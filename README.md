@@ -1,4 +1,14 @@
-# Nuxt Minimal Starter
+# How to run the local mysql server?
+
+```bash
+brew services start mysql
+```
+
+## How to connect to the mysql database via the terminal
+
+```bash
+mysql -u root -p
+```
 
 Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 

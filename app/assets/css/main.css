@@ -1,0 +1,391 @@
+@import "./themes/variables.css";
+
+/* ============================================
+   Form Fill Component Styles
+   ============================================ */
+
+/* Container */
+.form-fill-container {
+  min-height: 100vh;
+  background-color: rgb(var(--fill-bg));
+  font-family: var(--fill-font-family);
+  padding: var(--fill-spacing-lg);
+}
+
+/* Card */
+.form-fill-card {
+  max-width: 640px;
+  margin: 0 auto;
+  background-color: rgb(var(--fill-card-bg));
+  border-radius: var(--fill-radius-lg);
+  box-shadow: var(--fill-shadow-md);
+  padding: var(--fill-spacing-xl);
+}
+
+/* Header */
+.form-fill-header {
+  margin-bottom: var(--fill-spacing-xl);
+  text-align: center;
+}
+
+.form-fill-title {
+  font-size: var(--fill-font-size-2xl);
+  font-weight: 600;
+  color: rgb(var(--fill-text-primary));
+  margin-bottom: var(--fill-spacing-sm);
+}
+
+.form-fill-description {
+  font-size: var(--fill-font-size-base);
+  color: rgb(var(--fill-text-secondary));
+}
+
+/* Elements container */
+.form-fill-elements {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fill-spacing-lg);
+}
+
+/* Field wrapper */
+.form-fill-field {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Label */
+.form-fill-label {
+  display: block;
+  font-size: var(--fill-font-size-sm);
+  font-weight: 500;
+  color: rgb(var(--fill-label-color));
+  margin-bottom: var(--fill-spacing-xs);
+}
+
+.form-fill-required {
+  color: rgb(var(--fill-required-color));
+  margin-inline-start: 0.125rem;
+}
+
+/* Input */
+.form-fill-input {
+  width: 100%;
+  background-color: rgb(var(--fill-input-bg));
+  border: 1px solid rgb(var(--fill-input-border));
+  border-radius: var(--fill-radius-md);
+  padding: var(--fill-spacing-sm) var(--fill-spacing-md);
+  font-size: var(--fill-font-size-base);
+  color: rgb(var(--fill-input-text));
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-fill-input:focus {
+  outline: none;
+  border-color: rgb(var(--fill-input-border-focus));
+  box-shadow: 0 0 0 3px rgb(var(--fill-input-border-focus) / 0.1);
+}
+
+.form-fill-input::placeholder {
+  color: rgb(var(--fill-text-placeholder));
+}
+
+.form-fill-field.has-error .form-fill-input {
+  border-color: rgb(var(--fill-error-color));
+}
+
+/* Textarea */
+.form-fill-textarea {
+  width: 100%;
+  background-color: rgb(var(--fill-input-bg));
+  border: 1px solid rgb(var(--fill-input-border));
+  border-radius: var(--fill-radius-md);
+  padding: var(--fill-spacing-sm) var(--fill-spacing-md);
+  font-size: var(--fill-font-size-base);
+  color: rgb(var(--fill-input-text));
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-fill-textarea:focus {
+  outline: none;
+  border-color: rgb(var(--fill-input-border-focus));
+  box-shadow: 0 0 0 3px rgb(var(--fill-input-border-focus) / 0.1);
+}
+
+.form-fill-textarea::placeholder {
+  color: rgb(var(--fill-text-placeholder));
+}
+
+.form-fill-field.has-error .form-fill-textarea {
+  border-color: rgb(var(--fill-error-color));
+}
+
+/* Select */
+.form-fill-select {
+  width: 100%;
+  background-color: rgb(var(--fill-input-bg));
+  border: 1px solid rgb(var(--fill-input-border));
+  border-radius: var(--fill-radius-md);
+  padding: var(--fill-spacing-sm) var(--fill-spacing-md);
+  font-size: var(--fill-font-size-base);
+  color: rgb(var(--fill-input-text));
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.form-fill-select:focus {
+  outline: none;
+  border-color: rgb(var(--fill-input-border-focus));
+  box-shadow: 0 0 0 3px rgb(var(--fill-input-border-focus) / 0.1);
+}
+
+.form-fill-field.has-error .form-fill-select {
+  border-color: rgb(var(--fill-error-color));
+}
+
+/* Radio & Checkbox groups */
+.form-fill-radio-group,
+.form-fill-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fill-spacing-sm);
+}
+
+.form-fill-radio-option,
+.form-fill-checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: var(--fill-spacing-sm);
+  cursor: pointer;
+}
+
+.form-fill-radio-option input,
+.form-fill-checkbox-option input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: rgb(var(--color-primary-600));
+}
+
+.form-fill-radio-option span,
+.form-fill-checkbox-option span {
+  font-size: var(--fill-font-size-base);
+  color: rgb(var(--fill-text-primary));
+}
+
+/* Single checkbox */
+.form-fill-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--fill-spacing-sm);
+  cursor: pointer;
+}
+
+.form-fill-checkbox input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: rgb(var(--color-primary-600));
+}
+
+.form-fill-checkbox span {
+  font-size: var(--fill-font-size-base);
+  color: rgb(var(--fill-text-primary));
+}
+
+/* Help text */
+.form-fill-help {
+  font-size: var(--fill-font-size-sm);
+  color: rgb(var(--fill-help-text-color));
+  margin-top: var(--fill-spacing-xs);
+}
+
+/* Error text */
+.form-fill-error {
+  font-size: var(--fill-font-size-sm);
+  color: rgb(var(--fill-error-color));
+  margin-top: var(--fill-spacing-xs);
+}
+
+/* Sections */
+.form-fill-section {
+  padding: var(--fill-spacing-md);
+  border-radius: var(--fill-radius-md);
+  background-color: rgb(var(--fill-section-bg));
+}
+
+.form-fill-section.bordered {
+  border: 1px solid rgb(var(--color-neutral-200));
+  background-color: rgb(var(--fill-card-bg));
+}
+
+.form-fill-section-header {
+  margin-bottom: var(--fill-spacing-md);
+}
+
+.form-fill-section-title {
+  font-size: var(--fill-font-size-lg);
+  font-weight: 500;
+  color: rgb(var(--fill-text-primary));
+  margin-bottom: var(--fill-spacing-xs);
+}
+
+.form-fill-section-description {
+  font-size: var(--fill-font-size-sm);
+  color: rgb(var(--fill-text-secondary));
+}
+
+.form-fill-section-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fill-spacing-md);
+}
+
+.form-fill-section-toggle {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Layout elements (headings, paragraphs, etc.) */
+.form-fill-heading {
+  color: rgb(var(--fill-text-primary));
+  font-weight: 600;
+}
+
+.form-fill-heading.h1 {
+  font-size: var(--fill-font-size-3xl);
+}
+
+.form-fill-heading.h2 {
+  font-size: var(--fill-font-size-2xl);
+}
+
+.form-fill-heading.h3 {
+  font-size: var(--fill-font-size-xl);
+}
+
+.form-fill-paragraph {
+  font-size: var(--fill-font-size-base);
+  color: rgb(var(--fill-text-secondary));
+  line-height: 1.6;
+}
+
+.form-fill-divider {
+  border: none;
+  border-top: 1px solid rgb(var(--color-neutral-200));
+  margin: var(--fill-spacing-md) 0;
+}
+
+.form-fill-divider.dashed {
+  border-top-style: dashed;
+}
+
+.form-fill-divider.dotted {
+  border-top-style: dotted;
+}
+
+.form-fill-media {
+  max-width: 100%;
+  border-radius: var(--fill-radius-md);
+}
+
+.form-fill-media-caption {
+  font-size: var(--fill-font-size-sm);
+  color: rgb(var(--fill-text-muted));
+  margin-top: var(--fill-spacing-xs);
+  text-align: center;
+}
+
+/* Signature */
+.form-fill-signature-canvas {
+  border: 1px solid rgb(var(--fill-input-border));
+  border-radius: var(--fill-radius-md);
+  background-color: rgb(var(--fill-input-bg));
+  cursor: crosshair;
+}
+
+.form-fill-signature-actions {
+  display: flex;
+  gap: var(--fill-spacing-sm);
+  margin-top: var(--fill-spacing-sm);
+}
+
+/* Submit button */
+.form-fill-submit {
+  width: 100%;
+  background-color: rgb(var(--fill-button-primary-bg));
+  color: rgb(var(--fill-button-primary-text));
+  font-size: var(--fill-font-size-base);
+  font-weight: 500;
+  padding: var(--fill-spacing-sm) var(--fill-spacing-lg);
+  border: none;
+  border-radius: var(--fill-radius-md);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.form-fill-submit:hover {
+  background-color: rgb(var(--fill-button-primary-hover));
+}
+
+.form-fill-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Footer */
+.form-fill-footer {
+  margin-top: var(--fill-spacing-xl);
+}
+
+/* Success state */
+.form-fill-success {
+  text-align: center;
+  padding: var(--fill-spacing-xl);
+}
+
+.form-fill-success-icon {
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto var(--fill-spacing-md);
+  color: rgb(var(--color-success-500));
+}
+
+.form-fill-success-title {
+  font-size: var(--fill-font-size-xl);
+  font-weight: 600;
+  color: rgb(var(--fill-text-primary));
+  margin-bottom: var(--fill-spacing-sm);
+}
+
+.form-fill-success-message {
+  font-size: var(--fill-font-size-base);
+  color: rgb(var(--fill-text-secondary));
+}
+
+/* Error state */
+.form-fill-error-state {
+  text-align: center;
+  padding: var(--fill-spacing-xl);
+}
+
+.form-fill-error-title {
+  font-size: var(--fill-font-size-xl);
+  font-weight: 600;
+  color: rgb(var(--fill-error-color));
+  margin-bottom: var(--fill-spacing-sm);
+}
+
+.form-fill-error-message {
+  font-size: var(--fill-font-size-base);
+  color: rgb(var(--fill-text-secondary));
+}
+
+/* Loading state */
+.form-fill-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}

@@ -3,6 +3,7 @@ export default defineNuxtConfig({
 	compatibilityDate: "2025-07-15",
 	devtools: { enabled: true },
 	modules: ["@nuxt/fonts", "@nuxt/icon", "@nuxtjs/tailwindcss"],
+	css: ["~/assets/css/main.css"],
 	app: {
 		head: {
 			title: "Autodox",
@@ -10,4 +11,5 @@ export default defineNuxtConfig({
 			meta: [{ name: "description", content: "Some sort of app description for SEO" }],
 		},
 	},
+	ssr: false,
 });
