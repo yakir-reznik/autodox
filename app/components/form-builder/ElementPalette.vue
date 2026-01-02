@@ -10,10 +10,10 @@
 	const groupedElements = useGroupedPaletteElements();
 
 	const categories = [
-		{ key: "input", label: "Input Fields", elements: groupedElements.input },
-		{ key: "selection", label: "Selection", elements: groupedElements.selection },
-		{ key: "special", label: "Special", elements: groupedElements.special },
-		{ key: "layout", label: "Layout", elements: groupedElements.layout },
+		{ key: "input", label: "שדות קלט", elements: groupedElements.input },
+		{ key: "selection", label: "בחירה", elements: groupedElements.selection },
+		{ key: "special", label: "מיוחד", elements: groupedElements.special },
+		{ key: "layout", label: "פריסה", elements: groupedElements.layout },
 	];
 
 	// Clone function for drag-and-drop
@@ -32,7 +32,7 @@
 
 <template>
 	<div class="p-4 max-h-[calc(100vh-90px)]">
-		<h2 class="mb-4 text-lg font-semibold text-gray-900">Elements</h2>
+		<h2 class="mb-4 text-lg font-semibold text-gray-900">רכיבים</h2>
 
 		<div v-for="category in categories" :key="category.key" class="mb-6">
 			<h3 class="mb-2 text-xs font-medium uppercase tracking-wider text-gray-500">

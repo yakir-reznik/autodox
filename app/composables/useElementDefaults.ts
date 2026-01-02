@@ -10,21 +10,21 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 		// Input fields
 		case "text":
 			return {
-				label: "Text Field",
+				label: "שדה טקסט",
 				placeholder: "",
 				helpText: "",
 				validation: { required: false },
 			};
 		case "email":
 			return {
-				label: "Email",
+				label: "אימייל",
 				placeholder: "example@email.com",
 				helpText: "",
 				validation: { required: false },
 			};
 		case "number":
 			return {
-				label: "Number",
+				label: "מספר",
 				placeholder: "",
 				helpText: "",
 				validation: { required: false },
@@ -32,7 +32,7 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 			};
 		case "textarea":
 			return {
-				label: "Text Area",
+				label: "אזור טקסט",
 				placeholder: "",
 				helpText: "",
 				rows: 4,
@@ -40,21 +40,21 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 			};
 		case "date":
 			return {
-				label: "Date",
+				label: "תאריך",
 				placeholder: "",
 				helpText: "",
 				validation: { required: false },
 			};
 		case "time":
 			return {
-				label: "Time",
+				label: "שעה",
 				placeholder: "",
 				helpText: "",
 				validation: { required: false },
 			};
 		case "datetime":
 			return {
-				label: "Date & Time",
+				label: "תאריך ושעה",
 				placeholder: "",
 				helpText: "",
 				validation: { required: false },
@@ -63,38 +63,38 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 		// Selection fields
 		case "dropdown":
 			return {
-				label: "Dropdown",
-				placeholder: "Select an option",
+				label: "רשימה נפתחת",
+				placeholder: "בחר אפשרות",
 				helpText: "",
 				options: [
-					{ id: "opt1", label: "Option 1", value: "option1" },
-					{ id: "opt2", label: "Option 2", value: "option2" },
+					{ id: "opt1", label: "אפשרות 1", value: "option1" },
+					{ id: "opt2", label: "אפשרות 2", value: "option2" },
 				],
 				validation: { required: false },
 			};
 		case "radio":
 			return {
-				label: "Radio Buttons",
+				label: "כפתורי בחירה",
 				helpText: "",
 				options: [
-					{ id: "opt1", label: "Option 1", value: "option1" },
-					{ id: "opt2", label: "Option 2", value: "option2" },
+					{ id: "opt1", label: "אפשרות 1", value: "option1" },
+					{ id: "opt2", label: "אפשרות 2", value: "option2" },
 				],
 				validation: { required: false },
 			};
 		case "checkbox":
 			return {
-				label: "Checkbox",
+				label: "תיבת סימון",
 				helpText: "",
 				validation: { required: false },
 			};
 		case "checkboxes":
 			return {
-				label: "Checkboxes",
+				label: "תיבות סימון",
 				helpText: "",
 				options: [
-					{ id: "opt1", label: "Option 1", value: "option1" },
-					{ id: "opt2", label: "Option 2", value: "option2" },
+					{ id: "opt1", label: "אפשרות 1", value: "option1" },
+					{ id: "opt2", label: "אפשרות 2", value: "option2" },
 				],
 				validation: { required: false },
 			};
@@ -102,8 +102,8 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 		// Special fields
 		case "signature":
 			return {
-				label: "Signature",
-				helpText: "Draw your signature",
+				label: "חתימה",
+				helpText: "צייר את החתימה שלך",
 				maxWidth: 400,
 				maxHeight: 200,
 				validation: { required: false },
@@ -112,22 +112,22 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 		// Layout elements
 		case "heading_h1":
 			return {
-				text: "Heading",
+				text: "כותרת",
 				align: "right",
 			};
 		case "heading_h2":
 			return {
-				text: "Subheading",
+				text: "כותרת משנה",
 				align: "right",
 			};
 		case "heading_h3":
 			return {
-				text: "Section Title",
+				text: "כותרת מקטע",
 				align: "right",
 			};
 		case "paragraph":
 			return {
-				text: "Enter your text here...",
+				text: "הזן את הטקסט שלך כאן...",
 				align: "right",
 			};
 		case "image":
@@ -152,7 +152,7 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 			};
 		case "section":
 			return {
-				title: "Section",
+				title: "מקטע",
 				description: "",
 				collapsible: false,
 				defaultCollapsed: false,
@@ -171,43 +171,43 @@ export function usePaletteElements(): PaletteElement[] {
 		// Input fields
 		{
 			type: "text",
-			label: "Text",
+			label: "טקסט",
 			icon: "heroicons:pencil",
 			category: "input",
 		},
 		{
 			type: "email",
-			label: "Email",
+			label: "אימייל",
 			icon: "heroicons:envelope",
 			category: "input",
 		},
 		{
 			type: "number",
-			label: "Number",
+			label: "מספר",
 			icon: "heroicons:hashtag",
 			category: "input",
 		},
 		{
 			type: "textarea",
-			label: "Text Area",
+			label: "אזור טקסט",
 			icon: "heroicons:document-text",
 			category: "input",
 		},
 		{
 			type: "date",
-			label: "Date",
+			label: "תאריך",
 			icon: "heroicons:calendar",
 			category: "input",
 		},
 		{
 			type: "time",
-			label: "Time",
+			label: "שעה",
 			icon: "heroicons:clock",
 			category: "input",
 		},
 		{
 			type: "datetime",
-			label: "Date & Time",
+			label: "תאריך ושעה",
 			icon: "heroicons:calendar-days",
 			category: "input",
 		},
@@ -215,25 +215,25 @@ export function usePaletteElements(): PaletteElement[] {
 		// Selection fields
 		{
 			type: "dropdown",
-			label: "Dropdown",
+			label: "רשימה נפתחת",
 			icon: "heroicons:chevron-down",
 			category: "selection",
 		},
 		{
 			type: "radio",
-			label: "Radio",
+			label: "בחירה בודדת",
 			icon: "heroicons:check-circle",
 			category: "selection",
 		},
 		{
 			type: "checkbox",
-			label: "Checkbox",
+			label: "תיבת סימון",
 			icon: "heroicons:check",
 			category: "selection",
 		},
 		{
 			type: "checkboxes",
-			label: "Checkboxes",
+			label: "תיבות סימון",
 			icon: "heroicons:list-bullet",
 			category: "selection",
 		},
@@ -241,7 +241,7 @@ export function usePaletteElements(): PaletteElement[] {
 		// Special fields
 		{
 			type: "signature",
-			label: "Signature",
+			label: "חתימה",
 			icon: "heroicons:pencil-square",
 			category: "special",
 		},
@@ -249,55 +249,55 @@ export function usePaletteElements(): PaletteElement[] {
 		// Layout elements
 		{
 			type: "heading_h1",
-			label: "Heading 1",
+			label: "כותרת 1",
 			icon: "heroicons:h1",
 			category: "layout",
 		},
 		{
 			type: "heading_h2",
-			label: "Heading 2",
+			label: "כותרת 2",
 			icon: "heroicons:h2",
 			category: "layout",
 		},
 		{
 			type: "heading_h3",
-			label: "Heading 3",
+			label: "כותרת 3",
 			icon: "heroicons:h3",
 			category: "layout",
 		},
 		{
 			type: "paragraph",
-			label: "Paragraph",
+			label: "פסקה",
 			icon: "heroicons:bars-3-bottom-left",
 			category: "layout",
 		},
 		{
 			type: "image",
-			label: "Image",
+			label: "תמונה",
 			icon: "heroicons:photo",
 			category: "layout",
 		},
 		{
 			type: "video",
-			label: "Video",
+			label: "וידאו",
 			icon: "heroicons:video-camera",
 			category: "layout",
 		},
 		{
 			type: "divider",
-			label: "Divider",
+			label: "מפריד",
 			icon: "heroicons:minus",
 			category: "layout",
 		},
 		{
 			type: "spacer",
-			label: "Spacer",
+			label: "מרווח",
 			icon: "heroicons:arrows-up-down",
 			category: "layout",
 		},
 		{
 			type: "section",
-			label: "Section",
+			label: "מקטע",
 			icon: "heroicons:rectangle-group",
 			category: "layout",
 		},
