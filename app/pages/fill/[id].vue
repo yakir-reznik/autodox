@@ -3,6 +3,10 @@
 
 	const route = useRoute();
 	const formId = computed(() => Number(route.params.id));
+	const sessionId = computed(() => {
+		const param = route.query.session_id;
+		return param ? String(param) : null;
+	});
 
 	// Validate form ID
 	if (isNaN(formId.value)) {
@@ -20,6 +24,7 @@
 
 <template>
 	<div dir="rtl">
-		<Fill :form-id="formId" />
+		<Debug>{{ sessionId }}</Debug>
+		<Fill :form-id="formId" :session-id="sessionId" />
 	</div>
 </template>

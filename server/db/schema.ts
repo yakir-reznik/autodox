@@ -244,6 +244,112 @@ export const formElementsTable = mysqlTable("form_elements_table", {
 });
 
 // ============================================
+// FORM TRACKING - SESSION & ANALYTICS
+// ============================================
+
+// Session status enum
+export const sessionStatusEnum = [
+	"started",
+	"in_progress",
+	"submitted",
+	"abandoned",
+] as const;
+export type SessionStatus = (typeof sessionStatusEnum)[number];
+
+// Device type enum for tracking
+export const deviceTypeEnum = [
+	"mobile",
+	"tablet",
+	"desktop",
+	"unknown",
+] as const;
+export type DeviceType = (typeof deviceTypeEnum)[number];
+
+// Form Sessions Table - Tracks unique form filling instances
+export const formSessionsTable = mysqlTable("form_sessions_table", {
+	id: int().primaryKey().autoincrement(),
+
+	// Unique session token (passed via URL: ?session=xxx)
+	sessionToken: varchar("session_token", { length: 64 })
+		.notNull()
+		.unique(),
+
+	// Form relationship
+	formId: int("form_id")
+		.notNull()
+		.references(() => formsTable.id, {
+			onDelete: "cascade",
+		}),
+
+	// Session status
+	status: mysqlEnum("status", sessionStatusEnum)
+		.notNull()
+		.default("started"),
+
+	// Session metadata
+	startedAt: timestamp("started_at").notNull().defaultNow(),
+	lastAccessedAt: timestamp("last_accessed_at").notNull().defaultNow(),
+	submittedAt: timestamp("submitted_at"), // null until form is submitted
+
+	// Initial entrance data (captured on first visit)
+	initialIp: varchar("initial_ip", { length: 45 }), // IPv6 max length
+	initialUserAgent: text("initial_user_agent"),
+	initialReferrer: text("initial_referrer"),
+
+	// Form submission data (JSON field for flexibility)
+	submissionData: json("submission_data").$type<Record<string, any>>(),
+
+	// Timestamps
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at")
+		.notNull()
+		.defaultNow()
+		.$onUpdate(() => sql`now()`),
+});
+
+// Form Entrances/Visits Table - Tracks each page view/entrance
+export const formEntrancesTable = mysqlTable("form_entrances_table", {
+	id: int().primaryKey().autoincrement(),
+
+	// Session identifier (string token, nullable to support pre-session tracking)
+	sessionId: varchar("session_id", { length: 64 }),
+
+	// Direct form reference (denormalized for easier querying)
+	formId: int("form_id")
+		.notNull()
+		.references(() => formsTable.id, {
+			onDelete: "cascade",
+		}),
+
+	// Request metadata
+	ipAddress: varchar("ip_address", { length: 45 }), // IPv6 support
+	userAgent: text("user_agent"),
+	referrer: text(), // where they came from
+
+	// Context flags
+	isFormLocked: boolean("is_form_locked").notNull().default(false), // was session already submitted?
+	isNewSession: boolean("is_new_session").notNull().default(false), // first visit of session?
+
+	// Geographic/device data (optional, can be derived from IP/UA)
+	country: varchar({ length: 2 }), // ISO country code
+	deviceType: mysqlEnum("device_type", deviceTypeEnum),
+	browserName: varchar("browser_name", { length: 100 }),
+	osName: varchar("os_name", { length: 100 }),
+
+	// Additional metadata (extensible JSON field)
+	metadata: json().$type<{
+		screenResolution?: string;
+		language?: string;
+		timezone?: string;
+		[key: string]: any;
+	}>(),
+
+	// Timestamp (when entrance occurred)
+	timestamp: timestamp().notNull().defaultNow(),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// ============================================
 // RELATIONS
 // ============================================
 
@@ -259,6 +365,8 @@ export const formsRelations = relations(formsTable, ({ one, many }) => ({
 		relationName: "form_updater",
 	}),
 	elements: many(formElementsTable),
+	sessions: many(formSessionsTable),
+	entrances: many(formEntrancesTable),
 }));
 
 export const formElementsRelations = relations(
@@ -275,6 +383,27 @@ export const formElementsRelations = relations(
 		}),
 		children: many(formElementsTable, {
 			relationName: "element_hierarchy",
+		}),
+	})
+);
+
+export const formSessionsRelations = relations(
+	formSessionsTable,
+	({ one, many }) => ({
+		form: one(formsTable, {
+			fields: [formSessionsTable.formId],
+			references: [formsTable.id],
+		}),
+		entrances: many(formEntrancesTable),
+	})
+);
+
+export const formEntrancesRelations = relations(
+	formEntrancesTable,
+	({ one }) => ({
+		form: one(formsTable, {
+			fields: [formEntrancesTable.formId],
+			references: [formsTable.id],
 		}),
 	})
 );

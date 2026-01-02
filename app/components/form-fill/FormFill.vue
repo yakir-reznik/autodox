@@ -5,6 +5,7 @@
 
 	interface Props {
 		formId: number;
+		sessionId?: string | null;
 	}
 
 	const props = defineProps<Props>();
@@ -15,6 +16,23 @@
 		pending,
 		error,
 	} = await useFetch<FormWithElements>(`/api/forms/${props.formId}`);
+
+	// Track form entrance when form loads successfully
+	onMounted(async () => {
+		if (form.value && !error.value) {
+			try {
+				await $fetch(`/api/forms/${props.formId}/entrances`, {
+					method: "POST",
+					body: {
+						sessionToken: props.sessionId,
+					},
+				});
+			} catch (err) {
+				// Silently fail - entrance tracking shouldn't block form usage
+				console.error("Failed to track form entrance:", err);
+			}
+		}
+	});
 
 	// Check if form is published
 	const isPublished = computed(() => form.value?.status === "published");
