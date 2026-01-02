@@ -1,37 +1,37 @@
 <script setup lang="ts">
-import draggable from "vuedraggable";
-import type { ElementType, PaletteElement } from "~/types/form-builder";
-import { useGroupedPaletteElements, getDefaultConfig } from "~/composables/useElementDefaults";
+	import draggable from "vuedraggable";
+	import type { ElementType, PaletteElement } from "~/types/form-builder";
+	import { useGroupedPaletteElements, getDefaultConfig } from "~/composables/useElementDefaults";
 
-const emit = defineEmits<{
-	add: [type: ElementType];
-}>();
+	const emit = defineEmits<{
+		add: [type: ElementType];
+	}>();
 
-const groupedElements = useGroupedPaletteElements();
+	const groupedElements = useGroupedPaletteElements();
 
-const categories = [
-	{ key: "input", label: "Input Fields", elements: groupedElements.input },
-	{ key: "selection", label: "Selection", elements: groupedElements.selection },
-	{ key: "special", label: "Special", elements: groupedElements.special },
-	{ key: "layout", label: "Layout", elements: groupedElements.layout },
-];
+	const categories = [
+		{ key: "input", label: "Input Fields", elements: groupedElements.input },
+		{ key: "selection", label: "Selection", elements: groupedElements.selection },
+		{ key: "special", label: "Special", elements: groupedElements.special },
+		{ key: "layout", label: "Layout", elements: groupedElements.layout },
+	];
 
-// Clone function for drag-and-drop
-function cloneElement(element: PaletteElement) {
-	return {
-		type: element.type,
-		config: getDefaultConfig(element.type),
-	};
-}
+	// Clone function for drag-and-drop
+	function cloneElement(element: PaletteElement) {
+		return {
+			type: element.type,
+			config: getDefaultConfig(element.type),
+		};
+	}
 
-// Handle click to add
-function handleClick(type: ElementType) {
-	emit("add", type);
-}
+	// Handle click to add
+	function handleClick(type: ElementType) {
+		emit("add", type);
+	}
 </script>
 
 <template>
-	<div class="p-4">
+	<div class="p-4 max-h-[calc(100vh-90px)]">
 		<h2 class="mb-4 text-lg font-semibold text-gray-900">Elements</h2>
 
 		<div v-for="category in categories" :key="category.key" class="mb-6">
