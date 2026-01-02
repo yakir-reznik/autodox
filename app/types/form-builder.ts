@@ -126,3 +126,35 @@ export interface FormWithElements {
 		updatedAt: string;
 	}>;
 }
+
+// Upload-related types
+export interface Upload {
+	id: number;
+	filename: string;
+	originalFilename: string;
+	mimeType: string;
+	fileSize: number;
+	storagePath: string;
+	publicUrl: string;
+	uploadedBy: number | null;
+	uploadedAt: string;
+	createdAt: string;
+}
+
+export interface UploadResponse {
+	success: boolean;
+	upload: {
+		id: number;
+		filename: string;
+		originalFilename: string;
+		mimeType: string;
+		fileSize: number;
+		url: string; // Public URL for immediate use
+		uploadedAt: string;
+	};
+}
+
+export interface UploadErrorResponse {
+	statusCode: number;
+	message: string;
+}

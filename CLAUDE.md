@@ -9,6 +9,7 @@ Autodox is a Nuxt 4 form builder application that allows users to create, edit, 
 ## Common Commands
 
 ### Development
+
 ```bash
 # Install dependencies
 pnpm install
@@ -24,6 +25,9 @@ pnpm preview
 ```
 
 ### Database
+
+Calude code is not alowed to run database commands. Ask the operator to run these instead
+
 ```bash
 # Generate Drizzle migrations
 npx drizzle-kit generate
@@ -66,6 +70,7 @@ Database connection string: `mysql://root:e18e18@localhost:3306/autodox`
 - **JSON Configuration**: Element-specific settings stored in flexible `config` JSON field that varies by element type.
 
 **23 supported element types:**
+
 - Input fields: text, email, number, textarea, date, time, datetime
 - Selection fields: dropdown, radio, checkbox, checkboxes
 - Special: signature
@@ -74,11 +79,13 @@ Database connection string: `mysql://root:e18e18@localhost:3306/autodox`
 ### Frontend Architecture
 
 **Composables** (app/composables/):
+
 - `useFormBuilder.ts` - Core state management with reactive element tracking, CRUD operations, and dual ID mapping
 - `useAutoSave.ts` - Debounced auto-save (2 seconds) with status tracking
 - `useElementDefaults.ts` - Default configurations for all element types and utility functions
 
 **Component Structure:**
+
 - `app/components/ui/` - Reusable UI components (Button, Input, Select, etc.)
 - `app/components/form-builder/` - Form builder editor components
   - `FormBuilder.vue` - Root component orchestrating builder state, auto-save, and three-panel layout
@@ -90,6 +97,7 @@ Database connection string: `mysql://root:e18e18@localhost:3306/autodox`
 - `app/components/form-fill/` - Form rendering components for fill mode
 
 **Pages:**
+
 - `/` - Landing page
 - `/forms` - Forms list
 - `/forms/new` - Creates new form and redirects to editor
@@ -110,6 +118,7 @@ RESTful API with standard CRUD operations:
 ### Key Data Flow
 
 **Form Editing Flow:**
+
 1. Load form via `GET /api/forms/[id]`
 2. Convert server elements to builder elements (add clientId)
 3. User modifies elements → `isDirty` flag set
@@ -118,6 +127,7 @@ RESTful API with standard CRUD operations:
 6. Client updates local state with real IDs from server response
 
 **Element ID Mapping:**
+
 - New elements get temporary clientId (e.g., `temp-123`)
 - On save, server assigns real database ID
 - Server returns mapping: `{ tempIdMap: { 'temp-123': 45 } }`

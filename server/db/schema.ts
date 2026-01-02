@@ -357,6 +357,31 @@ export const formEntrancesTable = mysqlTable("form_entrances_table", {
 });
 
 // ============================================
+// UPLOADS TABLE
+// ============================================
+
+export const uploadsTable = mysqlTable("uploads_table", {
+	id: int().primaryKey().autoincrement(),
+
+	// File information
+	filename: varchar({ length: 255 }).notNull().unique(), // Stored filename (unique, hashed)
+	originalFilename: varchar("original_filename", { length: 255 }).notNull(), // User's original filename
+	mimeType: varchar("mime_type", { length: 100 }).notNull(), // e.g., "image/jpeg"
+	fileSize: int("file_size").notNull(), // Size in bytes
+
+	// Path information
+	storagePath: varchar("storage_path", { length: 500 }).notNull(), // Relative path: "uploads/2026/01/abc123.jpg"
+	publicUrl: varchar("public_url", { length: 500 }).notNull(), // Public URL: "/uploads/2026/01/abc123.jpg"
+
+	// Metadata
+	uploadedBy: int("uploaded_by").references(() => usersTable.id), // Nullable for now (auth later)
+
+	// Timestamps
+	uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// ============================================
 // RELATIONS
 // ============================================
 
@@ -414,3 +439,11 @@ export const formEntrancesRelations = relations(
 		}),
 	})
 );
+
+export const uploadsRelations = relations(uploadsTable, ({ one }) => ({
+	uploader: one(usersTable, {
+		fields: [uploadsTable.uploadedBy],
+		references: [usersTable.id],
+		relationName: "upload_creator",
+	}),
+}));

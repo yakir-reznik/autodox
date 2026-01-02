@@ -158,6 +158,13 @@
 		}
 	}
 
+	// Handle element update from canvas (e.g., drag-and-drop upload)
+	function handleElementUpdate(clientId: string, updates: Partial<BuilderElement>) {
+		updateElement(clientId, updates);
+		// Select the element to show its properties in the panel
+		selectElement(clientId);
+	}
+
 	// Deselect when clicking on empty canvas
 	function handleCanvasClick() {
 		selectElement(null);
@@ -229,6 +236,7 @@
 					@duplicate="duplicateElement"
 					@reorder="handleReorder"
 					@drop="handleElementDrop"
+					@update="handleElementUpdate"
 				/>
 			</main>
 

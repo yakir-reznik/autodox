@@ -27,7 +27,15 @@ const emit = defineEmits<{
 	duplicate: [clientId?: string];
 	reorder: [elements: BuilderElement[], parentId: string];
 	drop: [type: ElementType, position: number, parentId: string];
+	update: [clientId: string, updates: Partial<BuilderElement>];
 }>();
+
+// Handle config updates from child elements (e.g., drag-and-drop upload in MediaElement)
+function handleConfigUpdate(configUpdates: Record<string, any>) {
+	emit("update", props.element.clientId, {
+		config: { ...props.element.config, ...configUpdates },
+	});
+}
 
 // Get children for section elements
 const children = computed(() => {
@@ -138,7 +146,12 @@ const elementComponent = computed(() => {
 
 		<!-- Element content -->
 		<div class="p-4">
-			<component v-if="elementComponent" :is="elementComponent" :element="element" />
+			<component
+				v-if="elementComponent"
+				:is="elementComponent"
+				:element="element"
+				@update:config="handleConfigUpdate"
+			/>
 			<div v-else class="text-red-500">
 				Failed to load component for element type: {{ element.type }}
 			</div>
@@ -165,6 +178,7 @@ const elementComponent = computed(() => {
 							@duplicate="(clientId) => $emit('duplicate', clientId)"
 							@reorder="(els, parentId) => $emit('reorder', els, parentId)"
 							@drop="(type, pos, parentId) => $emit('drop', type, pos, parentId)"
+							@update="(clientId, updates) => $emit('update', clientId, updates)"
 						/>
 					</template>
 

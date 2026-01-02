@@ -16,6 +16,7 @@ const emit = defineEmits<{
 	duplicate: [clientId: string];
 	reorder: [elements: BuilderElement[], parentId: string | null];
 	drop: [type: ElementType, position: number, parentId: string | null];
+	update: [clientId: string, updates: Partial<BuilderElement>];
 }>();
 
 // Local copy for draggable
@@ -93,6 +94,7 @@ function calculatePosition(index: number): number {
 					@duplicate="(clientId) => $emit('duplicate', clientId || element.clientId)"
 					@reorder="(els, parentId) => $emit('reorder', els, parentId)"
 					@drop="(type, pos, parentId) => $emit('drop', type, pos, parentId)"
+					@update="(clientId, updates) => $emit('update', clientId, updates)"
 				/>
 			</template>
 		</draggable>

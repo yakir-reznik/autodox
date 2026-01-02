@@ -22,3 +22,7 @@ logs
 .env
 .env.*
 !.env.example
+
+# User uploads (regenerated at runtime)
+public/uploads/*
+!public/uploads/.gitkeep
