@@ -1,30 +1,33 @@
 {
-  "name": "autodox",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
-  },
-  "dependencies": {
-    "@nuxt/fonts": "0.12.1",
-    "@nuxt/icon": "2.1.1",
-    "@nuxtjs/tailwindcss": "6.14.0",
-    "@types/node": "^25.0.3",
-    "cloc": "2.6.0-cloc",
-    "dotenv": "^17.2.3",
-    "drizzle-orm": "^0.45.1",
-    "mysql2": "^3.16.0",
-    "nuxt": "^4.2.2",
-    "vue": "^3.5.26",
-    "vue-router": "^4.6.4",
-    "vuedraggable": "^4.1.0"
-  },
-  "devDependencies": {
-    "drizzle-kit": "^0.31.8",
-    "tsx": "^4.21.0"
-  }
+	"name": "autodox",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"build": "nuxt build",
+		"dev": "nuxt dev",
+		"generate": "nuxt generate",
+		"preview": "nuxt preview",
+		"postinstall": "nuxt prepare",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:generate-and-migrate": "drizzle-kit generate &&drizzle-kit migrate"
+	},
+	"dependencies": {
+		"@nuxt/fonts": "0.12.1",
+		"@nuxt/icon": "2.1.1",
+		"@nuxtjs/tailwindcss": "6.14.0",
+		"@types/node": "^25.0.3",
+		"cloc": "2.6.0-cloc",
+		"dotenv": "^17.2.3",
+		"drizzle-orm": "^0.45.1",
+		"mysql2": "^3.16.0",
+		"nuxt": "^4.2.2",
+		"vue": "^3.5.26",
+		"vue-router": "^4.6.4",
+		"vuedraggable": "^4.1.0"
+	},
+	"devDependencies": {
+		"drizzle-kit": "^0.31.8",
+		"tsx": "^4.21.0"
+	}
 }
