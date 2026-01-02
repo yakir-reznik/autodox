@@ -37,7 +37,7 @@ const enabled = computed({
 		>
 			<span
 				class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform"
-				:class="enabled ? 'translate-x-5' : 'translate-x-0'"
+				:class="enabled ? 'translate-x-5 rtl:-translate-x-5' : 'translate-x-0'"
 			/>
 		</button>
 		<span class="text-sm text-gray-700">
