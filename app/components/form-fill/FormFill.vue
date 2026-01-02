@@ -262,7 +262,7 @@
 		<form v-else class="form-fill-card" @submit.prevent="handleSubmit">
 			<!-- Navigation -->
 			<div class="text-center mb-8 my-4">
-				<NuxtLink to="/" class="form-fill-back-link bg-blue-100 rounded px-4 py-2">
+				<NuxtLink to="/" class="form-fill-back-link form-fill-button rounded px-4 py-2">
 					<Icon name="heroicons:arrow-left" class="inline h-4 w-4 mr-1" />
 					לעמוד הבית
 				</NuxtLink>
