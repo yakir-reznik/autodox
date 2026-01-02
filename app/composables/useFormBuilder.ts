@@ -16,6 +16,7 @@ export function useFormBuilder() {
 		title: "",
 		description: "",
 		status: "draft",
+		theme: "default",
 		elements: [],
 		selectedElementId: null,
 		isDirty: false,
@@ -191,6 +192,7 @@ export function useFormBuilder() {
 		state.title = response.title;
 		state.description = response.description || "";
 		state.status = response.status;
+		state.theme = response.theme;
 
 		// Convert server elements to builder elements
 		const serverIdToClientId = new Map<number, string>();
@@ -247,6 +249,7 @@ export function useFormBuilder() {
 					title: state.title,
 					description: state.description,
 					status: state.status,
+					theme: state.theme,
 					updatedBy: 1, // TODO: Get from auth
 				},
 			});
@@ -305,6 +308,7 @@ export function useFormBuilder() {
 		state.title = "";
 		state.description = "";
 		state.status = "draft";
+		state.theme = "default";
 		state.elements = [];
 		state.selectedElementId = null;
 		state.isDirty = false;

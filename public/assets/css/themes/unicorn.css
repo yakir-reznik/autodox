@@ -1,0 +1,64 @@
+:root {
+	/* Unicorn theme - Bright pink and girly color palette */
+
+	/* Primary pink colors */
+	--color-primary-50: 255 240 246;
+	--color-primary-100: 252 207 232;
+	--color-primary-200: 251 182 222;
+	--color-primary-300: 249 147 210;
+	--color-primary-400: 244 114 182;
+	--color-primary-500: 236 72 153;
+	--color-primary-600: 219 39 119;
+	--color-primary-700: 190 24 93;
+
+	/* Soft neutral colors with pink tint */
+	--color-neutral-50: 255 250 253;
+	--color-neutral-100: 254 242 250;
+	--color-neutral-200: 252 231 243;
+	--color-neutral-300: 249 219 236;
+	--color-neutral-400: 244 194 224;
+	--color-neutral-500: 219 163 199;
+	--color-neutral-600: 189 134 168;
+	--color-neutral-700: 157 104 137;
+	--color-neutral-800: 124 74 106;
+	--color-neutral-900: 91 44 75;
+
+	/* === Form Fill Tokens === */
+
+	/* Backgrounds - soft pink gradient feel */
+	--fill-bg: 255 240 250;
+	--fill-card-bg: 255 255 255;
+	--fill-section-bg: 255 250 253;
+
+	/* Text colors */
+	--fill-text-primary: 91 44 75;
+	--fill-text-secondary: 124 74 106;
+	--fill-text-muted: 157 104 137;
+	--fill-text-placeholder: 219 163 199;
+
+	/* Form element colors */
+	--fill-label-color: 124 74 106;
+	--fill-input-bg: 255 255 255;
+	--fill-input-border: 249 147 210;
+	--fill-input-border-focus: 236 72 153;
+	--fill-input-text: 91 44 75;
+	--fill-required-color: 236 72 153;
+	--fill-help-text-color: 157 104 137;
+	--fill-error-color: 219 39 119;
+	--fill-error-bg: 252 207 232;
+
+	/* Button colors - vibrant pink */
+	--fill-button-primary-bg: 236 72 153;
+	--fill-button-primary-text: 255 255 255;
+	--fill-button-primary-hover: 219 39 119;
+
+	/* === Border Radius - Completely round! === */
+	--fill-radius-sm: 9999px;
+	--fill-radius-md: 9999px;
+	--fill-radius-lg: 9999px;
+
+	/* === Shadows - Soft and girly === */
+	--fill-shadow-sm: 0 2px 8px 0 rgb(236 72 153 / 0.15);
+	--fill-shadow-md: 0 8px 16px -2px rgb(236 72 153 / 0.25), 0 4px 8px -2px rgb(244 114 182 / 0.15);
+	--fill-shadow-lg: 0 12px 24px -4px rgb(236 72 153 / 0.3), 0 8px 16px -4px rgb(244 114 182 / 0.2);
+}

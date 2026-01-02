@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import type { SaveStatus, FormStatus } from "~/types/form-builder";
+import type { SaveStatus, FormStatus, FormTheme } from "~/types/form-builder";
+import { getThemeOptionsForSelect } from "~/composables/useThemes";
 
 interface Props {
 	title: string;
 	description: string;
 	status: FormStatus;
+	theme: FormTheme;
 	saveStatus: SaveStatus;
 	lastSavedAt: Date | null;
 	isDirty: boolean;
@@ -17,6 +19,7 @@ const emit = defineEmits<{
 	"update:title": [value: string];
 	"update:description": [value: string];
 	"update:status": [value: FormStatus];
+	"update:theme": [value: FormTheme];
 	save: [];
 }>();
 
@@ -36,9 +39,16 @@ const statusOptions: { value: FormStatus; label: string }[] = [
 	{ value: "archived", label: "בארכיון" },
 ];
 
+const themeOptions = getThemeOptionsForSelect();
+
 function handleStatusChange(event: Event) {
 	const target = event.target as HTMLSelectElement;
 	emit("update:status", target.value as FormStatus);
+}
+
+function handleThemeChange(event: Event) {
+	const target = event.target as HTMLSelectElement;
+	emit("update:theme", target.value as FormTheme);
 }
 
 function goBack() {
@@ -81,21 +91,47 @@ watchEffect(() => {
 				</div>
 			</div>
 
-			<!-- Status selector, save status and button -->
+			<!-- Status selector, theme selector, save status and button -->
 			<div class="flex items-center gap-4">
-				<select
-					:value="status"
-					class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-					@change="handleStatusChange"
-				>
-					<option
-						v-for="option in statusOptions"
-						:key="option.value"
-						:value="option.value"
+				<div class="flex flex-col gap-1">
+					<label for="status-select" class="text-xs font-medium text-gray-600">
+						סטטוס
+					</label>
+					<select
+						id="status-select"
+						:value="status"
+						class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+						@change="handleStatusChange"
 					>
-						{{ option.label }}
-					</option>
-				</select>
+						<option
+							v-for="option in statusOptions"
+							:key="option.value"
+							:value="option.value"
+						>
+							{{ option.label }}
+						</option>
+					</select>
+				</div>
+
+				<div class="flex flex-col gap-1">
+					<label for="theme-select" class="text-xs font-medium text-gray-600">
+						ערכת נושא
+					</label>
+					<select
+						id="theme-select"
+						:value="theme"
+						class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+						@change="handleThemeChange"
+					>
+						<option
+							v-for="option in themeOptions"
+							:key="option.value"
+							:value="option.value"
+						>
+							{{ option.label }}
+						</option>
+					</select>
+				</div>
 
 				<FormBuilderSaveIndicator
 					:status="saveStatus"

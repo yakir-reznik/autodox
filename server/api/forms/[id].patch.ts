@@ -19,12 +19,14 @@ export default defineEventHandler(async (event) => {
 		title: string;
 		description: string;
 		status: "draft" | "published" | "archived";
+		theme: "default" | "dark" | "ocean" | "forest" | "unicorn";
 		updatedBy: number;
 	}> = {};
 
 	if (body.title !== undefined) updates.title = body.title;
 	if (body.description !== undefined) updates.description = body.description;
 	if (body.status !== undefined) updates.status = body.status;
+	if (body.theme !== undefined) updates.theme = body.theme;
 	if (body.updatedBy !== undefined) updates.updatedBy = body.updatedBy;
 
 	if (Object.keys(updates).length === 0) {

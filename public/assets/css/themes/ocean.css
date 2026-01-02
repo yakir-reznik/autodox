@@ -1,0 +1,18 @@
+:root {
+	/* Ocean theme - Blue color palette */
+	--color-primary-50: 240 249 255;
+	--color-primary-100: 224 242 254;
+	--color-primary-500: 14 165 233;
+	--color-primary-600: 2 132 199;
+	--color-primary-700: 3 105 161;
+
+	/* Backgrounds */
+	--fill-bg: 240 249 255;
+	--fill-card-bg: 255 255 255;
+	--fill-section-bg: 224 242 254;
+
+	/* Accent colors */
+	--fill-input-border-focus: 14 165 233;
+	--fill-button-primary-bg: 2 132 199;
+	--fill-button-primary-hover: 3 105 161;
+}

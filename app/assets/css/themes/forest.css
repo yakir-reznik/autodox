@@ -1,0 +1,18 @@
+:root {
+	/* Forest theme - Green/Earth tones */
+	--color-primary-50: 240 253 244;
+	--color-primary-100: 220 252 231;
+	--color-primary-500: 34 197 94;
+	--color-primary-600: 22 163 74;
+	--color-primary-700: 21 128 61;
+
+	/* Backgrounds */
+	--fill-bg: 254 252 232; /* warm cream */
+	--fill-card-bg: 255 255 255;
+	--fill-section-bg: 240 253 244;
+
+	/* Accent colors */
+	--fill-input-border-focus: 34 197 94;
+	--fill-button-primary-bg: 22 163 74;
+	--fill-button-primary-hover: 21 128 61;
+}

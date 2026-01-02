@@ -29,10 +29,11 @@
 		onError: (error) => console.error("Auto-save failed:", error),
 	});
 
-	// Watch for title/description/status changes and mark as dirty
+	// Watch for title/description/status/theme changes and mark as dirty
 	const initialTitle = ref<string>("");
 	const initialDescription = ref<string>("");
 	const initialStatus = ref<string>("");
+	const initialTheme = ref<string>("");
 
 	watch(
 		() => state.title,
@@ -77,6 +78,16 @@
 		}
 	);
 
+	watch(
+		() => state.theme,
+		(newTheme) => {
+			console.log("Theme changed:", newTheme, "Initial:", initialTheme.value);
+			if (state.formId && newTheme !== initialTheme.value) {
+				state.isDirty = true;
+			}
+		}
+	);
+
 	// Debug watcher for isDirty
 	watch(
 		() => state.isDirty,
@@ -109,6 +120,7 @@
 				initialTitle.value = state.title;
 				initialDescription.value = state.description;
 				initialStatus.value = state.status;
+				initialTheme.value = state.theme;
 			} catch (error) {
 				console.error("Failed to load form:", error);
 				loadError.value = error instanceof Error ? error.message : "Failed to load form";
@@ -178,6 +190,7 @@
 			v-model:title="state.title"
 			v-model:description="state.description"
 			v-model:status="state.status"
+			v-model:theme="state.theme"
 			:save-status="status"
 			:last-saved-at="state.lastSavedAt"
 			:is-dirty="state.isDirty"

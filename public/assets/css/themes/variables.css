@@ -1,0 +1,82 @@
+:root {
+  /* === Color Palette === */
+
+  /* Primary colors (RGB values for alpha support) */
+  --color-primary-50: 239 246 255;
+  --color-primary-100: 219 234 254;
+  --color-primary-500: 59 130 246;
+  --color-primary-600: 37 99 235;
+  --color-primary-700: 29 78 216;
+
+  /* Neutral/Gray colors */
+  --color-neutral-50: 249 250 251;
+  --color-neutral-100: 243 244 246;
+  --color-neutral-200: 229 231 235;
+  --color-neutral-300: 209 213 219;
+  --color-neutral-400: 156 163 175;
+  --color-neutral-500: 107 114 128;
+  --color-neutral-600: 75 85 99;
+  --color-neutral-700: 55 65 81;
+  --color-neutral-800: 31 41 55;
+  --color-neutral-900: 17 24 39;
+
+  /* Semantic colors */
+  --color-success-500: 34 197 94;
+  --color-success-100: 220 252 231;
+  --color-error-500: 239 68 68;
+  --color-error-100: 254 226 226;
+
+  /* === Form Fill Tokens === */
+
+  /* Background colors */
+  --fill-bg: var(--color-neutral-50);
+  --fill-card-bg: 255 255 255;
+  --fill-section-bg: var(--color-neutral-50);
+
+  /* Text colors */
+  --fill-text-primary: var(--color-neutral-900);
+  --fill-text-secondary: var(--color-neutral-600);
+  --fill-text-muted: var(--color-neutral-500);
+  --fill-text-placeholder: var(--color-neutral-400);
+
+  /* Form element colors */
+  --fill-label-color: var(--color-neutral-700);
+  --fill-input-bg: 255 255 255;
+  --fill-input-border: var(--color-neutral-300);
+  --fill-input-border-focus: var(--color-primary-500);
+  --fill-input-text: var(--color-neutral-900);
+  --fill-required-color: var(--color-error-500);
+  --fill-help-text-color: var(--color-neutral-500);
+  --fill-error-color: var(--color-error-500);
+  --fill-error-bg: var(--color-error-100);
+
+  /* Button colors */
+  --fill-button-primary-bg: var(--color-primary-600);
+  --fill-button-primary-text: 255 255 255;
+  --fill-button-primary-hover: var(--color-primary-700);
+
+  /* === Spacing === */
+  --fill-spacing-xs: 0.25rem;
+  --fill-spacing-sm: 0.5rem;
+  --fill-spacing-md: 1rem;
+  --fill-spacing-lg: 1.5rem;
+  --fill-spacing-xl: 2rem;
+
+  /* === Typography === */
+  --fill-font-family: inherit;
+  --fill-font-size-sm: 0.875rem;
+  --fill-font-size-base: 1rem;
+  --fill-font-size-lg: 1.125rem;
+  --fill-font-size-xl: 1.25rem;
+  --fill-font-size-2xl: 1.5rem;
+  --fill-font-size-3xl: 1.875rem;
+
+  /* === Border Radius === */
+  --fill-radius-sm: 0.25rem;
+  --fill-radius-md: 0.5rem;
+  --fill-radius-lg: 0.75rem;
+
+  /* === Shadows === */
+  --fill-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --fill-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}

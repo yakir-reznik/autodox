@@ -2,6 +2,7 @@ import type {
 	ElementType,
 	ElementConfig,
 	FormStatus,
+	FormTheme,
 	ValidationRules,
 	SelectionOption,
 } from "~~/server/db/schema";
@@ -11,6 +12,7 @@ export type {
 	ElementType,
 	ElementConfig,
 	FormStatus,
+	FormTheme,
 	ValidationRules,
 	SelectionOption,
 };
@@ -34,6 +36,7 @@ export interface FormBuilderState {
 	title: string;
 	description: string;
 	status: FormStatus;
+	theme: FormTheme;
 
 	// Elements
 	elements: BuilderElement[];
@@ -68,6 +71,7 @@ export interface UpdateFormRequest {
 	title?: string;
 	description?: string;
 	status?: FormStatus;
+	theme?: FormTheme;
 	updatedBy?: number;
 }
 
@@ -104,6 +108,7 @@ export interface FormWithElements {
 	title: string;
 	description: string | null;
 	status: FormStatus;
+	theme: FormTheme;
 	createdAt: string;
 	updatedAt: string;
 	createdBy: number;

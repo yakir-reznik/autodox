@@ -36,6 +36,20 @@
       "when": 1767357840290,
       "tag": "0004_graceful_ezekiel",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1767359824786,
+      "tag": "0005_light_robin_chapel",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1767360656110,
+      "tag": "0006_deep_champions",
+      "breakpoints": true
     }
   ]
 }

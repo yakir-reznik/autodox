@@ -1,5 +1,7 @@
 <script setup lang="ts">
 	import Fill from "~/components/form-fill/FormFill.vue";
+	import type { FormWithElements } from "~/types/form-builder";
+	import { getThemeDefinition } from "~/composables/useThemes";
 
 	const route = useRoute();
 	const formId = computed(() => Number(route.params.id));
@@ -16,15 +18,29 @@
 		});
 	}
 
-	// Page title will be set by FormFill component after loading
-	useHead({
-		title: "Fill Form - Autodox",
+	// Fetch form to get theme
+	const { data: form } = await useFetch<FormWithElements>(`/api/forms/${formId.value}`);
+
+	// Compute theme CSS file path
+	const themeCssPath = computed(() => {
+		const themeId = form.value?.theme || "default";
+		return getThemeDefinition(themeId).cssFile;
 	});
+
+	// Dynamically inject theme CSS - use function for reactivity
+	useHead(() => ({
+		title: "Fill Form - Autodox",
+		link: [
+			{
+				rel: "stylesheet",
+				href: themeCssPath.value,
+			},
+		],
+	}));
 </script>
 
 <template>
 	<div dir="rtl">
-		<Debug>{{ sessionId }}</Debug>
 		<Fill :form-id="formId" :session-id="sessionId" />
 	</div>
 </template>

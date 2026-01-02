@@ -35,6 +35,10 @@ export const usersTable = mysqlTable("users_table", {
 export const formStatusEnum = ["draft", "published", "archived"] as const;
 export type FormStatus = (typeof formStatusEnum)[number];
 
+// Form theme enum
+export const formThemeEnum = ["default", "dark", "ocean", "forest", "unicorn"] as const;
+export type FormTheme = (typeof formThemeEnum)[number];
+
 // Element type enum - covers all field types and layout elements
 export const elementTypeEnum = [
 	// Input Fields
@@ -189,6 +193,9 @@ export const formsTable = mysqlTable("forms_table", {
 
 	// Status
 	status: mysqlEnum("status", formStatusEnum).notNull().default("draft"),
+
+	// Theme
+	theme: mysqlEnum("theme", formThemeEnum).notNull().default("default"),
 
 	// Authorship
 	createdBy: int("created_by")

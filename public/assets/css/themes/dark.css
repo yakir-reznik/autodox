@@ -1,0 +1,28 @@
+:root {
+	/* Dark theme color overrides */
+	--color-neutral-50: 17 24 39;
+	--color-neutral-100: 31 41 55;
+	--color-neutral-200: 55 65 81;
+	--color-neutral-300: 75 85 99;
+	--color-neutral-400: 107 114 128;
+	--color-neutral-500: 156 163 175;
+	--color-neutral-600: 209 213 219;
+	--color-neutral-700: 229 231 235;
+	--color-neutral-800: 243 244 246;
+	--color-neutral-900: 249 250 251;
+
+	/* Form Fill Tokens - Dark Theme */
+	--fill-bg: 17 24 39;
+	--fill-card-bg: 31 41 55;
+	--fill-section-bg: 31 41 55;
+
+	--fill-text-primary: 249 250 251;
+	--fill-text-secondary: 209 213 219;
+	--fill-text-muted: 156 163 175;
+	--fill-text-placeholder: 107 114 128;
+
+	--fill-label-color: 229 231 235;
+	--fill-input-bg: 55 65 81;
+	--fill-input-border: 75 85 99;
+	--fill-input-text: 249 250 251;
+}
