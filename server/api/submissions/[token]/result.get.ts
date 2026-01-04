@@ -73,6 +73,9 @@ export default defineEventHandler(async (event) => {
 			},
 		};
 	} catch (error) {
+		if (error instanceof H3Error) {
+			throw error;
+		}
 		console.error(error);
 		setResponseStatus(event, 500);
 		return {
