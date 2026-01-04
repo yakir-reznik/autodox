@@ -24,6 +24,7 @@ export const usersTable = mysqlTable("users_table", {
 	id: int().primaryKey().autoincrement(),
 	name: varchar({ length: 255 }).notNull(),
 	email: varchar({ length: 255 }).notNull().unique(),
+	apiToken: varchar("api_token", { length: 64 }).unique(),
 	role: mysqlEnum("role", userRoleEnum).notNull().default("viewer"),
 });
 
@@ -263,6 +264,15 @@ export const sessionStatusEnum = [
 ] as const;
 export type SessionStatus = (typeof sessionStatusEnum)[number];
 
+// Submission status enum
+export const submissionStatusEnum = [
+	"pending",
+	"in_progress",
+	"submitted",
+	"locked",
+] as const;
+export type SubmissionStatus = (typeof submissionStatusEnum)[number];
+
 // Device type enum for tracking
 export const deviceTypeEnum = [
 	"mobile",
@@ -312,6 +322,37 @@ export const formSessionsTable = mysqlTable("form_sessions_table", {
 		.notNull()
 		.defaultNow()
 		.$onUpdate(() => sql`now()`),
+});
+
+// Submissions Table - Tracks submission links from creation to completion
+export const submissionsTable = mysqlTable("submissions_table", {
+	id: int().primaryKey().autoincrement(),
+
+	// Unique submission token (passed via URL: ?token=xxx)
+	token: varchar("token", { length: 64 }).notNull().unique(),
+
+	// Form relationship
+	formId: int("form_id")
+		.notNull()
+		.references(() => formsTable.id, { onDelete: "cascade" }),
+
+	// Link creation data
+	prefillData: json("prefill_data").$type<Record<string, unknown>>(),
+	additionalData: json("additional_data").$type<Record<string, unknown>>(),
+	createdByUserId: int("created_by_user_id").references(() => usersTable.id),
+	expiresAt: timestamp("expires_at").notNull(),
+
+	// Lifecycle tracking
+	status: mysqlEnum("status", submissionStatusEnum).notNull().default("pending"),
+
+	// Submission data (filled when user submits)
+	submissionData: json("submission_data").$type<Record<string, unknown>>(),
+
+	// Timestamps
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	startedAt: timestamp("started_at"),
+	submittedAt: timestamp("submitted_at"),
+	lockedAt: timestamp("locked_at"),
 });
 
 // Form Entrances/Visits Table - Tracks each page view/entrance
@@ -398,6 +439,7 @@ export const formsRelations = relations(formsTable, ({ one, many }) => ({
 	}),
 	elements: many(formElementsTable),
 	sessions: many(formSessionsTable),
+	submissions: many(submissionsTable),
 	entrances: many(formEntrancesTable),
 }));
 
@@ -429,6 +471,18 @@ export const formSessionsRelations = relations(
 		entrances: many(formEntrancesTable),
 	})
 );
+
+export const submissionsRelations = relations(submissionsTable, ({ one }) => ({
+	form: one(formsTable, {
+		fields: [submissionsTable.formId],
+		references: [formsTable.id],
+	}),
+	creator: one(usersTable, {
+		fields: [submissionsTable.createdByUserId],
+		references: [usersTable.id],
+		relationName: "submission_creator",
+	}),
+}));
 
 export const formEntrancesRelations = relations(
 	formEntrancesTable,

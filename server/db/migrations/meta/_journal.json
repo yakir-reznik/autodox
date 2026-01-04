@@ -57,6 +57,20 @@
       "when": 1767381058047,
       "tag": "0007_special_gateway",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1767509913564,
+      "tag": "0008_spotty_scrambler",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1767510657531,
+      "tag": "0009_secret_puck",
+      "breakpoints": true
     }
   ]
 }
