@@ -109,7 +109,7 @@
 					</div>
 					<div class="flex items-center gap-3">
 						<div class="text-sm text-gray-600" v-if="loggedIn">
-							{{ user.login }}
+							{{ user?.name }}
 						</div>
 					</div>
 				</div>
