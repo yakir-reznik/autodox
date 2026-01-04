@@ -1,0 +1,1 @@
+DROP TABLE `form_sessions_table`;

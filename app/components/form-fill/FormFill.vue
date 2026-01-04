@@ -16,18 +16,27 @@
 		data: form,
 		pending,
 		error,
-	} = await useFetch<FormWithElements & { prefillData?: Record<string, any> | null }>(
-		`/api/forms/${props.formId}`,
-		{
-			query: {
-				...(props.token && { token: props.token }),
-			},
+	} = await useFetch<
+		FormWithElements & {
+			prefillData?: Record<string, any> | null;
+			submissionStatus?: string | null;
+			isLocked?: boolean;
 		}
-	);
+	>(`/api/forms/${props.formId}`, {
+		query: {
+			...(props.token && { token: props.token }),
+		},
+	});
 
 	// Track form entrance when form loads successfully
 	onMounted(async () => {
 		if (form.value && !error.value) {
+			// Check if submission is already locked
+			if (form.value.isLocked) {
+				isAlreadyLocked.value = true;
+				return; // Don't proceed with tracking or prefill
+			}
+
 			try {
 				await $fetch(`/api/forms/${props.formId}/entrances`, {
 					method: "POST",
@@ -38,6 +47,17 @@
 			} catch (err) {
 				// Silently fail - entrance tracking shouldn't block form usage
 				console.error("Failed to track form entrance:", err);
+			}
+
+			// Mark submission as started if we have a token and it's not already locked
+			if (props.token && !form.value.isLocked) {
+				try {
+					await $fetch(`/api/submissions/${props.token}/start`, {
+						method: "POST",
+					});
+				} catch (err) {
+					console.error("Failed to mark submission as started:", err);
+				}
 			}
 		}
 
@@ -65,6 +85,7 @@
 	// Submission state
 	const isSubmitting = ref(false);
 	const isSubmitted = ref(false);
+	const isAlreadyLocked = ref(false);
 
 	// Convert server elements to client format with hierarchy
 	const allElements = computed((): BuilderElement[] => {
@@ -217,63 +238,97 @@
 		return isValid;
 	}
 
-	// Submit handler (placeholder - not saving to database yet)
+	// Submit handler
 	async function handleSubmit() {
 		if (!validateAll()) {
 			return;
 		}
 
+		// Check if we have a submission token
+		if (!props.token) {
+			console.error("No submission token provided");
+			alert("לא ניתן לשלוח: חסר טוקן שליחה");
+			return;
+		}
+
 		isSubmitting.value = true;
 
-		// Simulate submission delay
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		try {
+			// Convert formData to use element names instead of clientIds
+			const submissionData: Record<string, any> = {};
+			Object.entries(formData).forEach(([clientId, value]) => {
+				const element = allElements.value.find((el) => el.clientId === clientId);
+				if (element && isFieldElement(element.type)) {
+					// Use element name if set, otherwise fall back to clientId
+					const key = element.name || clientId;
+					submissionData[key] = value;
+				}
+			});
 
-		// For now, just mark as submitted
-		// In the future, this would POST to /api/forms/{id}/submissions
-		console.log("Form data:", formData);
+			// Submit to API
+			await $fetch(`/api/submissions/${props.token}/submit`, {
+				method: "POST",
+				body: {
+					submissionData,
+				},
+			});
 
-		isSubmitting.value = false;
-		isSubmitted.value = true;
+			isSubmitted.value = true;
+		} catch (error: any) {
+			console.error("Submission error:", error);
+			alert(error?.data?.message || "שליחת הטופס נכשלה. אנא נסה שוב.");
+		} finally {
+			isSubmitting.value = false;
+		}
 	}
 </script>
 
 <template>
 	<div class="form-fill-container">
 		<!-- Loading state -->
-		<div v-if="pending" class="form-fill-loading">
-			<Icon name="svg-spinners:ring-resize" class="h-8 w-8 text-blue-500" />
+		<div v-if="pending" class="grid place-items-center min-h-screen">
+			<div class="form-fill-loading">
+				<Icon name="svg-spinners:ring-resize" class="h-8 w-8 form-fill-text-primary" />
+			</div>
 		</div>
 
 		<!-- Error state (not found) -->
-		<div v-else-if="error" class="form-fill-card">
-			<div class="form-fill-error-state">
+		<div v-else-if="error" class="grid place-items-center min-h-screen">
+			<div class="form-fill-error-state form-fill-card">
 				<Icon name="heroicons:exclamation-circle" class="mx-auto h-12 w-12 text-red-500" />
-				<h2 class="form-fill-error-title">Form Not Found</h2>
+				<h2 class="form-fill-error-title">הטופס לא נמצא</h2>
+				<p class="form-fill-error-message">הטופס שאתה מחפש אינו קיים או הוסר.</p>
+			</div>
+		</div>
+
+		<!-- Already locked error -->
+		<div v-else-if="isAlreadyLocked" class="grid place-items-center min-h-screen">
+			<div class="form-fill-error-state form-fill-card">
+				<Icon name="heroicons:lock-closed" class="mx-auto h-12 w-12 text-red-500" />
+				<h2 class="form-fill-error-title">הטופס כבר נשלח</h2>
 				<p class="form-fill-error-message">
-					The form you are looking for does not exist or has been removed.
+					טופס זה כבר נשלח וננעל. לא ניתן לבצע שינויים נוספים.
 				</p>
 			</div>
 		</div>
 
 		<!-- Not published error -->
-		<div v-else-if="!isPublished" class="form-fill-card">
-			<div class="form-fill-error-state">
+		<div v-else-if="!isPublished" class="grid place-items-center min-h-screen">
+			<div class="form-fill-error-state form-fill-card">
 				<Icon name="heroicons:lock-closed" class="mx-auto h-12 w-12 text-gray-400" />
 				<h2 class="form-fill-error-title" style="color: rgb(var(--fill-text-primary))">
-					Form Not Available
+					הטופס אינו זמין
 				</h2>
-				<p class="form-fill-error-message">
-					This form is not currently accepting submissions.
-				</p>
+				<p class="form-fill-error-message">טופס זה אינו מקבל הגשות כרגע.</p>
 			</div>
 		</div>
 
 		<!-- Success state -->
-		<div v-else-if="isSubmitted" class="form-fill-card">
-			<div class="form-fill-success">
+		<div v-else-if="isSubmitted" class="place-items-center grid min-h-screen">
+			<div class="form-fill-success form-fill-card">
 				<Icon name="heroicons:check-circle" class="form-fill-success-icon" />
-				<h2 class="form-fill-success-title">Thank You!</h2>
-				<p class="form-fill-success-message">Your submission has been received.</p>
+				<h2 class="form-fill-success-title">תודה רבה!</h2>
+				<p class="form-fill-success-message">הטופס שלך התקבל בהצלחה.</p>
 			</div>
 		</div>
 
@@ -316,9 +371,9 @@
 				<button type="submit" class="form-fill-submit" :disabled="isSubmitting">
 					<template v-if="isSubmitting">
 						<Icon name="svg-spinners:ring-resize" class="inline h-4 w-4" />
-						Submitting...
+						שולח...
 					</template>
-					<template v-else> Submit </template>
+					<template v-else> שלח </template>
 				</button>
 			</footer>
 		</form>

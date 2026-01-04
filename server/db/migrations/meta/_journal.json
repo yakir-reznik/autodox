@@ -71,6 +71,13 @@
       "when": 1767510657531,
       "tag": "0009_secret_puck",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1767511980015,
+      "tag": "0010_rainy_zzzax",
+      "breakpoints": true
     }
   ]
 }

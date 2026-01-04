@@ -54,9 +54,9 @@
 
 	/* === Border Radius === */
 	--fill-radius-sm: 9999px;
-	--fill-radius-md: 9999px;  /* For buttons and inputs */
-	--fill-radius-lg: 1.5rem;  /* For card container */
-	--fill-radius-container: 1rem;  /* For wrapping elements */
+	--fill-radius-md: 9999px; /* For buttons and inputs */
+	--fill-radius-lg: 1.5rem; /* For card container */
+	--fill-radius-container: 1rem; /* For wrapping elements */
 
 	/* === Shadows - Soft and girly === */
 	--fill-shadow-sm: 0 2px 8px 0 rgb(236 72 153 / 0.15);
@@ -64,6 +64,9 @@
 	--fill-shadow-lg: 0 12px 24px -4px rgb(236 72 153 / 0.3), 0 8px 16px -4px rgb(244 114 182 / 0.2);
 }
 
+.form-fill-text-primary {
+	color: rgb(var(--fill-text-primary));
+}
 /* Override radius for wrapping elements (section, media, signature) */
 .form-fill-section {
 	border-radius: var(--fill-radius-container) !important;

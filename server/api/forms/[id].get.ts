@@ -34,6 +34,8 @@ export default defineEventHandler(async (event) => {
 
 	// If token is provided, fetch submission data for prefill
 	let prefillData = null;
+	let submissionStatus = null;
+	let isLocked = false;
 	if (token) {
 		const submission = await db.query.submissionsTable.findFirst({
 			where: eq(submissionsTable.token, token),
@@ -48,12 +50,22 @@ export default defineEventHandler(async (event) => {
 				});
 			}
 
-			prefillData = submission.prefillData;
+			submissionStatus = submission.status;
+			isLocked = submission.status === "locked";
+
+			// If already submitted/locked, use submission data instead of prefill
+			if (isLocked && submission.submissionData) {
+				prefillData = submission.submissionData;
+			} else {
+				prefillData = submission.prefillData;
+			}
 		}
 	}
 
 	return {
 		...form,
 		prefillData,
+		submissionStatus,
+		isLocked,
 	};
 });

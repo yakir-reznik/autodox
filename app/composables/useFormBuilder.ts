@@ -5,9 +5,40 @@ import type {
 	ElementConfig,
 	FormWithElements,
 } from "~/types/form-builder";
+import { isFieldElement } from "./useElementDefaults";
 
 function generateClientId(): string {
 	return `el_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+function generateUniqueName(
+	type: ElementType,
+	existingElements: BuilderElement[]
+): string {
+	// Get base name from type (remove underscores for cleaner names)
+	const baseName = type.replace(/_/g, "");
+
+	// Find all existing names with this base
+	const existingNames = existingElements
+		.map((el) => el.name)
+		.filter((name): name is string => name !== null);
+
+	// Find the highest number suffix for this base name
+	let maxNumber = 0;
+	const pattern = new RegExp(`^${baseName}(\\d+)$`);
+
+	for (const name of existingNames) {
+		const match = name.match(pattern);
+		if (match) {
+			const num = parseInt(match[1], 10);
+			if (num > maxNumber) {
+				maxNumber = num;
+			}
+		}
+	}
+
+	// Return the next available number
+	return `${baseName}${maxNumber + 1}`;
 }
 
 export function useFormBuilder() {
@@ -69,13 +100,18 @@ export function useFormBuilder() {
 		parentId: string | null = null,
 		position?: number
 	): BuilderElement {
+		// Generate unique name for field elements
+		const elementName = isFieldElement(type)
+			? generateUniqueName(type, state.elements)
+			: null;
+
 		const newElement: BuilderElement = {
 			id: null,
 			clientId: generateClientId(),
 			type,
 			position: position ?? getNextPosition(parentId),
 			parentId,
-			name: null,
+			name: elementName,
 			config,
 			isRequired: false,
 		};

@@ -255,15 +255,6 @@ export const formElementsTable = mysqlTable("form_elements_table", {
 // FORM TRACKING - SESSION & ANALYTICS
 // ============================================
 
-// Session status enum
-export const sessionStatusEnum = [
-	"started",
-	"in_progress",
-	"submitted",
-	"abandoned",
-] as const;
-export type SessionStatus = (typeof sessionStatusEnum)[number];
-
 // Submission status enum
 export const submissionStatusEnum = [
 	"pending",
@@ -281,48 +272,6 @@ export const deviceTypeEnum = [
 	"unknown",
 ] as const;
 export type DeviceType = (typeof deviceTypeEnum)[number];
-
-// Form Sessions Table - Tracks unique form filling instances
-export const formSessionsTable = mysqlTable("form_sessions_table", {
-	id: int().primaryKey().autoincrement(),
-
-	// Unique session token (passed via URL: ?session=xxx)
-	sessionToken: varchar("session_token", { length: 64 })
-		.notNull()
-		.unique(),
-
-	// Form relationship
-	formId: int("form_id")
-		.notNull()
-		.references(() => formsTable.id, {
-			onDelete: "cascade",
-		}),
-
-	// Session status
-	status: mysqlEnum("status", sessionStatusEnum)
-		.notNull()
-		.default("started"),
-
-	// Session metadata
-	startedAt: timestamp("started_at").notNull().defaultNow(),
-	lastAccessedAt: timestamp("last_accessed_at").notNull().defaultNow(),
-	submittedAt: timestamp("submitted_at"), // null until form is submitted
-
-	// Initial entrance data (captured on first visit)
-	initialIp: varchar("initial_ip", { length: 45 }), // IPv6 max length
-	initialUserAgent: text("initial_user_agent"),
-	initialReferrer: text("initial_referrer"),
-
-	// Form submission data (JSON field for flexibility)
-	submissionData: json("submission_data").$type<Record<string, any>>(),
-
-	// Timestamps
-	createdAt: timestamp("created_at").notNull().defaultNow(),
-	updatedAt: timestamp("updated_at")
-		.notNull()
-		.defaultNow()
-		.$onUpdate(() => sql`now()`),
-});
 
 // Submissions Table - Tracks submission links from creation to completion
 export const submissionsTable = mysqlTable("submissions_table", {
@@ -438,7 +387,6 @@ export const formsRelations = relations(formsTable, ({ one, many }) => ({
 		relationName: "form_updater",
 	}),
 	elements: many(formElementsTable),
-	sessions: many(formSessionsTable),
 	submissions: many(submissionsTable),
 	entrances: many(formEntrancesTable),
 }));
@@ -458,17 +406,6 @@ export const formElementsRelations = relations(
 		children: many(formElementsTable, {
 			relationName: "element_hierarchy",
 		}),
-	})
-);
-
-export const formSessionsRelations = relations(
-	formSessionsTable,
-	({ one, many }) => ({
-		form: one(formsTable, {
-			fields: [formSessionsTable.formId],
-			references: [formsTable.id],
-		}),
-		entrances: many(formEntrancesTable),
 	})
 );
 
