@@ -1,31 +1,34 @@
 <script setup lang="ts">
-interface Props {
-	modelValue?: string | number;
-	type?: "text" | "email" | "number" | "password" | "date" | "time" | "datetime-local";
-	placeholder?: string;
-	disabled?: boolean;
-	error?: string;
-	id?: string;
-}
+	interface Props {
+		modelValue?: string | number;
+		type?: "text" | "email" | "number" | "password" | "date" | "time" | "datetime-local";
+		placeholder?: string;
+		disabled?: boolean;
+		error?: string;
+		id?: string;
+	}
 
-const props = withDefaults(defineProps<Props>(), {
-	type: "text",
-	disabled: false,
-});
+	const props = withDefaults(defineProps<Props>(), {
+		type: "text",
+		disabled: false,
+	});
 
-const emit = defineEmits<{
-	"update:modelValue": [value: string | number];
-}>();
+	const attrs = useAttrs();
 
-const inputValue = computed({
-	get: () => props.modelValue ?? "",
-	set: (value) => emit("update:modelValue", value),
-});
+	const emit = defineEmits<{
+		"update:modelValue": [value: string | number];
+	}>();
+
+	const inputValue = computed({
+		get: () => props.modelValue ?? "",
+		set: (value) => emit("update:modelValue", value),
+	});
 </script>
 
 <template>
 	<div class="w-full">
 		<input
+			v-bind="attrs"
 			v-model="inputValue"
 			:id="id"
 			:type="type"

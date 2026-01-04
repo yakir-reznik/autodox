@@ -9,6 +9,8 @@ interface Form {
 }
 
 const { data: forms, pending, error, refresh } = await useFetch<Form[]>("/api/forms");
+const { user, clear } = useUserSession();
+const router = useRouter();
 
 const statusColors = {
 	draft: "bg-yellow-100 text-yellow-800",
@@ -30,6 +32,12 @@ function formatDate(dateString: string) {
 	});
 }
 
+async function handleLogout() {
+	await $fetch("/api/auth/logout", { method: "POST" });
+	await clear();
+	router.push("/login");
+}
+
 useHead({
 	title: "Forms - Autodox",
 });
@@ -49,12 +57,21 @@ useHead({
 						</NuxtLink>
 						<h1 class="text-2xl font-bold text-gray-900">Forms</h1>
 					</div>
-					<NuxtLink to="/forms/new">
-						<UiButton variant="primary">
-							<Icon name="heroicons:plus" class="h-5 w-5" />
-							New Form
+					<div class="flex items-center gap-3">
+						<div class="text-sm text-gray-600">
+							{{ user?.name }}
+						</div>
+						<NuxtLink to="/forms/new">
+							<UiButton variant="primary">
+								<Icon name="heroicons:plus" class="h-5 w-5" />
+								New Form
+							</UiButton>
+						</NuxtLink>
+						<UiButton variant="secondary" @click="handleLogout">
+							<Icon name="heroicons:arrow-right-on-rectangle" class="h-5 w-5" />
+							Logout
 						</UiButton>
-					</NuxtLink>
+					</div>
 				</div>
 			</div>
 		</header>
@@ -117,19 +134,27 @@ useHead({
 					<div class="mt-4 text-sm text-gray-500">
 						Updated {{ formatDate(form.updatedAt) }}
 					</div>
-					<div class="mt-6 flex gap-2">
-						<NuxtLink :to="`/edit/${form.id}`" class="flex-1">
+					<div class="mt-6 flex flex-col gap-2">
+						<NuxtLink :to="`/edit/${form.id}`">
 							<UiButton variant="primary" class="w-full">
 								<Icon name="heroicons:pencil-square" class="h-4 w-4" />
 								Edit
 							</UiButton>
 						</NuxtLink>
-						<NuxtLink :to="`/fill/${form.id}`" class="flex-1">
-							<UiButton variant="secondary" class="w-full">
-								<Icon name="heroicons:document-text" class="h-4 w-4" />
-								Fill
-							</UiButton>
-						</NuxtLink>
+						<div class="flex gap-2">
+							<NuxtLink :to="`/fill/${form.id}`" class="flex-1">
+								<UiButton variant="secondary" class="w-full">
+									<Icon name="heroicons:document-text" class="h-4 w-4" />
+									Fill
+								</UiButton>
+							</NuxtLink>
+							<NuxtLink :to="`/submissions/${form.id}`" class="flex-1">
+								<UiButton variant="secondary" class="w-full">
+									<Icon name="heroicons:inbox" class="h-4 w-4" />
+									Submissions
+								</UiButton>
+							</NuxtLink>
+						</div>
 					</div>
 				</div>
 			</div>
