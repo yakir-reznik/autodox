@@ -28,7 +28,7 @@
 	}
 
 	const route = useRoute();
-	const { user } = useUserSession();
+	const { user, loggedIn } = useUserSession();
 
 	const formId = Number(route.params.id);
 	const currentPage = ref(1);
@@ -108,8 +108,8 @@
 						</div>
 					</div>
 					<div class="flex items-center gap-3">
-						<div class="text-sm text-gray-600">
-							{{ user?.name }}
+						<div class="text-sm text-gray-600" v-if="loggedIn">
+							{{ user.login }}
 						</div>
 					</div>
 				</div>
