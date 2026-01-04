@@ -32,6 +32,9 @@
 
 	const formId = Number(route.params.id);
 	const currentPage = ref(1);
+	const selectedSubmission = ref<Submission | null>(null);
+	const showJsonModal = ref(false);
+	const userMap = ref<Record<number, string>>({});
 
 	const {
 		data: response,
@@ -44,6 +47,29 @@
 
 	const submissions = computed(() => response.value?.data ?? []);
 	const pagination = computed(() => response.value?.pagination);
+
+	// Fetch user names for submissions
+	watch(
+		submissions,
+		async (newSubmissions) => {
+			const userIds = newSubmissions
+				.filter((s) => s.createdByUserId)
+				.map((s) => s.createdByUserId!);
+
+			// Fetch user data for each user ID (you might want to batch this in production)
+			for (const userId of userIds) {
+				if (!userMap.value[userId]) {
+					try {
+						const userData = await $fetch(`/api/users/${userId}`);
+						userMap.value[userId] = userData.name;
+					} catch (e) {
+						userMap.value[userId] = "Unknown";
+					}
+				}
+			}
+		},
+		{ deep: false }
+	);
 
 	const statusColors = {
 		pending: "bg-gray-100 text-gray-800",
@@ -67,6 +93,35 @@
 			hour: "2-digit",
 			minute: "2-digit",
 		});
+	}
+
+	function openJsonModal(submission: Submission) {
+		selectedSubmission.value = submission;
+		showJsonModal.value = true;
+	}
+
+	function closeJsonModal() {
+		showJsonModal.value = false;
+		selectedSubmission.value = null;
+	}
+
+	function copyJsonToClipboard() {
+		if (selectedSubmission.value?.submissionData) {
+			const jsonString = JSON.stringify(
+				selectedSubmission.value.submissionData,
+				null,
+				2
+			);
+			navigator.clipboard.writeText(jsonString).then(() => {
+				// Optional: Show a toast notification
+				console.log("JSON copied to clipboard");
+			});
+		}
+	}
+
+	function openFillUrl(token: string) {
+		const fillUrl = `${window.location.origin}/fill/${formId}?token=${token}`;
+		window.open(fillUrl, "_blank");
 	}
 
 	function handlePreviousPage() {
@@ -152,16 +207,16 @@
 								Status
 							</th>
 							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
+								User
+							</th>
+							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
 								Created
 							</th>
 							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
 								Submitted
 							</th>
 							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
-								Expires
-							</th>
-							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
-								Token
+								Actions
 							</th>
 						</tr>
 					</thead>
@@ -183,6 +238,9 @@
 								</span>
 							</td>
 							<td class="px-6 py-4 text-sm text-gray-600">
+								{{ userMap[submission.createdByUserId || 0] || "-" }}
+							</td>
+							<td class="px-6 py-4 text-sm text-gray-600">
 								{{ formatDate(submission.createdAt) }}
 							</td>
 							<td class="px-6 py-4 text-sm text-gray-600">
@@ -192,13 +250,26 @@
 										: "-"
 								}}
 							</td>
-							<td class="px-6 py-4 text-sm text-gray-600">
-								{{ formatDate(submission.expiresAt) }}
-							</td>
 							<td class="px-6 py-4 text-sm">
-								<code class="rounded bg-gray-100 px-2 py-1 text-xs text-gray-800">
-									{{ submission.token.substring(0, 8) }}...
-								</code>
+								<div class="flex gap-2">
+									<UiButton
+										v-if="submission.submissionData"
+										variant="secondary"
+										size="sm"
+										@click="openJsonModal(submission)"
+									>
+										<Icon name="heroicons:document-text" class="h-4 w-4" />
+										View Data
+									</UiButton>
+									<UiButton
+										variant="secondary"
+										size="sm"
+										@click="openFillUrl(submission.token)"
+									>
+										<Icon name="heroicons:arrow-top-right-on-square" class="h-4 w-4" />
+										Open Form
+									</UiButton>
+								</div>
 							</td>
 						</tr>
 					</tbody>
@@ -260,5 +331,50 @@
 				</div>
 			</div>
 		</main>
+
+		<!-- JSON Modal -->
+		<div
+			v-if="showJsonModal && selectedSubmission"
+			class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+		>
+			<div class="relative w-full max-w-3xl rounded-lg bg-white shadow-xl">
+				<!-- Modal Header -->
+				<div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+					<h2 class="text-lg font-medium text-gray-900">
+						Submission Data (ID: {{ selectedSubmission.id }})
+					</h2>
+					<button
+						@click="closeJsonModal"
+						class="text-gray-400 hover:text-gray-600"
+					>
+						<Icon name="heroicons:x-mark" class="h-6 w-6" />
+					</button>
+				</div>
+
+				<!-- Modal Content -->
+				<div class="max-h-96 overflow-y-auto p-6">
+					<!-- JSON Display with LTR and left alignment -->
+					<div
+						dir="ltr"
+						class="rounded-lg bg-gray-50 p-4 font-mono text-sm text-left"
+					>
+						<pre class="whitespace-pre-wrap break-words text-gray-800">{{
+							JSON.stringify(selectedSubmission.submissionData, null, 2)
+						}}</pre>
+					</div>
+				</div>
+
+				<!-- Modal Footer -->
+				<div class="flex gap-3 border-t border-gray-200 px-6 py-4">
+					<UiButton variant="primary" @click="copyJsonToClipboard">
+						<Icon name="heroicons:clipboard-document" class="h-4 w-4" />
+						Copy JSON
+					</UiButton>
+					<UiButton variant="secondary" @click="closeJsonModal">
+						Close
+					</UiButton>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
