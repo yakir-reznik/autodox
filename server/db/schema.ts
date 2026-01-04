@@ -25,7 +25,7 @@ export const usersTable = mysqlTable("users_table", {
 	name: varchar({ length: 255 }).notNull(),
 	email: varchar({ length: 255 }).notNull().unique(),
 	password: varchar({ length: 255 }), // bcrypt hash
-	apiToken: varchar("api_token", { length: 64 }).unique(),
+	apiKey: varchar("api_key", { length: 64 }).unique(),
 	role: mysqlEnum("role", userRoleEnum).notNull().default("viewer"),
 });
 

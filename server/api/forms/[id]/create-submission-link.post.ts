@@ -28,29 +28,29 @@ export default defineEventHandler(async (event) => {
 		}
 
 		const body = await readBody<{
-			apiToken: string;
+			apiKey: string;
 			prefill?: Record<string, unknown>;
 			additionalData?: Record<string, unknown>;
 		}>(event);
 
 		// Authenticate user via API token
-		if (!body?.apiToken) {
+		if (!body?.apiKey) {
 			setResponseStatus(event, 401);
 			return {
 				success: false,
-				message: "API token is required",
+				message: "API key is required",
 			};
 		}
 
 		const user = await db.query.usersTable.findFirst({
-			where: eq(usersTable.apiToken, body.apiToken),
+			where: eq(usersTable.apiKey, body.apiKey),
 		});
 
 		if (!user) {
 			setResponseStatus(event, 401);
 			return {
 				success: false,
-				message: "Invalid API token",
+				message: "Invalid API key",
 			};
 		}
 

@@ -48,29 +48,6 @@
 	const submissions = computed(() => response.value?.data ?? []);
 	const pagination = computed(() => response.value?.pagination);
 
-	// Fetch user names for submissions
-	watch(
-		submissions,
-		async (newSubmissions) => {
-			const userIds = newSubmissions
-				.filter((s) => s.createdByUserId)
-				.map((s) => s.createdByUserId!);
-
-			// Fetch user data for each user ID (you might want to batch this in production)
-			for (const userId of userIds) {
-				if (!userMap.value[userId]) {
-					try {
-						const userData = await $fetch(`/api/users/${userId}`);
-						userMap.value[userId] = userData.name;
-					} catch (e) {
-						userMap.value[userId] = "Unknown";
-					}
-				}
-			}
-		},
-		{ deep: false }
-	);
-
 	const statusColors = {
 		pending: "bg-gray-100 text-gray-800",
 		in_progress: "bg-blue-100 text-blue-800",
@@ -107,11 +84,7 @@
 
 	function copyJsonToClipboard() {
 		if (selectedSubmission.value?.submissionData) {
-			const jsonString = JSON.stringify(
-				selectedSubmission.value.submissionData,
-				null,
-				2
-			);
+			const jsonString = JSON.stringify(selectedSubmission.value.submissionData, null, 2);
 			navigator.clipboard.writeText(jsonString).then(() => {
 				// Optional: Show a toast notification
 				console.log("JSON copied to clipboard");
@@ -122,6 +95,12 @@
 	function openFillUrl(token: string) {
 		const fillUrl = `${window.location.origin}/fill/${formId}?token=${token}`;
 		window.open(fillUrl, "_blank");
+	}
+
+	function copyTokenToClipboard(token: string) {
+		navigator.clipboard.writeText(token).then(() => {
+			console.log("Token copied to clipboard");
+		});
 	}
 
 	function handlePreviousPage() {
@@ -206,8 +185,8 @@
 							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
 								Status
 							</th>
-							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
-								User
+							<th class="px-6 py-3 text-sm font-medium text-gray-700 text-center">
+								Created By User ID
 							</th>
 							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
 								Created
@@ -217,6 +196,9 @@
 							</th>
 							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
 								Actions
+							</th>
+							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
+								Token
 							</th>
 						</tr>
 					</thead>
@@ -237,8 +219,8 @@
 									{{ statusLabels[submission.status] }}
 								</span>
 							</td>
-							<td class="px-6 py-4 text-sm text-gray-600">
-								{{ userMap[submission.createdByUserId || 0] || "-" }}
+							<td class="px-6 py-4 text-sm text-gray-600 text-center">
+								{{ submission.createdByUserId ?? "-" }}
 							</td>
 							<td class="px-6 py-4 text-sm text-gray-600">
 								{{ formatDate(submission.createdAt) }}
@@ -262,13 +244,31 @@
 										View Data
 									</UiButton>
 									<UiButton
+										v-if="!['submitted', 'locked'].includes(submission.status)"
 										variant="secondary"
 										size="sm"
 										@click="openFillUrl(submission.token)"
 									>
-										<Icon name="heroicons:arrow-top-right-on-square" class="h-4 w-4" />
+										<Icon
+											name="heroicons:arrow-top-right-on-square"
+											class="h-4 w-4"
+										/>
 										Open Form
 									</UiButton>
+								</div>
+							</td>
+							<td class="px-6 py-4 text-sm">
+								<div class="flex items-center gap-2">
+									<code class="rounded bg-gray-100 px-2 py-1 font-mono text-xs text-gray-700">
+										{{ submission.token }}
+									</code>
+									<button
+										@click="copyTokenToClipboard(submission.token)"
+										class="rounded p-1 hover:bg-gray-200 transition-colors"
+										title="Copy token"
+									>
+										<Icon name="heroicons:clipboard-document" class="h-4 w-4 text-gray-500" />
+									</button>
 								</div>
 							</td>
 						</tr>
@@ -343,10 +343,7 @@
 					<h2 class="text-lg font-medium text-gray-900">
 						Submission Data (ID: {{ selectedSubmission.id }})
 					</h2>
-					<button
-						@click="closeJsonModal"
-						class="text-gray-400 hover:text-gray-600"
-					>
+					<button @click="closeJsonModal" class="text-gray-400 hover:text-gray-600">
 						<Icon name="heroicons:x-mark" class="h-6 w-6" />
 					</button>
 				</div>
@@ -354,10 +351,7 @@
 				<!-- Modal Content -->
 				<div class="max-h-96 overflow-y-auto p-6">
 					<!-- JSON Display with LTR and left alignment -->
-					<div
-						dir="ltr"
-						class="rounded-lg bg-gray-50 p-4 font-mono text-sm text-left"
-					>
+					<div dir="ltr" class="rounded-lg bg-gray-50 p-4 font-mono text-sm text-left">
 						<pre class="whitespace-pre-wrap break-words text-gray-800">{{
 							JSON.stringify(selectedSubmission.submissionData, null, 2)
 						}}</pre>
@@ -370,9 +364,7 @@
 						<Icon name="heroicons:clipboard-document" class="h-4 w-4" />
 						Copy JSON
 					</UiButton>
-					<UiButton variant="secondary" @click="closeJsonModal">
-						Close
-					</UiButton>
+					<UiButton variant="secondary" @click="closeJsonModal"> Close </UiButton>
 				</div>
 			</div>
 		</div>
