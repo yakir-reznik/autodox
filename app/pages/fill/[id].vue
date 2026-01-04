@@ -9,6 +9,10 @@
 		const param = route.query.session_id;
 		return param ? String(param) : null;
 	});
+	const token = computed(() => {
+		const param = route.query.token;
+		return param ? String(param) : null;
+	});
 
 	// Validate form ID
 	if (isNaN(formId.value)) {
@@ -18,8 +22,12 @@
 		});
 	}
 
-	// Fetch form to get theme
-	const { data: form } = await useFetch<FormWithElements>(`/api/forms/${formId.value}`);
+	// Fetch form to get theme (include token in query if present)
+	const { data: form } = await useFetch<FormWithElements>(`/api/forms/${formId.value}`, {
+		query: {
+			...(token.value && { token: token.value }),
+		},
+	});
 
 	// Compute theme CSS file path
 	const themeCssPath = computed(() => {
@@ -41,6 +49,6 @@
 
 <template>
 	<div dir="rtl">
-		<Fill :form-id="formId" :session-id="sessionId" />
+		<Fill :form-id="formId" :session-id="sessionId" :token="token" />
 	</div>
 </template>

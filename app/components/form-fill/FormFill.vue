@@ -6,16 +6,24 @@
 	interface Props {
 		formId: number;
 		sessionId?: string | null;
+		token?: string | null;
 	}
 
 	const props = defineProps<Props>();
 
-	// Fetch form data
+	// Fetch form data (include token if present)
 	const {
 		data: form,
 		pending,
 		error,
-	} = await useFetch<FormWithElements>(`/api/forms/${props.formId}`);
+	} = await useFetch<FormWithElements & { prefillData?: Record<string, any> | null }>(
+		`/api/forms/${props.formId}`,
+		{
+			query: {
+				...(props.token && { token: props.token }),
+			},
+		}
+	);
 
 	// Track form entrance when form loads successfully
 	onMounted(async () => {
@@ -31,6 +39,17 @@
 				// Silently fail - entrance tracking shouldn't block form usage
 				console.error("Failed to track form entrance:", err);
 			}
+		}
+
+		// Apply prefill data if available
+		if (form.value?.prefillData) {
+			Object.entries(form.value.prefillData).forEach(([fieldName, value]) => {
+				// Find element by name and map to clientId
+				const element = allElements.value.find((el) => el.name === fieldName);
+				if (element) {
+					formData[element.clientId] = value;
+				}
+			});
 		}
 	});
 
