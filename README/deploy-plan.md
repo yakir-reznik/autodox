@@ -108,10 +108,13 @@ EXIT;
 sudo mkdir -p /var/www/autodox
 sudo chown autodox:autodox /var/www/autodox
 
-# Clone repository (or upload files)
+# Clone repository (shallow clone - no history, master branch only)
 cd /var/www/autodox
-git clone https://github.com/YOUR_USERNAME/autodox.git .
-# OR use rsync/scp to upload files
+git clone --depth 1 --single-branch --branch master https://github.com/YOUR_USERNAME/autodox.git .
+
+# Alternative: Upload files directly without git (no version control on server)
+# From your local machine:
+# rsync -avz --exclude 'node_modules' --exclude '.git' /path/to/local/autodox/ autodox@your-server-ip:/var/www/autodox/
 
 # Install dependencies
 pnpm install
@@ -301,6 +304,8 @@ crontab -e
 
 When you need to update the application:
 
+### Option 1: Using Git (Shallow Clone)
+
 ```bash
 # SSH into server
 ssh autodox@your-server-ip
@@ -308,9 +313,9 @@ ssh autodox@your-server-ip
 # Navigate to app directory
 cd /var/www/autodox
 
-# Pull latest changes
-git pull origin master
-# OR upload new files via rsync/scp
+# Fetch and reset to latest master (works with shallow clones)
+git fetch origin master
+git reset --hard origin/master
 
 # Install any new dependencies
 pnpm install
@@ -321,19 +326,30 @@ npx drizzle-kit migrate
 # Rebuild application
 pnpm build
 
-# Restart PM2
-pm2 restart autodox
+# Restart PM2 (zero-downtime)
+pm2 reload autodox
 
 # Check status
 pm2 status
 pm2 logs autodox --lines 50
 ```
 
-**Zero-downtime deployment (optional):**
+### Option 2: Using rsync (No Git Required)
+
 ```bash
-# PM2 cluster mode allows reloading without downtime
-pm2 reload autodox
+# From your LOCAL machine, sync files to server
+rsync -avz --exclude 'node_modules' --exclude '.git' --exclude '.env' \
+  /path/to/local/autodox/ autodox@your-server-ip:/var/www/autodox/
+
+# Then SSH into server and restart
+ssh autodox@your-server-ip "cd /var/www/autodox && pnpm install && npx drizzle-kit migrate && pnpm build && pm2 reload autodox"
 ```
+
+**Benefits:**
+- **Git method:** Simple, can track what's deployed
+- **Rsync method:** No git on server, slightly faster, smaller disk footprint
+
+**Note:** Both methods preserve your `.env` file and database
 
 ---
 
