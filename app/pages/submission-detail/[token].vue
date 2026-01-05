@@ -341,7 +341,7 @@
 						dir="ltr"
 						class="overflow-x-auto rounded-lg bg-gray-50 p-4 font-mono text-sm"
 					>
-						<pre class="whitespace-pre-wrap break-words text-gray-800">{{
+						<pre class="whitespace-pre-wrap wrap-break-word text-gray-800">{{
 							JSON.stringify(submission.submissionData, null, 2)
 						}}</pre>
 					</div>
@@ -369,7 +369,7 @@
 						dir="ltr"
 						class="overflow-x-auto rounded-lg bg-gray-50 p-4 font-mono text-sm"
 					>
-						<pre class="whitespace-pre-wrap break-words text-gray-800">{{
+						<pre class="whitespace-pre-wrap wrap-break-word text-gray-800">{{
 							JSON.stringify(submission.prefillData, null, 2)
 						}}</pre>
 					</div>
@@ -397,7 +397,7 @@
 						dir="ltr"
 						class="overflow-x-auto rounded-lg bg-gray-50 p-4 font-mono text-sm"
 					>
-						<pre class="whitespace-pre-wrap break-words text-gray-800">{{
+						<pre class="whitespace-pre-wrap wrap-break-word text-gray-800">{{
 							JSON.stringify(submission.additionalData, null, 2)
 						}}</pre>
 					</div>

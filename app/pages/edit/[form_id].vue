@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const route = useRoute();
-const formId = computed(() => Number(route.params.id));
+const formId = computed(() => Number(route.params.form_id));
 
 // Validate form ID
 if (isNaN(formId.value)) {

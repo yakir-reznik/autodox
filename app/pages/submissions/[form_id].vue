@@ -32,7 +32,7 @@
 
 	const { user, loggedIn } = useUserSession();
 
-	const formId = Number(route.params.id);
+	const formId = Number(route.params.form_id);
 	const currentPage = ref(1);
 	const selectedSubmission = ref<Submission | null>(null);
 	const showJsonModal = ref(false);
@@ -509,7 +509,7 @@
 				<div class="max-h-96 overflow-y-auto p-6">
 					<!-- JSON Display with LTR and left alignment -->
 					<div dir="ltr" class="rounded-lg bg-gray-50 p-4 font-mono text-sm text-left">
-						<pre class="whitespace-pre-wrap break-words text-gray-800">{{
+						<pre class="whitespace-pre-wrap wrap-break-word text-gray-800">{{
 							JSON.stringify(selectedSubmission.submissionData, null, 2)
 						}}</pre>
 					</div>

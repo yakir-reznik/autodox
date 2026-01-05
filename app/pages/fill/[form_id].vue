@@ -4,7 +4,7 @@
 	import { getThemeDefinition } from "~/composables/useThemes";
 
 	const route = useRoute();
-	const formId = computed(() => Number(route.params.id));
+	const formId = computed(() => Number(route.params.form_id));
 	const token = computed(() => {
 		const param = route.query.token;
 		return param ? String(param) : null;
@@ -41,6 +41,10 @@
 			},
 		],
 	}));
+
+	definePageMeta({
+		layout: "fill",
+	});
 </script>
 
 <template>
