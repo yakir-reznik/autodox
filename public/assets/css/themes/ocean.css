@@ -1,18 +1,946 @@
 :root {
-	/* Ocean theme - Blue color palette */
+	/* ============================================
+	   OCEAN THEME - Professional Design System
+	   ============================================ */
+
+	/* PRIMARY COLOR PALETTE - Deep Ocean Blues */
 	--color-primary-50: 240 249 255;
 	--color-primary-100: 224 242 254;
+	--color-primary-200: 186 230 253;
+	--color-primary-300: 125 211 252;
+	--color-primary-400: 56 189 248;
 	--color-primary-500: 14 165 233;
 	--color-primary-600: 2 132 199;
 	--color-primary-700: 3 105 161;
+	--color-primary-800: 7 89 133;
+	--color-primary-900: 12 74 110;
 
-	/* Backgrounds */
+	/* ACCENT COLORS - Ocean Teal & Aqua */
+	--color-accent-50: 240 253 250;
+	--color-accent-100: 204 251 241;
+	--color-accent-400: 32 201 151;
+	--color-accent-500: 16 185 129;
+	--color-accent-600: 5 150 105;
+
+	/* SEMANTIC COLORS */
+	--color-success-50: 240 253 250;
+	--color-success-500: 16 185 129;
+	--color-success-600: 5 150 105;
+
+	--color-error-50: 254 242 242;
+	--color-error-500: 239 68 68;
+	--color-error-600: 220 38 38;
+
+	--color-warning-50: 254 252 231;
+	--color-warning-500: 234 179 8;
+	--color-warning-600: 202 138 4;
+
+	/* NEUTRAL PALETTE */
+	--color-neutral-0: 255 255 255;
+	--color-neutral-50: 250 250 250;
+	--color-neutral-100: 244 244 245;
+	--color-neutral-200: 228 228 231;
+	--color-neutral-300: 212 212 216;
+	--color-neutral-400: 161 161 170;
+	--color-neutral-500: 113 113 122;
+	--color-neutral-600: 82 82 91;
+	--color-neutral-700: 63 63 70;
+	--color-neutral-800: 39 39 42;
+	--color-neutral-900: 24 24 27;
+
+	/* BACKGROUND COLORS */
 	--fill-bg: 240 249 255;
 	--fill-card-bg: 255 255 255;
-	--fill-section-bg: 224 242 254;
+	--fill-section-bg: 245 252 255;
+	--fill-input-bg: 255 255 255;
+	--fill-overlay: 24 24 27 / 0.5;
 
-	/* Accent colors */
+	/* BORDER COLORS */
+	--fill-border-default: 228 228 231;
+	--fill-border-light: 244 244 245;
+	--fill-border-strong: 14 165 233;
+
+	/* INPUT STYLING */
+	--fill-input-border: 228 228 231;
+	--fill-input-border-hover: 212 212 216;
 	--fill-input-border-focus: 14 165 233;
+	--fill-input-border-error: 239 68 68;
+	--fill-input-text: 24 24 27;
+	--fill-input-text-placeholder: 161 161 170;
+	--fill-input-disabled-bg: 250 250 250;
+	--fill-input-disabled-text: 161 161 170;
+
+	/* BUTTON STYLING */
 	--fill-button-primary-bg: 2 132 199;
 	--fill-button-primary-hover: 3 105 161;
+	--fill-button-primary-active: 7 89 133;
+	--fill-button-primary-text: 255 255 255;
+
+	--fill-button-secondary-bg: 240 249 255;
+	--fill-button-secondary-border: 14 165 233;
+	--fill-button-secondary-text: 2 132 199;
+	--fill-button-secondary-hover: 224 242 254;
+
+	--fill-button-ghost-text: 2 132 199;
+	--fill-button-ghost-hover: 240 249 255;
+
+	/* SHADOW & ELEVATION */
+	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+	--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+	--shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+	--shadow-focus: 0 0 0 3px rgb(14 165 233 / 0.1);
+
+	/* TYPOGRAPHY */
+	--font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+		"Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+	--font-family-mono: "Menlo", "Monaco", "Courier New", monospace;
+
+	--font-size-xs: 0.75rem;
+	--font-size-sm: 0.875rem;
+	--font-size-base: 1rem;
+	--font-size-lg: 1.125rem;
+	--font-size-xl: 1.25rem;
+	--font-size-2xl: 1.5rem;
+	--font-size-3xl: 1.875rem;
+
+	--font-weight-light: 300;
+	--font-weight-normal: 400;
+	--font-weight-medium: 500;
+	--font-weight-semibold: 600;
+	--font-weight-bold: 700;
+
+	/* LINE HEIGHT */
+	--line-height-tight: 1.25;
+	--line-height-snug: 1.375;
+	--line-height-normal: 1.5;
+	--line-height-relaxed: 1.625;
+	--line-height-loose: 2;
+
+	/* SPACING */
+	--spacing-0: 0;
+	--spacing-1: 0.25rem;
+	--spacing-2: 0.5rem;
+	--spacing-3: 0.75rem;
+	--spacing-4: 1rem;
+	--spacing-5: 1.25rem;
+	--spacing-6: 1.5rem;
+	--spacing-8: 2rem;
+	--spacing-10: 2.5rem;
+	--spacing-12: 3rem;
+
+	/* BORDER RADIUS */
+	--radius-none: 0;
+	--radius-sm: 0.375rem;
+	--radius-md: 0.5rem;
+	--radius-lg: 0.75rem;
+	--radius-xl: 1rem;
+	--radius-2xl: 1.25rem;
+	--radius-full: 9999px;
+
+	/* TRANSITIONS */
+	--transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+	--transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+	--transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   GLOBAL BASE STYLES
+   ============================================ */
+
+* {
+	box-sizing: border-box;
+}
+
+html {
+	font-family: var(--font-family-base);
+	font-size: 16px;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+body {
+	background-color: rgb(var(--fill-bg));
+	color: rgb(var(--fill-input-text));
+	line-height: var(--line-height-normal);
+	transition: background-color var(--transition-base);
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+h1,
+.h1 {
+	font-size: var(--font-size-3xl);
+	font-weight: var(--font-weight-bold);
+	line-height: var(--line-height-tight);
+	color: rgb(var(--color-primary-500));
+	margin: var(--spacing-4) 0;
+}
+
+h2,
+.h2 {
+	font-size: var(--font-size-2xl);
+	font-weight: var(--font-weight-bold);
+	line-height: var(--line-height-tight);
+	color: rgb(var(--color-primary-500));
+	margin: var(--spacing-4) 0 var(--spacing-2) 0;
+}
+
+h3,
+.h3 {
+	font-size: var(--font-size-xl);
+	font-weight: var(--font-weight-semibold);
+	line-height: var(--line-height-snug);
+	color: rgb(var(--color-primary-400));
+	margin: var(--spacing-3) 0 var(--spacing-2) 0;
+}
+
+p,
+.paragraph {
+	font-size: var(--font-size-base);
+	line-height: var(--line-height-relaxed);
+	color: rgb(var(--color-neutral-700));
+	margin: 0 0 var(--spacing-4) 0;
+}
+
+label {
+	display: block;
+	font-size: var(--font-size-sm);
+	font-weight: var(--font-weight-medium);
+	color: rgb(var(--color-neutral-700));
+	margin-bottom: var(--spacing-2);
+	line-height: var(--line-height-snug);
+}
+
+small,
+.small {
+	font-size: var(--font-size-xs);
+	color: rgb(var(--color-neutral-500));
+	line-height: var(--line-height-snug);
+}
+
+/* ============================================
+   FORM CONTAINERS & GROUPS
+   ============================================ */
+
+.form-group {
+	margin-bottom: var(--spacing-6);
+	display: flex;
+	flex-direction: column;
+}
+
+.form-section {
+	background-color: rgb(var(--fill-section-bg));
+	border: 1px solid rgb(var(--fill-border-light));
+	border-radius: var(--radius-lg);
+	padding: var(--spacing-8);
+	margin-bottom: var(--spacing-6);
+	box-shadow: var(--shadow-sm);
+}
+
+.form-section-title {
+	font-size: var(--font-size-lg);
+	font-weight: var(--font-weight-semibold);
+	color: rgb(var(--color-primary-800));
+	margin-bottom: var(--spacing-4);
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-2);
+}
+
+.form-row {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: var(--spacing-6);
+	margin-bottom: var(--spacing-6);
+}
+
+/* ============================================
+   INPUT FIELDS - Core Styling
+   ============================================ */
+
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"],
+textarea,
+select {
+	width: 100%;
+	padding: var(--spacing-3) var(--spacing-4);
+	font-family: var(--font-family-base);
+	font-size: var(--font-size-base);
+	line-height: var(--line-height-normal);
+	color: rgb(var(--fill-input-text));
+	background-color: rgb(var(--fill-input-bg));
+	border: 1.5px solid rgb(var(--fill-input-border));
+	border-radius: var(--radius-md);
+	transition: all var(--transition-base);
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+}
+
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="number"]:hover,
+input[type="password"]:hover,
+input[type="search"]:hover,
+input[type="tel"]:hover,
+input[type="url"]:hover,
+input[type="date"]:hover,
+input[type="time"]:hover,
+input[type="datetime-local"]:hover,
+input[type="month"]:hover,
+input[type="week"]:hover,
+textarea:hover,
+select:hover {
+	border-color: rgb(var(--fill-input-border-hover));
+	background-color: rgb(var(--fill-input-bg));
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="datetime-local"]:focus,
+input[type="month"]:focus,
+input[type="week"]:focus,
+textarea:focus,
+select:focus {
+	outline: none;
+	border-color: rgb(var(--fill-input-border-focus));
+	background-color: rgb(var(--fill-input-bg));
+	box-shadow: var(--shadow-focus);
+}
+
+input::placeholder,
+textarea::placeholder {
+	color: rgb(var(--fill-input-text-placeholder));
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+	background-color: rgb(var(--fill-input-disabled-bg));
+	color: rgb(var(--fill-input-disabled-text));
+	border-color: rgb(var(--fill-border-light));
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+input:disabled::placeholder,
+textarea:disabled::placeholder {
+	color: rgb(var(--fill-input-disabled-text));
+}
+
+/* ERROR STATE */
+input.error,
+textarea.error,
+select.error {
+	border-color: rgb(var(--fill-input-border-error));
+}
+
+input.error:focus,
+textarea.error:focus,
+select.error:focus {
+	box-shadow: 0 0 0 3px rgb(239 68 68 / 0.1);
+	border-color: rgb(var(--fill-input-border-error));
+}
+
+/* ============================================
+   TEXT INPUT
+   ============================================ */
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"] {
+	letter-spacing: 0.3px;
+}
+
+/* ============================================
+   NUMBER INPUT
+   ============================================ */
+
+input[type="number"] {
+	font-variant-numeric: tabular-nums;
+}
+
+/* Remove spinner on number inputs */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+input[type="number"] {
+	-moz-appearance: textfield;
+}
+
+/* ============================================
+   DATE & TIME INPUTS
+   ============================================ */
+
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"] {
+	cursor: pointer;
+}
+
+input[type="date"]::placeholder,
+input[type="time"]::placeholder,
+input[type="datetime-local"]::placeholder,
+input[type="month"]::placeholder,
+input[type="week"]::placeholder {
+	color: rgb(var(--fill-input-text-placeholder));
+}
+
+/* Calendar picker styling */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+	cursor: pointer;
+	border-radius: var(--radius-sm);
+	padding: var(--spacing-2);
+	opacity: 0.6;
+	transition: opacity var(--transition-fast);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+	opacity: 1;
+}
+
+/* ============================================
+   TEXTAREA
+   ============================================ */
+
+textarea {
+	resize: vertical;
+	min-height: 120px;
+	line-height: var(--line-height-relaxed);
+	font-family: var(--font-family-base);
+}
+
+textarea:focus {
+	resize: vertical;
+}
+
+/* ============================================
+   SELECT (DROPDOWN)
+   ============================================ */
+
+select {
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%232d3748' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+	background-position: right var(--spacing-3) center;
+	background-repeat: no-repeat;
+	background-size: 0.85em 0.85em;
+	padding-right: var(--spacing-10);
+	cursor: pointer;
+}
+
+select::-ms-expand {
+	display: none;
+}
+
+select option {
+	background-color: rgb(var(--fill-card-bg));
+	color: rgb(var(--fill-input-text));
+	padding: var(--spacing-2) var(--spacing-3);
+	border-radius: var(--radius-sm);
+}
+
+select option:checked {
+	background: linear-gradient(rgb(var(--color-primary-500)), rgb(var(--color-primary-500)));
+	background-color: rgb(var(--color-primary-500));
+	color: rgb(var(--fill-card-bg));
+}
+
+/* ============================================
+   CHECKBOX & RADIO
+   ============================================ */
+
+input[type="checkbox"],
+input[type="radio"] {
+	width: 1.25rem;
+	height: 1.25rem;
+	margin: 0;
+	cursor: pointer;
+	accent-color: rgb(var(--color-primary-600));
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	border: 1.5px solid rgb(var(--fill-input-border));
+	background-color: rgb(var(--fill-input-bg));
+	transition: all var(--transition-fast);
+	flex-shrink: 0;
+}
+
+input[type="checkbox"] {
+	border-radius: var(--radius-sm);
+}
+
+input[type="radio"] {
+	border-radius: 50%;
+}
+
+input[type="checkbox"]:hover,
+input[type="radio"]:hover {
+	border-color: rgb(var(--fill-input-border-hover));
+}
+
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+	background-color: rgb(var(--color-primary-600));
+	border-color: rgb(var(--color-primary-600));
+	background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+
+input[type="radio"]:checked {
+	background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e");
+}
+
+input[type="checkbox"]:focus,
+input[type="radio"]:focus {
+	outline: none;
+	box-shadow: var(--shadow-focus);
+	border-color: rgb(var(--fill-input-border-focus));
+}
+
+input[type="checkbox"]:disabled,
+input[type="radio"]:disabled {
+	background-color: rgb(var(--fill-input-disabled-bg));
+	border-color: rgb(var(--fill-border-light));
+	cursor: not-allowed;
+}
+
+/* ============================================
+   CHECKBOX/RADIO GROUP WRAPPER
+   ============================================ */
+
+.checkbox-group,
+.radio-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-3);
+}
+
+.checkbox-item,
+.radio-item {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-3);
+	cursor: pointer;
+}
+
+.checkbox-item input[type="checkbox"],
+.radio-item input[type="radio"] {
+	margin: 0;
+}
+
+.checkbox-item label,
+.radio-item label {
+	margin-bottom: 0;
+	font-weight: var(--font-weight-normal);
+	cursor: pointer;
+	user-select: none;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--spacing-2);
+	padding: var(--spacing-3) var(--spacing-6);
+	font-family: var(--font-family-base);
+	font-size: var(--font-size-base);
+	font-weight: var(--font-weight-medium);
+	line-height: var(--line-height-normal);
+	text-align: center;
+	border: none;
+	border-radius: var(--radius-md);
+	cursor: pointer;
+	transition: all var(--transition-base);
+	text-decoration: none;
+	white-space: nowrap;
+	user-select: none;
+	position: relative;
+	overflow: hidden;
+}
+
+/* PRIMARY BUTTON */
+button.btn-primary,
+input[type="submit"],
+.btn-primary {
+	background-color: rgb(var(--fill-button-primary-bg));
+	color: rgb(var(--fill-button-primary-text));
+	border: 1px solid transparent;
+	box-shadow: var(--shadow-sm);
+}
+
+button.btn-primary:hover,
+input[type="submit"]:hover,
+.btn-primary:hover {
+	background-color: rgb(var(--fill-button-primary-hover));
+	box-shadow: var(--shadow-md);
+	transform: translateY(-1px);
+}
+
+button.btn-primary:active,
+input[type="submit"]:active,
+.btn-primary:active {
+	background-color: rgb(var(--fill-button-primary-active));
+	transform: translateY(0);
+	box-shadow: var(--shadow-sm);
+}
+
+button.btn-primary:focus,
+input[type="submit"]:focus,
+.btn-primary:focus {
+	outline: none;
+	box-shadow: var(--shadow-focus);
+}
+
+/* SECONDARY BUTTON */
+button.btn-secondary,
+.btn-secondary {
+	background-color: rgb(var(--fill-button-secondary-bg));
+	color: rgb(var(--fill-button-secondary-text));
+	border: 1.5px solid rgb(var(--fill-button-secondary-border));
+}
+
+button.btn-secondary:hover,
+.btn-secondary:hover {
+	background-color: rgb(var(--fill-button-secondary-hover));
+	box-shadow: var(--shadow-md);
+}
+
+button.btn-secondary:active,
+.btn-secondary:active {
+	background-color: rgb(var(--fill-button-secondary-bg));
+}
+
+button.btn-secondary:focus,
+.btn-secondary:focus {
+	outline: none;
+	box-shadow: var(--shadow-focus);
+}
+
+/* GHOST BUTTON */
+button.btn-ghost,
+.btn-ghost {
+	background-color: transparent;
+	color: rgb(var(--fill-button-ghost-text));
+	border: 1px solid transparent;
+}
+
+button.btn-ghost:hover,
+.btn-ghost:hover {
+	background-color: rgb(var(--fill-button-ghost-hover));
+}
+
+button.btn-ghost:focus,
+.btn-ghost:focus {
+	outline: none;
+	box-shadow: var(--shadow-focus);
+}
+
+/* BUTTON SIZES */
+button.btn-sm,
+.btn-sm {
+	padding: var(--spacing-2) var(--spacing-4);
+	font-size: var(--font-size-sm);
+}
+
+button.btn-lg,
+.btn-lg {
+	padding: var(--spacing-4) var(--spacing-8);
+	font-size: var(--font-size-lg);
+	border-radius: var(--radius-lg);
+}
+
+/* DISABLED STATE */
+button:disabled,
+input[type="submit"]:disabled,
+input[type="reset"]:disabled,
+input[type="button"]:disabled,
+.btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+button:disabled:hover,
+input[type="submit"]:disabled:hover,
+input[type="reset"]:disabled:hover,
+input[type="button"]:disabled:hover,
+.btn:disabled:hover {
+	transform: none;
+	box-shadow: var(--shadow-sm);
+}
+
+/* ============================================
+   FORM VALIDATION & FEEDBACK
+   ============================================ */
+
+.form-control {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+}
+
+.form-control.error input,
+.form-control.error textarea,
+.form-control.error select {
+	border-color: rgb(var(--color-error-600));
+}
+
+.form-control.error input:focus,
+.form-control.error textarea:focus,
+.form-control.error select:focus {
+	box-shadow: 0 0 0 3px rgb(239 68 68 / 0.1);
+}
+
+.form-control.success input,
+.form-control.success textarea,
+.form-control.success select {
+	border-color: rgb(var(--color-success-600));
+}
+
+.form-control.success input:focus,
+.form-control.success textarea:focus,
+.form-control.success select:focus {
+	box-shadow: 0 0 0 3px rgb(16 185 129 / 0.1);
+}
+
+.help-text,
+.form-text {
+	display: block;
+	margin-top: var(--spacing-2);
+	font-size: var(--font-size-xs);
+	color: rgb(var(--color-neutral-500));
+	line-height: var(--line-height-snug);
+}
+
+.error-text {
+	display: block;
+	margin-top: var(--spacing-2);
+	font-size: var(--font-size-xs);
+	color: rgb(var(--color-error-600));
+	font-weight: var(--font-weight-medium);
+	line-height: var(--line-height-snug);
+}
+
+.success-text {
+	display: block;
+	margin-top: var(--spacing-2);
+	font-size: var(--font-size-xs);
+	color: rgb(var(--color-success-600));
+	font-weight: var(--font-weight-medium);
+	line-height: var(--line-height-snug);
+}
+
+/* ============================================
+   DIVIDER & SPACING ELEMENTS
+   ============================================ */
+
+hr,
+.divider {
+	border: none;
+	height: 1px;
+	background: linear-gradient(
+		to right,
+		transparent,
+		rgb(var(--fill-border-default)),
+		transparent
+	);
+	margin: var(--spacing-8) 0;
+}
+
+.spacer-sm {
+	height: var(--spacing-4);
+}
+
+.spacer-md {
+	height: var(--spacing-8);
+}
+
+.spacer-lg {
+	height: var(--spacing-12);
+}
+
+/* ============================================
+   IMAGE & VIDEO
+   ============================================ */
+
+img {
+	max-width: 100%;
+	height: auto;
+	border-radius: var(--radius-md);
+	display: block;
+}
+
+video {
+	max-width: 100%;
+	height: auto;
+	border-radius: var(--radius-md);
+	background-color: rgb(var(--color-neutral-900));
+	display: block;
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+	* {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
+/* Dark mode - system preference or manual override */
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) {
+		--fill-bg: 15 23 42;
+		--fill-card-bg: 30 41 59;
+		--fill-section-bg: 15 23 42;
+		--fill-input-bg: 30 41 59;
+		--fill-input-text: 241 245 249;
+		--fill-input-text-placeholder: 148 163 184;
+		--fill-input-border: 71 85 105;
+		--fill-input-border-hover: 100 116 139;
+		--fill-border-default: 71 85 105;
+		--fill-border-light: 51 65 85;
+		--color-neutral-700: 226 232 240;
+		--color-neutral-800: 203 213 225;
+		--color-neutral-900: 241 245 249;
+	}
+}
+
+/* Manual dark mode override */
+:root[data-theme="dark"] {
+	--fill-bg: 15 23 42;
+	--fill-card-bg: 30 41 59;
+	--fill-section-bg: 15 23 42;
+	--fill-input-bg: 30 41 59;
+	--fill-input-text: 241 245 249;
+	--fill-input-text-placeholder: 148 163 184;
+	--fill-input-border: 71 85 105;
+	--fill-input-border-hover: 100 116 139;
+	--fill-border-default: 71 85 105;
+	--fill-border-light: 51 65 85;
+	--color-neutral-700: 226 232 240;
+	--color-neutral-800: 203 213 225;
+	--color-neutral-900: 241 245 249;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+	.form-row {
+		grid-template-columns: 1fr;
+	}
+
+	h1,
+	.h1 {
+		font-size: var(--font-size-2xl);
+	}
+
+	h2,
+	.h2 {
+		font-size: var(--font-size-xl);
+	}
+
+	button,
+	input[type="button"],
+	input[type="submit"],
+	input[type="reset"],
+	.btn {
+		width: 100%;
+	}
+
+	input[type="text"],
+	input[type="email"],
+	input[type="number"],
+	input[type="password"],
+	input[type="search"],
+	input[type="tel"],
+	input[type="url"],
+	input[type="date"],
+	input[type="time"],
+	input[type="datetime-local"],
+	input[type="month"],
+	input[type="week"],
+	textarea,
+	select {
+		font-size: 16px;
+	}
+}
+
+/* ============================================
+   RTL SUPPORT (for Hebrew & Arabic)
+   ============================================ */
+
+[dir="rtl"] input[type="text"],
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="number"],
+[dir="rtl"] input[type="password"],
+[dir="rtl"] input[type="search"],
+[dir="rtl"] input[type="tel"],
+[dir="rtl"] input[type="url"],
+[dir="rtl"] textarea {
+	direction: rtl;
+	text-align: right;
+}
+
+[dir="rtl"] select {
+	background-position: left var(--spacing-3) center;
+	padding-right: var(--spacing-4);
+	padding-left: var(--spacing-10);
+}
+
+[dir="rtl"] .checkbox-item,
+[dir="rtl"] .radio-item {
+	flex-direction: row-reverse;
+}
+
+[dir="rtl"] .form-row {
+	direction: rtl;
+}
+
+[dir="rtl"] button,
+[dir="rtl"] .btn {
+	direction: rtl;
 }

@@ -27,14 +27,10 @@ export default defineEventHandler(async (event) => {
 			};
 		}
 
-		const body = await readBody<{
-			apiKey: string;
-			prefill?: Record<string, unknown>;
-			additionalData?: Record<string, unknown>;
-		}>(event);
+		const apiKey = getHeader(event, "x-api-key");
 
-		// Authenticate user via API token
-		if (!body?.apiKey) {
+		// Authenticate user via API key
+		if (!apiKey) {
 			setResponseStatus(event, 401);
 			return {
 				success: false,
@@ -43,7 +39,7 @@ export default defineEventHandler(async (event) => {
 		}
 
 		const user = await db.query.usersTable.findFirst({
-			where: eq(usersTable.apiKey, body.apiKey),
+			where: eq(usersTable.apiKey, apiKey),
 		});
 
 		if (!user) {
@@ -53,6 +49,11 @@ export default defineEventHandler(async (event) => {
 				message: "Invalid API key",
 			};
 		}
+
+		const body = await readBody<{
+			prefill?: Record<string, unknown>;
+			additionalData?: Record<string, unknown>;
+		}>(event);
 
 		const form = await db.query.formsTable.findFirst({
 			where: eq(formsTable.id, formId),

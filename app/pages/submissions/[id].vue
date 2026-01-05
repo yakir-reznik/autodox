@@ -234,6 +234,12 @@
 							</td>
 							<td class="px-6 py-4 text-sm">
 								<div class="flex gap-2">
+									<NuxtLink :to="`/submission-detail/${submission.token}`">
+										<UiButton variant="primary" size="sm">
+											<Icon name="heroicons:eye" class="h-4 w-4" />
+											View Details
+										</UiButton>
+									</NuxtLink>
 									<UiButton
 										v-if="submission.submissionData"
 										variant="secondary"
