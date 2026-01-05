@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
 	// Get pagination parameters
 	const query = getQuery(event);
 	const page = Math.max(1, Number(query.page) || 1);
-	const limit = 20;
+	const limit = 10;
 	const offset = (page - 1) * limit;
 
 	// Get total count of submissions for this form

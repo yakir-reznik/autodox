@@ -51,6 +51,14 @@
 	const submissions = computed(() => response.value?.data ?? []);
 	const pagination = computed(() => response.value?.pagination);
 
+	// Watch for page changes and refresh data
+	watch(
+		() => currentPage.value,
+		async () => {
+			await refresh();
+		}
+	);
+
 	const statusColors = {
 		pending: "bg-gray-100 text-gray-800",
 		in_progress: "bg-blue-100 text-blue-800",
@@ -128,6 +136,45 @@
 	function goToPage(page: number) {
 		currentPage.value = page;
 	}
+
+	// Generate page numbers to display in pagination (smart paging)
+	const paginationPages = computed(() => {
+		if (!pagination.value) return [];
+		const totalPages = pagination.value.totalPages;
+		const currentPageNum = pagination.value.page;
+		const pages: (number | string)[] = [];
+
+		// Show first page
+		pages.push(1);
+
+		// Calculate range around current page
+		const start = Math.max(2, currentPageNum - 1);
+		const end = Math.min(totalPages - 1, currentPageNum + 1);
+
+		// Add ellipsis if needed
+		if (start > 2) {
+			pages.push("...");
+		}
+
+		// Add pages around current page
+		for (let i = start; i <= end; i++) {
+			if (i !== 1 && i !== totalPages) {
+				pages.push(i);
+			}
+		}
+
+		// Add ellipsis if needed
+		if (end < totalPages - 1) {
+			pages.push("...");
+		}
+
+		// Show last page (if more than one page)
+		if (totalPages > 1 && !pages.includes(totalPages)) {
+			pages.push(totalPages);
+		}
+
+		return pages;
+	});
 
 	async function createNewSubmission() {
 		if (!user.value?.apiKey) {
@@ -462,15 +509,16 @@
 					<!-- Page numbers -->
 					<div class="flex gap-1">
 						<button
-							v-for="page in Math.min(5, pagination.totalPages)"
-							:key="page"
-							class="rounded border px-3 py-1 text-sm font-medium transition-colors"
+							v-for="(page, index) in paginationPages"
+							:key="`${page}-${index}`"
+							:disabled="page === '...'"
+							class="rounded border px-3 py-1 text-sm font-medium transition-colors disabled:cursor-default disabled:border-gray-200 disabled:bg-white disabled:text-gray-400"
 							:class="
 								page === pagination.page
 									? 'border-blue-500 bg-blue-50 text-blue-700'
-									: 'border-gray-300 text-gray-700 hover:bg-gray-50'
+									: 'border-gray-300 text-gray-700 hover:bg-gray-50 disabled:hover:bg-white'
 							"
-							@click="goToPage(page)"
+							@click="page !== '...' && goToPage(Number(page))"
 						>
 							{{ page }}
 						</button>
