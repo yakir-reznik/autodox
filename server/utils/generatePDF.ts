@@ -1,9 +1,57 @@
 import { db } from "~~/server/db";
-import { submissionsTable, formEntrancesTable, formsTable } from "~~/server/db/schema";
-import { eq, asc } from "drizzle-orm";
+import {
+	submissionsTable,
+	formEntrancesTable,
+	formsTable,
+	formElementsTable,
+} from "~~/server/db/schema";
+import { eq } from "drizzle-orm";
 import { createError } from "h3";
-import PDFDocument from "pdfkit";
 import type { SubmissionStatus, DeviceType } from "~~/server/db/schema";
+import path from "path";
+import fs from "fs";
+import { jsPDF } from "jspdf";
+
+/**
+ * Helper function to check if text contains Hebrew characters
+ */
+function containsHebrew(text: string): boolean {
+	const hebrewRegex = /[\u0590-\u05FF]/;
+	return hebrewRegex.test(text);
+}
+
+/**
+ * Helper function to reverse text for RTL display in jsPDF
+ * Only reverses if text contains Hebrew characters
+ */
+function reverseText(text: string): string {
+	if (!text) return text;
+	// Always reverse - used for labels and static Hebrew text
+	return text.split("").reverse().join("");
+}
+
+/**
+ * Smart reversal for values that might be Hebrew, English, or mixed
+ */
+function smartReverse(text: string): string {
+	if (!text) return text;
+
+	// If text contains Hebrew, reverse it
+	// Otherwise return as-is (for English text, numbers, etc.)
+	if (containsHebrew(text)) {
+		return text.split("").reverse().join("");
+	}
+	return text;
+}
+
+/**
+ * Helper function to check if a string is a base64 image
+ */
+function isBase64Image(str: string): boolean {
+	if (typeof str !== "string") return false;
+	const dataUrlPattern = /^data:image\/(png|jpg|jpeg|gif|webp);base64,/;
+	return dataUrlPattern.test(str);
+}
 
 /**
  * Submission data structure for PDF generation
@@ -35,6 +83,12 @@ export interface SubmissionData {
 		createdAt: Date;
 		updatedAt: Date;
 	};
+	formElements?: Array<{
+		id: number;
+		name: string | null;
+		type: string;
+		config: any;
+	}>;
 	entrances: Array<{
 		id: number;
 		sessionToken: string | null;
@@ -56,11 +110,8 @@ export interface SubmissionData {
 
 /**
  * Fetches submission data from the database
- * @param token - The submission token
- * @returns Submission data with form and entrances
  */
 async function getSubmissionData(token: string): Promise<SubmissionData> {
-	// Find the submission by token
 	const [submission] = await db
 		.select()
 		.from(submissionsTable)
@@ -74,256 +125,334 @@ async function getSubmissionData(token: string): Promise<SubmissionData> {
 		});
 	}
 
-	// Get the form details
 	const form = await db.query.formsTable.findFirst({
 		where: eq(formsTable.id, submission.formId),
 	});
 
-	// Get all form entrances for this specific submission (by token)
+	const formElements = await db.query.formElementsTable.findMany({
+		where: eq(formElementsTable.formId, submission.formId),
+		columns: {
+			id: true,
+			name: true,
+			type: true,
+			config: true,
+		},
+	});
+
 	const entrances = await db
 		.select()
 		.from(formEntrancesTable)
-		.where(eq(formEntrancesTable.sessionToken, token))
-		.orderBy(formEntrancesTable.timestamp);
+		.where(eq(formEntrancesTable.sessionToken, token));
 
 	return {
 		submission,
 		form,
+		formElements,
 		entrances,
 	};
 }
 
 /**
- * Generates a readable PDF document from submission token
- * @param token - The submission token
- * @returns PDFKit document stream
+ * Load Hebrew font and register it with jsPDF
  */
-export async function generateSubmissionPDF(token: string): Promise<PDFKit.PDFDocument> {
-	// Fetch submission data
+function registerHebrewFont(doc: jsPDF): boolean {
+	try {
+		const fontPath = path.join(
+			process.cwd(),
+			"fonts",
+			"Noto_Sans_Hebrew",
+			"NotoSansHebrew-Regular.ttf"
+		);
+		const fontBoldPath = path.join(
+			process.cwd(),
+			"fonts",
+			"Noto_Sans_Hebrew",
+			"NotoSansHebrew-Bold.ttf"
+		);
+
+		if (fs.existsSync(fontPath) && fs.existsSync(fontBoldPath)) {
+			// Read font files as base64
+			const fontBase64 = fs.readFileSync(fontPath).toString("base64");
+			const fontBoldBase64 = fs.readFileSync(fontBoldPath).toString("base64");
+
+			// Add fonts to jsPDF
+			doc.addFileToVFS("NotoSansHebrew-Regular.ttf", fontBase64);
+			doc.addFont("NotoSansHebrew-Regular.ttf", "NotoSansHebrew", "normal");
+
+			doc.addFileToVFS("NotoSansHebrew-Bold.ttf", fontBoldBase64);
+			doc.addFont("NotoSansHebrew-Bold.ttf", "NotoSansHebrew", "bold");
+
+			return true;
+		}
+		return false;
+	} catch (err) {
+		console.error("Failed to register Hebrew font:", err);
+		return false;
+	}
+}
+
+/**
+ * Generates a readable PDF document from submission token
+ */
+export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 	const data = await getSubmissionData(token);
-	const doc = new PDFDocument({
-		size: "A4",
-		margins: {
-			top: 50,
-			bottom: 50,
-			left: 50,
-			right: 50,
-		},
-		info: {
-			Title: `Submission ${data.submission.token}`,
-			Author: "Autodox",
-			Subject: `Form Submission Report`,
-			CreationDate: new Date(),
-		},
+
+	// Create PDF document
+	const doc = new jsPDF({
+		orientation: "portrait",
+		unit: "mm",
+		format: "a4",
 	});
 
+	// Register Hebrew font
+	const hebrewFontRegistered = registerHebrewFont(doc);
+	if (hebrewFontRegistered) {
+		doc.setFont("NotoSansHebrew", "normal");
+		doc.setLanguage("he");
+	}
+
+	// Colors
 	const colors = {
-		primary: "#2563eb", // blue-600
-		secondary: "#64748b", // slate-500
-		success: "#22c55e", // green-500
-		warning: "#f59e0b", // amber-500
-		danger: "#ef4444", // red-500
-		text: "#1e293b", // slate-800
-		muted: "#94a3b8", // slate-400
-		border: "#e2e8f0", // slate-200
+		primary: [37, 99, 235], // blue-600
+		secondary: [100, 116, 139], // slate-500
+		success: [34, 197, 94], // green-500
+		warning: [245, 158, 11], // amber-500
+		danger: [239, 68, 68], // red-500
+		text: [30, 41, 59], // slate-800
+		muted: [148, 163, 184], // slate-400
+		border: [226, 232, 240], // slate-200
 	};
 
-	let yPosition = doc.y;
+	let yPosition = 20;
+	const pageWidth = 210; // A4 width in mm
+	const pageHeight = 297; // A4 height in mm
+	const margin = 20;
+	const contentWidth = pageWidth - 2 * margin;
 
-	// Helper function to draw a horizontal line
-	const drawLine = (y: number) => {
-		doc.strokeColor(colors.border).lineWidth(1).moveTo(50, y).lineTo(545, y).stroke();
+	// Helper to get field label
+	const getFieldLabel = (fieldName: string): string => {
+		if (!data.formElements) return fieldName;
+		const element = data.formElements.find((el) => el.name === fieldName);
+		return element?.config?.label || fieldName;
 	};
 
-	// Helper function to add section header
-	const addSectionHeader = (title: string) => {
-		yPosition = doc.y + 20;
-		if (yPosition > 700) {
-			doc.addPage();
-			yPosition = 50;
-		}
-		doc.fillColor(colors.primary)
-			.fontSize(16)
-			.font("Helvetica-Bold")
-			.text(title, 50, yPosition);
-		yPosition += 25;
-		drawLine(yPosition);
-		yPosition += 15;
-		doc.fillColor(colors.text);
-	};
-
-	// Helper function to add a field
-	const addField = (label: string, value: string, valueColor: string = colors.text) => {
-		if (yPosition > 720) {
-			doc.addPage();
-			yPosition = 50;
-		}
-		doc.fillColor(colors.secondary)
-			.fontSize(10)
-			.font("Helvetica-Bold")
-			.text(label + ":", 50, yPosition, { width: 150, continued: false });
-
-		doc.fillColor(valueColor)
-			.fontSize(10)
-			.font("Helvetica")
-			.text(value, 210, yPosition, { width: 335 });
-
-		yPosition += 20;
-	};
-
-	// Helper function to format date
+	// Helper to format date
 	const formatDate = (date: Date | null | undefined): string => {
-		if (!date) return "N/A";
-		return new Date(date).toLocaleString("en-US", {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-			hour: "2-digit",
-			minute: "2-digit",
-			second: "2-digit",
-		});
+		if (!date) return reverseText("לא זמין");
+		const d = new Date(date);
+		const day = String(d.getDate()).padStart(2, "0");
+		const month = String(d.getMonth() + 1).padStart(2, "0");
+		const year = d.getFullYear();
+		const hours = String(d.getHours()).padStart(2, "0");
+		const minutes = String(d.getMinutes()).padStart(2, "0");
+		// Return in dd/mm/yyyy hh:mm format - no reversal needed
+		return `${day}/${month}/${year} ${hours}:${minutes}`;
 	};
 
-	// Helper function to get status color
-	const getStatusColor = (status: SubmissionStatus): string => {
-		switch (status) {
-			case "submitted":
-			case "locked":
-				return colors.success;
-			case "in_progress":
-				return colors.warning;
-			case "pending":
-				return colors.secondary;
-			default:
-				return colors.text;
+	// Helper to add new page if needed
+	const checkNewPage = (requiredSpace: number = 20) => {
+		if (yPosition + requiredSpace > pageHeight - margin) {
+			doc.addPage();
+			yPosition = margin;
 		}
 	};
 
-	// ========================================
+	// Helper to draw line
+	const drawLine = () => {
+		doc.setDrawColor(...colors.border);
+		doc.setLineWidth(0.5);
+		doc.line(margin, yPosition, pageWidth - margin, yPosition);
+		yPosition += 5;
+	};
+
+	// Helper to add section header
+	const addSectionHeader = (title: string) => {
+		checkNewPage(15);
+		yPosition += 8; // Add spacing before section
+		doc.setFontSize(16);
+		doc.setFont("NotoSansHebrew", "bold");
+		doc.setTextColor(...colors.primary);
+		doc.text(reverseText(title), pageWidth - margin, yPosition, { align: "right" });
+		yPosition += 8;
+		drawLine();
+		doc.setTextColor(...colors.text);
+		doc.setFont("NotoSansHebrew", "normal");
+	};
+
+	// Helper to add field
+	const addField = (label: string, value: string, color: number[] = colors.text) => {
+		checkNewPage(10);
+		doc.setFontSize(10);
+
+		// Label - always reverse (Hebrew labels)
+		doc.setFont("NotoSansHebrew", "bold");
+		doc.setTextColor(...colors.secondary);
+		doc.text(reverseText(label), pageWidth - margin, yPosition, { align: "right" });
+
+		// Value - use smart reversal (might be Hebrew, English, or mixed)
+		doc.setFont("NotoSansHebrew", "normal");
+		doc.setTextColor(...color);
+		const processedValue = smartReverse(value);
+		const lines = doc.splitTextToSize(processedValue, contentWidth * 0.6);
+		doc.text(lines, pageWidth - margin - 50, yPosition, { align: "right" });
+
+		yPosition += Math.max(7, lines.length * 5);
+	};
+
+	// Helper to add image
+	const addImage = (label: string, base64Data: string) => {
+		checkNewPage(60);
+		doc.setFontSize(10);
+		doc.setFont("NotoSansHebrew", "bold");
+		doc.setTextColor(...colors.secondary);
+		doc.text(reverseText(label) + ":", pageWidth - margin, yPosition, { align: "right" });
+		yPosition += 7;
+
+		try {
+			// Add image
+			doc.addImage(base64Data, "PNG", margin, yPosition, 80, 40);
+			yPosition += 45;
+		} catch (err) {
+			console.error("Failed to add image:", err);
+			doc.setTextColor(...colors.danger);
+			doc.text(reverseText("שגיאה בטעינת תמונה"), pageWidth - margin, yPosition, {
+				align: "right",
+			});
+			yPosition += 7;
+		}
+	};
+
+	// ===========================================
 	// HEADER
-	// ========================================
-	doc.fillColor(colors.primary)
-		.fontSize(24)
-		.font("Helvetica-Bold")
-		.text("Form Submission Report", 50, 50);
+	// ===========================================
+	doc.setFontSize(24);
+	doc.setFont("NotoSansHebrew", "bold");
+	doc.setTextColor(...colors.primary);
+	doc.text(reverseText("דוח הגשת טופס"), pageWidth - margin, yPosition, { align: "right" });
+	yPosition += 10;
 
-	yPosition = 80;
-	doc.fillColor(colors.muted)
-		.fontSize(10)
-		.font("Helvetica")
-		.text(`Generated on ${formatDate(new Date())}`, 50, yPosition);
+	doc.setFontSize(10);
+	doc.setFont("NotoSansHebrew", "normal");
+	doc.setTextColor(...colors.muted);
+	doc.text(reverseText(`נוצר בתאריך ${formatDate(new Date())}`), pageWidth - margin, yPosition, {
+		align: "right",
+	});
+	yPosition += 10;
 
-	yPosition = 110;
-	drawLine(yPosition);
-	yPosition += 20;
+	drawLine();
+	yPosition += 5;
 
-	// ========================================
+	// ===========================================
 	// SUBMISSION OVERVIEW
-	// ========================================
-	doc.fillColor(colors.primary)
-		.fontSize(18)
-		.font("Helvetica-Bold")
-		.text("Submission Overview", 50, yPosition);
-	yPosition += 30;
+	// ===========================================
+	doc.setFontSize(18);
+	doc.setFont("NotoSansHebrew", "bold");
+	doc.setTextColor(...colors.primary);
+	doc.text(reverseText("סקירת הגשה"), pageWidth - margin, yPosition, { align: "right" });
+	yPosition += 10;
 
-	addField("Submission ID", `#${data.submission.id}`);
-	addField("Token", data.submission.token);
-	addField(
-		"Status",
-		data.submission.status.toUpperCase(),
-		getStatusColor(data.submission.status)
-	);
+	addField("מזהה הגשה", `#${data.submission.id}`);
+	addField("טוקן", data.submission.token);
+
+	const statusHebrew: Record<string, string> = {
+		pending: "ממתין",
+		in_progress: "בתהליך",
+		submitted: "הוגש",
+		locked: "נעול",
+	};
+	const statusColor =
+		data.submission.status === "submitted" || data.submission.status === "locked"
+			? colors.success
+			: data.submission.status === "in_progress"
+			? colors.warning
+			: colors.secondary;
+
+	addField("סטטוס", statusHebrew[data.submission.status] || data.submission.status, statusColor);
 
 	if (data.form) {
-		addField("Form Title", data.form.title);
+		addField("שם הטופס", data.form.title);
 		if (data.form.description) {
-			addField("Form Description", data.form.description);
+			addField("תיאור הטופס", data.form.description);
 		}
 	}
 
-	// ========================================
+	// ===========================================
 	// TIMELINE
-	// ========================================
-	addSectionHeader("Submission Timeline");
+	// ===========================================
+	addSectionHeader("ציר זמן");
 
-	addField("Created", formatDate(data.submission.createdAt));
+	addField("נוצר", formatDate(data.submission.createdAt));
 	if (data.submission.startedAt) {
-		addField("Started", formatDate(data.submission.startedAt));
+		addField("התחיל", formatDate(data.submission.startedAt));
 	}
 	if (data.submission.submittedAt) {
-		addField("Submitted", formatDate(data.submission.submittedAt));
+		addField("הוגש", formatDate(data.submission.submittedAt));
 	}
 	if (data.submission.lockedAt) {
-		addField("Locked", formatDate(data.submission.lockedAt));
+		addField("ננעל", formatDate(data.submission.lockedAt));
 	}
 	if (data.submission.expiresAt) {
 		const isExpired = new Date(data.submission.expiresAt) < new Date();
 		addField(
-			"Expires",
+			"תפוגה",
 			formatDate(data.submission.expiresAt),
 			isExpired ? colors.danger : colors.text
 		);
 	}
 
-	// ========================================
+	// ===========================================
 	// SUBMISSION DATA
-	// ========================================
+	// ===========================================
 	if (data.submission.submissionData && Object.keys(data.submission.submissionData).length > 0) {
-		addSectionHeader("Submitted Data");
+		addSectionHeader("נתוני הגשה");
 
 		Object.entries(data.submission.submissionData).forEach(([key, value]) => {
-			const displayValue =
-				typeof value === "object" ? JSON.stringify(value, null, 2) : String(value);
-			addField(key, displayValue);
+			const fieldLabel = getFieldLabel(key);
+			if (typeof value === "string" && isBase64Image(value)) {
+				addImage(fieldLabel, value);
+			} else {
+				const displayValue =
+					typeof value === "object" ? JSON.stringify(value, null, 2) : String(value);
+				addField(fieldLabel, displayValue);
+			}
 		});
 	}
 
-	// ========================================
+	// ===========================================
 	// PREFILL DATA
-	// ========================================
+	// ===========================================
 	if (data.submission.prefillData && Object.keys(data.submission.prefillData).length > 0) {
-		addSectionHeader("Prefill Data");
+		addSectionHeader("נתוני מילוי מראש");
 
 		Object.entries(data.submission.prefillData).forEach(([key, value]) => {
-			const displayValue =
-				typeof value === "object" ? JSON.stringify(value, null, 2) : String(value);
-			addField(key, displayValue);
+			const fieldLabel = getFieldLabel(key);
+			if (typeof value === "string" && isBase64Image(value)) {
+				addImage(fieldLabel, value);
+			} else {
+				const displayValue =
+					typeof value === "object" ? JSON.stringify(value, null, 2) : String(value);
+				addField(fieldLabel, displayValue);
+			}
 		});
 	}
 
-	// ========================================
-	// ADDITIONAL DATA
-	// ========================================
-	if (data.submission.additionalData && Object.keys(data.submission.additionalData).length > 0) {
-		addSectionHeader("Additional Data");
-
-		Object.entries(data.submission.additionalData).forEach(([key, value]) => {
-			const displayValue =
-				typeof value === "object" ? JSON.stringify(value, null, 2) : String(value);
-			addField(key, displayValue);
-		});
-	}
-
-	// ========================================
+	// ===========================================
 	// ENTRANCE ANALYTICS
-	// ========================================
+	// ===========================================
 	if (data.entrances && data.entrances.length > 0) {
-		addSectionHeader("Entrance Analytics");
+		addSectionHeader("ניתוח כניסות");
 
-		addField("Total Entrances", data.entrances.length.toString(), colors.primary);
+		addField("סה״כ כניסות", data.entrances.length.toString(), colors.primary);
 
-		// Calculate unique sessions
 		const uniqueSessions = new Set(data.entrances.map((e) => e.sessionToken).filter(Boolean));
-		addField("Unique Sessions", uniqueSessions.size.toString());
+		addField("מפגשים ייחודיים", uniqueSessions.size.toString());
 
-		// Count new sessions
 		const newSessions = data.entrances.filter((e) => e.isNewSession).length;
-		addField("New Sessions", newSessions.toString());
+		addField("מפגשים חדשים", newSessions.toString());
 
-		// Count locked form views
 		const lockedViews = data.entrances.filter((e) => e.isFormLocked).length;
 		if (lockedViews > 0) {
-			addField("Locked Form Views", lockedViews.toString(), colors.warning);
+			addField("צפיות בטופס נעול", lockedViews.toString(), colors.warning);
 		}
 
 		// Device breakdown
@@ -333,20 +462,37 @@ export async function generateSubmissionPDF(token: string): Promise<PDFKit.PDFDo
 			deviceCounts[device] = (deviceCounts[device] || 0) + 1;
 		});
 
-		if (Object.keys(deviceCounts).length > 0) {
-			yPosition += 10;
-			doc.fillColor(colors.secondary)
-				.fontSize(10)
-				.font("Helvetica-Bold")
-				.text("Device Breakdown:", 50, yPosition);
-			yPosition += 20;
+		const deviceLabelsHebrew: Record<string, string> = {
+			mobile: "נייד",
+			tablet: "טאבלט",
+			desktop: "מחשב",
+			unknown: "לא ידוע",
+		};
 
+		if (Object.keys(deviceCounts).length > 0) {
+			checkNewPage(30);
+			yPosition += 5;
+			doc.setFontSize(10);
+			doc.setFont("NotoSansHebrew", "bold");
+			doc.setTextColor(...colors.secondary);
+			doc.text(reverseText("פירוט לפי מכשיר:"), pageWidth - margin, yPosition, {
+				align: "right",
+			});
+			yPosition += 7;
+
+			doc.setFont("NotoSansHebrew", "normal");
+			doc.setTextColor(...colors.text);
 			Object.entries(deviceCounts).forEach(([device, count]) => {
-				doc.fillColor(colors.text)
-					.fontSize(10)
-					.font("Helvetica")
-					.text(`• ${device}: ${count}`, 70, yPosition);
-				yPosition += 18;
+				const hebrewDevice = deviceLabelsHebrew[device] || device;
+				doc.text(
+					reverseText(`• ${hebrewDevice}: ${count}`),
+					pageWidth - margin - 5,
+					yPosition,
+					{
+						align: "right",
+					}
+				);
+				yPosition += 6;
 			});
 		}
 
@@ -359,122 +505,90 @@ export async function generateSubmissionPDF(token: string): Promise<PDFKit.PDFDo
 		});
 
 		if (Object.keys(countryCounts).length > 0) {
-			yPosition += 10;
-			doc.fillColor(colors.secondary)
-				.fontSize(10)
-				.font("Helvetica-Bold")
-				.text("Country Breakdown:", 50, yPosition);
-			yPosition += 20;
+			checkNewPage(30);
+			yPosition += 5;
+			doc.setFont("NotoSansHebrew", "bold");
+			doc.setTextColor(...colors.secondary);
+			doc.text(reverseText("פירוט לפי מדינה:"), pageWidth - margin, yPosition, {
+				align: "right",
+			});
+			yPosition += 7;
 
+			doc.setFont("NotoSansHebrew", "normal");
+			doc.setTextColor(...colors.text);
 			Object.entries(countryCounts).forEach(([country, count]) => {
-				doc.fillColor(colors.text)
-					.fontSize(10)
-					.font("Helvetica")
-					.text(`• ${country}: ${count}`, 70, yPosition);
-				yPosition += 18;
+				doc.text(reverseText(`• ${country}: ${count}`), pageWidth - margin - 5, yPosition, {
+					align: "right",
+				});
+				yPosition += 6;
 			});
 		}
 
-		// ========================================
+		// ===========================================
 		// DETAILED ENTRANCE LOG
-		// ========================================
-		addSectionHeader("Detailed Entrance Log");
+		// ===========================================
+		addSectionHeader("לוג כניסות מפורט");
 
 		data.entrances.forEach((entrance, index) => {
-			// Check if we need a new page
-			if (yPosition > 650) {
-				doc.addPage();
-				yPosition = 50;
-			}
+			checkNewPage(50);
 
-			doc.fillColor(colors.primary)
-				.fontSize(11)
-				.font("Helvetica-Bold")
-				.text(`Entrance #${index + 1}`, 50, yPosition);
-			yPosition += 20;
+			doc.setFontSize(11);
+			doc.setFont("NotoSansHebrew", "bold");
+			doc.setTextColor(...colors.primary);
+			doc.text(reverseText(`כניסה #${index + 1}`), pageWidth - margin, yPosition, {
+				align: "right",
+			});
+			yPosition += 7;
 
-			addField("Timestamp", formatDate(entrance.timestamp));
+			addField("זמן", formatDate(entrance.timestamp));
 
 			if (entrance.ipAddress) {
-				addField("IP Address", entrance.ipAddress);
+				addField("כתובת IP", entrance.ipAddress);
 			}
 
 			if (entrance.deviceType) {
-				addField("Device Type", entrance.deviceType);
+				const hebrewDeviceType =
+					deviceLabelsHebrew[entrance.deviceType] || entrance.deviceType;
+				addField("סוג מכשיר", hebrewDeviceType);
 			}
 
 			if (entrance.browserName) {
-				addField("Browser", entrance.browserName);
+				addField("דפדפן", entrance.browserName);
 			}
 
 			if (entrance.osName) {
-				addField("Operating System", entrance.osName);
+				addField("מערכת הפעלה", entrance.osName);
 			}
 
 			if (entrance.country) {
-				addField("Country", entrance.country);
+				addField("מדינה", entrance.country);
 			}
 
 			if (entrance.referrer) {
-				addField("Referrer", entrance.referrer);
+				addField("מקור הפניה", entrance.referrer);
 			}
 
-			if (entrance.userAgent) {
-				if (yPosition > 700) {
-					doc.addPage();
-					yPosition = 50;
-				}
-				doc.fillColor(colors.secondary)
-					.fontSize(8)
-					.font("Helvetica")
-					.text(`User Agent: ${entrance.userAgent}`, 50, yPosition, { width: 495 });
-				yPosition += 15;
-			}
-
-			if (entrance.metadata && Object.keys(entrance.metadata).length > 0) {
-				yPosition += 5;
-				doc.fillColor(colors.secondary)
-					.fontSize(9)
-					.font("Helvetica-Bold")
-					.text("Metadata:", 50, yPosition);
-				yPosition += 15;
-
-				Object.entries(entrance.metadata).forEach(([key, value]) => {
-					const displayValue =
-						typeof value === "object" ? JSON.stringify(value) : String(value);
-					doc.fillColor(colors.text)
-						.fontSize(8)
-						.font("Helvetica")
-						.text(`• ${key}: ${displayValue}`, 70, yPosition, { width: 475 });
-					yPosition += 12;
-				});
-			}
-
-			// Add spacing between entrances
-			yPosition += 10;
+			yPosition += 5;
 			if (index < data.entrances.length - 1) {
-				drawLine(yPosition);
-				yPosition += 15;
+				drawLine();
 			}
 		});
 	}
 
-	// ========================================
-	// FOOTER
-	// ========================================
-	const pages = doc.bufferedPageRange();
-	for (let i = 0; i < pages.count; i++) {
-		doc.switchToPage(pages.start + i);
-		doc.fillColor(colors.muted)
-			.fontSize(8)
-			.text(`Page ${i + 1} of ${pages.count}`, 50, 770, {
-				align: "center",
-				width: 495,
-			});
+	// ===========================================
+	// FOOTER - Add page numbers
+	// ===========================================
+	const pageCount = doc.getNumberOfPages();
+	for (let i = 1; i <= pageCount; i++) {
+		doc.setPage(i);
+		doc.setFontSize(8);
+		doc.setFont("NotoSansHebrew", "normal");
+		doc.setTextColor(...colors.muted);
+		doc.text(reverseText(`עמוד ${i} מתוך ${pageCount}`), pageWidth / 2, pageHeight - 10, {
+			align: "center",
+		});
 	}
 
-	// Finalize the document
-	doc.end();
-
-	return doc;
+	// Return PDF as buffer
+	return Buffer.from(doc.output("arraybuffer"));
 }
