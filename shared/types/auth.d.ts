@@ -4,8 +4,8 @@ declare module "#auth-utils" {
 		id: number;
 		name: string;
 		email: string;
-		role: "admin" | "user";
-		// Add your own fields
+		role: "admin" | "viewer";
+		apiKey: string;
 	}
 
 	interface UserSession {

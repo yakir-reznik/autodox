@@ -5,10 +5,6 @@
 
 	const route = useRoute();
 	const formId = computed(() => Number(route.params.id));
-	const sessionId = computed(() => {
-		const param = route.query.session_id;
-		return param ? String(param) : null;
-	});
 	const token = computed(() => {
 		const param = route.query.token;
 		return param ? String(param) : null;
@@ -49,6 +45,6 @@
 
 <template>
 	<div dir="rtl">
-		<Fill :form-id="formId" :session-id="sessionId" :token="token" />
+		<Fill :form-id="formId" :token="token" />
 	</div>
 </template>

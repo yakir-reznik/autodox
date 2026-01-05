@@ -43,11 +43,11 @@ export default defineEventHandler(async (event) => {
 			where: eq(formsTable.id, submission.formId),
 		});
 
-		// Get all form entrances for this submission's form
+		// Get all form entrances for this specific submission (by token)
 		const entrances = await db
 			.select()
 			.from(formEntrancesTable)
-			.where(eq(formEntrancesTable.formId, submission.formId))
+			.where(eq(formEntrancesTable.sessionToken, token))
 			.orderBy(formEntrancesTable.timestamp);
 
 		return {

@@ -37,6 +37,7 @@
 	const selectedSubmission = ref<Submission | null>(null);
 	const showJsonModal = ref(false);
 	const userMap = ref<Record<number, string>>({});
+	const isCreatingSubmission = ref(false);
 
 	const {
 		data: response,
@@ -128,6 +129,60 @@
 		currentPage.value = page;
 	}
 
+	async function createNewSubmission() {
+		if (!user.value?.apiKey) {
+			toasts.add({
+				title: "שגיאה: לא נמצא API Key",
+				theme: "error",
+				duration: 3000,
+			});
+			return;
+		}
+
+		isCreatingSubmission.value = true;
+
+		try {
+			const response = await $fetch<{
+				success: boolean;
+				link?: string;
+				token?: string;
+				formId?: number;
+				expiresAt?: string;
+				message?: string;
+			}>(`/api/forms/${formId}/create-submission-link`, {
+				method: "POST",
+				headers: {
+					"x-api-key": user.value.apiKey,
+				},
+			});
+
+			if (response.success) {
+				toasts.add({
+					title: "הגשה חדשה נוצרה בהצלחה",
+					theme: "success",
+					duration: 3000,
+				});
+
+				// Refresh the submissions list to show the new submission
+				await refresh();
+			} else {
+				toasts.add({
+					title: `שגיאה: ${response.message || "לא ניתן ליצור הגשה"}`,
+					theme: "error",
+					duration: 3000,
+				});
+			}
+		} catch (error: any) {
+			toasts.add({
+				title: `שגיאה: ${error.message || "לא ניתן ליצור הגשה"}`,
+				theme: "error",
+				duration: 3000,
+			});
+		} finally {
+			isCreatingSubmission.value = false;
+		}
+	}
+
 	useHead({
 		title: "Submissions - Autodox",
 	});
@@ -161,6 +216,23 @@
 
 		<!-- Content -->
 		<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+			<!-- Create New Submission Button -->
+			<div class="mb-6 flex justify-end">
+				<UiButton
+					variant="primary"
+					@click="createNewSubmission"
+					:disabled="isCreatingSubmission || !loggedIn"
+				>
+					<Icon
+						v-if="isCreatingSubmission"
+						name="svg-spinners:ring-resize"
+						class="h-4 w-4"
+					/>
+					<Icon v-else name="heroicons:plus" class="h-4 w-4" />
+					{{ isCreatingSubmission ? "יוצר הגשה..." : "צור הגשה חדשה" }}
+				</UiButton>
+			</div>
+
 			<!-- Loading state -->
 			<div v-if="pending" class="flex items-center justify-center py-12">
 				<Icon name="svg-spinners:ring-resize" class="h-8 w-8 text-blue-500" />

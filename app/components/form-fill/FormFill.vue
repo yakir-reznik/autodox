@@ -5,7 +5,6 @@
 
 	interface Props {
 		formId: number;
-		sessionId?: string | null;
 		token?: string | null;
 	}
 
@@ -41,7 +40,7 @@
 				await $fetch(`/api/forms/${props.formId}/entrances`, {
 					method: "POST",
 					body: {
-						sessionToken: props.sessionId,
+						sessionToken: props.token,
 					},
 				});
 			} catch (err) {

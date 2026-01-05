@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
 
 	// Insert entrance record
 	const [entrance] = await db.insert(formEntrancesTable).values({
-		sessionId: sessionToken || null,
+		sessionToken: sessionToken || null,
 		formId,
 		ipAddress,
 		userAgent,

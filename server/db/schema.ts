@@ -257,21 +257,11 @@ export const formElementsTable = mysqlTable("form_elements_table", {
 // ============================================
 
 // Submission status enum
-export const submissionStatusEnum = [
-	"pending",
-	"in_progress",
-	"submitted",
-	"locked",
-] as const;
+export const submissionStatusEnum = ["pending", "in_progress", "submitted", "locked"] as const;
 export type SubmissionStatus = (typeof submissionStatusEnum)[number];
 
 // Device type enum for tracking
-export const deviceTypeEnum = [
-	"mobile",
-	"tablet",
-	"desktop",
-	"unknown",
-] as const;
+export const deviceTypeEnum = ["mobile", "tablet", "desktop", "unknown"] as const;
 export type DeviceType = (typeof deviceTypeEnum)[number];
 
 // Submissions Table - Tracks submission links from creation to completion
@@ -310,7 +300,7 @@ export const formEntrancesTable = mysqlTable("form_entrances_table", {
 	id: int().primaryKey().autoincrement(),
 
 	// Session identifier (string token, nullable to support pre-session tracking)
-	sessionId: varchar("session_id", { length: 64 }),
+	sessionToken: varchar("session_id", { length: 64 }),
 
 	// Direct form reference (denormalized for easier querying)
 	formId: int("form_id")
@@ -392,23 +382,20 @@ export const formsRelations = relations(formsTable, ({ one, many }) => ({
 	entrances: many(formEntrancesTable),
 }));
 
-export const formElementsRelations = relations(
-	formElementsTable,
-	({ one, many }) => ({
-		form: one(formsTable, {
-			fields: [formElementsTable.formId],
-			references: [formsTable.id],
-		}),
-		parent: one(formElementsTable, {
-			fields: [formElementsTable.parentId],
-			references: [formElementsTable.id],
-			relationName: "element_hierarchy",
-		}),
-		children: many(formElementsTable, {
-			relationName: "element_hierarchy",
-		}),
-	})
-);
+export const formElementsRelations = relations(formElementsTable, ({ one, many }) => ({
+	form: one(formsTable, {
+		fields: [formElementsTable.formId],
+		references: [formsTable.id],
+	}),
+	parent: one(formElementsTable, {
+		fields: [formElementsTable.parentId],
+		references: [formElementsTable.id],
+		relationName: "element_hierarchy",
+	}),
+	children: many(formElementsTable, {
+		relationName: "element_hierarchy",
+	}),
+}));
 
 export const submissionsRelations = relations(submissionsTable, ({ one }) => ({
 	form: one(formsTable, {
@@ -422,15 +409,12 @@ export const submissionsRelations = relations(submissionsTable, ({ one }) => ({
 	}),
 }));
 
-export const formEntrancesRelations = relations(
-	formEntrancesTable,
-	({ one }) => ({
-		form: one(formsTable, {
-			fields: [formEntrancesTable.formId],
-			references: [formsTable.id],
-		}),
-	})
-);
+export const formEntrancesRelations = relations(formEntrancesTable, ({ one }) => ({
+	form: one(formsTable, {
+		fields: [formEntrancesTable.formId],
+		references: [formsTable.id],
+	}),
+}));
 
 export const uploadsRelations = relations(uploadsTable, ({ one }) => ({
 	uploader: one(usersTable, {
