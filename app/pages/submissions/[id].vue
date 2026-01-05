@@ -28,6 +28,8 @@
 	}
 
 	const route = useRoute();
+	const toasts = useToasts();
+
 	const { user, loggedIn } = useUserSession();
 
 	const formId = Number(route.params.id);
@@ -86,8 +88,11 @@
 		if (selectedSubmission.value?.submissionData) {
 			const jsonString = JSON.stringify(selectedSubmission.value.submissionData, null, 2);
 			navigator.clipboard.writeText(jsonString).then(() => {
-				// Optional: Show a toast notification
-				console.log("JSON copied to clipboard");
+				toasts.add({
+					title: "המידע הועתק ללוח",
+					theme: "success",
+					duration: 3000,
+				});
 			});
 		}
 	}
@@ -99,7 +104,11 @@
 
 	function copyTokenToClipboard(token: string) {
 		navigator.clipboard.writeText(token).then(() => {
-			console.log("Token copied to clipboard");
+			toasts.add({
+				title: "הטוקן הועתק ללוח",
+				theme: "success",
+				duration: 3000,
+			});
 		});
 	}
 

@@ -1,5 +1,5 @@
 <template>
-	<div class="fixed bottom-0 right-0 z-50 w-full p-8 md:bottom-8 md:p-2">
+	<div class="fixed bottom-0 right-0 z-[60] w-full p-8 md:bottom-8 md:p-2">
 		<div class="flex flex-col items-start justify-start gap-4">
 			<TransitionGroup name="toast">
 				<div
