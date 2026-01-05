@@ -179,25 +179,39 @@
 				<table class="w-full">
 					<thead class="border-b border-gray-200 bg-gray-50">
 						<tr>
-							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
+							<th
+								class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
+							>
 								ID
 							</th>
-							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
+							<th
+								class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
+							>
 								Status
 							</th>
-							<th class="px-6 py-3 text-sm font-medium text-gray-700 text-center">
+							<th
+								class="px-6 py-3 text-sm font-medium text-gray-700 text-center whitespace-nowrap"
+							>
 								Created By User ID
 							</th>
-							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
+							<th
+								class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
+							>
 								Created
 							</th>
-							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
+							<th
+								class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
+							>
 								Submitted
 							</th>
-							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
+							<th
+								class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
+							>
 								Actions
 							</th>
-							<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
+							<th
+								class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
+							>
 								Token
 							</th>
 						</tr>
@@ -208,10 +222,10 @@
 							:key="submission.id"
 							class="hover:bg-gray-50"
 						>
-							<td class="px-6 py-4 text-sm text-gray-900">
+							<td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
 								{{ submission.id }}
 							</td>
-							<td class="px-6 py-4 text-sm">
+							<td class="px-6 py-4 text-sm whitespace-nowrap">
 								<span
 									class="rounded-full px-2.5 py-0.5 text-xs font-medium"
 									:class="statusColors[submission.status]"
@@ -219,25 +233,27 @@
 									{{ statusLabels[submission.status] }}
 								</span>
 							</td>
-							<td class="px-6 py-4 text-sm text-gray-600 text-center">
+							<td
+								class="px-6 py-4 text-sm text-gray-600 text-center whitespace-nowrap"
+							>
 								{{ submission.createdByUserId ?? "-" }}
 							</td>
-							<td class="px-6 py-4 text-sm text-gray-600">
+							<td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
 								{{ formatDate(submission.createdAt) }}
 							</td>
-							<td class="px-6 py-4 text-sm text-gray-600">
+							<td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
 								{{
 									submission.submittedAt
 										? formatDate(submission.submittedAt)
 										: "-"
 								}}
 							</td>
-							<td class="px-6 py-4 text-sm">
+							<td class="px-6 py-4 text-sm whitespace-nowrap">
 								<div class="flex gap-2">
 									<NuxtLink :to="`/submission-detail/${submission.token}`">
 										<UiButton variant="primary" size="sm">
 											<Icon name="heroicons:eye" class="h-4 w-4" />
-											View Details
+											Details
 										</UiButton>
 									</NuxtLink>
 									<UiButton
@@ -263,19 +279,20 @@
 									</UiButton>
 								</div>
 							</td>
-							<td class="px-6 py-4 text-sm">
-								<div class="flex items-center gap-2">
-									<code class="rounded bg-gray-100 px-2 py-1 font-mono text-xs text-gray-700">
-										{{ submission.token }}
+							<td class="px-6 py-4 text-sm whitespace-nowrap">
+								<button
+									@click="copyTokenToClipboard(submission.token)"
+									class="flex items-center gap-2 rounded bg-gray-100 px-2 py-1 hover:bg-gray-200 transition-colors cursor-pointer"
+									:title="`Copy token: ${submission.token}`"
+								>
+									<code class="font-mono text-xs text-gray-700 ltr">
+										{{ submission.token.substring(0, 5) }}...
 									</code>
-									<button
-										@click="copyTokenToClipboard(submission.token)"
-										class="rounded p-1 hover:bg-gray-200 transition-colors"
-										title="Copy token"
-									>
-										<Icon name="heroicons:clipboard-document" class="h-4 w-4 text-gray-500" />
-									</button>
-								</div>
+									<Icon
+										name="heroicons:clipboard-document"
+										class="h-4 w-4 text-gray-500"
+									/>
+								</button>
 							</td>
 						</tr>
 					</tbody>
