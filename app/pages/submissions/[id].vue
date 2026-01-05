@@ -183,6 +183,42 @@
 		}
 	}
 
+	const downloadingPdfs = ref<Set<string>>(new Set());
+
+	function downloadPDF(token: string) {
+		if (downloadingPdfs.value.has(token)) return;
+
+		try {
+			downloadingPdfs.value.add(token);
+
+			// Create a temporary anchor element to trigger download
+			const link = document.createElement("a");
+			link.href = `/api/submissions/${token}/download-pdf`;
+			link.download = `submission-${token}-${new Date().toISOString().split("T")[0]}.pdf`;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+
+			toasts.add({
+				title: "מוריד PDF...",
+				theme: "success",
+				duration: 2000,
+			});
+		} catch (err) {
+			console.error("Failed to download PDF:", err);
+			toasts.add({
+				title: "שגיאה: לא ניתן להוריד PDF",
+				theme: "error",
+				duration: 3000,
+			});
+		} finally {
+			// Add a small delay before re-enabling the button
+			setTimeout(() => {
+				downloadingPdfs.value.delete(token);
+			}, 1000);
+		}
+	}
+
 	useHead({
 		title: "Submissions - Autodox",
 	});
@@ -337,6 +373,23 @@
 											Details
 										</UiButton>
 									</NuxtLink>
+									<UiButton
+										variant="secondary"
+										size="sm"
+										@click="downloadPDF(submission.token)"
+										:disabled="downloadingPdfs.has(submission.token)"
+										:title="'Download PDF report'"
+									>
+										<Icon
+											:name="
+												downloadingPdfs.has(submission.token)
+													? 'svg-spinners:ring-resize'
+													: 'heroicons:arrow-down-tray'
+											"
+											class="h-4 w-4"
+										/>
+										PDF
+									</UiButton>
 									<UiButton
 										v-if="submission.submissionData"
 										variant="secondary"

@@ -102,6 +102,32 @@
 		});
 	}
 
+	const isDownloading = ref(false);
+
+	async function downloadPDF() {
+		if (isDownloading.value) return;
+
+		try {
+			isDownloading.value = true;
+
+			// Create a temporary anchor element to trigger download
+			const link = document.createElement("a");
+			link.href = `/api/submissions/${token}/download-pdf`;
+			link.download = `submission-${token}-${new Date().toISOString().split("T")[0]}.pdf`;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		} catch (err) {
+			console.error("Failed to download PDF:", err);
+			alert("Failed to download PDF. Please try again.");
+		} finally {
+			// Add a small delay before re-enabling the button
+			setTimeout(() => {
+				isDownloading.value = false;
+			}, 1000);
+		}
+	}
+
 	useHead({
 		title: `Submission Details - Autodox`,
 	});
@@ -153,7 +179,7 @@
 			<div v-else-if="submission">
 				<!-- Submission Overview Card -->
 				<div class="mb-8 rounded-lg bg-white p-6 shadow">
-					<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+					<div class="grid grid-cols-1 gap-6 md:grid-cols-4">
 						<!-- Status -->
 						<div>
 							<label class="block text-sm font-medium text-gray-700">Status</label>
@@ -188,6 +214,30 @@
 							<div class="mt-2 text-gray-900">
 								{{ submission.createdByUserId ?? "Anonymous" }}
 							</div>
+						</div>
+
+						<!-- Download PDF Button -->
+						<div>
+							<label class="block text-sm font-medium mb-2 text-gray-700"
+								>Download PDF</label
+							>
+							<UiButton
+								v-if="!pending && submission"
+								variant="primary"
+								size="sm"
+								@click="downloadPDF"
+								:disabled="isDownloading"
+							>
+								<Icon
+									:name="
+										isDownloading
+											? 'svg-spinners:ring-resize'
+											: 'heroicons:arrow-down-tray'
+									"
+									class="h-4 w-4"
+								/>
+								{{ isDownloading ? "Downloading..." : "Download PDF" }}
+							</UiButton>
 						</div>
 					</div>
 
