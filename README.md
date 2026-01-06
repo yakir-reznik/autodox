@@ -42,7 +42,7 @@ pnpm db:generate
 pnpm db:migrate
 
 # Or run both at once
-pnpm db:generate-and-migrate
+pnpm db:sync
 ```
 
 ### Create Admin User
@@ -136,6 +136,7 @@ Autodox includes a built-in authentication system using `nuxt-auth-utils` with e
 ### Protected Routes
 
 The following routes require admin authentication:
+
 - `/forms` - Forms list
 - `/forms/new` - Create new form
 - `/edit/[id]` - Edit form
@@ -143,6 +144,7 @@ The following routes require admin authentication:
 ### Public Routes
 
 The following routes are accessible to everyone:
+
 - `/` - Landing page
 - `/login` - Login page
 - `/fill/[id]` - Form filling interface
