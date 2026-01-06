@@ -66,14 +66,15 @@ export default defineEventHandler(async (event) => {
 		.where(eq(submissionsTable.token, token));
 
 	// Trigger webhook delivery asynchronously (don't block the response)
-	// We use setImmediate to not block the response
-	setImmediate(async () => {
-		try {
-			await deliverWebhook(submission.id, submission.webhookUrl);
-		} catch (error) {
-			console.error("Webhook delivery failed:", error);
-		}
-	});
+	// Fire-and-forget pattern: start the promise but don't await it
+	console.log(`[Webhook] Starting delivery for submission ${submission.id}, webhookUrl: ${submission.webhookUrl || "none"}`);
+	deliverWebhook(submission.id, submission.webhookUrl)
+		.then((result) => {
+			console.log(`[Webhook] Delivery completed for submission ${submission.id}:`, result);
+		})
+		.catch((error) => {
+			console.error(`[Webhook] Delivery failed for submission ${submission.id}:`, error);
+		});
 
 	return {
 		success: true,

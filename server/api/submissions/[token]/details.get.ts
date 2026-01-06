@@ -1,5 +1,5 @@
 import { db } from "~~/server/db";
-import { submissionsTable, formEntrancesTable, formsTable } from "~~/server/db/schema";
+import { submissionsTable, formEntrancesTable, formsTable, webhookDeliveriesTable } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { H3Error, createError, getRouterParam } from "h3";
 
@@ -50,12 +50,30 @@ export default defineEventHandler(async (event) => {
 			.where(eq(formEntrancesTable.sessionToken, token))
 			.orderBy(formEntrancesTable.timestamp);
 
+		// Get all webhook deliveries for this submission (exclude large payload data)
+		const webhookDeliveries = await db
+			.select({
+				id: webhookDeliveriesTable.id,
+				submissionId: webhookDeliveriesTable.submissionId,
+				webhookUrl: webhookDeliveriesTable.webhookUrl,
+				status: webhookDeliveriesTable.status,
+				httpStatusCode: webhookDeliveriesTable.httpStatusCode,
+				errorMessage: webhookDeliveriesTable.errorMessage,
+				retryCount: webhookDeliveriesTable.retryCount,
+				deliveredAt: webhookDeliveriesTable.deliveredAt,
+				createdAt: webhookDeliveriesTable.createdAt,
+			})
+			.from(webhookDeliveriesTable)
+			.where(eq(webhookDeliveriesTable.submissionId, submission.id))
+			.orderBy(webhookDeliveriesTable.createdAt);
+
 		return {
 			success: true,
 			data: {
 				submission,
 				form,
 				entrances,
+				webhookDeliveries,
 			},
 		};
 	} catch (error) {

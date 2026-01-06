@@ -1,2 +1,2 @@
-- [] Add UI to track webhook posting per submission
-- [] In submission-details route show info if webhook submission succeeded or not
+- [x] Add UI to track webhook posting per submission
+- [x] In submission-details route show info if webhook submission succeeded or not

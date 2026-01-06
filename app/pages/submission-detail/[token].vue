@@ -39,12 +39,26 @@
 		description: string | null;
 	}
 
+	interface WebhookDelivery {
+		id: number;
+		submissionId: number;
+		webhookUrl: string;
+		status: "pending" | "success" | "failed" | "retry";
+		httpStatusCode: number | null;
+		errorMessage: string | null;
+		retryCount: number;
+		deliveredAt: string | null;
+		createdAt: string;
+		updatedAt: string;
+	}
+
 	interface DetailsResponse {
 		success: boolean;
 		data: {
 			submission: Submission;
 			form: Form | null;
 			entrances: FormEntrance[];
+			webhookDeliveries: WebhookDelivery[];
 		};
 	}
 
@@ -63,6 +77,7 @@
 	const submission = computed(() => response.value?.data?.submission);
 	const form = computed(() => response.value?.data?.form);
 	const entrances = computed(() => response.value?.data?.entrances ?? []);
+	const webhookDeliveries = computed(() => response.value?.data?.webhookDeliveries ?? []);
 
 	const statusColors: Record<string, string> = {
 		pending: "bg-gray-100 text-gray-800",
@@ -83,6 +98,20 @@
 		tablet: "Tablet",
 		desktop: "Desktop",
 		unknown: "Unknown",
+	};
+
+	const webhookStatusColors: Record<string, string> = {
+		success: "bg-green-100 text-green-800",
+		failed: "bg-red-100 text-red-800",
+		retry: "bg-yellow-100 text-yellow-800",
+		pending: "bg-gray-100 text-gray-800",
+	};
+
+	const webhookStatusLabels: Record<string, string> = {
+		success: "Success",
+		failed: "Failed",
+		retry: "Retrying",
+		pending: "Pending",
 	};
 
 	function formatDate(dateString: string) {
@@ -521,6 +550,67 @@
 								</tr>
 							</tbody>
 						</table>
+					</div>
+				</div>
+
+				<!-- Webhook Deliveries -->
+				<div v-if="webhookDeliveries.length > 0" class="mb-8 rounded-lg bg-white p-6 shadow">
+					<h2 class="mb-4 text-lg font-medium text-gray-900">
+						Webhook Deliveries ({{ webhookDeliveries.length }})
+					</h2>
+					<div class="space-y-4">
+						<div
+							v-for="delivery in webhookDeliveries"
+							:key="delivery.id"
+							class="rounded-lg border border-gray-200 p-4"
+						>
+							<!-- Header with status and URL -->
+							<div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+								<div class="flex-1">
+									<div class="flex items-center gap-2">
+										<span
+											class="rounded-full px-3 py-1 text-sm font-medium"
+											:class="webhookStatusColors[delivery.status]"
+										>
+											{{ webhookStatusLabels[delivery.status] }}
+										</span>
+										<span v-if="delivery.httpStatusCode" class="text-sm text-gray-600">
+											HTTP {{ delivery.httpStatusCode }}
+										</span>
+									</div>
+									<p class="mt-2 break-all text-sm text-gray-700">
+										<strong>URL:</strong>
+										<code class="rounded bg-gray-100 px-1 py-0.5 font-mono">
+											{{ delivery.webhookUrl }}
+										</code>
+									</p>
+								</div>
+								<div class="text-right text-sm text-gray-600">
+									<p>
+										<strong>Attempt:</strong>
+										{{ delivery.retryCount + 1 }}
+									</p>
+									<p class="mt-1">
+										{{ formatDate(delivery.createdAt) }}
+									</p>
+								</div>
+							</div>
+
+							<!-- Delivered timestamp -->
+							<div v-if="delivery.deliveredAt" class="mt-3 text-sm text-green-700">
+								<Icon
+									name="heroicons:check-circle"
+									class="mr-1 inline-block h-4 w-4"
+								/>
+								Delivered at {{ formatDate(delivery.deliveredAt) }}
+							</div>
+
+							<!-- Error message -->
+							<div v-if="delivery.errorMessage" class="mt-3 rounded-lg bg-red-50 p-3">
+								<p class="text-sm font-medium text-red-700">Error</p>
+								<p class="mt-1 text-sm text-red-600">{{ delivery.errorMessage }}</p>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
