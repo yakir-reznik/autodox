@@ -199,6 +199,9 @@ export const formsTable = mysqlTable("forms_table", {
 	// Theme
 	theme: mysqlEnum("theme", formThemeEnum).notNull().default("default"),
 
+	// Webhook configuration
+	webhookUrl: varchar("webhook_url", { length: 2048 }),
+
 	// Authorship
 	createdBy: int("created_by")
 		.notNull()
@@ -282,6 +285,9 @@ export const submissionsTable = mysqlTable("submissions_table", {
 	createdByUserId: int("created_by_user_id").references(() => usersTable.id),
 	expiresAt: timestamp("expires_at").notNull(),
 
+	// Webhook configuration (submission-level overrides form-level)
+	webhookUrl: varchar("webhook_url", { length: 2048 }),
+
 	// Lifecycle tracking
 	status: mysqlEnum("status", submissionStatusEnum).notNull().default("pending"),
 
@@ -293,6 +299,40 @@ export const submissionsTable = mysqlTable("submissions_table", {
 	startedAt: timestamp("started_at"),
 	submittedAt: timestamp("submitted_at"),
 	lockedAt: timestamp("locked_at"),
+});
+
+// Webhook Deliveries Table - Tracks webhook delivery attempts with audit trail
+export const webhookDeliveriesTable = mysqlTable("webhook_deliveries_table", {
+	id: int().primaryKey().autoincrement(),
+
+	// Submission relationship
+	submissionId: int("submission_id")
+		.notNull()
+		.references(() => submissionsTable.id, { onDelete: "cascade" }),
+
+	// Webhook details
+	webhookUrl: varchar("webhook_url", { length: 2048 }).notNull(),
+	status: mysqlEnum("status", ["pending", "success", "failed", "retry"] as const)
+		.notNull()
+		.default("pending"),
+	httpStatusCode: int("http_status_code"),
+
+	// Request and response data
+	requestPayload: json("request_payload").$type<Record<string, unknown>>(),
+	responseBody: text("response_body"),
+	errorMessage: varchar("error_message", { length: 1000 }),
+
+	// Retry tracking
+	retryCount: int("retry_count").notNull().default(0),
+	nextRetryAt: timestamp("next_retry_at"),
+	deliveredAt: timestamp("delivered_at"),
+
+	// Timestamps
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at")
+		.notNull()
+		.defaultNow()
+		.$onUpdate(() => sql`now()`),
 });
 
 // Form Entrances/Visits Table - Tracks each page view/entrance
@@ -397,7 +437,7 @@ export const formElementsRelations = relations(formElementsTable, ({ one, many }
 	}),
 }));
 
-export const submissionsRelations = relations(submissionsTable, ({ one }) => ({
+export const submissionsRelations = relations(submissionsTable, ({ one, many }) => ({
 	form: one(formsTable, {
 		fields: [submissionsTable.formId],
 		references: [formsTable.id],
@@ -406,6 +446,14 @@ export const submissionsRelations = relations(submissionsTable, ({ one }) => ({
 		fields: [submissionsTable.createdByUserId],
 		references: [usersTable.id],
 		relationName: "submission_creator",
+	}),
+	webhookDeliveries: many(webhookDeliveriesTable),
+}));
+
+export const webhookDeliveriesRelations = relations(webhookDeliveriesTable, ({ one }) => ({
+	submission: one(submissionsTable, {
+		fields: [webhookDeliveriesTable.submissionId],
+		references: [submissionsTable.id],
 	}),
 }));
 
