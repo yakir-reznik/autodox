@@ -7,7 +7,7 @@ import {
 } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { createError } from "h3";
-import type { SubmissionStatus, DeviceType } from "~~/server/db/schema";
+import type { SubmissionStatus } from "~~/server/db/schema";
 import path from "path";
 import fs from "fs";
 import { jsPDF } from "jspdf";
@@ -97,14 +97,7 @@ export interface SubmissionData {
 		userAgent: string | null;
 		referrer: string | null;
 		isFormLocked: boolean;
-		isNewSession: boolean;
-		country: string | null;
-		deviceType: DeviceType | null;
-		browserName: string | null;
-		osName: string | null;
-		metadata: Record<string, any> | null;
 		timestamp: Date;
-		createdAt: Date;
 	}>;
 }
 
@@ -447,81 +440,9 @@ export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 		const uniqueSessions = new Set(data.entrances.map((e) => e.sessionToken).filter(Boolean));
 		addField("מפגשים ייחודיים", uniqueSessions.size.toString());
 
-		const newSessions = data.entrances.filter((e) => e.isNewSession).length;
-		addField("מפגשים חדשים", newSessions.toString());
-
 		const lockedViews = data.entrances.filter((e) => e.isFormLocked).length;
 		if (lockedViews > 0) {
 			addField("צפיות בטופס נעול", lockedViews.toString(), colors.warning);
-		}
-
-		// Device breakdown
-		const deviceCounts: Record<string, number> = {};
-		data.entrances.forEach((e) => {
-			const device = e.deviceType || "unknown";
-			deviceCounts[device] = (deviceCounts[device] || 0) + 1;
-		});
-
-		const deviceLabelsHebrew: Record<string, string> = {
-			mobile: "נייד",
-			tablet: "טאבלט",
-			desktop: "מחשב",
-			unknown: "לא ידוע",
-		};
-
-		if (Object.keys(deviceCounts).length > 0) {
-			checkNewPage(30);
-			yPosition += 5;
-			doc.setFontSize(10);
-			doc.setFont("NotoSansHebrew", "bold");
-			doc.setTextColor(...colors.secondary);
-			doc.text(reverseText("פירוט לפי מכשיר:"), pageWidth - margin, yPosition, {
-				align: "right",
-			});
-			yPosition += 7;
-
-			doc.setFont("NotoSansHebrew", "normal");
-			doc.setTextColor(...colors.text);
-			Object.entries(deviceCounts).forEach(([device, count]) => {
-				const hebrewDevice = deviceLabelsHebrew[device] || device;
-				doc.text(
-					reverseText(`• ${hebrewDevice}: ${count}`),
-					pageWidth - margin - 5,
-					yPosition,
-					{
-						align: "right",
-					}
-				);
-				yPosition += 6;
-			});
-		}
-
-		// Country breakdown
-		const countryCounts: Record<string, number> = {};
-		data.entrances.forEach((e) => {
-			if (e.country) {
-				countryCounts[e.country] = (countryCounts[e.country] || 0) + 1;
-			}
-		});
-
-		if (Object.keys(countryCounts).length > 0) {
-			checkNewPage(30);
-			yPosition += 5;
-			doc.setFont("NotoSansHebrew", "bold");
-			doc.setTextColor(...colors.secondary);
-			doc.text(reverseText("פירוט לפי מדינה:"), pageWidth - margin, yPosition, {
-				align: "right",
-			});
-			yPosition += 7;
-
-			doc.setFont("NotoSansHebrew", "normal");
-			doc.setTextColor(...colors.text);
-			Object.entries(countryCounts).forEach(([country, count]) => {
-				doc.text(reverseText(`• ${country}: ${count}`), pageWidth - margin - 5, yPosition, {
-					align: "right",
-				});
-				yPosition += 6;
-			});
 		}
 
 		// ===========================================
@@ -530,7 +451,7 @@ export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 		addSectionHeader("לוג כניסות מפורט");
 
 		data.entrances.forEach((entrance, index) => {
-			checkNewPage(50);
+			checkNewPage(40);
 
 			doc.setFontSize(11);
 			doc.setFont("NotoSansHebrew", "bold");
@@ -546,22 +467,8 @@ export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 				addField("כתובת IP", entrance.ipAddress);
 			}
 
-			if (entrance.deviceType) {
-				const hebrewDeviceType =
-					deviceLabelsHebrew[entrance.deviceType] || entrance.deviceType;
-				addField("סוג מכשיר", hebrewDeviceType);
-			}
-
-			if (entrance.browserName) {
-				addField("דפדפן", entrance.browserName);
-			}
-
-			if (entrance.osName) {
-				addField("מערכת הפעלה", entrance.osName);
-			}
-
-			if (entrance.country) {
-				addField("מדינה", entrance.country);
+			if (entrance.userAgent) {
+				addField("User Agent", entrance.userAgent);
 			}
 
 			if (entrance.referrer) {

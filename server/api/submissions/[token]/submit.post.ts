@@ -1,6 +1,7 @@
 import { db } from "~~/server/db";
 import { submissionsTable } from "~~/server/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+import { deliverWebhook } from "~~/server/utils/webhookDelivery";
 
 export default defineEventHandler(async (event) => {
 	const token = getRouterParam(event, "token");
@@ -63,6 +64,16 @@ export default defineEventHandler(async (event) => {
 			lockedAt: now,
 		})
 		.where(eq(submissionsTable.token, token));
+
+	// Trigger webhook delivery asynchronously (don't block the response)
+	// We use setImmediate to not block the response
+	setImmediate(async () => {
+		try {
+			await deliverWebhook(submission.id, submission.webhookUrl);
+		} catch (error) {
+			console.error("Webhook delivery failed:", error);
+		}
+	});
 
 	return {
 		success: true,

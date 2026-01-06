@@ -319,7 +319,9 @@ export const webhookDeliveriesTable = mysqlTable("webhook_deliveries_table", {
 
 	// Request and response data
 	requestPayload: json("request_payload").$type<Record<string, unknown>>(),
+	requestHeaders: json("request_headers").$type<Record<string, string>>(),
 	responseBody: text("response_body"),
+	responseHeaders: json("response_headers").$type<Record<string, string>>(),
 	errorMessage: varchar("error_message", { length: 1000 }),
 
 	// Retry tracking
@@ -340,7 +342,7 @@ export const formEntrancesTable = mysqlTable("form_entrances_table", {
 	id: int().primaryKey().autoincrement(),
 
 	// Session identifier (string token, nullable to support pre-session tracking)
-	sessionToken: varchar("session_id", { length: 64 }),
+	sessionToken: varchar("session_token", { length: 64 }),
 
 	// Direct form reference (denormalized for easier querying)
 	formId: int("form_id")
@@ -356,25 +358,9 @@ export const formEntrancesTable = mysqlTable("form_entrances_table", {
 
 	// Context flags
 	isFormLocked: boolean("is_form_locked").notNull().default(false), // was session already submitted?
-	isNewSession: boolean("is_new_session").notNull().default(false), // first visit of session?
-
-	// Geographic/device data (optional, can be derived from IP/UA)
-	country: varchar({ length: 2 }), // ISO country code
-	deviceType: mysqlEnum("device_type", deviceTypeEnum),
-	browserName: varchar("browser_name", { length: 100 }),
-	osName: varchar("os_name", { length: 100 }),
-
-	// Additional metadata (extensible JSON field)
-	metadata: json().$type<{
-		screenResolution?: string;
-		language?: string;
-		timezone?: string;
-		[key: string]: any;
-	}>(),
 
 	// Timestamp (when entrance occurred)
 	timestamp: timestamp().notNull().defaultNow(),
-	createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // ============================================

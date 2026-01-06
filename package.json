@@ -10,7 +10,7 @@
 		"postinstall": "nuxt prepare",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
-		"db:generate-and-migrate": "drizzle-kit generate &&drizzle-kit migrate"
+		"db:sync": "drizzle-kit generate &&drizzle-kit migrate"
 	},
 	"dependencies": {
 		"@nuxt/fonts": "0.12.1",

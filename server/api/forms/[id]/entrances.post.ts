@@ -28,7 +28,6 @@ export default defineEventHandler(async (event) => {
 		userAgent,
 		referrer,
 		isFormLocked: false,
-		isNewSession: sessionToken ? true : false, // true if we have a session
 	});
 
 	return {

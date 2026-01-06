@@ -15,6 +15,15 @@ function generateToken(): string {
 		.substring(0, 32);
 }
 
+function validateWebhookUrl(url: string): boolean {
+	try {
+		new URL(url);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
 export default defineEventHandler(async (event) => {
 	try {
 		const formId = Number(getRouterParam(event, "id"));
@@ -53,6 +62,7 @@ export default defineEventHandler(async (event) => {
 		const body = await readBody<{
 			prefill?: Record<string, unknown>;
 			additionalData?: Record<string, unknown>;
+			webhook_url?: string;
 		}>(event);
 
 		const form = await db.query.formsTable.findFirst({
@@ -78,6 +88,21 @@ export default defineEventHandler(async (event) => {
 		const token = generateToken();
 		const expiresAt = new Date(Date.now() + TTL_MS);
 
+		// Determine webhook URL: request param > form default > null
+		let webhookUrl: string | null = null;
+		if (body?.webhook_url) {
+			if (!validateWebhookUrl(body.webhook_url)) {
+				setResponseStatus(event, 400);
+				return {
+					success: false,
+					message: "Invalid webhook URL format",
+				};
+			}
+			webhookUrl = body.webhook_url;
+		} else if (form.webhookUrl) {
+			webhookUrl = form.webhookUrl;
+		}
+
 		await db.insert(submissionsTable).values({
 			token,
 			formId,
@@ -86,6 +111,7 @@ export default defineEventHandler(async (event) => {
 			createdByUserId: user.id,
 			expiresAt,
 			status: "pending",
+			webhookUrl,
 		});
 
 		const baseUrl = getRequestURL(event).origin;
