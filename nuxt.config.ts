@@ -11,5 +11,8 @@ export default defineNuxtConfig({
 												meta: [{ name: "description", content: "Some sort of app description for SEO" }],
 								},
 				},
+				runtimeConfig: {
+							databaseUrl: process.env.DATABASE_URL,
+				},
 				ssr: false,
 });
