@@ -143,8 +143,6 @@ NODE_ENV=production
 NUXT_HOST=0.0.0.0
 NUXT_PORT=3000
 
-# Session secret (generate with: openssl rand -base64 32)
-SESSION_SECRET=your_generated_secret_here
 ```
 
 ```bash
@@ -153,10 +151,10 @@ npx drizzle-kit generate
 npx drizzle-kit migrate
 
 # Create admin user
-npx tsx scripts/create-admin.ts
+npx tsx scripts/create-admin.ts yakir.reznik@gmail.com some-password-123
 
 # Build application
-pnpm build
+npm run build
 
 # Test the build
 node .output/server/index.mjs
