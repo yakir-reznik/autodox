@@ -165,10 +165,11 @@ node .output/server/index.mjs
 
 ```bash
 # Create PM2 ecosystem file
-nano ecosystem.config.js
+# Note: Must use .cjs extension because package.json has "type": "module"
+nano ecosystem.config.cjs
 ```
 
-**ecosystem.config.js:**
+**ecosystem.config.cjs:**
 
 ```javascript
 module.exports = {
@@ -194,10 +195,10 @@ module.exports = {
 ```bash
 # Create log directory
 sudo mkdir -p /var/log/autodox
-sudo chown autodox:autodox /var/log/autodox
+sudo chown admin:admin /var/log/autodox
 
 # Start app with PM2
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.cjs
 
 # Configure PM2 to start on boot
 pm2 startup systemd
@@ -270,7 +271,7 @@ sudo certbot renew --dry-run
 ```bash
 # Create backup directory
 sudo mkdir -p /var/backups/autodox
-sudo chown autodox:autodox /var/backups/autodox
+sudo chown admin:admin /var/backups/autodox
 
 # Create backup script
 nano ~/backup-db.sh
@@ -333,13 +334,13 @@ git fetch origin master
 git reset --hard origin/master
 
 # Install any new dependencies
-pnpm install
+npm run install
 
 # Run any new migrations
 npx drizzle-kit migrate
 
 # Rebuild application
-pnpm build
+npm run build
 
 # Restart PM2 (zero-downtime)
 pm2 reload autodox
