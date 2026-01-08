@@ -1,1 +1,0 @@
-ALTER TABLE `forms_table` ADD `theme` enum('default','dark','ocean','forest') DEFAULT 'default' NOT NULL;

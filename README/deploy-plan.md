@@ -46,8 +46,13 @@ ssh root@your-server-ip
 apt update && apt upgrade -y
 
 # Create non-root user
-adduser autodox
+adduser admin
 usermod -aG sudo autodox
+
+# Log out and log back in using the new user you created
+
+# Install nginx
+sudo apt install -y nginx
 
 # Setup firewall
 ufw allow OpenSSH
@@ -61,21 +66,24 @@ su - autodox
 ### 2. Install Dependencies
 
 ```bash
-# Install Node.js 20.x (LTS)
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
+# Install NVM
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 
-# Install pnpm
-sudo npm install -g pnpm
+# Load NVM without restarting the terminal
+\. "$HOME/.nvm/nvm.sh"
+# Download and install Node.js:
+nvm install 24
+# Verify the Node.js version:
+node -v # Should print "v24.12.0".
+# Verify npm version:
+npm -v # Should print "11.6.2".
+
 
 # Install MySQL
 sudo apt install -y mysql-server
 
-# Install nginx
-sudo apt install -y nginx
-
 # Install PM2 (process manager)
-sudo npm install -g pm2
+npm install -g pm2
 ```
 
 ### 3. MySQL Setup
@@ -95,7 +103,7 @@ sudo mysql -u root -p
 
 ```sql
 CREATE DATABASE autodox CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'autodox'@'localhost' IDENTIFIED BY 'STRONG_PASSWORD_HERE';
+CREATE USER 'autodox'@'localhost' IDENTIFIED BY 'Y75ZPleHmLnABOK';
 GRANT ALL PRIVILEGES ON autodox.* TO 'autodox'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
@@ -106,27 +114,29 @@ EXIT;
 ```bash
 # Create application directory
 sudo mkdir -p /var/www/autodox
-sudo chown autodox:autodox /var/www/autodox
+sudo chown admin /var/www/autodox
 
 # Clone repository (shallow clone - no history, master branch only)
 cd /var/www/autodox
-git clone --depth 1 --single-branch --branch master https://github.com/YOUR_USERNAME/autodox.git .
+sudo git clone --depth 1 --single-branch --branch master https://github.com/yakir-reznik/autodox.git .
 
 # Alternative: Upload files directly without git (no version control on server)
 # From your local machine:
 # rsync -avz --exclude 'node_modules' --exclude '.git' /path/to/local/autodox/ autodox@your-server-ip:/var/www/autodox/
 
 # Install dependencies
-pnpm install
+npm install
 
 # Create .env file
 nano .env
 ```
 
 **.env configuration:**
+
 ```env
 # Database
 DATABASE_URL=mysql://autodox:YOUR_DB_PASSWORD@localhost:3306/autodox
+NUXT_SESSION_PASSWORD=SOME_STRONG_PASSWORD_123123
 
 # App
 NODE_ENV=production
@@ -139,6 +149,7 @@ SESSION_SECRET=your_generated_secret_here
 
 ```bash
 # Run database migrations
+npx drizzle-kit generate
 npx drizzle-kit migrate
 
 # Create admin user
@@ -160,23 +171,26 @@ nano ecosystem.config.js
 ```
 
 **ecosystem.config.js:**
+
 ```javascript
 module.exports = {
-  apps: [{
-    name: 'autodox',
-    script: '.output/server/index.mjs',
-    cwd: '/var/www/autodox',
-    instances: 1,
-    exec_mode: 'cluster',
-    env: {
-      NODE_ENV: 'production',
-      PORT: 3000
+  apps: [
+    {
+      name: "autodox",
+      script: ".output/server/index.mjs",
+      cwd: "/var/www/autodox",
+      instances: 1,
+      exec_mode: "cluster",
+      env: {
+        NODE_ENV: "production",
+        PORT: 3000,
+      },
+      error_file: "/var/log/autodox/error.log",
+      out_file: "/var/log/autodox/out.log",
+      time: true,
     },
-    error_file: '/var/log/autodox/error.log',
-    out_file: '/var/log/autodox/out.log',
-    time: true
-  }]
-}
+  ],
+};
 ```
 
 ```bash
@@ -202,6 +216,7 @@ sudo nano /etc/nginx/sites-available/autodox
 ```
 
 **Nginx configuration:**
+
 ```nginx
 server {
     listen 80;
@@ -264,6 +279,7 @@ nano ~/backup-db.sh
 ```
 
 **backup-db.sh:**
+
 ```bash
 #!/bin/bash
 
@@ -294,6 +310,7 @@ crontab -e
 ```
 
 **Add this line to crontab:**
+
 ```
 0 2 * * * /home/autodox/backup-db.sh
 ```
@@ -346,6 +363,7 @@ ssh autodox@your-server-ip "cd /var/www/autodox && pnpm install && npx drizzle-k
 ```
 
 **Benefits:**
+
 - **Git method:** Simple, can track what's deployed
 - **Rsync method:** No git on server, slightly faster, smaller disk footprint
 
@@ -356,12 +374,14 @@ ssh autodox@your-server-ip "cd /var/www/autodox && pnpm install && npx drizzle-k
 ## Backup and Recovery
 
 ### Manual Backup
+
 ```bash
 cd /var/backups/autodox
 mysqldump -u autodox -p autodox | gzip > manual_backup_$(date +%Y%m%d).sql.gz
 ```
 
 ### Restore from Backup
+
 ```bash
 # Stop the application
 pm2 stop autodox
@@ -374,6 +394,7 @@ pm2 start autodox
 ```
 
 ### Download Backups to Local Machine
+
 ```bash
 # On your local machine
 scp autodox@your-server-ip:/var/backups/autodox/autodox_*.sql.gz ./backups/
@@ -384,6 +405,7 @@ scp autodox@your-server-ip:/var/backups/autodox/autodox_*.sql.gz ./backups/
 ## Monitoring and Maintenance
 
 ### Check Application Status
+
 ```bash
 pm2 status
 pm2 logs autodox
@@ -391,24 +413,28 @@ pm2 monit
 ```
 
 ### Check Nginx Status
+
 ```bash
 sudo systemctl status nginx
 sudo tail -f /var/log/nginx/error.log
 ```
 
 ### Check MySQL Status
+
 ```bash
 sudo systemctl status mysql
 sudo mysql -u autodox -p -e "SHOW PROCESSLIST;"
 ```
 
 ### Check Disk Space
+
 ```bash
 df -h
 du -sh /var/backups/autodox
 ```
 
 ### View Recent Backups
+
 ```bash
 ls -lh /var/backups/autodox
 tail /var/backups/autodox/backup.log
@@ -448,12 +474,14 @@ tail /var/backups/autodox/backup.log
 ## Troubleshooting
 
 ### App not starting
+
 ```bash
 pm2 logs autodox --lines 100
 # Check for errors in the logs
 ```
 
 ### Database connection issues
+
 ```bash
 # Verify MySQL is running
 sudo systemctl status mysql
@@ -463,6 +491,7 @@ mysql -u autodox -p -e "SELECT 1;"
 ```
 
 ### Nginx 502 Bad Gateway
+
 ```bash
 # Check if app is running
 pm2 status
@@ -472,6 +501,7 @@ sudo tail -f /var/log/nginx/error.log
 ```
 
 ### Out of disk space
+
 ```bash
 # Check disk usage
 df -h

@@ -1,1 +1,0 @@
-ALTER TABLE `forms_table` MODIFY COLUMN `theme` enum('default','dark','ocean','forest','unicorn') NOT NULL DEFAULT 'default';
