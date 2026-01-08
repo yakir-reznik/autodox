@@ -14,6 +14,11 @@ async function hashPassword(password: string): Promise<string> {
 	return `${salt}:${derivedKey.toString("hex")}`;
 }
 
+function randomApiKey(): string {
+	// Generate a random 16 chars API key in hex format - lowercase
+	return randomBytes(16).toString("hex");
+}
+
 async function createAdmin() {
 	const connection = await mysql.createConnection(process.env.DATABASE_URL!);
 	const db = drizzle(connection, { schema, mode: "default" });
@@ -42,7 +47,7 @@ async function createAdmin() {
 				.set({
 					password: hashedPassword,
 					name: name,
-					role: "admin"
+					role: "admin",
 				})
 				.where(eq(schema.usersTable.email, email));
 
@@ -54,6 +59,7 @@ async function createAdmin() {
 				email: email,
 				password: hashedPassword,
 				role: "admin",
+				apiKey: randomApiKey(),
 			});
 
 			console.log("Admin user created successfully");
