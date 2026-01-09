@@ -300,7 +300,17 @@
 		<!-- Content -->
 		<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 			<!-- Create New Submission Button -->
-			<div class="mb-6 flex justify-end">
+			<div class="mb-6 flex justify-end gap-3">
+				<UiButton
+					variant="secondary"
+					@click="refresh"
+					:disabled="pending"
+					:title="'Refresh submissions data'"
+				>
+					<Icon v-if="pending" name="svg-spinners:ring-resize" class="h-4 w-4" />
+					<Icon v-else name="heroicons:arrow-path" class="h-4 w-4" />
+					{{ pending ? "טוען..." : "רענן" }}
+				</UiButton>
 				<UiButton
 					variant="primary"
 					@click="createNewSubmission"
