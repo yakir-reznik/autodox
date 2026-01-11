@@ -61,6 +61,12 @@ useHead({
 						<div class="text-sm text-gray-600">
 							{{ user?.name }}
 						</div>
+						<NuxtLink to="/forms/upload">
+							<UiButton variant="secondary">
+								<Icon name="heroicons:arrow-up-tray" class="h-5 w-5" />
+								Upload JSON
+							</UiButton>
+						</NuxtLink>
 						<NuxtLink to="/forms/new">
 							<UiButton variant="primary">
 								<Icon name="heroicons:plus" class="h-5 w-5" />

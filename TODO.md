@@ -1,2 +1,9 @@
 - [x] Add UI to track webhook posting per submission
 - [x] In submission-details route show info if webhook submission succeeded or not
+- [] Allow admin user to manage forms by directories: Some folder > multiple forms. Admin should be able to rename folders, move forms between folders, delete folders, etc...
+- [] When creating a new form the drag and drop does not work, dragging an element to the blank canvas does not work. Cliking on an element does work.
+- [] Section element should not contain title by default, if i want a title inside of it i will add a heading element manually
+- [] We need a way to group elements togther and only show them if a checkbox is checked. For example: "Are you pregnant" if this is checked i want to show a group of other fields such as "What week are you"
+- [] We want the exported pdf to look as close the the digital for as possible
+- [] We want a feature where i can define forms that are password protected - meaning when a user tries to enter a submission link they need to enter a password. i want to be able to pass a password in the create-submission-link endpoint. if a form is not password protected and a password is passed - make the single submission password protected.
+- [] Create a feature where an admin user can paste a json structure of the form structure and the form will be created from the json. Basically admin users will upload an actual pdf to chatgpt and ask it to generate json output of the form structure. I want the admins to upload that output to our system to quick create forms. In the screen where the admins will do this you need to also write the required json structure so users can copy-paste it to chatgpt.
