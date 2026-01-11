@@ -15,6 +15,16 @@
 		lockedAt: string | null;
 	}
 
+	interface Form {
+		id: number;
+		title: string;
+		description: string | null;
+		status: "draft" | "published" | "archived";
+		createdAt: string;
+		updatedAt: string;
+		createdByUserId: number;
+	}
+
 	interface PaginatedResponse {
 		data: Submission[];
 		pagination: {
@@ -40,6 +50,12 @@
 	const isCreatingSubmission = ref(false);
 
 	const {
+		data: formData,
+		pending: formPending,
+		error: formError,
+	} = await useFetch<Form>(`/api/forms/${formId}`);
+
+	const {
 		data: response,
 		pending,
 		error,
@@ -50,6 +66,7 @@
 
 	const submissions = computed(() => response.value?.data ?? []);
 	const pagination = computed(() => response.value?.pagination);
+	const isFormPublished = computed(() => formData.value?.status === "published");
 
 	// Watch for page changes and refresh data
 	watch(
@@ -311,10 +328,17 @@
 					<Icon v-else name="heroicons:arrow-path" class="h-4 w-4" />
 					{{ pending ? "טוען..." : "רענן" }}
 				</UiButton>
+				<NuxtLink :to="`/edit/${formId}`">
+					<UiButton variant="secondary">
+						<Icon name="heroicons:pencil" class="h-4 w-4" />
+						עריכת טופס
+					</UiButton>
+				</NuxtLink>
 				<UiButton
 					variant="primary"
 					@click="createNewSubmission"
-					:disabled="isCreatingSubmission || !loggedIn"
+					:disabled="isCreatingSubmission || !loggedIn || !isFormPublished"
+					:title="!isFormPublished ? 'צור הגשה רק עבור טפסים פורסומים' : ''"
 				>
 					<Icon
 						v-if="isCreatingSubmission"

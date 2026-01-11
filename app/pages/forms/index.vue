@@ -1,46 +1,46 @@
 <script setup lang="ts">
-interface Form {
-	id: number;
-	title: string;
-	description: string | null;
-	status: "draft" | "published" | "archived";
-	createdAt: string;
-	updatedAt: string;
-}
+	interface Form {
+		id: number;
+		title: string;
+		description: string | null;
+		status: "draft" | "published" | "archived";
+		createdAt: string;
+		updatedAt: string;
+	}
 
-const { data: forms, pending, error, refresh } = await useFetch<Form[]>("/api/forms");
-const { user, clear } = useUserSession();
-const router = useRouter();
+	const { data: forms, pending, error, refresh } = await useFetch<Form[]>("/api/forms");
+	const { user, clear } = useUserSession();
+	const router = useRouter();
 
-const statusColors = {
-	draft: "bg-yellow-100 text-yellow-800",
-	published: "bg-green-100 text-green-800",
-	archived: "bg-gray-100 text-gray-800",
-};
+	const statusColors = {
+		draft: "bg-yellow-100 text-yellow-800",
+		published: "bg-green-100 text-green-800",
+		archived: "bg-gray-100 text-gray-800",
+	};
 
-const statusLabels = {
-	draft: "Draft",
-	published: "Published",
-	archived: "Archived",
-};
+	const statusLabels = {
+		draft: "Draft",
+		published: "Published",
+		archived: "Archived",
+	};
 
-function formatDate(dateString: string) {
-	return new Date(dateString).toLocaleDateString("he-IL", {
-		year: "numeric",
-		month: "short",
-		day: "numeric",
+	function formatDate(dateString: string) {
+		return new Date(dateString).toLocaleDateString("he-IL", {
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+		});
+	}
+
+	async function handleLogout() {
+		await $fetch("/api/auth/logout", { method: "POST" });
+		await clear();
+		router.push("/login");
+	}
+
+	useHead({
+		title: "Forms - Autodox",
 	});
-}
-
-async function handleLogout() {
-	await $fetch("/api/auth/logout", { method: "POST" });
-	await clear();
-	router.push("/login");
-}
-
-useHead({
-	title: "Forms - Autodox",
-});
 </script>
 
 <template>
@@ -93,9 +93,7 @@ useHead({
 			<div v-else-if="error" class="rounded-lg bg-red-50 p-6 text-center">
 				<Icon name="heroicons:exclamation-circle" class="mx-auto h-12 w-12 text-red-500" />
 				<p class="mt-2 text-red-700">Failed to load forms</p>
-				<UiButton variant="secondary" class="mt-4" @click="refresh">
-					Try Again
-				</UiButton>
+				<UiButton variant="secondary" class="mt-4" @click="refresh"> Try Again </UiButton>
 			</div>
 
 			<!-- Empty state -->
@@ -126,7 +124,10 @@ useHead({
 							<h3 class="font-medium text-gray-900">
 								{{ form.title }}
 							</h3>
-							<p v-if="form.description" class="mt-1 text-sm text-gray-500 line-clamp-2">
+							<p
+								v-if="form.description"
+								class="mt-1 text-sm text-gray-500 line-clamp-2"
+							>
 								{{ form.description }}
 							</p>
 						</div>
@@ -138,7 +139,7 @@ useHead({
 						</span>
 					</div>
 					<div class="mt-4 text-sm text-gray-500">
-						Updated {{ formatDate(form.updatedAt) }}
+						עודכן ב {{ formatDate(form.updatedAt) }}
 					</div>
 					<div class="mt-6 flex flex-col gap-2">
 						<NuxtLink :to="`/edit/${form.id}`">
