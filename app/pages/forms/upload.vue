@@ -1,12 +1,20 @@
 <script setup lang="ts">
+const router = useRouter();
+const route = useRoute();
+
 useHead({ title: "Upload JSON - Autodox" });
 
 const { user } = useUserSession();
-const router = useRouter();
 
 const jsonInput = ref("");
 const error = ref("");
 const loading = ref(false);
+const formId = computed(() => {
+	const id = route.query.formId;
+	return id ? Number(id) : null;
+});
+
+const isUpdatingMode = computed(() => formId.value !== null);
 
 // Example JSON for users to copy
 const exampleJson = `{
@@ -145,16 +153,25 @@ async function handleUpload() {
 			throw new Error("Invalid JSON format. Please check your JSON syntax.");
 		}
 
-		// Call API
-		const response = await $fetch<{ formId: number; success: boolean }>("/api/forms/upload-json", {
-			method: "POST",
-			body: parsed,
-		});
-
-		// Redirect to form editor
-		await router.push(`/edit/${response.formId}`);
+		if (isUpdatingMode.value && formId.value) {
+			// Update existing form
+			const response = await $fetch<{ formId: number; success: boolean }>(`/api/forms/${formId.value}/upload-json`, {
+				method: "POST",
+				body: parsed,
+			});
+			// Redirect back to form editor
+			await router.push(`/edit/${response.formId}`);
+		} else {
+			// Create new form
+			const response = await $fetch<{ formId: number; success: boolean }>("/api/forms/upload-json", {
+				method: "POST",
+				body: parsed,
+			});
+			// Redirect to form editor
+			await router.push(`/edit/${response.formId}`);
+		}
 	} catch (e: any) {
-		error.value = e.data?.message || e.message || "Failed to create form";
+		error.value = e.data?.message || e.message || (isUpdatingMode.value ? "Failed to update form" : "Failed to create form");
 	} finally {
 		loading.value = false;
 	}
@@ -167,12 +184,14 @@ async function handleUpload() {
 		<header class="bg-white shadow">
 			<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 				<div class="flex items-center gap-4">
-					<NuxtLink to="/forms">
+					<NuxtLink :to="isUpdatingMode ? `/edit/${formId}` : '/forms'">
 						<UiButton variant="secondary" size="sm">
 							<Icon name="heroicons:arrow-left" class="h-5 w-5" />
 						</UiButton>
 					</NuxtLink>
-					<h1 class="text-2xl font-bold text-gray-900">Upload JSON Form</h1>
+					<h1 class="text-2xl font-bold text-gray-900">
+						{{ isUpdatingMode ? "Import JSON - Replace Form Structure" : "Upload JSON Form" }}
+					</h1>
 				</div>
 			</div>
 		</header>
@@ -284,7 +303,9 @@ async function handleUpload() {
 				<div class="rounded-lg bg-white p-6 shadow">
 					<h2 class="mb-4 text-lg font-semibold text-gray-900">Paste Your JSON</h2>
 					<p class="mb-4 text-sm text-gray-600">
-						Paste the JSON output from ChatGPT here. The form will be created automatically.
+						{{ isUpdatingMode
+							? "Paste the JSON to replace your form's structure. All existing elements will be replaced."
+							: "Paste the JSON output from ChatGPT here. The form will be created automatically." }}
 					</p>
 					<textarea
 						v-model="jsonInput"
@@ -321,10 +342,10 @@ async function handleUpload() {
 						@click="handleUpload"
 					>
 						<Icon
-							name="heroicons:plus"
+							:name="isUpdatingMode ? 'heroicons:arrow-up-tray' : 'heroicons:plus'"
 							class="h-5 w-5"
 						/>
-						Create Form
+						{{ isUpdatingMode ? "Replace Form" : "Create Form" }}
 					</UiButton>
 				</div>
 			</div>

@@ -10,6 +10,7 @@ interface Props {
 	saveStatus: SaveStatus;
 	lastSavedAt: Date | null;
 	isDirty: boolean;
+	formId?: number;
 }
 
 const props = defineProps<Props>();
@@ -137,6 +138,16 @@ watchEffect(() => {
 					:status="saveStatus"
 					:last-saved-at="lastSavedAt"
 				/>
+
+				<NuxtLink
+					:to="`/forms/upload?formId=${formId}`"
+					title="Upload JSON to replace form structure"
+				>
+					<UiButton variant="secondary" size="sm">
+						<Icon name="heroicons:arrow-up-tray" class="h-4 w-4" />
+						Import JSON
+					</UiButton>
+				</NuxtLink>
 
 				<UiButton
 					variant="primary"
