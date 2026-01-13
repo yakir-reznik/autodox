@@ -60,11 +60,21 @@ export interface PaletteElement {
 // Auto-save status
 export type SaveStatus = "idle" | "pending" | "saving" | "saved" | "error";
 
+// Folder types
+export interface Folder {
+	id: number;
+	name: string;
+	createdBy: number;
+	createdAt: string;
+	updatedAt: string;
+}
+
 // API types
 export interface CreateFormRequest {
 	title: string;
 	description?: string;
 	createdBy: number;
+	folderId?: number | null;
 }
 
 export interface UpdateFormRequest {
@@ -73,6 +83,7 @@ export interface UpdateFormRequest {
 	status?: FormStatus;
 	theme?: FormTheme;
 	updatedBy?: number;
+	folderId?: number | null;
 }
 
 export interface SaveElementsRequest {
@@ -107,6 +118,7 @@ export interface FormWithElements {
 	id: number;
 	title: string;
 	description: string | null;
+	folderId: number | null;
 	status: FormStatus;
 	theme: FormTheme;
 	createdAt: string;

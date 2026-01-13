@@ -186,12 +186,37 @@ export type ElementConfig =
 // FORM BUILDER TABLES
 // ============================================
 
+// Folders Table - For organizing forms
+export const foldersTable = mysqlTable("folders_table", {
+	id: int().primaryKey().autoincrement(),
+
+	// Folder metadata
+	name: varchar({ length: 255 }).notNull(),
+
+	// Authorship
+	createdBy: int("created_by")
+		.notNull()
+		.references(() => usersTable.id),
+
+	// Timestamps
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at")
+		.notNull()
+		.defaultNow()
+		.$onUpdate(() => sql`now()`),
+});
+
 export const formsTable = mysqlTable("forms_table", {
 	id: int().primaryKey().autoincrement(),
 
 	// Form metadata
 	title: varchar({ length: 255 }).notNull(),
 	description: text(),
+
+	// Folder relationship (nullable - forms can be unfiled)
+	folderId: int("folder_id").references(() => foldersTable.id, {
+		onDelete: "cascade", // delete forms when folder is deleted
+	}),
 
 	// Status
 	status: mysqlEnum("status", formStatusEnum).notNull().default("draft"),
@@ -392,7 +417,20 @@ export const uploadsTable = mysqlTable("uploads_table", {
 // RELATIONS
 // ============================================
 
+export const foldersRelations = relations(foldersTable, ({ one, many }) => ({
+	creator: one(usersTable, {
+		fields: [foldersTable.createdBy],
+		references: [usersTable.id],
+		relationName: "folder_creator",
+	}),
+	forms: many(formsTable),
+}));
+
 export const formsRelations = relations(formsTable, ({ one, many }) => ({
+	folder: one(foldersTable, {
+		fields: [formsTable.folderId],
+		references: [foldersTable.id],
+	}),
 	creator: one(usersTable, {
 		fields: [formsTable.createdBy],
 		references: [usersTable.id],

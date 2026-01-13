@@ -23,6 +23,7 @@ export default defineEventHandler(async (event) => {
 		description: body.description || null,
 		status: "draft",
 		createdBy: body.createdBy,
+		folderId: body.folderId || null,
 	});
 
 	const insertId = result[0].insertId;
