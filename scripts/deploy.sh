@@ -33,8 +33,8 @@ git reset --hard origin/master || error_exit "Failed to reset to latest master"
 log "✓ Code updated successfully"
 
 # 2. Install dependencies
-log "Installing dependencies with pnpm..."
-pnpm install || error_exit "Failed to install dependencies"
+log "Installing dependencies with npm..."
+npm install || error_exit "Failed to install dependencies"
 log "✓ Dependencies installed"
 
 # 3. Run database migrations
@@ -45,7 +45,7 @@ log "✓ Migrations completed"
 
 # 4. Build application
 log "Building application..."
-pnpm build || error_exit "Failed to build application"
+npm run build || error_exit "Failed to build application"
 log "✓ Build completed successfully"
 
 # 5. Restart PM2 app (zero-downtime reload)
