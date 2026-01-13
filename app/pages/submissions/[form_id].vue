@@ -15,10 +15,20 @@
 		lockedAt: string | null;
 	}
 
+	interface Folder {
+		id: number;
+		name: string;
+		createdBy: number;
+		createdAt: string;
+		updatedAt: string;
+	}
+
 	interface Form {
 		id: number;
 		title: string;
 		description: string | null;
+		folderId: number | null;
+		folder: Folder | null;
 		status: "draft" | "published" | "archived";
 		createdAt: string;
 		updatedAt: string;
@@ -302,7 +312,16 @@
 						</NuxtLink>
 						<div>
 							<h1 class="text-2xl font-bold text-gray-900">Submissions</h1>
-							<p class="text-sm text-gray-600">Form ID: {{ formId }}</p>
+							<div class="flex items-center gap-2 mt-1">
+								<p class="text-sm font-medium text-gray-900">{{ formData?.title }}</p>
+								<span
+									v-if="formData?.folder"
+									class="text-xs text-indigo-800 bg-indigo-100 rounded px-2 py-1"
+								>
+									{{ formData.folder.name }}
+								</span>
+							</div>
+							<p class="text-xs text-gray-500">Form ID: {{ formId }}</p>
 						</div>
 					</div>
 					<div class="flex items-center gap-3">

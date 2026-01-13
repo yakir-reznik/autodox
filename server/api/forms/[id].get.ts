@@ -18,6 +18,7 @@ export default defineEventHandler(async (event) => {
 	const form = await db.query.formsTable.findFirst({
 		where: eq(formsTable.id, id),
 		with: {
+			folder: true,
 			elements: {
 				where: eq(formElementsTable.isDeleted, false),
 				orderBy: [asc(formElementsTable.position)],
