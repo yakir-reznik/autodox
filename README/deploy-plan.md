@@ -350,6 +350,47 @@ pm2 status
 pm2 logs autodox --lines 50
 ```
 
+### Manual Deployment (If Script Fails)
+
+If the deploy script doesn't work, run these commands manually:
+
+```bash
+# SSH into server
+ssh autodox@your-server-ip
+
+# Navigate to app directory
+cd /var/www/autodox
+
+# 1. Fetch latest code from master
+git fetch origin master
+git reset --hard origin/master
+
+# 2. Install dependencies
+pnpm install
+
+# 3. Generate and run migrations
+npx drizzle-kit generate
+npx drizzle-kit migrate
+
+# 4. Build application
+pnpm build
+
+# 5. Restart PM2 (zero-downtime reload)
+pm2 reload autodox
+
+# 6. Verify app is running
+sleep 2
+pm2 status
+pm2 logs autodox --lines 50
+```
+
+**If PM2 reload fails:**
+```bash
+# Stop and start instead (with brief downtime)
+pm2 stop autodox
+pm2 start ecosystem.config.cjs
+```
+
 ---
 
 ## Backup and Recovery
