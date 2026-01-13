@@ -318,55 +318,37 @@ crontab -e
 
 ## Deployment Update Procedure
 
-When you need to update the application:
+When you need to update the application, use the automated deploy script:
 
-### Option 1: Using Git (Shallow Clone)
+### Using the Deploy Script
 
 ```bash
 # SSH into server
 ssh autodox@your-server-ip
 
-# Navigate to app directory
-cd /var/www/autodox
+# Run the deployment script
+/var/www/autodox/scripts/deploy.sh
+```
 
-# Fetch and reset to latest master (works with shallow clones)
-git fetch origin master
-git reset --hard origin/master
+**What the script does:**
+1. Fetches latest code from master branch
+2. Installs dependencies with `pnpm install`
+3. Generates and runs database migrations
+4. Builds the application with `pnpm build`
+5. Reloads PM2 process (zero-downtime restart)
+6. Verifies the app is running
 
-# Install any new dependencies
-npm run install
+**Monitor deployment:**
+```bash
+# Watch the deploy logs
+tail -f /var/log/autodox/deploy.log
+```
 
-# Run any new migrations
-npx drizzle-kit migrate
-
-# Rebuild application
-npm run build
-
-# Restart PM2 (zero-downtime)
-pm2 reload autodox
-
-# Check status
+**Check status after deployment:**
+```bash
 pm2 status
 pm2 logs autodox --lines 50
 ```
-
-### Option 2: Using rsync (No Git Required)
-
-```bash
-# From your LOCAL machine, sync files to server
-rsync -avz --exclude 'node_modules' --exclude '.git' --exclude '.env' \
-  /path/to/local/autodox/ autodox@your-server-ip:/var/www/autodox/
-
-# Then SSH into server and restart
-ssh autodox@your-server-ip "cd /var/www/autodox && pnpm install && npx drizzle-kit migrate && pnpm build && pm2 reload autodox"
-```
-
-**Benefits:**
-
-- **Git method:** Simple, can track what's deployed
-- **Rsync method:** No git on server, slightly faster, smaller disk footprint
-
-**Note:** Both methods preserve your `.env` file and database
 
 ---
 
