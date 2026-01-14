@@ -1,5 +1,5 @@
 import { db } from "~~/server/db";
-import { formsTable } from "~~/server/db/schema";
+import { formsTable, foldersTable } from "~~/server/db/schema";
 import { desc, eq, isNull, type SQL } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
@@ -13,9 +13,25 @@ export default defineEventHandler(async (event) => {
 		filter = eq(formsTable.folderId, parseInt(folderId as string));
 	}
 
-	return db
-		.select()
+	const results = await db
+		.select({
+			id: formsTable.id,
+			title: formsTable.title,
+			description: formsTable.description,
+			folderId: formsTable.folderId,
+			status: formsTable.status,
+			theme: formsTable.theme,
+			webhookUrl: formsTable.webhookUrl,
+			createdBy: formsTable.createdBy,
+			updatedBy: formsTable.updatedBy,
+			createdAt: formsTable.createdAt,
+			updatedAt: formsTable.updatedAt,
+			folderName: foldersTable.name,
+		})
 		.from(formsTable)
+		.leftJoin(foldersTable, eq(formsTable.folderId, foldersTable.id))
 		.where(filter)
 		.orderBy(desc(formsTable.updatedAt));
+
+	return results;
 });
