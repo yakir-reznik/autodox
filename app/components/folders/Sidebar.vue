@@ -191,7 +191,7 @@
 </script>
 
 <template>
-	<div class="w-64 flex flex-col border-l border-gray-200 bg-gray-50">
+	<div class="w-72 flex flex-col border-l border-gray-200 bg-gray-50">
 		<!-- Header -->
 		<div class="border-b border-gray-200 px-4 py-4">
 			<h3 class="text-sm font-semibold text-gray-700">תיקיות</h3>
