@@ -64,11 +64,11 @@ const isCurrentFolder = computed(() => selectedFolderId.value === props.currentF
 						v-for="option in folderOptions"
 						:key="option.id ?? 'unfiled'"
 						type="button"
-						class="w-full rounded-lg border px-4 py-3 text-right transition-colors"
+						class="w-full rounded-lg px-4 py-3 text-right transition-colors"
 						:class="
 							selectedFolderId === option.id
-								? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500'
-								: 'border-gray-300 bg-white hover:bg-gray-50'
+								? 'bg-blue-50 border-2 border-blue-500'
+								: 'border border-gray-300 bg-white hover:bg-gray-50'
 						"
 						@click="selectedFolderId = option.id"
 					>
