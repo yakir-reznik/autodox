@@ -7,12 +7,7 @@
 
 	// State management
 	const selectedFolderId = ref<number | null | "all" | "unfiled">("all");
-	const showFolderModal = ref(false);
-	const showDeleteFolderModal = ref(false);
 	const showMoveFormModal = ref(false);
-	const folderModalMode = ref<"create" | "rename">("create");
-	const editingFolder = ref<Folder | null>(null);
-	const deletingFolder = ref<Folder | null>(null);
 	const movingForm = ref<FormListItem | null>(null);
 
 	// Fetch folders
@@ -39,63 +34,10 @@
 		selectedFolderId.value = id;
 	}
 
-	function handleCreateFolder() {
-		folderModalMode.value = "create";
-		editingFolder.value = null;
-		showFolderModal.value = true;
-	}
-
-	function handleRenameFolder(folder: Folder) {
-		folderModalMode.value = "rename";
-		editingFolder.value = folder;
-		showFolderModal.value = true;
-	}
-
-	function handleDeleteFolder(folder: Folder) {
-		deletingFolder.value = folder;
-		showDeleteFolderModal.value = true;
-	}
-
-	async function submitFolder(name: string) {
-		try {
-			if (folderModalMode.value === "create") {
-				await $fetch("/api/folders", {
-					method: "POST",
-					body: {
-						name,
-						createdBy: user.value?.id,
-					},
-				});
-			} else if (editingFolder.value) {
-				await $fetch(`/api/folders/${editingFolder.value.id}`, {
-					method: "PATCH",
-					body: { name },
-				});
-			}
-			await refreshFolders();
-		} catch (error) {
-			console.error("Failed to save folder:", error);
-		}
-	}
-
-	async function confirmDeleteFolder() {
-		if (!deletingFolder.value) return;
-
-		try {
-			await $fetch(`/api/folders/${deletingFolder.value.id}`, {
-				method: "DELETE",
-			});
-
-			// If currently viewing the deleted folder, switch to "all"
-			if (selectedFolderId.value === deletingFolder.value.id) {
-				selectFolder("all");
-			}
-
-			await refreshFolders();
-			await refresh();
-		} catch (error) {
-			console.error("Failed to delete folder:", error);
-		}
+	// Handle folders changed event from sidebar
+	async function handleFoldersChanged() {
+		await refreshFolders();
+		await refresh();
 	}
 
 	// Form move handlers
@@ -120,12 +62,6 @@
 			console.error("Failed to move form:", error);
 		}
 	}
-
-	// Calculate form count for a folder (for delete modal)
-	const deletingFolderFormCount = computed(() => {
-		if (!deletingFolder.value || !forms.value) return 0;
-		return forms.value.filter((f) => f.folderId === deletingFolder.value?.id).length;
-	});
 
 	useHead({
 		title: "Forms - Autodox",
@@ -177,12 +113,12 @@
 			<FoldersSidebar
 				:folders="folders || []"
 				:selected-folder-id="selectedFolderId"
+				:forms="forms || []"
+				:user-id="user?.id"
 				@select-all="selectFolder('all')"
 				@select-unfiled="selectFolder('unfiled')"
 				@select-folder="selectFolder"
-				@create-folder="handleCreateFolder"
-				@rename-folder="handleRenameFolder"
-				@delete-folder="handleDeleteFolder"
+				@folders-changed="handleFoldersChanged"
 			/>
 
 			<!-- Main Content Area -->
@@ -222,20 +158,6 @@
 		</div>
 
 		<!-- Modals -->
-		<FoldersModal
-			v-model="showFolderModal"
-			:mode="folderModalMode"
-			:folder="editingFolder"
-			@submit="submitFolder"
-		/>
-
-		<FoldersDeleteModal
-			v-model="showDeleteFolderModal"
-			:folder="deletingFolder"
-			:form-count="deletingFolderFormCount"
-			@confirm="confirmDeleteFolder"
-		/>
-
 		<FoldersMoveFormModal
 			v-if="movingForm"
 			v-model="showMoveFormModal"

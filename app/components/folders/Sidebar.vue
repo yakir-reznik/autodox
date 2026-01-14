@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import type { Folder } from "~/types/form-builder";
+import type { FormListItem } from "~/types/FormListItem";
 
 interface Props {
 	folders: Folder[];
 	selectedFolderId: number | null | "all" | "unfiled";
+	forms: FormListItem[];
+	userId: number | undefined;
 }
 
 const props = defineProps<Props>();
@@ -11,17 +14,87 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
 	"select-all": [];
 	"select-unfiled": [];
-	"select-folder": [folderId: number];
-	"create-folder": [];
-	"rename-folder": [folder: Folder];
-	"delete-folder": [folder: Folder];
+	"select-folder": [folderId: number | "all"];
+	"folders-changed": [];
 }>();
 
 const hoveredFolderId = ref<number | null>(null);
 
+// Modal state
+const showFolderModal = ref(false);
+const showDeleteFolderModal = ref(false);
+const folderModalMode = ref<"create" | "rename">("create");
+const editingFolder = ref<Folder | null>(null);
+const deletingFolder = ref<Folder | null>(null);
+
 const isSelected = (type: "all" | "unfiled" | number) => {
 	return props.selectedFolderId === type;
 };
+
+// Folder handlers
+function handleCreateFolder() {
+	folderModalMode.value = "create";
+	editingFolder.value = null;
+	showFolderModal.value = true;
+}
+
+function handleRenameFolder(folder: Folder) {
+	folderModalMode.value = "rename";
+	editingFolder.value = folder;
+	showFolderModal.value = true;
+}
+
+function handleDeleteFolder(folder: Folder) {
+	deletingFolder.value = folder;
+	showDeleteFolderModal.value = true;
+}
+
+async function submitFolder(name: string) {
+	try {
+		if (folderModalMode.value === "create") {
+			await $fetch("/api/folders", {
+				method: "POST",
+				body: {
+					name,
+					createdBy: props.userId,
+				},
+			});
+		} else if (editingFolder.value) {
+			await $fetch(`/api/folders/${editingFolder.value.id}`, {
+				method: "PATCH",
+				body: { name },
+			});
+		}
+		emit("folders-changed");
+	} catch (error) {
+		console.error("Failed to save folder:", error);
+	}
+}
+
+async function confirmDeleteFolder() {
+	if (!deletingFolder.value) return;
+
+	try {
+		await $fetch(`/api/folders/${deletingFolder.value.id}`, {
+			method: "DELETE",
+		});
+
+		// If currently viewing the deleted folder, switch to "all"
+		if (props.selectedFolderId === deletingFolder.value.id) {
+			emit("select-folder", "all");
+		}
+
+		emit("folders-changed");
+	} catch (error) {
+		console.error("Failed to delete folder:", error);
+	}
+}
+
+// Calculate form count for a folder (for delete modal)
+const deletingFolderFormCount = computed(() => {
+	if (!deletingFolder.value || !props.forms) return 0;
+	return props.forms.filter((f) => f.folderId === deletingFolder.value?.id).length;
+});
 </script>
 
 <template>
@@ -107,7 +180,7 @@ const isSelected = (type: "all" | "unfiled" | number) => {
 								<button
 									type="button"
 									class="rounded p-1 hover:bg-gray-200 transition-colors"
-									@click="emit('rename-folder', folder)"
+									@click="handleRenameFolder(folder)"
 									title="שינוי שם"
 								>
 									<Icon name="mdi:pencil" class="h-4 w-4" />
@@ -115,7 +188,7 @@ const isSelected = (type: "all" | "unfiled" | number) => {
 								<button
 									type="button"
 									class="rounded p-1 hover:bg-red-100 hover:text-red-600 transition-colors"
-									@click="emit('delete-folder', folder)"
+									@click="handleDeleteFolder(folder)"
 									title="מחיקה"
 								>
 									<Icon name="mdi:delete" class="h-4 w-4" />
@@ -133,11 +206,26 @@ const isSelected = (type: "all" | "unfiled" | number) => {
 				variant="secondary"
 				size="sm"
 				class="w-full"
-				@click="emit('create-folder')"
+				@click="handleCreateFolder"
 			>
 				<Icon name="mdi:folder-plus" class="h-4 w-4" />
 				<span>תיקייה חדשה</span>
 			</UiButton>
 		</div>
+
+		<!-- Modals -->
+		<FoldersModal
+			v-model="showFolderModal"
+			:mode="folderModalMode"
+			:folder="editingFolder"
+			@submit="submitFolder"
+		/>
+
+		<FoldersDeleteModal
+			v-model="showDeleteFolderModal"
+			:folder="deletingFolder"
+			:form-count="deletingFolderFormCount"
+			@confirm="confirmDeleteFolder"
+		/>
 	</div>
 </template>
