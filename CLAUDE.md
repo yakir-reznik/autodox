@@ -151,3 +151,159 @@ RESTful API with standard CRUD operations:
 - **Element Configuration**: Each element type has a specific config shape defined in `useElementDefaults.ts`
 - **Validation Rules**: Stored in element config, structure varies by field type
 - **Parent References**: When saving nested elements, tempIds in parentId must be resolved to real IDs
+
+## Nuxt Best Practices
+
+### Component Naming
+
+- **Use PascalCase** for component filenames: `FormBuilder.vue`, `PropertyPanel.vue`
+- **Multi-word names** are required (avoid single-word components like `Button.vue` in app code; use `BaseButton.vue` or `UiButton.vue`)
+- **Prefixes for component types**:
+  - `Base*` - Base UI components (BaseButton, BaseInput)
+  - `App*` - App-specific layout components (AppHeader, AppSidebar)
+  - `The*` - Single-instance components (TheNavbar, TheFooter)
+- **Organize by feature**: Keep related components together in feature directories
+  - `app/components/form-builder/` - Form builder feature
+  - `app/components/form-fill/` - Form filling feature
+  - `app/components/ui/` - Reusable UI components
+
+### Data Loading
+
+**Server-Side Data Fetching (SSR/SSG):**
+
+- Use `useFetch()` for API calls that should run on server and hydrate on client
+- Use `useAsyncData()` for more control over data fetching and caching
+
+```typescript
+// Good - runs on server, hydrates on client
+const { data, pending, error } = await useFetch("/api/forms");
+
+// Good - with custom key and transform
+const { data } = await useAsyncData("forms", () => $fetch("/api/forms"));
+```
+
+**Client-Side Only Data Fetching:**
+
+- Use `$fetch` directly for client-side only requests
+- Wrap in `onMounted` or use inside event handlers
+
+```typescript
+// Good - client-side only
+async function deleteForm(id: number) {
+  await $fetch(`/api/forms/${id}`, { method: "DELETE" });
+}
+```
+
+**Important Notes:**
+
+- This app has SSR disabled (`ssr: false` in nuxt.config), so all data fetching is client-side
+- Still use composables for consistency and potential future SSR enablement
+- `useFetch` and `useAsyncData` provide better DX with reactivity and loading states
+
+### Auto-Imports
+
+Nuxt automatically imports:
+
+- Components from `app/components/`
+- Composables from `app/composables/`
+- Utils from `app/utils/`
+- Vue APIs (`ref`, `computed`, `watch`, etc.)
+- Nuxt APIs (`navigateTo`, `useFetch`, etc.)
+
+**Do NOT manually import** these - rely on auto-imports:
+
+```typescript
+// Bad - unnecessary imports
+import { ref, computed } from "vue";
+import { navigateTo } from "nuxt/app";
+
+// Good - auto-imported
+const count = ref(0);
+const doubled = computed(() => count.value * 2);
+await navigateTo("/forms");
+```
+
+### Composables
+
+- **Naming**: Prefix with `use` (useFormBuilder, useAutoSave)
+- **Location**: Place in `app/composables/` for auto-import
+- **State**: Use composables for shared state and logic
+- **Return object**: Return reactive refs/computed values and methods
+
+```typescript
+// Good composable pattern
+export function useFormBuilder() {
+  const elements = ref<FormElement[]>([]);
+  const selectedElement = ref<FormElement | null>(null);
+
+  const addElement = (element: FormElement) => {
+    elements.value.push(element);
+  };
+
+  return {
+    elements,
+    selectedElement,
+    addElement,
+  };
+}
+```
+
+### File-Based Routing
+
+- **Pages**: Files in `app/pages/` automatically create routes
+  - `pages/index.vue` → `/`
+  - `pages/forms/index.vue` → `/forms`
+  - `pages/edit/[id].vue` → `/edit/:id` (dynamic route)
+- **Navigation**: Use `navigateTo()` for programmatic navigation
+- **Links**: Use `<NuxtLink>` for declarative navigation
+
+### API Routes
+
+- **Location**: `server/api/` directory
+- **File naming**:
+  - `server/api/forms/index.get.ts` → `GET /api/forms`
+  - `server/api/forms/index.post.ts` → `POST /api/forms`
+  - `server/api/forms/[id].get.ts` → `GET /api/forms/:id`
+  - `server/api/forms/[id]/elements.put.ts` → `PUT /api/forms/:id/elements`
+- **Event handlers**: Use `defineEventHandler()`
+- **Request data**: Use `getQuery()`, `readBody()`, `getRouterParams()`
+
+```typescript
+// Good API route pattern
+export default defineEventHandler(async (event) => {
+  const { id } = getRouterParams(event);
+  const body = await readBody(event);
+  // ... handle request
+  return { success: true, data: result };
+});
+```
+
+### TypeScript
+
+- **Enable strict mode**: Already configured in this project
+- **Type imports**: Use `import type` for type-only imports
+- **Component props**: Define with TypeScript interfaces
+- **API types**: Share types between client and server
+
+```typescript
+// Good - type-only import
+import type { FormElement } from "~/types/form-builder";
+
+// Good - typed component props
+interface Props {
+  element: FormElement;
+  readonly?: boolean;
+}
+
+const props = defineProps<Props>();
+```
+
+### Performance
+
+- **Debounce frequent operations**: Use `useDebounceFn()` or custom debounce
+- **Avoid unnecessary reactivity**: Use `shallowRef()` for large objects when deep reactivity isn't needed
+- **Virtual scrolling**: For large lists (already using draggable in this project)
+
+### Common Patterns in This Project
+
+- **Soft deletes**: Mark as deleted rather than removing from database
