@@ -9,6 +9,7 @@
 	const selectedFolderId = ref<number | null | "all" | "unfiled">("all");
 	const showMoveFormModal = ref(false);
 	const movingForm = ref<FormListItem | null>(null);
+	const searchQuery = ref("");
 
 	// Fetch folders
 	const { data: folders, refresh: refreshFolders } = await useFetch<Folder[]>("/api/folders");
@@ -22,6 +23,25 @@
 	});
 
 	const { data: forms, pending, error, refresh } = await useFetch<FormListItem[]>(formsQuery);
+
+	// Filter forms based on search query
+	const filteredForms = computed(() => {
+		if (!forms.value) return [];
+		if (!searchQuery.value.trim()) return forms.value;
+
+		const query = searchQuery.value.toLowerCase().trim();
+		return forms.value.filter((form) => {
+			const title = form.title.toLowerCase();
+			// Simple fuzzy matching: check if all characters in query appear in title in order
+			let titleIndex = 0;
+			for (const char of query) {
+				titleIndex = title.indexOf(char, titleIndex);
+				if (titleIndex === -1) return false;
+				titleIndex++;
+			}
+			return true;
+		});
+	});
 
 	async function handleLogout() {
 		await $fetch("/api/auth/logout", { method: "POST" });
@@ -124,6 +144,34 @@
 			<!-- Main Content Area -->
 			<main class="flex-1 overflow-y-auto px-4 py-8 sm:px-6 lg:px-8">
 				<div class="mx-auto max-w-6xl">
+					<!-- Search Bar -->
+					<div class="mb-6 flex items-center justify-between gap-4">
+						<div class="relative w-full max-w-xs">
+							<Icon
+								name="heroicons:magnifying-glass"
+								class="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+							/>
+							<input
+								v-model="searchQuery"
+								type="text"
+								placeholder="חיפוש טפסים..."
+								class="w-full rounded-md border border-gray-300 py-2 pl-4 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+								:class="{ 'pl-10': searchQuery }"
+							/>
+							<button
+								v-if="searchQuery"
+								@click="searchQuery = ''"
+								class="absolute left-2.5 top-1/2 flex -translate-y-1/2 items-center justify-center rounded p-0.5 text-gray-400 transition-colors hover:text-gray-600"
+								type="button"
+							>
+								<Icon name="heroicons:x-mark" class="h-4 w-4" />
+							</button>
+						</div>
+						<div v-if="searchQuery && !pending" class="text-sm text-gray-600">
+							{{ filteredForms.length }} תוצאות
+						</div>
+					</div>
+
 					<!-- Loading state -->
 					<div v-if="pending" class="flex items-center justify-center py-12">
 						<Icon name="svg-spinners:ring-resize" class="h-8 w-8 text-blue-500" />
@@ -142,12 +190,12 @@
 					</div>
 
 					<!-- Empty state -->
-					<FormListEmptyState v-else-if="!forms || forms.length === 0" />
+					<FormListEmptyState v-else-if="!filteredForms || filteredForms.length === 0" />
 
 					<!-- Forms grid -->
 					<div v-else class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 						<FormListCard
-							v-for="form in forms"
+							v-for="form in filteredForms"
 							:key="form.id"
 							:form="form"
 							@move-form="handleMoveForm"

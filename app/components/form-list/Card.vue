@@ -1,11 +1,17 @@
 <template>
-	<div :key="form.id" class="group flex flex-col h-full rounded-xl border border-gray-200 bg-white p-6 transition-all hover:border-gray-300 hover:shadow-sm">
+	<div
+		:key="form.id"
+		class="group flex flex-col h-full rounded-md border border-gray-200 bg-white p-6 transition-all hover:border-gray-300 hover:shadow-sm"
+	>
 		<!-- Header: Title & Description -->
 		<div class="mb-4">
 			<h3 class="text-lg font-semibold text-gray-900 leading-tight">
 				{{ form.title }}
 			</h3>
-			<p v-if="form.description" class="mt-2 text-sm text-gray-600 line-clamp-2 leading-relaxed">
+			<p
+				v-if="form.description"
+				class="mt-2 text-sm text-gray-600 line-clamp-2 leading-relaxed"
+			>
 				{{ form.description }}
 			</p>
 		</div>
@@ -54,7 +60,12 @@
 						הגשות
 					</UiButton>
 				</NuxtLink>
-				<UiButton variant="ghost" size="sm" class="w-full justify-center" @click="handleMoveForm(form)">
+				<UiButton
+					variant="ghost"
+					size="sm"
+					class="w-full justify-center"
+					@click="handleMoveForm(form)"
+				>
 					<Icon name="mdi:folder-move" class="h-4 w-4" />
 					העבר
 				</UiButton>
