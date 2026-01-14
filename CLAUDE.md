@@ -136,7 +136,7 @@ RESTful API with standard CRUD operations:
 ### Technology Stack
 
 - **Frontend**: Nuxt 4 (SSR disabled), Vue 3, TypeScript
-- **Styling**: TailwindCSS with RTL support
+- **Styling**: TailwindCSS with RTL support. Make sure the design is simple, minimal, functional, partical and provides good ui/ux practices
 - **Database**: MySQL with Drizzle ORM
 - **Key Libraries**:
   - vuedraggable - Drag-and-drop
