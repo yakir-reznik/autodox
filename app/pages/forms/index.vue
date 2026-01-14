@@ -209,7 +209,7 @@
 		<!-- Content with Sidebar Layout -->
 		<div class="flex h-[calc(100vh-5rem)]">
 			<!-- Folder Sidebar -->
-			<FoldersFolderSidebar
+			<FoldersSidebar
 				:folders="folders || []"
 				:selected-folder-id="selectedFolderId"
 				@select-all="selectFolder('all')"
@@ -334,14 +334,14 @@
 		</div>
 
 		<!-- Modals -->
-		<FoldersFolderModal
+		<FoldersModal
 			v-model="showFolderModal"
 			:mode="folderModalMode"
 			:folder="editingFolder"
 			@submit="submitFolder"
 		/>
 
-		<FoldersDeleteFolderModal
+		<FoldersDeleteModal
 			v-model="showDeleteFolderModal"
 			:folder="deletingFolder"
 			:form-count="deletingFolderFormCount"
