@@ -15,13 +15,16 @@ const emit = defineEmits<{
 }>();
 
 const folderName = ref("");
+const inputRef = ref<HTMLInputElement | null>(null);
 
-// Reset form when modal opens
+// Reset form and focus input when modal opens
 watch(
 	() => props.modelValue,
-	(isOpen) => {
+	async (isOpen) => {
 		if (isOpen) {
 			folderName.value = props.mode === "rename" && props.folder ? props.folder.name : "";
+			await nextTick();
+			inputRef.value?.focus();
 		}
 	},
 );
@@ -43,11 +46,11 @@ const submitLabel = computed(() => (props.mode === "create" ? "יצירה" : "ש
 	<UiModal :model-value="modelValue" :title="title" size="sm" @update:model-value="emit('update:modelValue', $event)">
 		<form @submit.prevent="handleSubmit">
 			<UiInput
+				ref="inputRef"
 				v-model="folderName"
 				name="folderName"
 				label="שם התיקייה"
 				placeholder="הזן שם תיקייה..."
-				autofocus
 			/>
 		</form>
 
