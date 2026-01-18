@@ -1,7 +1,7 @@
 - [x] Add UI to track webhook posting per submission
 - [x] In submission-details route show info if webhook submission succeeded or not
 - [x] Allow admin user to manage forms by directories: Some folder > multiple forms. Admin should be able to rename folders, move forms between folders, delete folders, etc...
-- [] When creating a new form the drag and drop does not work, dragging an element to the blank canvas does not work. Cliking on an element does work.
+- [x] When creating a new form the drag and drop does not work, dragging an element to the blank canvas does not work. Cliking on an element does work.
 - [] Section element should not contain title by default, if i want a title inside of it i will add a heading element manually
 - [] We need a way to group elements togther and only show them if a checkbox is checked. For example: "Are you pregnant" if this is checked i want to show a group of other fields such as "What week are you"
 - [] We want the exported pdf to look as close the the digital for as possible
