@@ -15,6 +15,13 @@
       "when": 1768306522459,
       "tag": "0001_kind_frank_castle",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1768996306481,
+      "tag": "0002_fuzzy_kitty_pryde",
+      "breakpoints": true
     }
   ]
 }

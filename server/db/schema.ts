@@ -227,8 +227,8 @@ export const formsTable = mysqlTable("forms_table", {
 	// Webhook configuration
 	webhookUrl: varchar("webhook_url", { length: 2048 }),
 
-	// Password protection
-	passwordHash: varchar("password_hash", { length: 255 }),
+	// Password protection (stored as plain text for admin visibility)
+	password: varchar("password", { length: 255 }),
 
 	// Authorship
 	createdBy: int("created_by")
@@ -315,6 +315,9 @@ export const submissionsTable = mysqlTable("submissions_table", {
 
 	// Webhook configuration (submission-level overrides form-level)
 	webhookUrl: varchar("webhook_url", { length: 2048 }),
+
+	// Password protection (submission-level overrides form-level, stored as plain text)
+	password: varchar("password", { length: 255 }),
 
 	// Lifecycle tracking
 	status: mysqlEnum("status", submissionStatusEnum).notNull().default("pending"),

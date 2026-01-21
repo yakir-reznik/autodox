@@ -16,23 +16,19 @@ Add password protection at two levels:
 
 ---
 
-## Database Changes
+## Database Changes ✅ COMPLETED
 
-### 1. Update `formsTable` (server/db/schema.ts)
-- ✅ Column exists as `passwordHash`
-- ⚠️ **TODO**: Rename to `password` (plain text storage)
+### 1. Update `formsTable` (server/db/schema.ts) ✅
 ```typescript
 password: varchar("password", { length: 255 }), // null = no form-level password, stored as plain text
 ```
 
-### 2. Update `submissionsTable` (server/db/schema.ts)
-- ✅ Column exists as `passwordHash`
-- ⚠️ **TODO**: Rename to `password` (plain text storage)
+### 2. Update `submissionsTable` (server/db/schema.ts) ✅
 ```typescript
 password: varchar("password", { length: 255 }), // null = no submission-specific password, stored as plain text
 ```
 
-**Migration**: Need to run migration after renaming columns
+**Migration**: Run `npx drizzle-kit generate` then `npx drizzle-kit migrate`
 
 ---
 
@@ -119,7 +115,7 @@ Passwords are stored as plain text for simplicity and to allow display in the fo
 
 ## Implementation Order
 
-1. Update database schema (rename `passwordHash` → `password` in both tables)
+1. ~~Update database schema (rename `passwordHash` → `password` in both tables)~~ ✅
 2. Run database migration (user will do this)
 3. Create `settings.get.ts` endpoint (auth required, returns password)
 4. Update `[id].get.ts` (return `hasPassword` boolean, never actual password)
