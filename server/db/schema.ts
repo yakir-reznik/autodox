@@ -227,6 +227,9 @@ export const formsTable = mysqlTable("forms_table", {
 	// Webhook configuration
 	webhookUrl: varchar("webhook_url", { length: 2048 }),
 
+	// Password protection
+	passwordHash: varchar("password_hash", { length: 255 }),
+
 	// Authorship
 	createdBy: int("created_by")
 		.notNull()
