@@ -15,8 +15,6 @@ const emit = defineEmits<{
 }>();
 
 const config = computed(() => props.element.config as {
-	title?: string;
-	description?: string;
 	collapsible?: boolean;
 	defaultCollapsed?: boolean;
 	bordered?: boolean;
@@ -58,24 +56,18 @@ function updateChildData(clientId: string, value: any) {
 
 <template>
 	<div :class="sectionClass" :style="sectionStyle">
-		<!-- Section header -->
+		<!-- Collapse toggle -->
 		<div
-			v-if="config.title"
-			class="form-fill-section-header"
-			:class="{ 'form-fill-section-toggle': config.collapsible }"
+			v-if="config.collapsible"
+			class="form-fill-section-header form-fill-section-toggle"
 			@click="toggleCollapse"
 		>
-			<div class="flex items-center justify-between">
-				<h4 class="form-fill-section-title">{{ config.title }}</h4>
+			<div class="flex items-center justify-end">
 				<Icon
-					v-if="config.collapsible"
 					:name="isCollapsed ? 'heroicons:chevron-down' : 'heroicons:chevron-up'"
 					class="h-5 w-5 text-gray-500"
 				/>
 			</div>
-			<p v-if="config.description" class="form-fill-section-description">
-				{{ config.description }}
-			</p>
 		</div>
 
 		<!-- Section content -->

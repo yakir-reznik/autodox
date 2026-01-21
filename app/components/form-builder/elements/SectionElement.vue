@@ -8,8 +8,6 @@ interface Props {
 const props = defineProps<Props>();
 
 const config = computed(() => props.element.config as {
-	title?: string;
-	description?: string;
 	collapsible?: boolean;
 	defaultCollapsed?: boolean;
 	bordered?: boolean;
@@ -35,23 +33,13 @@ const sectionStyle = computed(() => ({
 		:class="{ 'border border-gray-200': config.bordered }"
 		:style="sectionStyle"
 	>
-		<!-- Section header -->
+		<!-- Collapse toggle -->
 		<div
-			v-if="config.title || config.collapsible"
-			class="flex items-center justify-between px-4 py-3"
-			:class="{ 'cursor-pointer': config.collapsible }"
+			v-if="config.collapsible"
+			class="flex items-center justify-end px-4 py-2 cursor-pointer"
 			@click="toggleCollapse"
 		>
-			<div>
-				<h4 v-if="config.title" class="font-medium text-gray-900">
-					{{ config.title }}
-				</h4>
-				<p v-if="config.description" class="mt-0.5 text-sm text-gray-500">
-					{{ config.description }}
-				</p>
-			</div>
 			<button
-				v-if="config.collapsible"
 				type="button"
 				class="text-gray-400 transition-transform"
 				:class="{ 'rotate-180': !isCollapsed }"

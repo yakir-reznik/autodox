@@ -242,25 +242,6 @@ const triggerFileInput = () => {
 
 		<!-- Section settings -->
 		<template v-if="element.type === 'section'">
-			<div>
-				<label class="mb-1 block text-sm text-gray-600">Title</label>
-				<UiInput
-					:model-value="config.title || ''"
-					placeholder="Section title..."
-					@update:model-value="$emit('update:config', { title: $event })"
-				/>
-			</div>
-
-			<div>
-				<label class="mb-1 block text-sm text-gray-600">Description</label>
-				<UiTextarea
-					:model-value="config.description || ''"
-					:rows="2"
-					placeholder="Optional description..."
-					@update:model-value="$emit('update:config', { description: $event })"
-				/>
-			</div>
-
 			<UiToggle
 				:model-value="config.bordered || false"
 				@update:model-value="$emit('update:config', { bordered: $event })"

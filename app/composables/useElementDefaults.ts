@@ -152,8 +152,6 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 			};
 		case "section":
 			return {
-				title: "מקטע",
-				description: "",
 				collapsible: false,
 				defaultCollapsed: false,
 				bordered: true,
