@@ -11,9 +11,14 @@ interface Props {
 	lastSavedAt: Date | null;
 	isDirty: boolean;
 	formId?: number;
+	canUndo?: boolean;
+	canRedo?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+	canUndo: false,
+	canRedo: false,
+});
 const router = useRouter();
 
 const emit = defineEmits<{
@@ -22,7 +27,18 @@ const emit = defineEmits<{
 	"update:status": [value: FormStatus];
 	"update:theme": [value: FormTheme];
 	save: [];
+	undo: [];
+	redo: [];
 }>();
+
+// Detect Mac for keyboard shortcut tooltips
+const isMac = computed(() => {
+	if (typeof navigator === 'undefined') return false;
+	return navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+});
+
+const undoShortcut = computed(() => isMac.value ? '⌘Z' : 'Ctrl+Z');
+const redoShortcut = computed(() => isMac.value ? '⌘⇧Z' : 'Ctrl+Shift+Z');
 
 const localTitle = computed({
 	get: () => props.title,
@@ -138,6 +154,30 @@ watchEffect(() => {
 					:status="saveStatus"
 					:last-saved-at="lastSavedAt"
 				/>
+
+				<!-- Undo/Redo buttons -->
+				<div class="flex items-center gap-1">
+					<button
+						type="button"
+						class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-gray-500"
+						:disabled="!canUndo"
+						:title="`בטל (${undoShortcut})`"
+						@click="$emit('undo')"
+					>
+						<Icon name="heroicons:arrow-uturn-right" class="h-5 w-5" />
+					</button>
+					<button
+						type="button"
+						class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-gray-500"
+						:disabled="!canRedo"
+						:title="`בצע שוב (${redoShortcut})`"
+						@click="$emit('redo')"
+					>
+						<Icon name="heroicons:arrow-uturn-left" class="h-5 w-5" />
+					</button>
+				</div>
+
+				<div class="h-6 w-px bg-gray-300" />
 
 				<NuxtLink
 					:to="`/forms/upload?formId=${formId}`"

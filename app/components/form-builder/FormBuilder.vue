@@ -21,7 +21,14 @@
 		reorderElements,
 		loadForm,
 		save,
+		canUndo,
+		canRedo,
+		undo,
+		redo,
 	} = useFormBuilder();
+
+	// Setup keyboard shortcuts for undo/redo
+	useKeyboardShortcuts(undo, redo);
 
 	const { status, triggerSave, forceSave } = useAutoSave({
 		debounceMs: 10000,
@@ -202,7 +209,11 @@
 			:last-saved-at="state.lastSavedAt"
 			:is-dirty="state.isDirty"
 			:form-id="state.formId ?? undefined"
+			:can-undo="canUndo"
+			:can-redo="canRedo"
 			@save="forceSave"
+			@undo="undo"
+			@redo="redo"
 		/>
 
 		<!-- Main content -->

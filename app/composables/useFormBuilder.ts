@@ -4,8 +4,10 @@ import type {
 	ElementType,
 	ElementConfig,
 	FormWithElements,
+	HistoryEntry,
 } from "~/types/form-builder";
 import { isFieldElement } from "./useElementDefaults";
+import { useHistory } from "./useHistory";
 
 function generateClientId(): string {
 	return `el_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -56,6 +58,22 @@ export function useFormBuilder() {
 		saveError: null,
 	});
 
+	// History management for undo/redo (only structural changes: add/remove/move/reorder/duplicate)
+	const history = useHistory();
+	const isUndoRedoOperation = ref(false);
+
+	function getSnapshot(): HistoryEntry {
+		return {
+			elements: JSON.parse(JSON.stringify(state.elements)) as BuilderElement[],
+			selectedElementId: state.selectedElementId,
+		};
+	}
+
+	function recordHistory() {
+		if (isUndoRedoOperation.value) return;
+		history.record(getSnapshot());
+	}
+
 	// Computed properties
 	const selectedElement = computed(() =>
 		state.elements.find((el) => el.clientId === state.selectedElementId)
@@ -100,6 +118,8 @@ export function useFormBuilder() {
 		parentId: string | null = null,
 		position?: number
 	): BuilderElement {
+		recordHistory();
+
 		// Generate unique name for field elements
 		const elementName = isFieldElement(type)
 			? generateUniqueName(type, state.elements)
@@ -123,13 +143,18 @@ export function useFormBuilder() {
 		return newElement;
 	}
 
-	function removeElement(clientId: string) {
+	function removeElement(clientId: string, isRecursiveCall = false) {
+		// Record history only for the top-level call, not recursive children removals
+		if (!isRecursiveCall) {
+			recordHistory();
+		}
+
 		// Also remove children if it's a section
 		const element = state.elements.find((el) => el.clientId === clientId);
 		if (element?.type === "section") {
 			const children = getChildElements(clientId);
 			for (const child of children) {
-				removeElement(child.clientId);
+				removeElement(child.clientId, true);
 			}
 		}
 
@@ -145,6 +170,7 @@ export function useFormBuilder() {
 	}
 
 	function updateElement(clientId: string, updates: Partial<BuilderElement>) {
+		// Note: Property updates are not recorded in history (only structural changes like add/remove/reorder)
 		const element = state.elements.find((el) => el.clientId === clientId);
 		if (element) {
 			Object.assign(element, updates);
@@ -157,6 +183,8 @@ export function useFormBuilder() {
 		newPosition: number,
 		newParentId: string | null = null
 	) {
+		recordHistory();
+
 		const element = state.elements.find((el) => el.clientId === clientId);
 		if (element) {
 			element.position = newPosition;
@@ -170,6 +198,8 @@ export function useFormBuilder() {
 	}
 
 	function duplicateElement(clientId: string): BuilderElement | null {
+		recordHistory();
+
 		const element = state.elements.find((el) => el.clientId === clientId);
 		if (!element) return null;
 
@@ -182,12 +212,27 @@ export function useFormBuilder() {
 
 		const newPosition = getPositionBetween(afterElement || null, nextElement);
 
-		return addElement(
-			element.type,
-			JSON.parse(JSON.stringify(element.config)),
-			element.parentId,
-			newPosition
-		);
+		// Use internal add to avoid double recording
+		const elementName = isFieldElement(element.type)
+			? generateUniqueName(element.type, state.elements)
+			: null;
+
+		const newElement: BuilderElement = {
+			id: null,
+			clientId: generateClientId(),
+			type: element.type,
+			position: newPosition,
+			parentId: element.parentId,
+			name: elementName,
+			config: JSON.parse(JSON.stringify(element.config)),
+			isRequired: false,
+		};
+
+		state.elements.push(newElement);
+		state.isDirty = true;
+		state.selectedElementId = newElement.clientId;
+
+		return newElement;
 	}
 
 	// Reorder elements after drag-and-drop
@@ -195,6 +240,8 @@ export function useFormBuilder() {
 		newOrder: BuilderElement[],
 		parentId: string | null = null
 	) {
+		recordHistory();
+
 		// Update positions based on new order
 		newOrder.forEach((element, index) => {
 			const el = state.elements.find((e) => e.clientId === element.clientId);
@@ -338,6 +385,29 @@ export function useFormBuilder() {
 		}
 	}
 
+	// Undo/Redo operations
+	function performUndo() {
+		const snapshot = history.undo(getSnapshot());
+		if (!snapshot) return;
+
+		isUndoRedoOperation.value = true;
+		state.elements = snapshot.elements;
+		state.selectedElementId = snapshot.selectedElementId;
+		state.isDirty = true;
+		isUndoRedoOperation.value = false;
+	}
+
+	function performRedo() {
+		const snapshot = history.redo(getSnapshot());
+		if (!snapshot) return;
+
+		isUndoRedoOperation.value = true;
+		state.elements = snapshot.elements;
+		state.selectedElementId = snapshot.selectedElementId;
+		state.isDirty = true;
+		isUndoRedoOperation.value = false;
+	}
+
 	// Reset state
 	function reset() {
 		state.formId = null;
@@ -351,6 +421,7 @@ export function useFormBuilder() {
 		state.isSaving = false;
 		state.lastSavedAt = null;
 		state.saveError = null;
+		history.clear();
 	}
 
 	return {
@@ -371,5 +442,10 @@ export function useFormBuilder() {
 		loadForm,
 		save,
 		reset,
+		// History
+		canUndo: history.canUndo,
+		canRedo: history.canRedo,
+		undo: performUndo,
+		redo: performRedo,
 	};
 }

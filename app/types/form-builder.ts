@@ -170,3 +170,9 @@ export interface UploadErrorResponse {
 	statusCode: number;
 	message: string;
 }
+
+// History snapshot for undo/redo
+export interface HistoryEntry {
+	elements: BuilderElement[];
+	selectedElementId: string | null;
+}
