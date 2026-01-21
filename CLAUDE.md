@@ -307,3 +307,20 @@ const props = defineProps<Props>();
 ### Common Patterns in This Project
 
 - **Soft deletes**: Mark as deleted rather than removing from database
+
+## Plan Generation and Storage
+
+When generating implementation plans using the plan mode, follow these conventions:
+
+- **Location**: Save all generated plans in `.claude/plans/` directory
+- **Naming**: Use descriptive, kebab-case names that reflect the plan's purpose
+  - Example: `add-dark-mode-toggle.md`
+  - Example: `refactor-form-validation.md`
+  - Example: `implement-user-authentication.md`
+- **Format**: Save as markdown files with `.md` extension
+- **Content**: Plans should include:
+  - Brief overview of the task
+  - Step-by-step implementation steps
+  - Critical files to modify or create
+  - Any architectural considerations or trade-offs
+  - Testing strategy (if applicable)
