@@ -7,7 +7,7 @@ export interface AutoSaveOptions {
 }
 
 export function useAutoSave(options: AutoSaveOptions) {
-	const { debounceMs = 2000, onSave, onError } = options;
+	const { debounceMs = 10000, onSave, onError } = options;
 
 	const status = ref<SaveStatus>("idle");
 	const lastSavedAt = ref<Date | null>(null);

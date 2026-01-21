@@ -24,7 +24,7 @@
 	} = useFormBuilder();
 
 	const { status, triggerSave, forceSave } = useAutoSave({
-		debounceMs: 2000,
+		debounceMs: 10000,
 		onSave: save,
 		onError: (error) => console.error("Auto-save failed:", error),
 	});
