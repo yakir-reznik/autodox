@@ -1,118 +1,133 @@
 <script setup lang="ts">
-import draggable from "vuedraggable";
-import type { BuilderElement, ElementType } from "~/types/form-builder";
-import { getElementComponent } from "~/composables/useElementDefaults";
-import InputElement from "./InputElement.vue";
-import TextareaElement from "./TextareaElement.vue";
-import SelectionElement from "./SelectionElement.vue";
-import SignatureElement from "./SignatureElement.vue";
-import HeadingElement from "./HeadingElement.vue";
-import ParagraphElement from "./ParagraphElement.vue";
-import MediaElement from "./MediaElement.vue";
-import DividerElement from "./DividerElement.vue";
-import SpacerElement from "./SpacerElement.vue";
-import SectionElement from "./SectionElement.vue";
+	import draggable from "vuedraggable";
+	import type { BuilderElement, ElementType } from "~/types/form-builder";
+	import { getElementComponent } from "~/composables/useElementDefaults";
+	import InputElement from "./InputElement.vue";
+	import TextareaElement from "./TextareaElement.vue";
+	import SelectionElement from "./SelectionElement.vue";
+	import SignatureElement from "./SignatureElement.vue";
+	import HeadingElement from "./HeadingElement.vue";
+	import ParagraphElement from "./ParagraphElement.vue";
+	import MediaElement from "./MediaElement.vue";
+	import DividerElement from "./DividerElement.vue";
+	import SpacerElement from "./SpacerElement.vue";
+	import SectionElement from "./SectionElement.vue";
 
-interface Props {
-	element: BuilderElement;
-	selected: boolean;
-	getChildren: (parentId: string) => BuilderElement[];
-}
-
-const props = defineProps<Props>();
-
-const emit = defineEmits<{
-	select: [clientId?: string];
-	delete: [clientId?: string];
-	duplicate: [clientId?: string];
-	reorder: [elements: BuilderElement[], parentId: string];
-	drop: [type: ElementType, position: number, parentId: string];
-	update: [clientId: string, updates: Partial<BuilderElement>];
-}>();
-
-// Handle config updates from child elements (e.g., drag-and-drop upload in MediaElement)
-function handleConfigUpdate(configUpdates: Record<string, any>) {
-	emit("update", props.element.clientId, {
-		config: { ...props.element.config, ...configUpdates },
-	});
-}
-
-// Get children for section elements
-const children = computed(() => {
-	if (props.element.type === "section") {
-		return props.getChildren(props.element.clientId);
+	interface Props {
+		element: BuilderElement;
+		selected: boolean;
+		getChildren: (parentId: string) => BuilderElement[];
 	}
-	return [];
-});
 
-// Local copy for nested draggable
-const localChildren = computed({
-	get: () => [...children.value],
-	set: (newElements) => {
-		emit("reorder", newElements, props.element.clientId);
-	},
-});
+	const props = defineProps<Props>();
 
-// Handle nested drag
-function handleNestedChange(event: any) {
-	if (event.added) {
-		const { element, newIndex } = event.added;
-		// Only handle drops from palette (no clientId), not moves of existing elements
-		if (element.type && element.config && !element.clientId) {
-			const position = calculateNestedPosition(newIndex);
-			emit("drop", element.type, position, props.element.clientId);
+	const emit = defineEmits<{
+		select: [clientId?: string];
+		delete: [clientId?: string];
+		duplicate: [clientId?: string];
+		reorder: [elements: BuilderElement[], parentId: string];
+		drop: [type: ElementType, position: number, parentId: string];
+		update: [clientId: string, updates: Partial<BuilderElement>];
+	}>();
+
+	// Handle config updates from child elements (e.g., drag-and-drop upload in MediaElement)
+	function handleConfigUpdate(configUpdates: Record<string, any>) {
+		emit("update", props.element.clientId, {
+			config: { ...props.element.config, ...configUpdates },
+		});
+	}
+
+	// Get children for section elements
+	const children = computed(() => {
+		if (props.element.type === "section") {
+			return props.getChildren(props.element.clientId);
+		}
+		return [];
+	});
+
+	// Local copy for nested draggable
+	const localChildren = computed({
+		get: () => [...children.value],
+		set: (newElements) => {
+			emit("reorder", newElements, props.element.clientId);
+		},
+	});
+
+	// Handle nested drag
+	function handleNestedChange(event: any) {
+		if (event.added) {
+			const { element, newIndex } = event.added;
+			// Only handle drops from palette (no clientId), not moves of existing elements
+			if (element.type && element.config && !element.clientId) {
+				const position = calculateNestedPosition(newIndex);
+				emit("drop", element.type, position, props.element.clientId);
+			}
 		}
 	}
-}
 
-function calculateNestedPosition(index: number): number {
-	const elements = children.value;
-	if (elements.length === 0) return 1000;
-	if (index === 0) {
-		return elements[0] ? elements[0].position / 2 : 1000;
+	function calculateNestedPosition(index: number): number {
+		const elements = children.value;
+		if (elements.length === 0) return 1000;
+		if (index === 0) {
+			return elements[0] ? elements[0].position / 2 : 1000;
+		}
+		if (index >= elements.length) {
+			return (elements[elements.length - 1]?.position || 0) + 1000;
+		}
+		const before = elements[index - 1];
+		const after = elements[index];
+		if (!before || !after) return 1000;
+		return (before.position + after.position) / 2;
 	}
-	if (index >= elements.length) {
-		return (elements[elements.length - 1]?.position || 0) + 1000;
-	}
-	const before = elements[index - 1];
-	const after = elements[index];
-	if (!before || !after) return 1000;
-	return (before.position + after.position) / 2;
-}
 
-// Map element types to components
-const componentMap = {
-	InputElement,
-	TextareaElement,
-	SelectionElement,
-	SignatureElement,
-	HeadingElement,
-	ParagraphElement,
-	MediaElement,
-	DividerElement,
-	SpacerElement,
-	SectionElement,
-};
+	// Map element types to components
+	const componentMap = {
+		InputElement,
+		TextareaElement,
+		SelectionElement,
+		SignatureElement,
+		HeadingElement,
+		ParagraphElement,
+		MediaElement,
+		DividerElement,
+		SpacerElement,
+		SectionElement,
+	};
 
-// Determine which component to render
-const elementComponent = computed(() => {
-	const componentName = getElementComponent(props.element.type);
-	if (!componentName) {
-		console.error(`No component mapping for element type: ${props.element.type}`);
-		return null;
-	}
-	return componentMap[componentName as keyof typeof componentMap] || null;
-});
+	// Get section background color for styling
+	const sectionBackgroundColor = computed(() => {
+		if (props.element.type === "section") {
+			const config = props.element.config as { backgroundColor?: string };
+			return config.backgroundColor || "#fff";
+		}
+		return undefined;
+	});
+
+	// Determine which component to render
+	const elementComponent = computed(() => {
+		const componentName = getElementComponent(props.element.type);
+		if (!componentName) {
+			console.error(`No component mapping for element type: ${props.element.type}`);
+			return null;
+		}
+		return componentMap[componentName as keyof typeof componentMap] || null;
+	});
 </script>
 
 <template>
 	<div
-		class="group relative rounded-lg border bg-white transition-all"
+		class="group relative rounded-lg border transition-all"
 		:class="[
+			element.type !== 'section' && 'bg-white',
 			selected
 				? 'border-blue-500 ring-2 ring-blue-200'
 				: 'border-gray-200 hover:border-gray-300',
 		]"
+		:style="
+			element.type === 'section'
+				? { backgroundColor: sectionBackgroundColor }
+				: {}
+		"
 		@click.stop="$emit('select', element.clientId)"
 	>
 		<!-- Drag handle and actions -->
@@ -148,6 +163,7 @@ const elementComponent = computed(() => {
 		<div class="p-4">
 			<component
 				v-if="elementComponent"
+				v-show="element.type !== 'section'"
 				:is="elementComponent"
 				:element="element"
 				@update:config="handleConfigUpdate"
@@ -157,7 +173,7 @@ const elementComponent = computed(() => {
 			</div>
 
 			<!-- Nested elements for sections -->
-			<div v-if="element.type === 'section'" class="mt-4">
+			<div v-if="element.type === 'section'" class="my-4">
 				<draggable
 					v-model="localChildren"
 					group="form-elements"

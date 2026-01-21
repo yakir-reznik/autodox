@@ -22,16 +22,13 @@ function toggleCollapse() {
 	}
 }
 
-const sectionStyle = computed(() => ({
-	backgroundColor: config.value.backgroundColor || "transparent",
-}));
+// Note: backgroundColor is applied by ElementWrapper for section elements
 </script>
 
 <template>
 	<div
 		class="rounded-lg"
 		:class="{ 'border border-gray-200': config.bordered }"
-		:style="sectionStyle"
 	>
 		<!-- Collapse toggle -->
 		<div
