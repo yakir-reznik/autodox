@@ -63,6 +63,7 @@ export default defineEventHandler(async (event) => {
 			prefill?: Record<string, unknown>;
 			additionalData?: Record<string, unknown>;
 			webhook_url?: string;
+			password?: string;
 		}>(event);
 
 		const form = await db.query.formsTable.findFirst({
@@ -112,6 +113,7 @@ export default defineEventHandler(async (event) => {
 			expiresAt,
 			status: "pending",
 			webhookUrl,
+			password: body?.password ?? null,
 		});
 
 		const baseUrl = getRequestURL(event).origin;

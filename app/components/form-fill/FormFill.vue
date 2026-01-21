@@ -10,28 +10,54 @@
 
 	const props = defineProps<Props>();
 
+	// Type for password-protected response
+	type FormResponse =
+		| (FormWithElements & {
+				prefillData?: Record<string, any> | null;
+				submissionStatus?: string | null;
+				isLocked?: boolean;
+				hasPassword?: boolean;
+				requiresPassword?: false;
+		  })
+		| {
+				id: number;
+				title: string;
+				hasPassword: true;
+				requiresPassword: true;
+		  };
+
 	// Fetch form data (include token if present)
 	const {
 		data: form,
 		pending,
 		error,
-	} = await useFetch<
-		FormWithElements & {
-			prefillData?: Record<string, any> | null;
-			submissionStatus?: string | null;
-			isLocked?: boolean;
-		}
-	>(`/api/forms/${props.formId}`, {
+		refresh: refreshForm,
+	} = await useFetch<FormResponse>(`/api/forms/${props.formId}`, {
 		query: {
 			...(props.token && { token: props.token }),
 		},
 	});
 
+	// Check if password is required
+	const requiresPassword = computed(() => {
+		return form.value && "requiresPassword" in form.value && form.value.requiresPassword === true;
+	});
+
+	// Handle password verification
+	async function handlePasswordVerified() {
+		await refreshForm();
+	}
+
 	// Track form entrance when form loads successfully
 	onMounted(async () => {
 		if (form.value && !error.value) {
-			// Check if submission is already locked
-			if (form.value.isLocked) {
+			// Skip if password is required
+			if (requiresPassword.value) {
+				return;
+			}
+
+			// Check if submission is already locked (only available on full form response)
+			if ("isLocked" in form.value && form.value.isLocked) {
 				isAlreadyLocked.value = true;
 				return; // Don't proceed with tracking or prefill
 			}
@@ -60,8 +86,8 @@
 			}
 		}
 
-		// Apply prefill data if available
-		if (form.value?.prefillData) {
+		// Apply prefill data if available (only on full form response)
+		if (form.value && "prefillData" in form.value && form.value.prefillData) {
 			Object.entries(form.value.prefillData).forEach(([fieldName, value]) => {
 				// Find element by name and map to clientId
 				const element = allElements.value.find((el) => el.name === fieldName);
@@ -72,8 +98,11 @@
 		}
 	});
 
-	// Check if form is published
-	const isPublished = computed(() => form.value?.status === "published");
+	// Check if form is published (only check if we have the full form response)
+	const isPublished = computed(() => {
+		if (!form.value || requiresPassword.value) return true; // Assume published until we know
+		return "status" in form.value && form.value.status === "published";
+	});
 
 	// Form data storage (keyed by element id)
 	const formData = reactive<Record<string, any>>({});
@@ -88,7 +117,8 @@
 
 	// Convert server elements to client format with hierarchy
 	const allElements = computed((): BuilderElement[] => {
-		if (!form.value) return [];
+		if (!form.value || requiresPassword.value) return [];
+		if (!("elements" in form.value)) return [];
 
 		return form.value.elements
 			.filter((el) => !el.isDeleted)
@@ -299,6 +329,15 @@
 				<p class="form-fill-error-message">הטופס שאתה מחפש אינו קיים או הוסר.</p>
 			</div>
 		</div>
+
+		<!-- Password gate -->
+		<FormFillPasswordGate
+			v-else-if="requiresPassword"
+			:form-id="formId"
+			:form-title="form?.title ?? ''"
+			:token="token"
+			@verified="handlePasswordVerified"
+		/>
 
 		<!-- Already locked error -->
 		<div v-else-if="isAlreadyLocked" class="grid place-items-center min-h-screen">

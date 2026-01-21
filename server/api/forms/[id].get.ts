@@ -37,8 +37,10 @@ export default defineEventHandler(async (event) => {
 	let prefillData = null;
 	let submissionStatus = null;
 	let isLocked = false;
+	let submission = null;
+
 	if (token) {
-		const submission = await db.query.submissionsTable.findFirst({
+		submission = await db.query.submissionsTable.findFirst({
 			where: eq(submissionsTable.token, token),
 		});
 
@@ -63,8 +65,31 @@ export default defineEventHandler(async (event) => {
 		}
 	}
 
+	// Determine password requirement (submission password > form password)
+	const effectivePassword = submission?.password ?? form.password;
+	const hasPassword = !!effectivePassword;
+
+	// Check if password has been verified via cookie
+	const cookieName = token ? `form_pwd_${token}` : `form_pwd_${id}`;
+	const verifiedCookie = getCookie(event, cookieName);
+	const isPasswordVerified = verifiedCookie === "verified";
+
+	// If password required and not verified, return limited response
+	if (hasPassword && !isPasswordVerified) {
+		return {
+			id: form.id,
+			title: form.title,
+			hasPassword: true,
+			requiresPassword: true,
+		};
+	}
+
+	// Remove password from form object before returning (never expose password)
+	const { password: _password, ...formWithoutPassword } = form;
+
 	return {
-		...form,
+		...formWithoutPassword,
+		hasPassword,
 		prefillData,
 		submissionStatus,
 		isLocked,

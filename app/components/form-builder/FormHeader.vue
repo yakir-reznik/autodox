@@ -21,6 +21,9 @@ const props = withDefaults(defineProps<Props>(), {
 });
 const router = useRouter();
 
+// Settings modal state
+const showSettingsModal = ref(false);
+
 const emit = defineEmits<{
 	"update:title": [value: string];
 	"update:description": [value: string];
@@ -179,6 +182,15 @@ watchEffect(() => {
 
 				<div class="h-6 w-px bg-gray-300" />
 
+				<UiButton
+					variant="secondary"
+					size="sm"
+					title="הגדרות טופס"
+					@click="showSettingsModal = true"
+				>
+					<Icon name="heroicons:cog-6-tooth" class="h-4 w-4" />
+				</UiButton>
+
 				<NuxtLink
 					:to="`/forms/upload?formId=${formId}`"
 					title="Upload JSON to replace form structure"
@@ -200,4 +212,11 @@ watchEffect(() => {
 			</div>
 		</div>
 	</header>
+
+	<!-- Settings Modal -->
+	<FormBuilderFormSettingsModal
+		v-if="formId"
+		v-model="showSettingsModal"
+		:form-id="formId"
+	/>
 </template>
