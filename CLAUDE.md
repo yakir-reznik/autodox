@@ -312,7 +312,7 @@ const props = defineProps<Props>();
 
 When generating implementation plans using the plan mode, follow these conventions:
 
-- **Location**: Save all generated plans in this projects root folder `.claude/plans/` directory
+- **Location**: Save all generated plans in this path: /Users/yakir_reznik/dev/autodox/.claude/plans
 - **Naming**: Use descriptive, kebab-case names that reflect the plan's purpose
   - Example: `add-dark-mode-toggle.md`
   - Example: `refactor-form-validation.md`
