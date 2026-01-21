@@ -7,21 +7,32 @@ Add password protection at two levels:
 
 **Priority rule**: Submission-specific password > Form password > No protection
 
+**Important UX requirement**: Password is stored as **plain text** (not hashed) and displayed directly in the form builder settings. This allows form creators to see and edit the current password.
+
+**Security model**:
+- `GET /api/forms/[id]` (public) returns only `hasPassword: boolean` - never the actual password
+- `GET /api/forms/[id]/settings` (auth required) returns full settings including plain text password
+- Form fill page only knows IF password is required, not what it is
+
 ---
 
 ## Database Changes
 
-### 1. Add to `submissionsTable` (server/db/schema.ts)
+### 1. Update `formsTable` (server/db/schema.ts)
+- ✅ Column exists as `passwordHash`
+- ⚠️ **TODO**: Rename to `password` (plain text storage)
 ```typescript
-passwordHash: varchar("password_hash", { length: 255 }), // null = no submission-specific password
+password: varchar("password", { length: 255 }), // null = no form-level password, stored as plain text
 ```
 
-### 2. Add to `formsTable` (server/db/schema.ts)
+### 2. Update `submissionsTable` (server/db/schema.ts)
+- ✅ Column exists as `passwordHash`
+- ⚠️ **TODO**: Rename to `password` (plain text storage)
 ```typescript
-passwordHash: varchar("password_hash", { length: 255 }), // null = no form-level password
+password: varchar("password", { length: 255 }), // null = no submission-specific password, stored as plain text
 ```
 
-**Migration required**: Run `npx drizzle-kit generate` then `npx drizzle-kit migrate`
+**Migration**: Need to run migration after renaming columns
 
 ---
 
@@ -29,23 +40,30 @@ passwordHash: varchar("password_hash", { length: 255 }), // null = no form-level
 
 ### 1. Update `create-submission-link.post.ts`
 - Accept optional `password` field in request body
-- Hash password using existing scrypt pattern before storing
+- Store password as plain text
 - File: `/server/api/forms/[id]/create-submission-link.post.ts`
 
-### 2. Update `[id].get.ts` (form fetch)
-- Check if password is required (form or submission has passwordHash)
-- If password required, return limited response: `{ requiresPassword: true, formId, title }`
+### 2. Update `[id].get.ts` (form fetch - public)
+- **NEVER return the actual password**
+- Return `hasPassword: boolean` indicating if password protection is enabled (form or submission level)
+- If password required AND not yet verified, return limited response: `{ hasPassword: true, formId, title }`
 - Only return full form data after password verification
 - File: `/server/api/forms/[id].get.ts`
 
-### 3. Create new endpoint: `POST /api/forms/[id]/verify-password`
+### 3. Create new endpoint: `GET /api/forms/[id]/settings` (auth required)
+- Returns form settings including plain text password
+- Only accessible to authenticated users (form creators/admins)
+- Used by form builder to display current password
+- File: `/server/api/forms/[id]/settings.get.ts`
+
+### 4. Create new endpoint: `POST /api/forms/[id]/verify-password`
 - Accepts: `{ token?: string, password: string }`
-- Verifies password against submission-specific hash OR form hash
-- On success: Mark submission as verified (add `passwordVerified` boolean to submissions)
+- Compares password against submission-specific password OR form password (plain text comparison)
+- On success: Mark session as verified (could use cookie/session or mark submission record)
 - Returns: `{ success: true }` or 401 error
 - File: `/server/api/forms/[id]/verify-password.post.ts`
 
-### 4. Update form PATCH endpoint
+### 5. Update form PATCH endpoint
 - Allow setting/removing form password via PATCH
 - File: `/server/api/forms/[id].patch.ts`
 
@@ -55,8 +73,12 @@ passwordHash: varchar("password_hash", { length: 255 }), // null = no form-level
 
 ### 1. Create `FormSettingsModal.vue` component
 - Modal with form settings including password protection
+- Fetch current settings from `GET /api/forms/[id]/settings` (includes plain text password)
 - Toggle to enable/disable password protection
-- Password input field (shown when enabled)
+- **Plain text input** (shown when toggle is on) - regular text input, NOT password type
+- Display current password in the input field (fetched from settings endpoint)
+- **Validation**: Password field cannot be empty when toggle is enabled
+- Toggle off = remove password protection (set password to null)
 - Save button to update form via PATCH
 - File: `/app/components/form-builder/FormSettingsModal.vue`
 
@@ -82,38 +104,28 @@ passwordHash: varchar("password_hash", { length: 255 }), // null = no form-level
 
 ---
 
-## Password Hashing (reuse existing pattern)
-From `server/api/auth/login.post.ts`:
-```typescript
-const scryptAsync = promisify(scrypt);
+## Password Storage (Plain Text)
 
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString("hex");
-  const hash = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${salt}:${hash.toString("hex")}`;
-}
+Passwords are stored as plain text for simplicity and to allow display in the form builder.
 
-async function verifyPassword(storedHash: string, password: string): Promise<boolean> {
-  const [salt, hash] = storedHash.split(":");
-  const hashBuffer = Buffer.from(hash, "hex");
-  const suppliedHashBuffer = (await scryptAsync(password, salt, 64)) as Buffer;
-  return timingSafeEqual(hashBuffer, suppliedHashBuffer);
-}
-```
+**Security considerations**:
+- Form passwords are simple access control, not high-security credentials
+- If DB is compromised, attacker could remove password anyway
+- Trade-off: usability (editable passwords) vs security (hashed passwords)
 
-Create utility file: `/server/utils/password.ts`
+**No utility file needed** - just simple string comparison for verification.
 
 ---
 
 ## Implementation Order
 
-1. Create password utility (`server/utils/password.ts`)
-2. Update database schema (add passwordHash fields)
-3. Run database migration (user will do this)
-4. Update `create-submission-link.post.ts` (accept password param)
-5. Create `verify-password.post.ts` endpoint
-6. Update `[id].get.ts` (check password protection)
-7. Update `[id].patch.ts` (allow setting form password)
+1. Update database schema (rename `passwordHash` → `password` in both tables)
+2. Run database migration (user will do this)
+3. Create `settings.get.ts` endpoint (auth required, returns password)
+4. Update `[id].get.ts` (return `hasPassword` boolean, never actual password)
+5. Update `[id].patch.ts` (allow setting/removing form password)
+6. Create `verify-password.post.ts` endpoint
+7. Update `create-submission-link.post.ts` (accept password param)
 8. Create `PasswordGate.vue` component
 9. Update `FormFill.vue` (integrate password gate)
 10. Create `FormSettingsModal.vue` component
@@ -125,40 +137,50 @@ Create utility file: `/server/utils/password.ts`
 
 | File | Change |
 |------|--------|
-| `server/db/schema.ts` | Add passwordHash to forms & submissions |
-| `server/utils/password.ts` | New - hash/verify utilities |
+| `server/db/schema.ts` | Rename `passwordHash` → `password` in forms & submissions |
+| `server/api/forms/[id]/settings.get.ts` | New - auth required, returns plain text password |
 | `server/api/forms/[id]/create-submission-link.post.ts` | Accept password param |
-| `server/api/forms/[id]/verify-password.post.ts` | New - password verification |
-| `server/api/forms/[id].get.ts` | Check password protection |
-| `server/api/forms/[id].patch.ts` | Allow setting form password |
+| `server/api/forms/[id]/verify-password.post.ts` | New - password verification (plain text compare) |
+| `server/api/forms/[id].get.ts` | Return `hasPassword` boolean, never actual password |
+| `server/api/forms/[id].patch.ts` | Allow setting/removing form password |
 | `app/components/form-fill/PasswordGate.vue` | New - password entry UI |
 | `app/components/form-fill/FormFill.vue` | Integrate password gate |
-| `app/components/form-builder/FormSettingsModal.vue` | New - form settings modal |
+| `app/components/form-builder/FormSettingsModal.vue` | New - form settings modal with plain text password input |
 | `app/components/form-builder/FormHeader.vue` | Add settings button |
 
 ---
 
 ## Verification
 
-1. **Test submission-level password**:
+1. **Test form builder settings**:
+   - Open form in builder → click settings
+   - Enable password toggle → password input should appear (required, cannot be empty)
+   - Enter password → save → reload page
+   - Open settings again → password should be visible in plain text
+
+2. **Test submission-level password**:
    - Create submission link with password via API
    - Access link in browser - should show password prompt
    - Enter wrong password - should show error
    - Enter correct password - should show form
 
-2. **Test form-level password via UI**:
+3. **Test form-level password via UI**:
    - Open form in builder
-   - Click settings button → enable password → save
+   - Click settings button → enable password → enter password → save
    - Create submission link (no password param)
    - Access link - should require form password
 
-3. **Test priority** (submission > form):
+4. **Test priority** (submission > form):
    - Form has password "form123"
    - Create link with password "link456"
    - Only "link456" should work for that specific link
 
-4. **Test removing password**:
+5. **Test removing password**:
    - Form has password set
-   - Open settings modal → disable password → save
+   - Open settings modal → disable toggle → save
    - Create new submission link
    - Access link - should NOT require password
+
+6. **Test security** (password not leaked):
+   - Access `/api/forms/[id]` directly - should NOT contain password field
+   - Access `/api/forms/[id]/settings` without auth - should return 401
