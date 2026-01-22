@@ -172,7 +172,7 @@ export async function deliverWebhook(
 			webhookUrl: "none",
 			status: "success",
 			httpStatusCode: null,
-			requestPayload: payload,
+			requestPayload: payload as unknown as Record<string, unknown>,
 			requestHeaders,
 			responseBody: "No webhook URL configured - skipped delivery",
 			responseHeaders: null,
@@ -192,7 +192,7 @@ export async function deliverWebhook(
 		submissionId,
 		webhookUrl,
 		status: "pending",
-		requestPayload: payload,
+		requestPayload: payload as unknown as Record<string, unknown>,
 		requestHeaders,
 		retryCount: 0,
 	});

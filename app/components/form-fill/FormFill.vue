@@ -75,7 +75,7 @@
 			}
 
 			// Mark submission as started if we have a token and it's not already locked
-			if (props.token && !form.value.isLocked) {
+			if (props.token && !("isLocked" in form.value && form.value.isLocked)) {
 				try {
 					await $fetch(`/api/submissions/${props.token}/start`, {
 						method: "POST",
@@ -383,7 +383,7 @@
 			<!-- Header -->
 			<header class="form-fill-header">
 				<h1 class="form-fill-title">{{ form?.title }}</h1>
-				<p v-if="form?.description" class="form-fill-description">
+				<p v-if="form && 'description' in form && form.description" class="form-fill-description">
 					{{ form.description }}
 				</p>
 			</header>

@@ -7,7 +7,14 @@ import { promisify } from "util";
 const scryptAsync = promisify(scrypt);
 
 async function verifyPassword(storedPassword: string, suppliedPassword: string): Promise<boolean> {
-	const [salt, hash] = storedPassword.split(":");
+	const parts = storedPassword.split(":");
+	if (parts.length !== 2) {
+		return false;
+	}
+	const [salt, hash] = parts;
+	if (!salt || !hash) {
+		return false;
+	}
 	const hashBuffer = Buffer.from(hash, "hex");
 	const suppliedHashBuffer = (await scryptAsync(suppliedPassword, salt, 64)) as Buffer;
 	return timingSafeEqual(hashBuffer, suppliedHashBuffer);

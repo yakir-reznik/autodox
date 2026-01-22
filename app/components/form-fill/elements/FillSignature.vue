@@ -72,9 +72,10 @@ function stopDrawing() {
 
 function getPoint(event: MouseEvent | TouchEvent, rect: DOMRect) {
 	if ("touches" in event) {
+		const touch = event.touches[0];
 		return {
-			x: event.touches[0].clientX - rect.left,
-			y: event.touches[0].clientY - rect.top,
+			x: (touch?.clientX ?? 0) - rect.left,
+			y: (touch?.clientY ?? 0) - rect.top,
 		};
 	}
 	return {

@@ -31,7 +31,7 @@ function generateUniqueName(
 
 	for (const name of existingNames) {
 		const match = name.match(pattern);
-		if (match) {
+		if (match && match[1]) {
 			const num = parseInt(match[1], 10);
 			if (num > maxNumber) {
 				maxNumber = num;
@@ -269,7 +269,7 @@ export function useFormBuilder() {
 	}
 
 	async function loadForm(id: number) {
-		const response = (await $fetch(`/api/forms/${id}`)) as FormWithElements;
+		const response = await $fetch<FormWithElements>(`/api/forms/${id}`);
 
 		state.formId = response.id;
 		state.title = response.title;

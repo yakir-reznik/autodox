@@ -206,14 +206,14 @@ export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 
 	// Colors
 	const colors = {
-		primary: [37, 99, 235], // blue-600
-		secondary: [100, 116, 139], // slate-500
-		success: [34, 197, 94], // green-500
-		warning: [245, 158, 11], // amber-500
-		danger: [239, 68, 68], // red-500
-		text: [30, 41, 59], // slate-800
-		muted: [148, 163, 184], // slate-400
-		border: [226, 232, 240], // slate-200
+		primary: [37, 99, 235] as [number, number, number], // blue-600
+		secondary: [100, 116, 139] as [number, number, number], // slate-500
+		success: [34, 197, 94] as [number, number, number], // green-500
+		warning: [245, 158, 11] as [number, number, number], // amber-500
+		danger: [239, 68, 68] as [number, number, number], // red-500
+		text: [30, 41, 59] as [number, number, number], // slate-800
+		muted: [148, 163, 184] as [number, number, number], // slate-400
+		border: [226, 232, 240] as [number, number, number], // slate-200
 	};
 
 	let yPosition = 20;
@@ -273,7 +273,7 @@ export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 	};
 
 	// Helper to add field
-	const addField = (label: string, value: string, color: number[] = colors.text) => {
+	const addField = (label: string, value: string, color: [number, number, number] = colors.text) => {
 		checkNewPage(10);
 		doc.setFontSize(10);
 

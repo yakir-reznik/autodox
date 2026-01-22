@@ -41,7 +41,7 @@ export const THEME_DEFINITIONS: ThemeDefinition[] = [
 ];
 
 export function getThemeDefinition(themeId: FormTheme): ThemeDefinition {
-	return THEME_DEFINITIONS.find((t) => t.id === themeId) || THEME_DEFINITIONS[0];
+	return THEME_DEFINITIONS.find((t) => t.id === themeId) ?? THEME_DEFINITIONS[0]!;
 }
 
 export function getThemeOptionsForSelect() {
