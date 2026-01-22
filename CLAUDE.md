@@ -319,8 +319,8 @@ When generating implementation plans using the plan mode, follow these conventio
   - Example: `implement-user-authentication.md`
 - **Format**: Save as markdown files with `.md` extension
 - **Content**: Plans should include:
+  - When writing plans, break the implementation into small, self-contained steps. Each step should be clear and executable on its own, without relying on previous context or implicit knowledge.
   - Brief overview of the task
   - Step-by-step implementation steps
   - Critical files to modify or create
   - Any architectural considerations or trade-offs
-  - Testing strategy (if applicable)
