@@ -23,6 +23,7 @@ const error = ref<string | null>(null);
 const passwordEnabled = ref(false);
 const password = ref("");
 const passwordError = ref<string | null>(null);
+const allowPublicSubmissions = ref(true);
 
 // Fetch settings when modal opens
 watch(
@@ -44,10 +45,12 @@ async function fetchSettings() {
 			id: number;
 			title: string;
 			password: string | null;
+			allowPublicSubmissions: boolean;
 		}>(`/api/forms/${props.formId}/settings`);
 
 		passwordEnabled.value = !!data.password;
 		password.value = data.password ?? "";
+		allowPublicSubmissions.value = data.allowPublicSubmissions ?? true;
 	} catch (e: any) {
 		error.value = e.data?.message || "Failed to load settings";
 	} finally {
@@ -93,6 +96,7 @@ async function saveSettings() {
 			method: "PATCH",
 			body: {
 				password: passwordEnabled.value ? password.value : null,
+				allowPublicSubmissions: allowPublicSubmissions.value,
 			},
 		});
 
@@ -123,6 +127,51 @@ function close() {
 
 		<!-- Settings form -->
 		<div v-else class="space-y-6">
+			<!-- Form access section -->
+			<div class="space-y-4">
+				<div>
+					<h3 class="text-sm font-medium text-gray-900">גישה לטופס</h3>
+					<p class="text-sm text-gray-500 mt-1">
+						בחר מי יכול למלא ולשלוח את הטופס
+					</p>
+				</div>
+
+				<div class="space-y-3">
+					<label class="flex items-start gap-3 cursor-pointer">
+						<input
+							type="radio"
+							:checked="allowPublicSubmissions"
+							@change="allowPublicSubmissions = true"
+							class="mt-1"
+						/>
+						<div>
+							<span class="text-sm font-medium text-gray-900">פתוח לכולם</span>
+							<p class="text-xs text-gray-500">
+								כל מי שיש לו את כתובת הטופס יכול למלא ולשלוח
+							</p>
+						</div>
+					</label>
+
+					<label class="flex items-start gap-3 cursor-pointer">
+						<input
+							type="radio"
+							:checked="!allowPublicSubmissions"
+							@change="allowPublicSubmissions = false"
+							class="mt-1"
+						/>
+						<div>
+							<span class="text-sm font-medium text-gray-900">קישור אישי בלבד</span>
+							<p class="text-xs text-gray-500">
+								רק משתמשים עם קישור ייעודי יוכלו למלא את הטופס
+							</p>
+						</div>
+					</label>
+				</div>
+			</div>
+
+			<!-- Divider -->
+			<div class="border-t border-gray-200"></div>
+
 			<!-- Password protection section -->
 			<div class="space-y-4">
 				<div class="flex items-center justify-between">

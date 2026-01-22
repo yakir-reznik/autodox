@@ -39,7 +39,22 @@ export default defineEventHandler(async (event) => {
 
 	// Get submissions for this page
 	const submissions = await db
-		.select()
+		.select({
+			id: submissionsTable.id,
+			token: submissionsTable.token,
+			formId: submissionsTable.formId,
+			prefillData: submissionsTable.prefillData,
+			additionalData: submissionsTable.additionalData,
+			createdByUserId: submissionsTable.createdByUserId,
+			expiresAt: submissionsTable.expiresAt,
+			status: submissionsTable.status,
+			isPublic: submissionsTable.isPublic,
+			submissionData: submissionsTable.submissionData,
+			createdAt: submissionsTable.createdAt,
+			startedAt: submissionsTable.startedAt,
+			submittedAt: submissionsTable.submittedAt,
+			lockedAt: submissionsTable.lockedAt,
+		})
 		.from(submissionsTable)
 		.where(eq(submissionsTable.formId, id))
 		.orderBy(desc(submissionsTable.createdAt))

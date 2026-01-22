@@ -68,7 +68,7 @@ Add a form-level setting in FormSettingsModal that controls whether a form allow
 
 ## Implementation Steps
 
-### 1. Database Migration
+### 1. Database Migration ✅
 
 **File**: New migration via `npx drizzle-kit generate`
 
@@ -77,7 +77,7 @@ ALTER TABLE `forms_table` ADD `allow_public_submissions` boolean DEFAULT true NO
 ALTER TABLE `submissions_table` ADD `is_public` boolean DEFAULT false NOT NULL;
 ```
 
-### 2. Update Schema Definition
+### 2. Update Schema Definition ✅
 
 **File**: `server/db/schema.ts`
 
@@ -93,7 +93,7 @@ Add to `submissionsTable` (after line 323 - after `status`):
 isPublic: boolean("is_public").notNull().default(false),
 ```
 
-### 3. API - Settings GET Endpoint
+### 3. API - Settings GET Endpoint ✅
 
 **File**: `server/api/forms/[id]/settings.get.ts`
 
@@ -106,7 +106,7 @@ return {
 };
 ```
 
-### 4. API - Form PATCH Endpoint
+### 4. API - Form PATCH Endpoint ✅
 
 **File**: `server/api/forms/[id].patch.ts`
 
@@ -125,100 +125,26 @@ const ALLOWED_FIELDS = [
 
 Return `allowPublicSubmissions` in the response so the client knows if public submission is allowed.
 
-### 6. API - New Public Submit Endpoint
+### 6. API - Unified Form Submit Endpoint ✅
 
-**File**: `server/api/forms/[id]/public-submit.post.ts` (NEW FILE)
+**File**: `server/api/forms/[id]/submit.post.ts` (NEW FILE)
 
-This endpoint handles submissions when no token exists:
+This endpoint handles both token-based and public submissions:
 
-```typescript
-import { createHash, randomBytes } from "crypto";
-import { eq } from "drizzle-orm";
-import { db } from "~~/server/db";
-import { formsTable, submissionsTable } from "~~/server/db/schema";
-import { deliverWebhook } from "~~/server/utils/webhookDelivery";
+- **With token in body**: Updates existing submission (same as legacy flow)
+- **Without token**: Checks `allowPublicSubmissions` and creates a new public submission
 
-function generateToken(): string {
-  const timestamp = Date.now().toString();
-  const random = randomBytes(16).toString("hex");
-  return createHash("sha256")
-    .update(`${timestamp}-${random}`)
-    .digest("hex")
-    .substring(0, 32);
-}
+Key logic:
 
-export default defineEventHandler(async (event) => {
-  const formId = Number(getRouterParam(event, "id"));
-  const body = await readBody(event);
-  const { submissionData } = body;
+1. If `token` provided → find submission, validate, update with `submissionData`, lock it
+2. If no `token` → check `form.allowPublicSubmissions`, if true create new submission with `isPublic: true`
+3. Returns 403 error if public submissions not allowed and no token provided
 
-  if (isNaN(formId)) {
-    throw createError({ statusCode: 400, message: "Invalid form ID" });
-  }
-
-  if (!submissionData || typeof submissionData !== "object") {
-    throw createError({ statusCode: 400, message: "Submission data is required" });
-  }
-
-  // 1. Get form and check allowPublicSubmissions
-  const form = await db.query.formsTable.findFirst({
-    where: eq(formsTable.id, formId),
-  });
-
-  if (!form) {
-    throw createError({ statusCode: 404, message: "Form not found" });
-  }
-
-  if (!form.allowPublicSubmissions) {
-    throw createError({
-      statusCode: 403,
-      message: "טופס זה דורש קישור אישי לשליחה",
-    });
-  }
-
-  if (form.status !== "published") {
-    throw createError({ statusCode: 400, message: "Form is not published" });
-  }
-
-  // 2. Generate token and create submission record
-  const token = generateToken();
-  const now = new Date();
-
-  const [insertResult] = await db.insert(submissionsTable).values({
-    token,
-    formId,
-    isPublic: true,
-    createdByUserId: null,
-    expiresAt: now, // Already expired since it's immediately locked
-    status: "locked",
-    submissionData,
-    submittedAt: now,
-    lockedAt: now,
-    webhookUrl: form.webhookUrl,
-  });
-
-  const submissionId = insertResult.insertId;
-
-  // 3. Trigger webhook if configured (fire-and-forget)
-  if (form.webhookUrl) {
-    deliverWebhook(submissionId, form.webhookUrl)
-      .then((result) => {
-        console.log(`[Webhook] Delivery completed for public submission ${submissionId}:`, result);
-      })
-      .catch((error) => {
-        console.error(`[Webhook] Delivery failed for public submission ${submissionId}:`, error);
-      });
-  }
-
-  return { success: true, message: "Form submitted successfully" };
-});
-```
-
-### 7. FormFill.vue - Update Submit Logic
+### 7. FormFill.vue - Update Submit Logic ✅
 
 **File**: `app/components/form-fill/FormFill.vue`
 
-Update `handleSubmit()` function (around line 271):
+Update `handleSubmit()` function to use the unified endpoint:
 
 ```typescript
 async function handleSubmit() {
@@ -237,19 +163,11 @@ async function handleSubmit() {
       }
     });
 
-    if (props.token) {
-      // Existing flow - submit with token
-      await $fetch(`/api/submissions/${props.token}/submit`, {
-        method: "POST",
-        body: { submissionData },
-      });
-    } else {
-      // New flow - public submission (auto-generate token on server)
-      await $fetch(`/api/forms/${props.formId}/public-submit`, {
-        method: "POST",
-        body: { submissionData },
-      });
-    }
+    // Use unified endpoint - pass token if available
+    await $fetch(`/api/forms/${props.formId}/submit`, {
+      method: "POST",
+      body: { submissionData, token: props.token },
+    });
 
     isSubmitted.value = true;
   } catch (error: any) {
@@ -266,18 +184,9 @@ async function handleSubmit() {
 }
 ```
 
-**IMPORTANT**: Remove the early return check for missing token (delete lines 276-281):
+**IMPORTANT**: Remove the early return check for missing token (delete the block that checks `if (!props.token)` and returns early).
 
-```typescript
-// DELETE THIS BLOCK:
-if (!props.token) {
-  console.error("No submission token provided");
-  alert("לא ניתן לשלוח: חסר טוקן שליחה");
-  return;
-}
-```
-
-### 8. FormSettingsModal - Add State & UI
+### 8. FormSettingsModal - Add State & UI ✅
 
 **File**: `app/components/form-builder/FormSettingsModal.vue`
 
@@ -363,7 +272,7 @@ await $fetch(`/api/forms/${props.formId}`, {
 <div class="border-t border-gray-200"></div>
 ```
 
-### 9. Submissions List - Show Public Indicator
+### 9. Submissions List - Show Public Indicator ✅
 
 **File**: `app/pages/submissions/[form_id].vue`
 
@@ -396,7 +305,7 @@ Update the status column in the table (around line 445) to include a public indi
 </td>
 ```
 
-### 10. API - Submissions List Endpoint
+### 10. API - Submissions List Endpoint ✅
 
 **File**: `server/api/forms/[id]/submissions.get.ts`
 
@@ -405,8 +314,8 @@ Ensure `isPublic` is included in the select query and returned in the response.
 ## Critical Files
 
 1. `server/db/schema.ts` - Add `allowPublicSubmissions` to forms, `isPublic` to submissions
-2. `server/api/forms/[id]/public-submit.post.ts` - **NEW**: Handle public submissions
-3. `app/components/form-fill/FormFill.vue` - Update submit logic for both flows
+2. `server/api/forms/[id]/submit.post.ts` - **NEW**: Unified submit endpoint (token + public)
+3. `app/components/form-fill/FormFill.vue` - Update submit logic to use unified endpoint
 4. `app/components/form-builder/FormSettingsModal.vue` - Add form access setting UI
 5. `app/pages/submissions/[form_id].vue` - Show public submission indicator
 6. `server/api/forms/[id]/settings.get.ts` - Return `allowPublicSubmissions`

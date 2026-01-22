@@ -230,6 +230,9 @@ export const formsTable = mysqlTable("forms_table", {
 	// Password protection (stored as plain text for admin visibility)
 	password: varchar("password", { length: 255 }),
 
+	// Public submissions setting (true = anyone can submit, false = requires token/link)
+	allowPublicSubmissions: boolean("allow_public_submissions").notNull().default(true),
+
 	// Authorship
 	createdBy: int("created_by")
 		.notNull()
@@ -321,6 +324,9 @@ export const submissionsTable = mysqlTable("submissions_table", {
 
 	// Lifecycle tracking
 	status: mysqlEnum("status", submissionStatusEnum).notNull().default("pending"),
+
+	// Whether this is a public submission (auto-created) vs admin-created
+	isPublic: boolean("is_public").notNull().default(false),
 
 	// Submission data (filled when user submits)
 	submissionData: json("submission_data").$type<Record<string, unknown>>(),

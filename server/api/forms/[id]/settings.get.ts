@@ -40,5 +40,6 @@ export default defineEventHandler(async (event) => {
 		theme: form.theme,
 		webhookUrl: form.webhookUrl,
 		password: form.password,
+		allowPublicSubmissions: form.allowPublicSubmissions,
 	};
 });

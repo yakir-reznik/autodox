@@ -10,7 +10,7 @@
 
 	const props = defineProps<Props>();
 
-	// Type for password-protected response
+	// Type for password-protected or token-required response
 	type FormResponse =
 		| (FormWithElements & {
 				prefillData?: Record<string, any> | null;
@@ -18,12 +18,19 @@
 				isLocked?: boolean;
 				hasPassword?: boolean;
 				requiresPassword?: false;
+				requiresToken?: false;
 		  })
 		| {
 				id: number;
 				title: string;
 				hasPassword: true;
 				requiresPassword: true;
+		  }
+		| {
+				id: number;
+				title: string;
+				description?: string | null;
+				requiresToken: true;
 		  };
 
 	// Fetch form data (include token if present)
@@ -43,6 +50,11 @@
 		return form.value && "requiresPassword" in form.value && form.value.requiresPassword === true;
 	});
 
+	// Check if token is required (form doesn't allow public submissions)
+	const requiresToken = computed(() => {
+		return form.value && "requiresToken" in form.value && form.value.requiresToken === true;
+	});
+
 	// Handle password verification
 	async function handlePasswordVerified() {
 		await refreshForm();
@@ -51,8 +63,8 @@
 	// Track form entrance when form loads successfully
 	onMounted(async () => {
 		if (form.value && !error.value) {
-			// Skip if password is required
-			if (requiresPassword.value) {
+			// Skip if password or token is required
+			if (requiresPassword.value || requiresToken.value) {
 				return;
 			}
 
@@ -100,7 +112,7 @@
 
 	// Check if form is published (only check if we have the full form response)
 	const isPublished = computed(() => {
-		if (!form.value || requiresPassword.value) return true; // Assume published until we know
+		if (!form.value || requiresPassword.value || requiresToken.value) return true; // Assume published until we know
 		return "status" in form.value && form.value.status === "published";
 	});
 
@@ -117,7 +129,7 @@
 
 	// Convert server elements to client format with hierarchy
 	const allElements = computed((): BuilderElement[] => {
-		if (!form.value || requiresPassword.value) return [];
+		if (!form.value || requiresPassword.value || requiresToken.value) return [];
 		if (!("elements" in form.value)) return [];
 
 		return form.value.elements
@@ -273,13 +285,6 @@
 			return;
 		}
 
-		// Check if we have a submission token
-		if (!props.token) {
-			console.error("No submission token provided");
-			alert("לא ניתן לשלוח: חסר טוקן שליחה");
-			return;
-		}
-
 		isSubmitting.value = true;
 
 		try {
@@ -294,18 +299,21 @@
 				}
 			});
 
-			// Submit to API
-			await $fetch(`/api/submissions/${props.token}/submit`, {
+			// Use unified endpoint - pass token if available
+			await $fetch(`/api/forms/${props.formId}/submit`, {
 				method: "POST",
-				body: {
-					submissionData,
-				},
+				body: { submissionData, token: props.token },
 			});
 
 			isSubmitted.value = true;
 		} catch (error: any) {
 			console.error("Submission error:", error);
-			alert(error?.data?.message || "שליחת הטופס נכשלה. אנא נסה שוב.");
+			// Handle 403 for "requires link" error
+			if (error?.statusCode === 403) {
+				alert(error?.data?.message || "טופס זה דורש קישור אישי לשליחה");
+			} else {
+				alert(error?.data?.message || "שליחת הטופס נכשלה. אנא נסה שוב.");
+			}
 		} finally {
 			isSubmitting.value = false;
 		}
@@ -337,6 +345,13 @@
 			:form-title="form?.title ?? ''"
 			:token="token"
 			@verified="handlePasswordVerified"
+		/>
+
+		<!-- Token gate (requires personal link) -->
+		<FormFillTokenGate
+			v-else-if="requiresToken"
+			:form-title="form?.title ?? ''"
+			:form-description="form && 'description' in form ? form.description : null"
 		/>
 
 		<!-- Already locked error -->

@@ -33,6 +33,20 @@ export default defineEventHandler(async (event) => {
 		});
 	}
 
+	// Check for token in query params
+	const hasValidToken = !!token;
+
+	// If form requires token (doesn't allow public submissions) and no token provided,
+	// return limited response similar to password gate
+	if (!form.allowPublicSubmissions && !hasValidToken) {
+		return {
+			id: form.id,
+			title: form.title,
+			description: form.description,
+			requiresToken: true,
+		};
+	}
+
 	// If token is provided, fetch submission data for prefill
 	let prefillData = null;
 	let submissionStatus = null;

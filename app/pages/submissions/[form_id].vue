@@ -8,6 +8,7 @@
 		createdByUserId: number | null;
 		expiresAt: string;
 		status: "pending" | "in_progress" | "submitted" | "locked";
+		isPublic: boolean;
 		submissionData: Record<string, unknown> | null;
 		createdAt: string;
 		startedAt: string | null;
@@ -443,12 +444,22 @@
 								{{ submission.id }}
 							</td>
 							<td class="px-6 py-4 text-sm whitespace-nowrap">
-								<span
-									class="rounded-full px-2.5 py-0.5 text-xs font-medium"
-									:class="statusColors[submission.status]"
-								>
-									{{ statusLabels[submission.status] }}
-								</span>
+								<div class="flex items-center gap-2">
+									<span
+										class="rounded-full px-2.5 py-0.5 text-xs font-medium"
+										:class="statusColors[submission.status]"
+									>
+										{{ statusLabels[submission.status] }}
+									</span>
+									<span
+										v-if="submission.isPublic"
+										class="rounded-full bg-purple-100 text-purple-800 px-2 py-0.5 text-xs font-medium flex items-center gap-1"
+										title="הגשה ציבורית"
+									>
+										<Icon name="heroicons:globe-alt" class="h-3 w-3" />
+										ציבורי
+									</span>
+								</div>
 							</td>
 							<td
 								class="px-6 py-4 text-sm text-gray-600 text-center whitespace-nowrap"
