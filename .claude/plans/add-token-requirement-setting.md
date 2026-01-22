@@ -1,163 +1,361 @@
-# Implementation Plan: Token-Required Form Access Control
+# Implementation Plan: Public Form Submissions Setting
 
 ## Overview
-Add a form-level setting in FormSettingsModal that controls whether a form requires a submission token to be filled. This provides access control: forms can be either publicly accessible or private (token-only).
+
+Add a form-level setting in FormSettingsModal that controls whether a form allows public submissions (anyone can fill and submit) or requires a pre-created submission link (token required). For public forms, automatically generate a unique token on submission and track these as "public" submissions.
+
+## User-Facing Phrasing (Hebrew)
+
+**Setting Label**: "גישה לטופס" (Form Access)
+
+**Options**:
+
+1. **"פתוח לכולם"** (Open to everyone) - Default
+   - Help text: "כל מי שיש לו את כתובת הטופס יכול למלא ולשלוח"
+   - (Anyone with the form URL can fill and submit)
+
+2. **"קישור אישי בלבד"** (Personal link only)
+   - Help text: "רק משתמשים עם קישור ייעודי יוכלו למלא את הטופס"
+   - (Only users with a dedicated link can fill the form)
+
+**Submissions list indicator**: For public submissions, show a badge "הגשה ציבורית" (Public submission) or a globe icon to distinguish from admin-created submission links.
 
 ## Design Decisions
 
-### Field Details
-- **Database field**: `requiresToken` (boolean, default `false`)
-- **Hebrew label**: "דורש קישור ייעודי" (Requires dedicated link)
-- **Help text**: "כאשר מופעל, רק משתמשים עם קישור ייעודי יוכלו למלא את הטופס"
-- **Default**: `false` for backward compatibility (existing forms remain publicly accessible)
+### Database Changes
 
-### Access Control Flow
-1. User accesses `/fill/[id]` (no token) → Check if form requires token
-2. If `requiresToken: true` and no token → Show 403 error with message
-3. If `requiresToken: true` and token provided → Validate token, then check password (if any)
-4. If `requiresToken: false` → Allow access (token optional)
+**1. forms_table - New column:**
 
-### Error Message
-**Title**: "נדרש קישור ייעודי"
-**Message**: "טופס זה זמין רק באמצעות קישור ייעודי. אנא פנה למנהל המערכת לקבלת הקישור."
+```sql
+`allow_public_submissions` boolean DEFAULT true NOT NULL
+```
+
+- Default `true` for backward compatibility (existing forms remain accessible)
+
+**2. submissions_table - New column:**
+
+```sql
+`is_public` boolean DEFAULT false NOT NULL
+```
+
+- Indicates if submission was auto-created (public) vs admin-created (via API)
+- Public submissions have `createdByUserId` = NULL and `isPublic` = TRUE
+
+### Access Flow
+
+**Current flow (with token):**
+
+1. Admin creates submission link → token generated
+2. User accesses `/fill/{id}?token=xxx` → submission tracked
+3. User submits → updates existing submission record
+
+**New flow (public submissions):**
+
+1. Form has `allowPublicSubmissions: true`
+2. User accesses `/fill/{id}` (no token) → form loads normally
+3. User submits → NEW submission record auto-created with:
+   - Auto-generated token
+   - `isPublic: true`
+   - `createdByUserId: null`
+   - `status: locked` (immediately submitted)
+4. Return success
+
+**Blocked flow (requires link):**
+
+1. Form has `allowPublicSubmissions: false`
+2. User accesses `/fill/{id}` (no token) → form loads normally (can view)
+3. User tries to submit → error message explaining they need a dedicated link
 
 ## Implementation Steps
 
 ### 1. Database Migration
-**File**: Create new migration file via `npx drizzle-kit generate`
 
-Add column to forms_table:
+**File**: New migration via `npx drizzle-kit generate`
+
 ```sql
-ALTER TABLE `forms_table` ADD `requires_token` boolean DEFAULT false NOT NULL;
+ALTER TABLE `forms_table` ADD `allow_public_submissions` boolean DEFAULT true NOT NULL;
+ALTER TABLE `submissions_table` ADD `is_public` boolean DEFAULT false NOT NULL;
 ```
 
 ### 2. Update Schema Definition
-**File**: `/Users/yakir_reznik/dev/autodox/server/db/schema.ts` (line ~231)
 
-Add after `password` field:
+**File**: `server/db/schema.ts`
+
+Add to `formsTable` (after line 231 - after `password`):
+
 ```typescript
-requiresToken: boolean("requires_token").notNull().default(false),
+allowPublicSubmissions: boolean("allow_public_submissions").notNull().default(true),
+```
+
+Add to `submissionsTable` (after line 323 - after `status`):
+
+```typescript
+isPublic: boolean("is_public").notNull().default(false),
 ```
 
 ### 3. API - Settings GET Endpoint
-**File**: `/Users/yakir_reznik/dev/autodox/server/api/forms/[id]/settings.get.ts` (line ~42)
+
+**File**: `server/api/forms/[id]/settings.get.ts`
 
 Add to return object:
+
 ```typescript
 return {
   // ... existing fields
-  requiresToken: form.requiresToken,
+  allowPublicSubmissions: form.allowPublicSubmissions,
 };
 ```
 
 ### 4. API - Form PATCH Endpoint
-**File**: `/Users/yakir_reznik/dev/autodox/server/api/forms/[id].patch.ts` (line 5)
 
-Add to whitelist:
+**File**: `server/api/forms/[id].patch.ts`
+
+Add to allowed fields:
+
 ```typescript
 const ALLOWED_FIELDS = [
   // ... existing fields
-  "requiresToken"
+  "allowPublicSubmissions",
 ] as const;
 ```
 
-### 5. API - Form GET Endpoint (Critical Change)
-**File**: `/Users/yakir_reznik/dev/autodox/server/api/forms/[id].get.ts` (insert after line 34, BEFORE password check)
+### 5. API - Form GET Endpoint
 
-Add token validation logic:
+**File**: `server/api/forms/[id].get.ts`
+
+Return `allowPublicSubmissions` in the response so the client knows if public submission is allowed.
+
+### 6. API - New Public Submit Endpoint
+
+**File**: `server/api/forms/[id]/public-submit.post.ts` (NEW FILE)
+
+This endpoint handles submissions when no token exists:
+
 ```typescript
-// Check if form requires token
-if (form.requiresToken && !token) {
-  throw createError({
-    statusCode: 403,
-    message: "This form requires a dedicated link to access",
-    data: {
-      requiresToken: true,
-      formTitle: form.title,
-    }
-  });
+import { createHash, randomBytes } from "crypto";
+import { eq } from "drizzle-orm";
+import { db } from "~~/server/db";
+import { formsTable, submissionsTable } from "~~/server/db/schema";
+import { deliverWebhook } from "~~/server/utils/webhookDelivery";
+
+function generateToken(): string {
+  const timestamp = Date.now().toString();
+  const random = randomBytes(16).toString("hex");
+  return createHash("sha256")
+    .update(`${timestamp}-${random}`)
+    .digest("hex")
+    .substring(0, 32);
 }
 
-// If token provided for token-required form, validate it
-if (form.requiresToken && token) {
-  const submission = await db.query.submissionsTable.findFirst({
-    where: eq(submissionsTable.token, token),
+export default defineEventHandler(async (event) => {
+  const formId = Number(getRouterParam(event, "id"));
+  const body = await readBody(event);
+  const { submissionData } = body;
+
+  if (isNaN(formId)) {
+    throw createError({ statusCode: 400, message: "Invalid form ID" });
+  }
+
+  if (!submissionData || typeof submissionData !== "object") {
+    throw createError({ statusCode: 400, message: "Submission data is required" });
+  }
+
+  // 1. Get form and check allowPublicSubmissions
+  const form = await db.query.formsTable.findFirst({
+    where: eq(formsTable.id, formId),
   });
 
-  if (!submission || submission.formId !== id) {
+  if (!form) {
+    throw createError({ statusCode: 404, message: "Form not found" });
+  }
+
+  if (!form.allowPublicSubmissions) {
     throw createError({
       statusCode: 403,
-      message: "Invalid or expired link",
-      data: {
-        requiresToken: true,
-        formTitle: form.title,
-      }
+      message: "טופס זה דורש קישור אישי לשליחה",
     });
   }
 
-  // Check token expiry
-  if (new Date() > new Date(submission.expiresAt)) {
-    throw createError({
-      statusCode: 410,
-      message: "Submission link has expired",
+  if (form.status !== "published") {
+    throw createError({ statusCode: 400, message: "Form is not published" });
+  }
+
+  // 2. Generate token and create submission record
+  const token = generateToken();
+  const now = new Date();
+
+  const [insertResult] = await db.insert(submissionsTable).values({
+    token,
+    formId,
+    isPublic: true,
+    createdByUserId: null,
+    expiresAt: now, // Already expired since it's immediately locked
+    status: "locked",
+    submissionData,
+    submittedAt: now,
+    lockedAt: now,
+    webhookUrl: form.webhookUrl,
+  });
+
+  const submissionId = insertResult.insertId;
+
+  // 3. Trigger webhook if configured (fire-and-forget)
+  if (form.webhookUrl) {
+    deliverWebhook(submissionId, form.webhookUrl)
+      .then((result) => {
+        console.log(`[Webhook] Delivery completed for public submission ${submissionId}:`, result);
+      })
+      .catch((error) => {
+        console.error(`[Webhook] Delivery failed for public submission ${submissionId}:`, error);
+      });
+  }
+
+  return { success: true, message: "Form submitted successfully" };
+});
+```
+
+### 7. FormFill.vue - Update Submit Logic
+
+**File**: `app/components/form-fill/FormFill.vue`
+
+Update `handleSubmit()` function (around line 271):
+
+```typescript
+async function handleSubmit() {
+  if (!validateAll()) return;
+
+  isSubmitting.value = true;
+
+  try {
+    // Convert formData to use element names instead of clientIds
+    const submissionData: Record<string, any> = {};
+    Object.entries(formData).forEach(([clientId, value]) => {
+      const element = allElements.value.find((el) => el.clientId === clientId);
+      if (element && isFieldElement(element.type)) {
+        const key = element.name || clientId;
+        submissionData[key] = value;
+      }
     });
+
+    if (props.token) {
+      // Existing flow - submit with token
+      await $fetch(`/api/submissions/${props.token}/submit`, {
+        method: "POST",
+        body: { submissionData },
+      });
+    } else {
+      // New flow - public submission (auto-generate token on server)
+      await $fetch(`/api/forms/${props.formId}/public-submit`, {
+        method: "POST",
+        body: { submissionData },
+      });
+    }
+
+    isSubmitted.value = true;
+  } catch (error: any) {
+    console.error("Submission error:", error);
+    // Handle 403 for "requires link" error
+    if (error?.statusCode === 403) {
+      alert(error?.data?.message || "טופס זה דורש קישור אישי לשליחה");
+    } else {
+      alert(error?.data?.message || "שליחת הטופס נכשלה. אנא נסה שוב.");
+    }
+  } finally {
+    isSubmitting.value = false;
   }
 }
 ```
 
-**Important**: This check must happen BEFORE the password check (currently at line 68-85).
+**IMPORTANT**: Remove the early return check for missing token (delete lines 276-281):
 
-### 6. FormSettingsModal - Add State
-**File**: `/Users/yakir_reznik/dev/autodox/app/components/form-builder/FormSettingsModal.vue`
-
-**Add reactive ref** (after line 24):
 ```typescript
-const requiresToken = ref(false);
+// DELETE THIS BLOCK:
+if (!props.token) {
+  console.error("No submission token provided");
+  alert("לא ניתן לשלוח: חסר טוקן שליחה");
+  return;
+}
 ```
 
-**Update fetchSettings** (modify function at line 43-50):
+### 8. FormSettingsModal - Add State & UI
+
+**File**: `app/components/form-builder/FormSettingsModal.vue`
+
+**Add reactive ref** (after line 25):
+
+```typescript
+const allowPublicSubmissions = ref(true);
+```
+
+**Update fetchSettings** (line 43-50):
+
 ```typescript
 const data = await $fetch<{
-  // ... existing types
-  requiresToken: boolean;
+  id: number;
+  title: string;
+  password: string | null;
+  allowPublicSubmissions: boolean;
 }>(`/api/forms/${props.formId}/settings`);
 
-// ... existing assignments
-requiresToken.value = data.requiresToken ?? false;
+passwordEnabled.value = !!data.password;
+password.value = data.password ?? "";
+allowPublicSubmissions.value = data.allowPublicSubmissions ?? true;
 ```
 
-**Update saveSettings** (modify function at line 92-96):
+**Update saveSettings** (line 92-96):
+
 ```typescript
 await $fetch(`/api/forms/${props.formId}`, {
   method: "PATCH",
   body: {
     password: passwordEnabled.value ? password.value : null,
-    requiresToken: requiresToken.value,
+    allowPublicSubmissions: allowPublicSubmissions.value,
   },
 });
 ```
 
-### 7. FormSettingsModal - Add UI Section
-**File**: Same file, insert BEFORE password section (around line 127)
+**Add UI section** (insert BEFORE password section, around line 127):
 
 ```vue
-<!-- Token requirement section -->
+<!-- Form access section -->
 <div class="space-y-4">
-  <div class="flex items-center justify-between">
-    <div>
-      <h3 class="text-sm font-medium text-gray-900">דורש קישור ייעודי</h3>
-      <p class="text-sm text-gray-500">
-        כאשר מופעל, רק משתמשים עם קישור ייעודי יוכלו למלא את הטופס
-      </p>
-    </div>
-    <UiToggle v-model="requiresToken" />
+  <div>
+    <h3 class="text-sm font-medium text-gray-900">גישה לטופס</h3>
+    <p class="text-sm text-gray-500 mt-1">
+      בחר מי יכול למלא ולשלוח את הטופס
+    </p>
   </div>
 
-  <div v-if="requiresToken" class="rounded-lg bg-blue-50 p-3">
-    <p class="text-xs text-blue-700">
-      <Icon name="heroicons:information-circle" class="inline h-4 w-4 ml-1" />
-      יש ליצור קישורי מילוי ייעודיים עבור משתמשים דרך מסך ניהול השליחות
-    </p>
+  <div class="space-y-3">
+    <label class="flex items-start gap-3 cursor-pointer">
+      <input
+        type="radio"
+        :checked="allowPublicSubmissions"
+        @change="allowPublicSubmissions = true"
+        class="mt-1"
+      />
+      <div>
+        <span class="text-sm font-medium text-gray-900">פתוח לכולם</span>
+        <p class="text-xs text-gray-500">
+          כל מי שיש לו את כתובת הטופס יכול למלא ולשלוח
+        </p>
+      </div>
+    </label>
+
+    <label class="flex items-start gap-3 cursor-pointer">
+      <input
+        type="radio"
+        :checked="!allowPublicSubmissions"
+        @change="allowPublicSubmissions = false"
+        class="mt-1"
+      />
+      <div>
+        <span class="text-sm font-medium text-gray-900">קישור אישי בלבד</span>
+        <p class="text-xs text-gray-500">
+          רק משתמשים עם קישור ייעודי יוכלו למלא את הטופס
+        </p>
+      </div>
+    </label>
   </div>
 </div>
 
@@ -165,66 +363,92 @@ await $fetch(`/api/forms/${props.formId}`, {
 <div class="border-t border-gray-200"></div>
 ```
 
-### 8. FormFill - Add Error State
-**File**: `/Users/yakir_reznik/dev/autodox/app/components/form-fill/FormFill.vue`
+### 9. Submissions List - Show Public Indicator
 
-Insert after password gate block (around line 341):
-```vue
-<!-- Token required error -->
-<div v-else-if="error?.statusCode === 403 && error?.data?.requiresToken"
-     class="grid place-items-center min-h-screen">
-  <div class="form-fill-error-state form-fill-card">
-    <Icon name="heroicons:link-slash" class="mx-auto h-12 w-12 text-orange-500" />
-    <h2 class="form-fill-error-title">נדרש קישור ייעודי</h2>
-    <p class="form-fill-error-message">
-      טופס זה זמין רק באמצעות קישור ייעודי. אנא פנה למנהל המערכת לקבלת הקישור.
-    </p>
-    <p v-if="error?.data?.formTitle" class="text-sm text-gray-500 mt-2">
-      טופס: {{ error.data.formTitle }}
-    </p>
-  </div>
-</div>
+**File**: `app/pages/submissions/[form_id].vue`
+
+Update `Submission` interface (add after line 11):
+
+```typescript
+isPublic: boolean;
 ```
 
-## Edge Cases Handled
+Update the status column in the table (around line 445) to include a public indicator:
 
-1. **Token provided for public form** → Works normally (backward compatible)
-2. **Form requires token AND password** → Token check first, then password gate
-3. **Invalid token on token-required form** → 403 error with clear message
-4. **Expired token** → 410 error (already handled)
-5. **Toggle requiresToken ON for existing form** → Immediate effect (public access blocked)
+```vue
+<td class="px-6 py-4 text-sm whitespace-nowrap">
+  <div class="flex items-center gap-2">
+    <span
+      class="rounded-full px-2.5 py-0.5 text-xs font-medium"
+      :class="statusColors[submission.status]"
+    >
+      {{ statusLabels[submission.status] }}
+    </span>
+    <span
+      v-if="submission.isPublic"
+      class="rounded-full bg-purple-100 text-purple-800 px-2 py-0.5 text-xs font-medium flex items-center gap-1"
+      title="הגשה ציבורית"
+    >
+      <Icon name="heroicons:globe-alt" class="h-3 w-3" />
+      ציבורי
+    </span>
+  </div>
+</td>
+```
+
+### 10. API - Submissions List Endpoint
+
+**File**: `server/api/forms/[id]/submissions.get.ts`
+
+Ensure `isPublic` is included in the select query and returned in the response.
+
+## Critical Files
+
+1. `server/db/schema.ts` - Add `allowPublicSubmissions` to forms, `isPublic` to submissions
+2. `server/api/forms/[id]/public-submit.post.ts` - **NEW**: Handle public submissions
+3. `app/components/form-fill/FormFill.vue` - Update submit logic for both flows
+4. `app/components/form-builder/FormSettingsModal.vue` - Add form access setting UI
+5. `app/pages/submissions/[form_id].vue` - Show public submission indicator
+6. `server/api/forms/[id]/settings.get.ts` - Return `allowPublicSubmissions`
+7. `server/api/forms/[id].patch.ts` - Allow updating `allowPublicSubmissions`
+8. `server/api/forms/[id].get.ts` - Return `allowPublicSubmissions` for client
+9. `server/api/forms/[id]/submissions.get.ts` - Include `isPublic` in response
+
+## Edge Cases
+
+1. **Form with `allowPublicSubmissions: false` and no token** → User can view form but submission returns 403 with clear message
+2. **Form with both public access AND password** → Password checked before form loads, then public submission works
+3. **Toggle setting OFF for existing form** → New public submissions blocked, existing tokens still work
+4. **Public submission on unpublished form** → Rejected (form must be published)
 
 ## Testing Checklist
 
 ### API Tests
-- [ ] GET form with `requiresToken: true`, no token → 403
-- [ ] GET form with `requiresToken: true`, valid token → Success
-- [ ] GET form with `requiresToken: true`, invalid token → 403
-- [ ] GET form with `requiresToken: false`, no token → Success
-- [ ] PATCH form to update `requiresToken` → Success
-- [ ] GET settings returns `requiresToken` → Success
+
+- [ ] GET form returns `allowPublicSubmissions`
+- [ ] PATCH form updates `allowPublicSubmissions`
+- [ ] GET settings returns `allowPublicSubmissions`
+- [ ] POST public-submit with `allowPublicSubmissions: true` → Success, creates submission with `isPublic: true`
+- [ ] POST public-submit with `allowPublicSubmissions: false` → 403 error
+- [ ] GET submissions returns `isPublic` field
 
 ### UI Tests
-- [ ] Open FormSettingsModal → toggle appears
-- [ ] Toggle ON → info box appears
-- [ ] Save settings → API called correctly
-- [ ] Access form without token when required → error shown
-- [ ] Access form with token when required → form loads
 
-### Edge Cases
-- [ ] Form with token requirement AND password → both checks work
-- [ ] Expired token on token-required form → proper error
+- [ ] FormSettingsModal shows access radio buttons
+- [ ] Default is "Open to everyone" (true)
+- [ ] Selecting "Personal link only" saves correctly
+- [ ] FormFill submits without token when allowed → success screen
+- [ ] FormFill shows error alert when public submission blocked
+- [ ] Submissions list shows "ציבורי" badge for public submissions
 
-## Critical Files
+### End-to-End
 
-1. `/Users/yakir_reznik/dev/autodox/server/db/schema.ts` - Add field definition
-2. `/Users/yakir_reznik/dev/autodox/server/api/forms/[id].get.ts` - Core access control logic
-3. `/Users/yakir_reznik/dev/autodox/app/components/form-builder/FormSettingsModal.vue` - Settings UI
-4. `/Users/yakir_reznik/dev/autodox/server/api/forms/[id]/settings.get.ts` - Return requiresToken
-5. `/Users/yakir_reznik/dev/autodox/server/api/forms/[id].patch.ts` - Allow updating field
-6. `/Users/yakir_reznik/dev/autodox/app/components/form-fill/FormFill.vue` - Error state
+- [ ] Create form → set to "Personal link only" → try to submit without token → see error alert
+- [ ] Create form → leave as "Open to everyone" → submit without token → success
+- [ ] Check submissions list shows the public submission with purple "ציבורי" badge
 
 ## Migration Impact
-- ✅ Zero breaking changes (default `false` maintains current behavior)
-- ✅ All existing forms remain publicly accessible
-- ✅ Existing submission tokens continue to work
+
+- ✅ Default `allowPublicSubmissions: true` maintains current accessibility
+- ✅ Default `isPublic: false` correctly marks existing submissions as admin-created
+- ✅ No breaking changes to existing token-based flows
