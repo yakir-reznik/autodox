@@ -4,6 +4,7 @@ import type { BuilderElement } from "~/types/form-builder";
 interface RepeaterConfig {
 	label?: string;
 	helpText?: string;
+	itemName?: string;
 	minItems?: number;
 	maxItems?: number;
 	addButtonText?: string;
@@ -144,7 +145,7 @@ const itemStyle = computed(() => {
 				<!-- Item header with index and remove button -->
 				<div class="mb-3 flex items-center justify-between">
 					<span class="text-sm font-medium text-gray-600">
-						#{{ itemIndex + 1 }}
+						{{ config.itemName ? `${config.itemName} #${itemIndex + 1}` : `#${itemIndex + 1}` }}
 					</span>
 					<button
 						v-if="canRemove"

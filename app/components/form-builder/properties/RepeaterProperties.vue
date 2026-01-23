@@ -4,6 +4,7 @@ import type { BuilderElement } from "~/types/form-builder";
 interface RepeaterConfig {
 	label?: string;
 	helpText?: string;
+	itemName?: string;
 	minItems?: number;
 	maxItems?: number;
 	addButtonText?: string;
@@ -74,6 +75,17 @@ function clearMaxLimit() {
 				placeholder="שדה חזרה"
 				@update:model-value="emit('update:config', { label: String($event) })"
 			/>
+		</div>
+
+		<!-- Item name -->
+		<div>
+			<label class="mb-1 block text-sm text-gray-600">שם הפריט</label>
+			<UiInput
+				:model-value="config.itemName || ''"
+				placeholder="e.g., איש קשר"
+				@update:model-value="emit('update:config', { itemName: String($event) })"
+			/>
+			<p class="mt-1 text-xs text-gray-500">כיצד כל פריט יוצג (למשל: איש קשר #1, איש קשר #2)</p>
 		</div>
 
 		<!-- Help text -->

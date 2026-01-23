@@ -4,6 +4,7 @@ import type { BuilderElement } from "~/types/form-builder";
 interface RepeaterConfig {
 	label?: string;
 	helpText?: string;
+	itemName?: string;
 	minItems?: number;
 	maxItems?: number;
 	addButtonText?: string;
