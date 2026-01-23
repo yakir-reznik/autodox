@@ -12,6 +12,7 @@
 	import DividerElement from "./DividerElement.vue";
 	import SpacerElement from "./SpacerElement.vue";
 	import SectionElement from "./SectionElement.vue";
+	import RepeaterElement from "./RepeaterElement.vue";
 
 	interface Props {
 		element: BuilderElement;
@@ -37,9 +38,14 @@
 		});
 	}
 
-	// Get children for section elements
+	// Check if element is a container type (can have nested children)
+	const isContainer = computed(
+		() => props.element.type === "section" || props.element.type === "repeater",
+	);
+
+	// Get children for container elements (section, repeater)
 	const children = computed(() => {
-		if (props.element.type === "section") {
+		if (isContainer.value) {
 			return props.getChildren(props.element.clientId);
 		}
 		return [];
@@ -92,11 +98,12 @@
 		DividerElement,
 		SpacerElement,
 		SectionElement,
+		RepeaterElement,
 	};
 
-	// Get section background color for styling
-	const sectionBackgroundColor = computed(() => {
-		if (props.element.type === "section") {
+	// Get container background color for styling (section, repeater)
+	const containerBackgroundColor = computed(() => {
+		if (isContainer.value) {
 			const config = props.element.config as { backgroundColor?: string };
 			return config.backgroundColor || "#fff";
 		}
@@ -118,16 +125,12 @@
 	<div
 		class="group relative rounded-lg border transition-all"
 		:class="[
-			element.type !== 'section' && 'bg-white',
+			!isContainer && 'bg-white',
 			selected
 				? 'border-blue-500 ring-2 ring-blue-200'
 				: 'border-gray-200 hover:border-gray-300',
 		]"
-		:style="
-			element.type === 'section'
-				? { backgroundColor: sectionBackgroundColor }
-				: {}
-		"
+		:style="isContainer ? { backgroundColor: containerBackgroundColor } : {}"
 		@click.stop="$emit('select', element.clientId)"
 	>
 		<!-- Drag handle and actions -->
@@ -163,7 +166,6 @@
 		<div class="p-4">
 			<component
 				v-if="elementComponent"
-				v-show="element.type !== 'section'"
 				:is="elementComponent"
 				:element="element"
 				@update:config="handleConfigUpdate"
@@ -172,8 +174,8 @@
 				Failed to load component for element type: {{ element.type }}
 			</div>
 
-			<!-- Nested elements for sections -->
-			<div v-if="element.type === 'section'" class="my-4">
+			<!-- Nested elements for containers (section, repeater) -->
+			<div v-if="isContainer" class="mt-4">
 				<draggable
 					v-model="localChildren"
 					group="form-elements"
@@ -204,7 +206,7 @@
 							v-if="children.length === 0"
 							class="flex min-h-[80px] items-center justify-center rounded border-2 border-dashed border-gray-200 bg-gray-50"
 						>
-							<p class="text-sm text-gray-400">Drag elements here</p>
+							<p class="text-sm text-gray-400">הוספ/י אלמנטים לכאן</p>
 						</div>
 					</template>
 				</draggable>

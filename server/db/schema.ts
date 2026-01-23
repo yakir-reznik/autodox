@@ -60,6 +60,7 @@ export const elementTypeEnum = [
 
 	// Special Fields
 	"signature",
+	"repeater", // repeatable group container
 
 	// Layout Elements
 	"heading_h1",
@@ -168,6 +169,16 @@ type SectionConfig = {
 	backgroundColor?: string;
 };
 
+type RepeaterConfig = {
+	label?: string;
+	helpText?: string;
+	minItems?: number; // minimum items required (default: 1)
+	maxItems?: number; // maximum items allowed (null = unlimited, if minItems === maxItems it's fixed length)
+	addButtonText?: string; // text for add button
+	bordered?: boolean;
+	backgroundColor?: string;
+};
+
 // Union type for all possible configs
 export type ElementConfig =
 	| TextFieldConfig
@@ -180,7 +191,8 @@ export type ElementConfig =
 	| MediaConfig
 	| DividerConfig
 	| SpacerConfig
-	| SectionConfig;
+	| SectionConfig
+	| RepeaterConfig;
 
 // ============================================
 // FORM BUILDER TABLES

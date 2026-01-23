@@ -157,6 +157,16 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 				bordered: true,
 				backgroundColor: "#f9fafb",
 			};
+		case "repeater":
+			return {
+				label: "שדה חזרה",
+				helpText: "",
+				minItems: 1,
+				maxItems: undefined,
+				addButtonText: "הוסף עוד",
+				bordered: true,
+				backgroundColor: "#f9fafb",
+			};
 
 		default:
 			return {};
@@ -241,6 +251,12 @@ export function usePaletteElements(): PaletteElement[] {
 			type: "signature",
 			label: "חתימה",
 			icon: "heroicons:pencil-square",
+			category: "special",
+		},
+		{
+			type: "repeater",
+			label: "שדה חזרה",
+			icon: "heroicons:arrows-pointing-out",
 			category: "special",
 		},
 
@@ -329,6 +345,7 @@ export function getElementComponent(type: ElementType): string | undefined {
 		checkbox: "SelectionElement",
 		checkboxes: "SelectionElement",
 		signature: "SignatureElement",
+		repeater: "RepeaterElement",
 		heading_h1: "HeadingElement",
 		heading_h2: "HeadingElement",
 		heading_h3: "HeadingElement",
@@ -360,6 +377,11 @@ export function isFieldElement(type: ElementType): boolean {
 		"signature",
 	];
 	return fieldTypes.includes(type);
+}
+
+// Check if element type stores submittable data (includes repeaters)
+export function isSubmittableElement(type: ElementType): boolean {
+	return isFieldElement(type) || type === "repeater";
 }
 
 // Check if element type supports validation

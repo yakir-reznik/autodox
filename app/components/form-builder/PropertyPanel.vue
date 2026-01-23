@@ -28,6 +28,7 @@ const elementTypeName = computed(() => {
 		checkbox: "Checkbox",
 		checkboxes: "Checkboxes",
 		signature: "Signature",
+		repeater: "Repeater",
 		heading_h1: "Heading 1",
 		heading_h2: "Heading 2",
 		heading_h3: "Heading 3",
@@ -101,7 +102,14 @@ function updateRequired(isRequired: boolean) {
 
 			<!-- Layout properties -->
 			<FormBuilderPropertiesLayoutProperties
-				v-if="!isFieldElement(element.type)"
+				v-if="!isFieldElement(element.type) && element.type !== 'repeater'"
+				:element="element"
+				@update:config="updateConfig"
+			/>
+
+			<!-- Repeater properties -->
+			<FormBuilderPropertiesRepeaterProperties
+				v-if="element.type === 'repeater'"
 				:element="element"
 				@update:config="updateConfig"
 			/>

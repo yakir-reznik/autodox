@@ -11,6 +11,7 @@
 	import FillDivider from "./elements/FillDivider.vue";
 	import FillSpacer from "./elements/FillSpacer.vue";
 	import FillSection from "./elements/FillSection.vue";
+	import FillRepeater from "./elements/FillRepeater.vue";
 
 	interface Props {
 		element: BuilderElement;
@@ -65,6 +66,8 @@
 				return FillSpacer;
 			case "section":
 				return FillSection;
+			case "repeater":
+				return FillRepeater;
 			default:
 				return "";
 		}

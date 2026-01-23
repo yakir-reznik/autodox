@@ -1,0 +1,1 @@
+ALTER TABLE `form_elements_table` MODIFY COLUMN `type` enum('text','email','number','textarea','date','time','datetime','dropdown','radio','checkbox','checkboxes','signature','repeater','heading_h1','heading_h2','heading_h3','paragraph','image','video','divider','spacer','section') NOT NULL;

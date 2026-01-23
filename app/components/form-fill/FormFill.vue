@@ -1,6 +1,6 @@
 <script setup lang="ts">
 	import type { FormWithElements, BuilderElement, ElementType } from "~/types/form-builder";
-	import { isFieldElement } from "~/composables/useElementDefaults";
+	import { isFieldElement, isSubmittableElement } from "~/composables/useElementDefaults";
 	import FormField from "./FormField.vue";
 
 	interface Props {
@@ -172,10 +172,9 @@
 		}
 	}
 
-	// Validate a single field
-	function validateField(clientId: string): boolean {
-		const element = allElements.value.find((el) => el.clientId === clientId);
-		if (!element || !isFieldElement(element.type)) return true;
+	// Validate a single field with a given value
+	function validateFieldValue(element: BuilderElement, value: any, errorKey: string): boolean {
+		if (!isFieldElement(element.type)) return true;
 
 		const config = element.config as {
 			label?: string;
@@ -190,8 +189,6 @@
 			};
 		};
 
-		const value = formData[clientId];
-
 		// Required validation
 		if (element.isRequired || config.validation?.required) {
 			if (
@@ -200,14 +197,14 @@
 				value === "" ||
 				(Array.isArray(value) && value.length === 0)
 			) {
-				errors[clientId] = config.validation?.customMessage || "This field is required";
+				errors[errorKey] = config.validation?.customMessage || "This field is required";
 				return false;
 			}
 		}
 
 		// Skip further validation if empty and not required
 		if (!value) {
-			delete errors[clientId];
+			delete errors[errorKey];
 			return true;
 		}
 
@@ -217,7 +214,7 @@
 			typeof value === "string" &&
 			value.length < config.validation.minLength
 		) {
-			errors[clientId] = `Minimum ${config.validation.minLength} characters required`;
+			errors[errorKey] = `Minimum ${config.validation.minLength} characters required`;
 			return false;
 		}
 
@@ -227,7 +224,7 @@
 			typeof value === "string" &&
 			value.length > config.validation.maxLength
 		) {
-			errors[clientId] = `Maximum ${config.validation.maxLength} characters allowed`;
+			errors[errorKey] = `Maximum ${config.validation.maxLength} characters allowed`;
 			return false;
 		}
 
@@ -237,7 +234,7 @@
 			typeof value === "number" &&
 			value < config.validation.min
 		) {
-			errors[clientId] = `Minimum value is ${config.validation.min}`;
+			errors[errorKey] = `Minimum value is ${config.validation.min}`;
 			return false;
 		}
 
@@ -247,7 +244,7 @@
 			typeof value === "number" &&
 			value > config.validation.max
 		) {
-			errors[clientId] = `Maximum value is ${config.validation.max}`;
+			errors[errorKey] = `Maximum value is ${config.validation.max}`;
 			return false;
 		}
 
@@ -255,13 +252,44 @@
 		if (config.validation?.pattern && typeof value === "string") {
 			const regex = new RegExp(config.validation.pattern);
 			if (!regex.test(value)) {
-				errors[clientId] = config.validation.customMessage || "Invalid format";
+				errors[errorKey] = config.validation.customMessage || "Invalid format";
 				return false;
 			}
 		}
 
-		delete errors[clientId];
+		delete errors[errorKey];
 		return true;
+	}
+
+	// Validate a single field (wrapper for root-level fields)
+	function validateField(clientId: string): boolean {
+		const element = allElements.value.find((el) => el.clientId === clientId);
+		if (!element) return true;
+		return validateFieldValue(element, formData[clientId], clientId);
+	}
+
+	// Validate repeater children
+	function validateRepeater(repeaterClientId: string): boolean {
+		const repeaterItems = formData[repeaterClientId] as Record<string, any>[] | undefined;
+		if (!repeaterItems || repeaterItems.length === 0) return true;
+
+		const children = getChildElements(repeaterClientId);
+		let isValid = true;
+
+		for (let itemIndex = 0; itemIndex < repeaterItems.length; itemIndex++) {
+			const item = repeaterItems[itemIndex];
+			for (const child of children) {
+				if (isFieldElement(child.type)) {
+					const value = item[child.clientId];
+					const errorKey = `${repeaterClientId}[${itemIndex}].${child.clientId}`;
+					if (!validateFieldValue(child, value, errorKey)) {
+						isValid = false;
+					}
+				}
+			}
+		}
+
+		return isValid;
 	}
 
 	// Validate all fields
@@ -269,8 +297,15 @@
 		let isValid = true;
 
 		for (const element of allElements.value) {
+			// Skip elements with a parent - they're validated by their parent container
+			if (element.parentId) continue;
+
 			if (isFieldElement(element.type)) {
 				if (!validateField(element.clientId)) {
+					isValid = false;
+				}
+			} else if (element.type === "repeater") {
+				if (!validateRepeater(element.clientId)) {
 					isValid = false;
 				}
 			}
@@ -292,7 +327,7 @@
 			const submissionData: Record<string, any> = {};
 			Object.entries(formData).forEach(([clientId, value]) => {
 				const element = allElements.value.find((el) => el.clientId === clientId);
-				if (element && isFieldElement(element.type)) {
+				if (element && isSubmittableElement(element.type)) {
 					// Use element name if set, otherwise fall back to clientId
 					const key = element.name || clientId;
 					submissionData[key] = value;
