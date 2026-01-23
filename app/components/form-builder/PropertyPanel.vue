@@ -112,6 +112,7 @@ function updateRequired(isRequired: boolean) {
 				v-if="element.type === 'repeater'"
 				:element="element"
 				@update:config="updateConfig"
+				@update:name="updateName"
 			/>
 
 			<!-- Validation editor -->

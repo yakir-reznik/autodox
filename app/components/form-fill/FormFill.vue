@@ -104,7 +104,24 @@
 				// Find element by name and map to clientId
 				const element = allElements.value.find((el) => el.name === fieldName);
 				if (element) {
-					formData[element.clientId] = value;
+					// For repeaters, transform nested data from field names to clientIds
+					if (element.type === "repeater" && Array.isArray(value)) {
+						const children = getChildElements(element.clientId);
+						const transformedItems = value.map((item: Record<string, any>) => {
+							const transformedItem: Record<string, any> = {};
+							Object.entries(item).forEach(([childFieldName, childValue]) => {
+								// Find child element by name
+								const childElement = children.find((c) => c.name === childFieldName);
+								if (childElement) {
+									transformedItem[childElement.clientId] = childValue;
+								}
+							});
+							return transformedItem;
+						});
+						formData[element.clientId] = transformedItems;
+					} else {
+						formData[element.clientId] = value;
+					}
 				}
 			});
 		}
@@ -330,7 +347,23 @@
 				if (element && isSubmittableElement(element.type)) {
 					// Use element name if set, otherwise fall back to clientId
 					const key = element.name || clientId;
-					submissionData[key] = value;
+
+					// For repeaters, transform nested data to use field names
+					if (element.type === "repeater" && Array.isArray(value)) {
+						const children = getChildElements(clientId);
+						const transformedItems = value.map((item: Record<string, any>) => {
+							const transformedItem: Record<string, any> = {};
+							Object.entries(item).forEach(([childClientId, childValue]) => {
+								const childElement = children.find((c) => c.clientId === childClientId);
+								const childKey = childElement?.name || childClientId;
+								transformedItem[childKey] = childValue;
+							});
+							return transformedItem;
+						});
+						submissionData[key] = transformedItems;
+					} else {
+						submissionData[key] = value;
+					}
 				}
 			});
 
