@@ -11,6 +11,7 @@ const config = computed(() => props.element.config as {
 	label?: string;
 	placeholder?: string;
 	helpText?: string;
+	pattern?: string;
 	validation?: { required?: boolean };
 });
 
@@ -30,6 +31,15 @@ const inputType = computed(() => {
 			return "text";
 	}
 });
+
+const emailPattern = "[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}";
+
+const pattern = computed(() => {
+	if (props.element.type === "email") {
+		return config.value.pattern || emailPattern;
+	}
+	return config.value.pattern;
+});
 </script>
 
 <template>
@@ -41,6 +51,7 @@ const inputType = computed(() => {
 		<input
 			:type="inputType"
 			:placeholder="config.placeholder"
+			:pattern="pattern"
 			disabled
 			class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500"
 		/>

@@ -13,6 +13,7 @@ const emit = defineEmits<{
 
 const config = computed(() => props.element.config as {
 	placeholder?: string;
+	pattern?: string;
 	rows?: number;
 	step?: number;
 });
@@ -30,6 +31,19 @@ const config = computed(() => props.element.config as {
 				placeholder="Placeholder text..."
 				@update:model-value="$emit('update:config', { placeholder: $event })"
 			/>
+		</div>
+
+		<!-- Pattern (for email, text, etc.) -->
+		<div v-if="['email', 'text'].includes(element.type)">
+			<label class="mb-1 block text-sm text-gray-600">Pattern</label>
+			<UiInput
+				:model-value="config.pattern || ''"
+				placeholder="Regex pattern..."
+				@update:model-value="$emit('update:config', { pattern: $event })"
+			/>
+			<p v-if="element.type === 'email'" class="mt-1 text-xs text-gray-500">
+				Default: [a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}
+			</p>
 		</div>
 
 		<!-- Rows (for textarea) -->

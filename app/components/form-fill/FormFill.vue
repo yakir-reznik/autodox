@@ -214,7 +214,7 @@
 				value === "" ||
 				(Array.isArray(value) && value.length === 0)
 			) {
-				errors[errorKey] = config.validation?.customMessage || "This field is required";
+				errors[errorKey] = config.validation?.customMessage || "חסר ערך בשדה חובה";
 				return false;
 			}
 		}
@@ -231,7 +231,7 @@
 			typeof value === "string" &&
 			value.length < config.validation.minLength
 		) {
-			errors[errorKey] = `Minimum ${config.validation.minLength} characters required`;
+			errors[errorKey] = `נדרשים לפחות ${config.validation.minLength} תווים`;
 			return false;
 		}
 
@@ -241,7 +241,7 @@
 			typeof value === "string" &&
 			value.length > config.validation.maxLength
 		) {
-			errors[errorKey] = `Maximum ${config.validation.maxLength} characters allowed`;
+			errors[errorKey] = `מותרים עד ${config.validation.maxLength} תווים`;
 			return false;
 		}
 
@@ -251,7 +251,7 @@
 			typeof value === "number" &&
 			value < config.validation.min
 		) {
-			errors[errorKey] = `Minimum value is ${config.validation.min}`;
+			errors[errorKey] = `הערך המינימלי הוא ${config.validation.min}`;
 			return false;
 		}
 
@@ -261,7 +261,7 @@
 			typeof value === "number" &&
 			value > config.validation.max
 		) {
-			errors[errorKey] = `Maximum value is ${config.validation.max}`;
+			errors[errorKey] = `הערך המקסימלי הוא ${config.validation.max}`;
 			return false;
 		}
 
@@ -269,7 +269,7 @@
 		if (config.validation?.pattern && typeof value === "string") {
 			const regex = new RegExp(config.validation.pattern);
 			if (!regex.test(value)) {
-				errors[errorKey] = config.validation.customMessage || "Invalid format";
+				errors[errorKey] = config.validation.customMessage || "ערך לא תקין";
 				return false;
 			}
 		}
@@ -331,9 +331,77 @@
 		return isValid;
 	}
 
+	// Computed property for error summaries
+	const errorSummaries = computed(() => {
+		const summaries: Array<{ errorKey: string; label: string; message: string }> = [];
+
+		for (const [errorKey, message] of Object.entries(errors)) {
+			// Parse error key to find the element
+			// Format can be: "el_123" (root field) or "el_5[0].el_6" (repeater item)
+			let element: BuilderElement | undefined;
+			let label = "";
+
+			if (errorKey.includes("[")) {
+				// Repeater item error: el_5[0].el_6
+				const match = errorKey.match(/^(el_\d+)\[(\d+)\]\.(el_\d+)$/);
+				if (match) {
+					const [, repeaterClientId, itemIndex, fieldClientId] = match;
+					const repeater = allElements.value.find((el) => el.clientId === repeaterClientId);
+					const field = allElements.value.find((el) => el.clientId === fieldClientId);
+					const fieldLabel =
+						(field?.config as { label?: string })?.label || field?.name || fieldClientId;
+					const repeaterLabel =
+						(repeater?.config as { label?: string })?.label || repeater?.name || repeaterClientId;
+					label = `${repeaterLabel} (שורה ${Number(itemIndex) + 1}) - ${fieldLabel}`;
+					element = field;
+				}
+			} else {
+				// Root field error: el_123
+				element = allElements.value.find((el) => el.clientId === errorKey);
+				label = (element?.config as { label?: string })?.label || element?.name || errorKey;
+			}
+
+			summaries.push({ errorKey, label, message });
+		}
+
+		return summaries;
+	});
+
+	// Scroll to a specific error field
+	function scrollToError(errorKey: string) {
+		if (!errorKey) return;
+
+		// For repeater errors (el_5[0].el_6), we need to extract the repeater clientId
+		let targetFieldId = errorKey;
+		if (errorKey.includes("[")) {
+			const match = errorKey.match(/^(el_\d+)\[/);
+			if (match) {
+				targetFieldId = match[1]; // Scroll to the repeater container
+			}
+		}
+
+		// Find the field element by data attribute
+		const fieldElement = document.querySelector(`[data-field-id="${targetFieldId}"]`);
+		if (fieldElement) {
+			fieldElement.scrollIntoView({ behavior: "smooth", block: "center" });
+		}
+	}
+
+	// Scroll to first error field
+	function scrollToFirstError() {
+		const firstErrorKey = Object.keys(errors)[0];
+		if (firstErrorKey) {
+			scrollToError(firstErrorKey);
+		}
+	}
+
 	// Submit handler
 	async function handleSubmit() {
 		if (!validateAll()) {
+			// Scroll to first error field after DOM updates
+			nextTick(() => {
+				scrollToFirstError();
+			});
 			return;
 		}
 
@@ -485,6 +553,26 @@
 					@update:model-value="updateFormData(element.clientId, $event)"
 					@blur="validateField(element.clientId)"
 				/>
+			</div>
+
+			<!-- Error Summary -->
+			<div v-if="errorSummaries.length > 0" class="form-fill-error-summary">
+				<div class="form-fill-error-summary-header">
+					<Icon name="heroicons:exclamation-triangle" class="h-5 w-5" />
+					<span>יש לתקן את השגיאות הבאות:</span>
+				</div>
+				<ul class="form-fill-error-summary-list">
+					<li v-for="err in errorSummaries" :key="err.errorKey">
+						<span><strong>{{ err.label }}:</strong> {{ err.message }}</span>
+						<button
+							type="button"
+							class="form-fill-error-summary-link"
+							@click="scrollToError(err.errorKey)"
+						>
+							צפה בשדה
+						</button>
+					</li>
+				</ul>
 			</div>
 
 			<!-- Footer -->

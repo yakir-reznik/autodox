@@ -388,6 +388,60 @@
 	color: rgb(var(--fill-text-secondary));
 }
 
+/* Error summary above submit button */
+.form-fill-error-summary {
+	background-color: rgb(var(--fill-error-color) / 0.1);
+	border: 1px solid rgb(var(--fill-error-color) / 0.3);
+	border-radius: var(--fill-radius);
+	padding: var(--fill-spacing-md);
+	margin-bottom: var(--fill-spacing-lg);
+}
+
+.form-fill-error-summary-header {
+	display: flex;
+	align-items: center;
+	gap: var(--fill-spacing-sm);
+	color: rgb(var(--fill-error-color));
+	font-weight: 600;
+	margin-bottom: var(--fill-spacing-sm);
+}
+
+.form-fill-error-summary-list {
+	list-style: disc;
+	padding-inline-start: var(--fill-spacing-lg);
+	color: rgb(var(--fill-text-primary));
+	font-size: var(--fill-font-size-sm);
+	display: flex;
+	flex-direction: column;
+	gap: var(--fill-spacing-xs);
+}
+
+.form-fill-error-summary-list li {
+	display: flex;
+	align-items: center;
+	gap: var(--fill-spacing-sm);
+	flex-wrap: wrap;
+}
+
+.form-fill-error-summary-list li strong {
+	color: rgb(var(--fill-error-color));
+}
+
+.form-fill-error-summary-link {
+	font-size: var(--fill-font-size-xs);
+	color: rgb(var(--fill-primary-color));
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	text-decoration: underline;
+	white-space: nowrap;
+}
+
+.form-fill-error-summary-link:hover {
+	color: rgb(var(--fill-primary-color) / 0.8);
+}
+
 /* Loading state */
 .form-fill-loading {
 	display: flex;
