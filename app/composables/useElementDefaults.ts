@@ -375,6 +375,7 @@ export function isFieldElement(type: ElementType): boolean {
 		"checkbox",
 		"checkboxes",
 		"signature",
+		"repeater",
 	];
 	return fieldTypes.includes(type);
 }
