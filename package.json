@@ -17,6 +17,7 @@
 		"@nuxt/icon": "2.1.1",
 		"@nuxtjs/tailwindcss": "6.14.0",
 		"@pinia/nuxt": "0.11.3",
+		"@react-pdf/renderer": "^4.3.2",
 		"@types/node": "^25.0.3",
 		"@types/pdfkit": "^0.17.4",
 		"cloc": "2.6.0-cloc",
@@ -27,6 +28,7 @@
 		"nuxt": "^4.2.2",
 		"nuxt-auth-utils": "0.5.26",
 		"pinia": "^3.0.4",
+		"react": "^19.2.3",
 		"vue": "^3.5.26",
 		"vue-router": "^4.6.4",
 		"vuedraggable": "^4.1.0"
