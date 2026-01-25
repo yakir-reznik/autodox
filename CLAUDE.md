@@ -27,7 +27,7 @@ pnpm build    # Build for production
 
 - **No database commands**: Ask the operator to run migrations, schema changes, etc.
 - **Tailwind only**: Avoid custom CSS unless absolutely necessary for animations/keyframes.
-- **Plans location**: Save implementation plans to `.claude/plans/` as kebab-case markdown files.
+- **Plans location**: Save implementation plans to `.claude/plans/` (relative to project root, NOT home directory) as kebab-case markdown files.
 
 ## Documentation
 
