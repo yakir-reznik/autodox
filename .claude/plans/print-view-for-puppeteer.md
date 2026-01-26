@@ -172,7 +172,7 @@ Add `PUPPETEER_SECRET` to `.env` - a random string for authenticating Puppeteer 
 
 ## Implementation Steps
 
-- [ ] **Step 1: Add environment variable**
+- [x] **Step 1: Add environment variable**
   - Add `PUPPETEER_SECRET` to `.env.example` file with a comment explaining it's used for authenticating Puppeteer requests to submission data endpoints
 
 - [ ] **Step 2: Create timeline type definitions**
@@ -280,6 +280,7 @@ Add `PUPPETEER_SECRET` to `.env` - a random string for authenticating Puppeteer 
 ## Testing Checklist
 
 ### Details Endpoint Query Parameters
+
 - Call `/api/submissions/{token}/details` without params → verify returns all fields (backward compatible)
 - Call `/api/submissions/{token}/details?include=all` → verify returns all fields
 - Call `/api/submissions/{token}/details?include=form,submissionTimeline` → verify returns only submission, form, and submissionTimeline
@@ -287,12 +288,14 @@ Add `PUPPETEER_SECRET` to `.env` - a random string for authenticating Puppeteer 
 - Call `/api/submissions/{token}/details?include=submissionEntrances` → verify returns only submission and submissionEntrances
 
 ### Authentication
+
 - **Puppeteer auth**: Send request with `X-Puppeteer-Secret` header matching `.env` value → verify 200 response with data
 - **No auth**: Send request without header and without session cookie → verify 401 error
 - **Admin session**: Login as admin, call endpoint → verify 200 response with data
 - **Non-admin session**: Login as non-admin user, call endpoint → verify 403 error
 
 ### Timeline Data Quality
+
 - Fetch `submissionTimeline` from details endpoint → verify returned as array
 - Check each timeline event has `type` field with value 'lifecycle', 'entrance', or 'webhook'
 - Verify events are sorted chronologically by timestamp (earliest first)
@@ -301,16 +304,19 @@ Add `PUPPETEER_SECRET` to `.env` - a random string for authenticating Puppeteer 
 - Verify webhook events have `id`, `webhookUrl`, `status`, `httpStatusCode`, `errorMessage`, `retryCount`, `deliveredAt` fields
 
 ### Print View Display
+
 - As admin, navigate to `/print/{token}` in browser → verify page loads and displays form with filled values
 - Verify form styling matches the regular PC form view exactly
 - Verify submission timeline displays at bottom with all events in chronological order
 - Use browser print preview (Ctrl/Cmd+P) → verify clean output without scrollbars/navigation
 
 ### PDF Generation
+
 - Call `/api/submissions/{token}/download-pdf` → verify PDF downloads successfully
 - Open PDF → verify contains form data and timeline information
 - Verify PDF matches print preview appearance
 
 ### Backward Compatibility
+
 - Navigate to existing submission detail page (`/submission-detail/{token}`) → verify still works after refactoring
 - Trigger form submission with webhook configured → verify webhook payload includes entrances data correctly
