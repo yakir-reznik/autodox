@@ -175,7 +175,7 @@ Add `PUPPETEER_SECRET` to `.env` - a random string for authenticating Puppeteer 
 - [x] **Step 1: Add environment variable**
   - Add `PUPPETEER_SECRET` to `.env.example` file with a comment explaining it's used for authenticating Puppeteer requests to submission data endpoints
 
-- [ ] **Step 2: Create timeline type definitions**
+- [x] **Step 2: Create timeline type definitions**
   - Create new file `/app/types/submission-timeline.ts`
   - Define `BaseSubmissionTimelineEvent` interface with `timestamp: Date` and `type: 'lifecycle' | 'entrance' | 'webhook'`
   - Define `SubmissionLifecycleEvent` extending base with `event: 'created' | 'started' | 'submitted' | 'locked' | 'expires'` and optional `status: string`
@@ -183,7 +183,7 @@ Add `PUPPETEER_SECRET` to `.env` - a random string for authenticating Puppeteer 
   - Define `SubmissionWebhookEvent` extending base with fields: `id`, `webhookUrl`, `status`, `httpStatusCode`, `errorMessage`, `retryCount`, `deliveredAt`
   - Export union type `SubmissionTimelineEvent = SubmissionLifecycleEvent | SubmissionEntranceEvent | SubmissionWebhookEvent`
 
-- [ ] **Step 3: Create shared submission utilities**
+- [x] **Step 3: Create shared submission utilities**
   - Create new file `/server/utils/submissions.ts`
   - Import timeline types from `~/app/types/submission-timeline`
   - Import database tables: `submissionsTable`, `formEntrancesTable`, `formsTable`, `formElementsTable`, `webhookDeliveriesTable`
@@ -210,7 +210,7 @@ Add `PUPPETEER_SECRET` to `.env` - a random string for authenticating Puppeteer 
     - Return as `SubmissionTimelineEvent[]`
   - Export all functions and `SubmissionData` interface
 
-- [ ] **Step 4: Refactor PDF generation utility**
+- [x] **Step 4: Refactor PDF generation utility**
   - Open `/server/utils/generatePDF.ts`
   - Import `getSubmissionDataByToken` and `getSubmissionEntrancesByToken` from `~/server/utils/submissions`
   - Remove the local `getSubmissionData` function (lines 107-146)
@@ -218,14 +218,14 @@ Add `PUPPETEER_SECRET` to `.env` - a random string for authenticating Puppeteer 
   - Replace inline entrances query (line 138) with `getSubmissionEntrancesByToken(token)`
   - Verify PDF generation still works correctly
 
-- [ ] **Step 5: Refactor webhook delivery utility**
+- [x] **Step 5: Refactor webhook delivery utility**
   - Open `/server/utils/webhookDelivery.ts`
   - Import `getSubmissionEntrancesByToken` from `~/server/utils/submissions`
   - Remove inline entrances query (lines 119-128)
   - Replace with `const entrances = await getSubmissionEntrancesByToken(submission.token)`
   - Map entrances to extract only needed fields: `id`, `timestamp`, `ipAddress`, `userAgent`, `referrer`
 
-- [ ] **Step 6: Enhance details endpoint with query parameters**
+- [x] **Step 6: Enhance details endpoint with query parameters**
   - Open `/server/api/submissions/[token]/details.get.ts`
   - Import all utility functions from `~/server/utils/submissions`
   - Import timeline types from `~/app/types/submission-timeline`
@@ -235,7 +235,7 @@ Add `PUPPETEER_SECRET` to `.env` - a random string for authenticating Puppeteer 
   - Build response object conditionally based on `include` parameter containing: `submission` (always), `form`, `elements`, `submissionEntrances`, `submissionTimeline`, `webhookDeliveries`
   - Ensure backward compatibility: no params or `include=all` returns all data like before
 
-- [ ] **Step 7: Create print view component**
+- [x] **Step 7: Create print view component**
   - Create new file `/app/components/form-print/FormPrint.vue`
   - Accept props: `form`, `elements`, `values`, `submissionTimeline` (typed as `SubmissionTimelineEvent[]`)
   - Reuse `FormField.vue` component to render form elements with filled values
@@ -244,10 +244,10 @@ Add `PUPPETEER_SECRET` to `.env` - a random string for authenticating Puppeteer 
   - Style to match regular PC form view exactly
   - Add `@media print` CSS rules for clean PDF output (hide scrollbars, adjust margins, handle page breaks)
 
-- [ ] **Step 8: Create print page route**
+- [x] **Step 8: Create print page route**
   - Create new file `/app/pages/print/[token].vue`
   - Use `fill` layout (no headers/sidebars)
-  - Fetch data from `/api/submissions/[token]/details?include=all` on page load
+  - Fetch data from `/api/submissions/[token]/details?include=form,elements,submissionTimeline` on page load
   - Note: Authentication happens automatically via Puppeteer's `setExtraHTTPHeaders` or browser session cookie
   - Load form theme CSS dynamically based on form metadata
   - **Transform elements to BuilderElement format:**
@@ -269,7 +269,7 @@ Add `PUPPETEER_SECRET` to `.env` - a random string for authenticating Puppeteer 
   - Render `FormPrint` component passing: `form`, transformed `elements`, transformed `values`, `submissionTimeline`
   - Add `@media print` styles to page wrapper
 
-- [ ] **Step 9: Update PDF download endpoint**
+- [x] **Step 9: Update PDF download endpoint**
   - Open `/server/api/submissions/[token]/download-pdf.get.ts`
   - Locate Puppeteer browser automation code
   - Before `page.goto()`, add `await page.setExtraHTTPHeaders({ "X-Puppeteer-Secret": process.env.PUPPETEER_SECRET })`

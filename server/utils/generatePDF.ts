@@ -1,13 +1,7 @@
-import { db } from "~~/server/db";
 import {
-	submissionsTable,
-	formEntrancesTable,
-	formsTable,
-	formElementsTable,
-} from "~~/server/db/schema";
-import { eq } from "drizzle-orm";
-import { createError } from "h3";
-import type { SubmissionStatus } from "~~/server/db/schema";
+	getSubmissionDataByToken,
+	getSubmissionEntrancesByToken,
+} from "~/server/utils/submissions";
 import path from "path";
 import fs from "fs";
 import { jsPDF } from "jspdf";
@@ -53,97 +47,6 @@ function isBase64Image(str: string): boolean {
 	return dataUrlPattern.test(str);
 }
 
-/**
- * Submission data structure for PDF generation
- */
-export interface SubmissionData {
-	submission: {
-		id: number;
-		token: string;
-		formId: number;
-		prefillData: Record<string, unknown> | null;
-		additionalData: Record<string, unknown> | null;
-		createdByUserId: number | null;
-		expiresAt: Date;
-		status: SubmissionStatus;
-		submissionData: Record<string, unknown> | null;
-		createdAt: Date;
-		startedAt: Date | null;
-		submittedAt: Date | null;
-		lockedAt: Date | null;
-	};
-	form?: {
-		id: number;
-		title: string;
-		description: string | null;
-		status: string;
-		theme: string;
-		createdBy: number;
-		updatedBy: number | null;
-		createdAt: Date;
-		updatedAt: Date;
-	};
-	formElements?: Array<{
-		id: number;
-		name: string | null;
-		type: string;
-		config: any;
-	}>;
-	entrances: Array<{
-		id: number;
-		sessionToken: string | null;
-		formId: number;
-		ipAddress: string | null;
-		userAgent: string | null;
-		referrer: string | null;
-		isFormLocked: boolean;
-		timestamp: Date;
-	}>;
-}
-
-/**
- * Fetches submission data from the database
- */
-async function getSubmissionData(token: string): Promise<SubmissionData> {
-	const [submission] = await db
-		.select()
-		.from(submissionsTable)
-		.where(eq(submissionsTable.token, token))
-		.limit(1);
-
-	if (!submission) {
-		throw createError({
-			statusCode: 404,
-			message: "Submission not found",
-		});
-	}
-
-	const form = await db.query.formsTable.findFirst({
-		where: eq(formsTable.id, submission.formId),
-	});
-
-	const formElements = await db.query.formElementsTable.findMany({
-		where: eq(formElementsTable.formId, submission.formId),
-		columns: {
-			id: true,
-			name: true,
-			type: true,
-			config: true,
-		},
-	});
-
-	const entrances = await db
-		.select()
-		.from(formEntrancesTable)
-		.where(eq(formEntrancesTable.sessionToken, token));
-
-	return {
-		submission,
-		form,
-		formElements,
-		entrances,
-	};
-}
 
 /**
  * Load Hebrew font and register it with jsPDF
@@ -188,7 +91,13 @@ function registerHebrewFont(doc: jsPDF): boolean {
  * Generates a readable PDF document from submission token
  */
 export async function generateSubmissionPDF(token: string): Promise<Buffer> {
-	const data = await getSubmissionData(token);
+	const submissionData = await getSubmissionDataByToken(token);
+	const entrances = await getSubmissionEntrancesByToken(token);
+
+	const data = {
+		...submissionData,
+		entrances,
+	};
 
 	// Create PDF document
 	const doc = new jsPDF({

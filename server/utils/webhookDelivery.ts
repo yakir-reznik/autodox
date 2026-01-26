@@ -3,10 +3,10 @@ import {
 	webhookDeliveriesTable,
 	submissionsTable,
 	formsTable,
-	formEntrancesTable,
 } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { generateSubmissionPDF } from "./generatePDF";
+import { getSubmissionEntrancesByToken } from "./submissions";
 
 interface WebhookPayload {
 	event: string;
@@ -116,16 +116,14 @@ export async function deliverWebhook(
 		.limit(1);
 
 	// Fetch entrances data
-	const entrances = await db
-		.select({
-			id: formEntrancesTable.id,
-			timestamp: formEntrancesTable.timestamp,
-			ipAddress: formEntrancesTable.ipAddress,
-			userAgent: formEntrancesTable.userAgent,
-			referrer: formEntrancesTable.referrer,
-		})
-		.from(formEntrancesTable)
-		.where(eq(formEntrancesTable.sessionToken, submission.token));
+	const allEntrances = await getSubmissionEntrancesByToken(submission.token);
+	const entrances = allEntrances.map((entrance) => ({
+		id: entrance.id,
+		timestamp: entrance.timestamp,
+		ipAddress: entrance.ipAddress,
+		userAgent: entrance.userAgent,
+		referrer: entrance.referrer,
+	}));
 
 	// Generate PDF
 	let pdfBase64 = "";

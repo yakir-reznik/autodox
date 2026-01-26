@@ -1,7 +1,13 @@
 import { db } from "~~/server/db";
-import { submissionsTable, formEntrancesTable, formsTable, webhookDeliveriesTable } from "~~/server/db/schema";
+import { webhookDeliveriesTable } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
-import { H3Error, createError, getRouterParam } from "h3";
+import { H3Error, createError, getRouterParam, getHeader, getQuery } from "h3";
+import {
+	getSubmissionDataByToken,
+	getSubmissionEntrancesByToken,
+	getSubmissionTimeline,
+} from "~/server/utils/submissions";
+import type { SubmissionTimelineEvent } from "~/app/types/submission-timeline";
 
 export default defineEventHandler(async (event) => {
 	try {
@@ -14,67 +20,118 @@ export default defineEventHandler(async (event) => {
 			});
 		}
 
-		// Check if user is authenticated and is an admin
-		const { user } = await requireUserSession(event);
+		// Dual authentication: Puppeteer header or admin session
+		const puppeteerSecret = getHeader(event, "X-Puppeteer-Secret");
 
-		if (user.role !== "admin") {
-			throw createError({
-				statusCode: 403,
-				message: "Only admin users can access this endpoint",
-			});
+		if (puppeteerSecret) {
+			// Puppeteer authentication
+			if (puppeteerSecret !== process.env.PUPPETEER_SECRET) {
+				throw createError({
+					statusCode: 401,
+					message: "Invalid Puppeteer secret",
+				});
+			}
+		} else {
+			// Admin session authentication
+			const { user } = await requireUserSession(event);
+
+			if (user.role !== "admin") {
+				throw createError({
+					statusCode: 403,
+					message: "Only admin users can access this endpoint",
+				});
+			}
 		}
 
-		// Find the submission by token
-		const [submission] = await db
-			.select()
-			.from(submissionsTable)
-			.where(eq(submissionsTable.token, token))
-			.limit(1);
+		// Parse query parameter for conditional data inclusion
+		const query = getQuery(event);
+		const includeParam = (query.include as string) || "all";
+		const includeFields = includeParam === "all"
+			? ["form", "elements", "submissionEntrances", "submissionTimeline", "webhooks"]
+			: includeParam.split(",").map((field) => field.trim());
 
-		if (!submission) {
-			throw createError({
-				statusCode: 404,
-				message: "Submission not found",
-			});
+		// Fetch submission data using shared utility
+		const { submission, form, formElements } = await getSubmissionDataByToken(token);
+
+		// Build response object conditionally based on include parameter
+		const response: {
+			submission: typeof submission;
+			form?: typeof form;
+			elements?: typeof formElements;
+			submissionEntrances?: Awaited<ReturnType<typeof getSubmissionEntrancesByToken>>;
+			submissionTimeline?: SubmissionTimelineEvent[];
+			webhookDeliveries?: Array<{
+				id: number;
+				submissionId: number;
+				webhookUrl: string;
+				status: string;
+				httpStatusCode: number | null;
+				errorMessage: string | null;
+				retryCount: number;
+				deliveredAt: Date | null;
+				createdAt: Date;
+			}>;
+		} = {
+			submission,
+		};
+
+		// Add form if requested
+		if (includeFields.includes("form")) {
+			response.form = form;
 		}
 
-		// Get the form details
-		const form = await db.query.formsTable.findFirst({
-			where: eq(formsTable.id, submission.formId),
-		});
+		// Add elements if requested
+		if (includeFields.includes("elements")) {
+			response.elements = formElements;
+		}
 
-		// Get all form entrances for this specific submission (by token)
-		const entrances = await db
-			.select()
-			.from(formEntrancesTable)
-			.where(eq(formEntrancesTable.sessionToken, token))
-			.orderBy(formEntrancesTable.timestamp);
+		// Add submission entrances if requested
+		if (includeFields.includes("submissionEntrances")) {
+			response.submissionEntrances = await getSubmissionEntrancesByToken(token);
+		}
 
-		// Get all webhook deliveries for this submission (exclude large payload data)
-		const webhookDeliveries = await db
-			.select({
-				id: webhookDeliveriesTable.id,
-				submissionId: webhookDeliveriesTable.submissionId,
-				webhookUrl: webhookDeliveriesTable.webhookUrl,
-				status: webhookDeliveriesTable.status,
-				httpStatusCode: webhookDeliveriesTable.httpStatusCode,
-				errorMessage: webhookDeliveriesTable.errorMessage,
-				retryCount: webhookDeliveriesTable.retryCount,
-				deliveredAt: webhookDeliveriesTable.deliveredAt,
-				createdAt: webhookDeliveriesTable.createdAt,
-			})
-			.from(webhookDeliveriesTable)
-			.where(eq(webhookDeliveriesTable.submissionId, submission.id))
-			.orderBy(webhookDeliveriesTable.createdAt);
+		// Add submission timeline if requested
+		if (includeFields.includes("submissionTimeline")) {
+			response.submissionTimeline = await getSubmissionTimeline(token);
+		}
+
+		// Add webhook deliveries if requested
+		if (includeFields.includes("webhooks")) {
+			const webhookDeliveries = await db
+				.select({
+					id: webhookDeliveriesTable.id,
+					submissionId: webhookDeliveriesTable.submissionId,
+					webhookUrl: webhookDeliveriesTable.webhookUrl,
+					status: webhookDeliveriesTable.status,
+					httpStatusCode: webhookDeliveriesTable.httpStatusCode,
+					errorMessage: webhookDeliveriesTable.errorMessage,
+					retryCount: webhookDeliveriesTable.retryCount,
+					deliveredAt: webhookDeliveriesTable.deliveredAt,
+					createdAt: webhookDeliveriesTable.createdAt,
+				})
+				.from(webhookDeliveriesTable)
+				.where(eq(webhookDeliveriesTable.submissionId, submission.id))
+				.orderBy(webhookDeliveriesTable.createdAt);
+
+			response.webhookDeliveries = webhookDeliveries;
+		}
+
+		// Maintain backward compatibility: if no params or include=all, return data with old field names
+		if (includeParam === "all") {
+			return {
+				success: true,
+				data: {
+					submission: response.submission,
+					form: response.form,
+					entrances: response.submissionEntrances,
+					webhookDeliveries: response.webhookDeliveries,
+				},
+			};
+		}
 
 		return {
 			success: true,
-			data: {
-				submission,
-				form,
-				entrances,
-				webhookDeliveries,
-			},
+			data: response,
 		};
 	} catch (error) {
 		if (error instanceof H3Error) {
