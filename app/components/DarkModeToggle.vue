@@ -1,5 +1,5 @@
 <template>
-	<div class="dark-mode-toggle">
+	<div v-if="!isPrintView" class="dark-mode-toggle">
 		<button
 			class="toggle-switch"
 			:class="{ 'is-dark': isDark }"
