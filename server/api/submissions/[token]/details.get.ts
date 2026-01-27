@@ -1,13 +1,13 @@
 import { db } from "~~/server/db";
 import { webhookDeliveriesTable } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
-import { H3Error, createError, getRouterParam, getHeader, getQuery } from "h3";
+import { H3Error, createError, getRouterParam, getQuery, getHeader } from "h3";
 import {
 	getSubmissionDataByToken,
 	getSubmissionEntrancesByToken,
 	getSubmissionTimeline,
-} from "~/server/utils/submissions";
-import type { SubmissionTimelineEvent } from "~/app/types/submission-timeline";
+} from "~~/server/utils/submissions";
+import type { SubmissionTimelineEvent } from "~~/app/types/submission-timeline";
 
 export default defineEventHandler(async (event) => {
 	try {
@@ -21,18 +21,14 @@ export default defineEventHandler(async (event) => {
 		}
 
 		// Dual authentication: Puppeteer header or admin session
-		const puppeteerSecret = getHeader(event, "X-Puppeteer-Secret");
+		// Note: Header may be duplicated (comma-separated) if forwarded during SSR, take first value
+		const rawPuppeteerSecret = getHeader(event, "X-Puppeteer-Secret");
+		const puppeteerSecret = rawPuppeteerSecret?.split(",")[0]?.trim();
+		const expectedSecret = process.env.PUPPETEER_SECRET;
+		const isPuppeteerAuth = puppeteerSecret && expectedSecret && puppeteerSecret === expectedSecret;
 
-		if (puppeteerSecret) {
-			// Puppeteer authentication
-			if (puppeteerSecret !== process.env.PUPPETEER_SECRET) {
-				throw createError({
-					statusCode: 401,
-					message: "Invalid Puppeteer secret",
-				});
-			}
-		} else {
-			// Admin session authentication
+		if (!isPuppeteerAuth) {
+			// Not Puppeteer, require admin session
 			const { user } = await requireUserSession(event);
 
 			if (user.role !== "admin") {
@@ -46,9 +42,10 @@ export default defineEventHandler(async (event) => {
 		// Parse query parameter for conditional data inclusion
 		const query = getQuery(event);
 		const includeParam = (query.include as string) || "all";
-		const includeFields = includeParam === "all"
-			? ["form", "elements", "submissionEntrances", "submissionTimeline", "webhooks"]
-			: includeParam.split(",").map((field) => field.trim());
+		const includeFields =
+			includeParam === "all"
+				? ["form", "elements", "submissionEntrances", "submissionTimeline", "webhooks"]
+				: includeParam.split(",").map((field) => field.trim());
 
 		// Fetch submission data using shared utility
 		const { submission, form, formElements } = await getSubmissionDataByToken(token);

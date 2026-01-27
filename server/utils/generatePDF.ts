@@ -1,7 +1,7 @@
 import {
 	getSubmissionDataByToken,
 	getSubmissionEntrancesByToken,
-} from "~/server/utils/submissions";
+} from "~~/server/utils/submissions";
 import path from "path";
 import fs from "fs";
 import { jsPDF } from "jspdf";
@@ -47,7 +47,6 @@ function isBase64Image(str: string): boolean {
 	return dataUrlPattern.test(str);
 }
 
-
 /**
  * Load Hebrew font and register it with jsPDF
  */
@@ -57,13 +56,13 @@ function registerHebrewFont(doc: jsPDF): boolean {
 			process.cwd(),
 			"fonts",
 			"Noto_Sans_Hebrew",
-			"NotoSansHebrew-Regular.ttf"
+			"NotoSansHebrew-Regular.ttf",
 		);
 		const fontBoldPath = path.join(
 			process.cwd(),
 			"fonts",
 			"Noto_Sans_Hebrew",
-			"NotoSansHebrew-Bold.ttf"
+			"NotoSansHebrew-Bold.ttf",
 		);
 
 		if (fs.existsSync(fontPath) && fs.existsSync(fontBoldPath)) {
@@ -182,7 +181,11 @@ export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 	};
 
 	// Helper to add field
-	const addField = (label: string, value: string, color: [number, number, number] = colors.text) => {
+	const addField = (
+		label: string,
+		value: string,
+		color: [number, number, number] = colors.text,
+	) => {
 		checkNewPage(10);
 		doc.setFontSize(10);
 
@@ -266,8 +269,8 @@ export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 		data.submission.status === "submitted" || data.submission.status === "locked"
 			? colors.success
 			: data.submission.status === "in_progress"
-			? colors.warning
-			: colors.secondary;
+				? colors.warning
+				: colors.secondary;
 
 	addField("סטטוס", statusHebrew[data.submission.status] || data.submission.status, statusColor);
 
@@ -298,7 +301,7 @@ export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 		addField(
 			"תפוגה",
 			formatDate(data.submission.expiresAt),
-			isExpired ? colors.danger : colors.text
+			isExpired ? colors.danger : colors.text,
 		);
 	}
 

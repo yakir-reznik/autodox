@@ -16,7 +16,7 @@ if (!token.value) {
 }
 
 // Fetch submission data with form, elements, and timeline
-// Note: Authentication happens automatically via Puppeteer's setExtraHTTPHeaders or browser session cookie
+// Note: During SSR, useFetch automatically forwards request headers including X-Puppeteer-Secret
 const { data: response, error } = await useFetch(
 	`/api/submissions/${token.value}/details`,
 	{
