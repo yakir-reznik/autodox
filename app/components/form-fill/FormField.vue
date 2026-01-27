@@ -20,6 +20,7 @@
 		error?: string;
 		formData: Record<string, any>;
 		errors: Record<string, string>;
+		readonly?: boolean;
 	}
 
 	const props = defineProps<Props>();
@@ -86,6 +87,7 @@
 			:get-children="getChildren"
 			:form-data="formData"
 			:errors="errors"
+			:readonly="readonly"
 			@update:model-value="emit('update:modelValue', $event)"
 			@blur="emit('blur')"
 		/>

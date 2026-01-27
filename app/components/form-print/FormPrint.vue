@@ -95,6 +95,7 @@ const sortedTimeline = computed(() => {
 				:model-value="values[element.clientId]"
 				:form-data="values"
 				:errors="{}"
+				:readonly="true"
 			/>
 		</div>
 

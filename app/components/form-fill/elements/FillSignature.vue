@@ -5,6 +5,7 @@ interface Props {
 	element: BuilderElement;
 	modelValue?: string;
 	error?: string;
+	readonly?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -126,31 +127,62 @@ onMounted(() => {
 			<span v-if="isRequired" class="form-fill-required">*</span>
 		</label>
 
-		<canvas
-			ref="canvasRef"
-			:width="canvasWidth"
-			:height="canvasHeight"
-			class="form-fill-signature-canvas"
-			@mousedown="startDrawing"
-			@mousemove="draw"
-			@mouseup="stopDrawing"
-			@mouseleave="stopDrawing"
-			@touchstart.prevent="startDrawing"
-			@touchmove.prevent="draw"
-			@touchend="stopDrawing"
-		/>
-
-		<div class="form-fill-signature-actions">
-			<button
-				type="button"
-				class="text-sm text-gray-600 hover:text-gray-800"
-				@click="clearSignature"
-			>
-				Clear
-			</button>
+		<!-- Readonly mode: display signature as image -->
+		<div
+			v-if="readonly && modelValue"
+			class="form-fill-signature-readonly"
+			:style="{ maxWidth: `${canvasWidth}px` }"
+		>
+			<img
+				:src="modelValue"
+				:alt="config.label || 'חתימה'"
+				class="form-fill-signature-image"
+			/>
 		</div>
+
+		<!-- Edit mode: canvas for drawing -->
+		<template v-else>
+			<canvas
+				ref="canvasRef"
+				:width="canvasWidth"
+				:height="canvasHeight"
+				class="form-fill-signature-canvas"
+				@mousedown="startDrawing"
+				@mousemove="draw"
+				@mouseup="stopDrawing"
+				@mouseleave="stopDrawing"
+				@touchstart.prevent="startDrawing"
+				@touchmove.prevent="draw"
+				@touchend="stopDrawing"
+			/>
+
+			<div class="form-fill-signature-actions">
+				<button
+					type="button"
+					class="text-sm text-gray-600 hover:text-gray-800"
+					@click="clearSignature"
+				>
+					Clear
+				</button>
+			</div>
+		</template>
 
 		<p v-if="error" class="form-fill-error">{{ error }}</p>
 		<p v-else-if="config.helpText" class="form-fill-help">{{ config.helpText }}</p>
 	</div>
 </template>
+
+<style scoped>
+.form-fill-signature-readonly {
+	border: 1px solid rgb(var(--fill-border));
+	border-radius: 0.375rem;
+	padding: 0.5rem;
+	background: rgb(var(--fill-bg-input));
+}
+
+.form-fill-signature-image {
+	display: block;
+	max-width: 100%;
+	height: auto;
+}
+</style>
