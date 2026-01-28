@@ -1,46 +1,46 @@
 <script setup lang="ts">
-	useHead({
-		title: "Login - Autodox",
-	});
+useHead({
+	title: "הרשמה - Autodox",
+});
 
-	const email = ref("");
-	const password = ref("");
-	const error = ref("");
-	const loading = ref(false);
-	const { fetch } = useUserSession();
-	const router = useRouter();
-	const route = useRoute();
+const name = ref("");
+const email = ref("");
+const password = ref("");
+const error = ref("");
+const loading = ref(false);
+const { fetch } = useUserSession();
+const router = useRouter();
+const route = useRoute();
 
-	// Handle Google OAuth error
-	if (route.query.error === "google") {
-		error.value = "התחברות עם Google נכשלה";
-	}
+// Handle Google OAuth error
+if (route.query.error === "google") {
+	error.value = "הרשמה עם Google נכשלה";
+}
 
-	async function handleLogin() {
-		error.value = "";
-		loading.value = true;
+async function handleSignup() {
+	error.value = "";
+	loading.value = true;
 
-		try {
-			const response = await $fetch("/api/auth/login", {
-				method: "POST",
-				body: {
-					email: email.value,
-					password: password.value,
-				},
-			});
+	try {
+		const response = await $fetch("/api/auth/signup", {
+			method: "POST",
+			body: {
+				name: name.value,
+				email: email.value,
+				password: password.value,
+			},
+		});
 
-			if (response.success) {
-				// Refresh the session to ensure it's recognized
-				await fetch();
-				// Redirect to forms page after successful login
-				await router.push("/forms");
-			}
-		} catch (e: any) {
-			error.value = e.data?.statusMessage || "שם משתמש או סיסמא שגויים";
-		} finally {
-			loading.value = false;
+		if (response.success) {
+			await fetch();
+			await router.push("/forms");
 		}
+	} catch (e: any) {
+		error.value = e.data?.statusMessage || "ההרשמה נכשלה";
+	} finally {
+		loading.value = false;
 	}
+}
 </script>
 
 <template>
@@ -48,10 +48,24 @@
 		<div class="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
 			<div class="text-center mb-8">
 				<h1 class="text-3xl font-bold text-gray-900">Autodox</h1>
-				<p class="mt-2 text-sm text-gray-600">התחבר כדי לערוך טפסים</p>
+				<p class="mt-2 text-sm text-gray-600">הירשם כדי להתחיל ליצור טפסים</p>
 			</div>
 
-			<form @submit.prevent="handleLogin" class="space-y-6">
+			<form @submit.prevent="handleSignup" class="space-y-6">
+				<div>
+					<label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+						שם מלא
+					</label>
+					<UiInput
+						id="name"
+						v-model="name"
+						type="text"
+						placeholder="ישראל ישראלי"
+						:disabled="loading"
+						required
+					/>
+				</div>
+
 				<div>
 					<label for="email" class="block text-sm font-medium text-gray-700 mb-1">
 						אימייל
@@ -76,9 +90,10 @@
 						id="password"
 						v-model="password"
 						type="password"
-						placeholder="Aa123456"
+						placeholder="לפחות 6 תווים"
 						:disabled="loading"
 						required
+						minlength="6"
 					/>
 				</div>
 
@@ -87,7 +102,7 @@
 				</div>
 
 				<UiButton type="submit" variant="primary" class="w-full" :disabled="loading">
-					{{ loading ? "מתחבר..." : "התחבר" }}
+					{{ loading ? "נרשם..." : "הירשם" }}
 				</UiButton>
 			</form>
 
@@ -122,13 +137,13 @@
 						d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
 					/>
 				</svg>
-				התחבר עם Google
+				הירשם עם Google
 			</a>
 
 			<p class="mt-6 text-center text-sm text-gray-600">
-				אין לך חשבון?
-				<NuxtLink to="/signup" class="font-medium text-blue-600 hover:text-blue-500">
-					הירשם
+				כבר יש לך חשבון?
+				<NuxtLink to="/login" class="font-medium text-blue-600 hover:text-blue-500">
+					התחבר
 				</NuxtLink>
 			</p>
 		</div>
