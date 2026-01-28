@@ -69,7 +69,7 @@ export function cleanupExpiredPDFs(): void {
 	let deletedCount = 0;
 
 	for (const file of files) {
-		if (!file.endsWith('.pdf')) {
+		if (!file.endsWith(".pdf")) {
 			continue;
 		}
 
@@ -108,6 +108,7 @@ export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 
 	const browser = await puppeteer.launch({
 		headless: true,
+		args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
 	});
 
 	try {
