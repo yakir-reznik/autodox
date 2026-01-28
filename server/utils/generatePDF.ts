@@ -124,6 +124,9 @@ export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 			waitUntil: "networkidle0",
 		});
 
+		// Wait for fonts to be loaded
+		await page.evaluate(() => document.fonts.ready);
+
 		// Generate PDF
 		const pdfBuffer = Buffer.from(
 			await page.pdf({

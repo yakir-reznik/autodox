@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
+
 :root {
   /* === Color Palette === */
 
@@ -63,7 +65,7 @@
   --fill-spacing-xl: 2rem;
 
   /* === Typography === */
-  --fill-font-family: inherit;
+  --fill-font-family: 'Rubik', sans-serif;
   --fill-font-size-sm: 0.875rem;
   --fill-font-size-base: 1rem;
   --fill-font-size-lg: 1.125rem;

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
+
 :root {
 	/* Forest theme - Green/Earth tones */
 	--color-primary-50: 240 253 244;
@@ -15,4 +17,7 @@
 	--fill-input-border-focus: 34 197 94;
 	--fill-button-primary-bg: 22 163 74;
 	--fill-button-primary-hover: 21 128 61;
+
+	/* Typography */
+	--fill-font-family: 'Rubik', sans-serif;
 }

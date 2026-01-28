@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
+
 :root {
 	/* Dark theme color overrides */
 	--color-neutral-50: 17 24 39;
@@ -25,4 +27,7 @@
 	--fill-input-bg: 55 65 81;
 	--fill-input-border: 75 85 99;
 	--fill-input-text: 249 250 251;
+
+	/* Typography */
+	--fill-font-family: 'Rubik', sans-serif;
 }

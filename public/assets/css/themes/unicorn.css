@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
+
 :root {
 	/* Unicorn theme - Bright pink and girly color palette */
 
@@ -62,6 +64,9 @@
 	--fill-shadow-sm: 0 2px 8px 0 rgb(236 72 153 / 0.15);
 	--fill-shadow-md: 0 8px 16px -2px rgb(236 72 153 / 0.25), 0 4px 8px -2px rgb(244 114 182 / 0.15);
 	--fill-shadow-lg: 0 12px 24px -4px rgb(236 72 153 / 0.3), 0 8px 16px -4px rgb(244 114 182 / 0.2);
+
+	/* Typography */
+	--fill-font-family: 'Rubik', sans-serif;
 }
 
 .form-fill-text-primary {
