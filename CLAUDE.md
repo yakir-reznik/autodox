@@ -16,6 +16,7 @@ Autodox is a **Nuxt 4** form builder for creating and filling dynamic forms (Vue
 - **Minimal comments**: Code should be self-explanatory. Only comment non-obvious logic.
 - **Modular structure**: Keep files focused. Extract reusable logic to composables, components to separate files, and shared types to `app/types/` use types over interfaces.
 - **Writing plans**: When planning write implementation steps in a way that each step can be done by a standalone agent without previous context.
+- **Implementing plans**: When implementing plans mark steps as complete in the plans markdown file
 
 ## Commands
 
