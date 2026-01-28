@@ -5,7 +5,7 @@ import {
 	formsTable,
 } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
-import { generateSubmissionPDF } from "./generatePDF";
+import { queuePDFGeneration } from "./pdfQueue";
 import { getSubmissionEntrancesByToken } from "./submissions";
 
 interface WebhookPayload {
@@ -128,7 +128,7 @@ export async function deliverWebhook(
 	// Generate PDF
 	let pdfBase64 = "";
 	try {
-		const pdfBuffer = await generateSubmissionPDF(submission.token);
+		const pdfBuffer = await queuePDFGeneration(submission.token);
 		pdfBase64 = pdfBuffer.toString("base64");
 	} catch (error) {
 		console.error("Failed to generate PDF for webhook:", error);

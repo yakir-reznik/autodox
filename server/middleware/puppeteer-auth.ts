@@ -12,9 +12,6 @@ import {
 export default defineEventHandler((event) => {
 	const path = event.path;
 
-	console.log("[Puppeteer Middleware] Path:", path);
-	console.log("[Puppeteer Middleware] Is Puppeteer route:", isPuppeteerRoute(path, puppeteerApiRoutes));
-
 	// Only process Puppeteer API routes
 	if (!isPuppeteerRoute(path, puppeteerApiRoutes)) {
 		return;

@@ -1,5 +1,5 @@
 import { H3Error, createError, getRouterParam, setResponseHeaders } from "h3";
-import { generateSubmissionPDF } from "~~/server/utils/generatePDF";
+import { queuePDFGeneration } from "~~/server/utils/pdfQueue";
 
 export default defineEventHandler(async (event) => {
 	const token = getRouterParam(event, "token");
@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
 	}
 
 	try {
-		const pdfBuffer = await generateSubmissionPDF(token);
+		const pdfBuffer = await queuePDFGeneration(token);
 
 		// Generate filename
 		const filename = `submission-${token}-${new Date().toISOString().split("T")[0]}.pdf`;
