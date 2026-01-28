@@ -125,6 +125,7 @@ export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 		});
 
 		// Wait for fonts to be loaded
+		// @ts-expect-error - document exists in browser context inside page.evaluate()
 		await page.evaluate(() => document.fonts.ready);
 
 		// Generate PDF
