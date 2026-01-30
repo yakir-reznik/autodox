@@ -1,5 +1,9 @@
 ## Features
 
+- [ ] Ability to define webhook url setting in form level and ability to override in submission level
+- [ ] Ability to define wether or not to post pdf to submission webhook - settings in form level and ability to override in submission level
+- [ ] Users can only see their own forms and submissions, Admins can see every users forms
+- [ ] Be able to delete (archive / soft delete) forms
 - [ ] Show/hide fields or sections based on previous answers
 - [ ] Required-if rules
 - [ ] Calculated fields, Auto-sum, scores, pricing, percentages
