@@ -17,6 +17,8 @@ Autodox is a **Nuxt 4** form builder for creating and filling dynamic forms (Vue
 - **Modular structure**: Keep files focused. Extract reusable logic to composables, components to separate files, and shared types to `app/types/` use types over interfaces.
 - **Writing plans**: When planning write implementation steps in a way that each step can be done by a standalone agent without previous context.
 - **Implementing plans**: When implementing plans mark steps as complete in the plans markdown file
+- **Plans location path folder**: Save implementation plans to `.claude/plans/` (relative to project root, NOT home directory) as kebab-case markdown files. name the file in a semantic way that reflects the core essense of the plan.
+-
 
 ## Commands
 
@@ -29,7 +31,6 @@ pnpm build    # Build for production
 
 - **No database commands**: Ask the operator to run migrations, schema changes, etc.
 - **Tailwind only**: Avoid custom CSS unless absolutely necessary for animations/keyframes.
-- **Plans location**: Save implementation plans to `.claude/plans/` (relative to project root, NOT home directory) as kebab-case markdown files. name the file in a semantic way that reflects the core essense of the plan.
 
 ## Documentation
 
