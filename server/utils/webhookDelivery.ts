@@ -89,13 +89,18 @@ async function attemptDelivery(
 	}
 }
 
+type DeliverWebhookOptions = {
+	includePdf?: boolean;
+};
+
 /**
  * Deliver webhook for a submission
  * If webhookUrl is null, logs to table but doesn't attempt delivery
  */
 export async function deliverWebhook(
 	submissionId: number,
-	webhookUrl: string | null
+	webhookUrl: string | null,
+	options?: DeliverWebhookOptions,
 ): Promise<{ deliveryId: number; success: boolean }> {
 	// Fetch submission data
 	const [submission] = await db
@@ -125,13 +130,15 @@ export async function deliverWebhook(
 		referrer: entrance.referrer,
 	}));
 
-	// Generate PDF
+	// Generate PDF only if opted in
 	let pdfBase64 = "";
-	try {
-		const pdfBuffer = await queuePDFGeneration(submission.token);
-		pdfBase64 = pdfBuffer.toString("base64");
-	} catch (error) {
-		console.error("Failed to generate PDF for webhook:", error);
+	if (options?.includePdf) {
+		try {
+			const pdfBuffer = await queuePDFGeneration(submission.token);
+			pdfBase64 = pdfBuffer.toString("base64");
+		} catch (error) {
+			console.error("Failed to generate PDF for webhook:", error);
+		}
 	}
 
 	// Build payload

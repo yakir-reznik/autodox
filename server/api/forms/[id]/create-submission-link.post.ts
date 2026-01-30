@@ -63,6 +63,7 @@ export default defineEventHandler(async (event) => {
 			prefill?: Record<string, unknown>;
 			additionalData?: Record<string, unknown>;
 			webhook_url?: string;
+			webhook_include_pdf?: boolean;
 			password?: string;
 		}>(event);
 
@@ -113,6 +114,7 @@ export default defineEventHandler(async (event) => {
 			expiresAt,
 			status: "pending",
 			webhookUrl,
+			webhookIncludePdf: body?.webhook_include_pdf ?? null,
 			password: body?.password ?? null,
 		});
 

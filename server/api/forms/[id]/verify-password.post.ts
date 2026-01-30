@@ -33,9 +33,7 @@ export default defineEventHandler(async (event) => {
 		});
 	}
 
-	// Determine the effective password to check against
-	// Priority: submission password > form password
-	let effectivePassword = form.password;
+	// Fetch submission if token provided
 	let submission = null;
 
 	if (token) {
@@ -44,20 +42,17 @@ export default defineEventHandler(async (event) => {
 		});
 
 		if (submission && submission.formId === id) {
-			// Check if token is expired
 			if (new Date() > new Date(submission.expiresAt)) {
 				throw createError({
 					statusCode: 410,
 					message: "Submission link has expired",
 				});
 			}
-
-			// Use submission password if set, otherwise fall back to form password
-			if (submission.password) {
-				effectivePassword = submission.password;
-			}
 		}
 	}
+
+	// Determine effective password (submission override > form default)
+	const { password: effectivePassword } = resolveFormSettings(form, submission);
 
 	// If no password protection exists
 	if (!effectivePassword) {

@@ -79,8 +79,8 @@ export default defineEventHandler(async (event) => {
 		}
 	}
 
-	// Determine password requirement (submission password > form password)
-	const effectivePassword = submission?.password ?? form.password;
+	// Determine password requirement (submission override > form default)
+	const { password: effectivePassword } = resolveFormSettings(form, submission);
 	const hasPassword = !!effectivePassword;
 
 	// Check if password has been verified via cookie

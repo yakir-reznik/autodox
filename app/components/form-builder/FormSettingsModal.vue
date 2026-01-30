@@ -24,6 +24,8 @@ const passwordEnabled = ref(false);
 const password = ref("");
 const passwordError = ref<string | null>(null);
 const allowPublicSubmissions = ref(true);
+const webhookUrl = ref("");
+const webhookIncludePdf = ref(false);
 
 // Fetch settings when modal opens
 watch(
@@ -46,11 +48,15 @@ async function fetchSettings() {
 			title: string;
 			password: string | null;
 			allowPublicSubmissions: boolean;
+			webhookUrl: string | null;
+			webhookIncludePdf: boolean;
 		}>(`/api/forms/${props.formId}/settings`);
 
 		passwordEnabled.value = !!data.password;
 		password.value = data.password ?? "";
 		allowPublicSubmissions.value = data.allowPublicSubmissions ?? true;
+		webhookUrl.value = data.webhookUrl ?? "";
+		webhookIncludePdf.value = data.webhookIncludePdf ?? false;
 	} catch (e: any) {
 		error.value = e.data?.message || "Failed to load settings";
 	} finally {
@@ -97,6 +103,8 @@ async function saveSettings() {
 			body: {
 				password: passwordEnabled.value ? password.value : null,
 				allowPublicSubmissions: allowPublicSubmissions.value,
+				webhookUrl: webhookUrl.value.trim() || null,
+				webhookIncludePdf: webhookIncludePdf.value,
 			},
 		});
 
@@ -200,6 +208,40 @@ function close() {
 						הסיסמה מוצגת בטקסט רגיל ותהיה גלויה למי שניגש להגדרות
 					</p>
 				</div>
+			</div>
+
+			<!-- Divider -->
+			<div class="border-t border-gray-200"></div>
+
+			<!-- Webhook URL section -->
+			<div class="space-y-4">
+				<div>
+					<h3 class="text-sm font-medium text-gray-900">Webhook URL</h3>
+					<p class="text-sm text-gray-500 mt-1">
+						כתובת URL שתקבל את נתוני הטופס בעת שליחה
+					</p>
+				</div>
+
+				<UiInput
+					v-model="webhookUrl"
+					type="url"
+					placeholder="https://example.com/webhook"
+					dir="ltr"
+				/>
+
+				<div class="flex items-center justify-between">
+					<div>
+						<p class="text-sm font-medium text-gray-900">צירוף PDF</p>
+						<p class="text-sm text-gray-500">
+							צרף קובץ PDF של הטופס לנתוני ה-Webhook
+						</p>
+					</div>
+					<UiToggle v-model="webhookIncludePdf" />
+				</div>
+
+				<p class="text-xs text-gray-500">
+					ניתן לדרוס הגדרות אלו ברמת קישור השליחה דרך ה-API
+				</p>
 			</div>
 
 			<!-- Error message -->

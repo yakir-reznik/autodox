@@ -2,7 +2,7 @@ import { db } from "~~/server/db";
 import { formsTable } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
 
-const ALLOWED_FIELDS = ["title", "description", "status", "theme", "updatedBy", "folderId", "password", "allowPublicSubmissions"] as const;
+const ALLOWED_FIELDS = ["title", "description", "status", "theme", "updatedBy", "folderId", "password", "allowPublicSubmissions", "webhookUrl", "webhookIncludePdf"] as const;
 
 export default defineEventHandler(async (event) => {
 	const id = Number(getRouterParam(event, "id"));

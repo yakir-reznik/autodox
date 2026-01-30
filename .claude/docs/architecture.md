@@ -82,3 +82,19 @@ Returns: { tempIdMap: { "temp-123": 45 } }
      ↓ client update
 Element and parent references updated with real IDs
 ```
+
+## Overrideable Form Settings
+
+Settings that can be defined at the form level and overridden per submission.
+
+**Source of truth:** `server/utils/overrideableFormSettings.ts`
+
+**Current settings:** `password`, `webhookUrl`, `webhookIncludePdf`
+
+**Resolution:** `resolveFormSettings(form, submission?)` returns `submission[key] ?? form[key] ?? null` for each overrideable key. Auto-imported in server routes.
+
+**Adding a new setting:**
+
+1. Add the column to both `formsTable` and `submissionsTable` in `server/db/schema.ts`
+2. Add the key to `OVERRIDEABLE_FORM_SETTINGS` in `server/utils/overrideableFormSettings.ts`
+3. Run migration (operator)

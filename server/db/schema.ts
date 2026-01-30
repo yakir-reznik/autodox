@@ -238,6 +238,7 @@ export const formsTable = mysqlTable("forms_table", {
 
 	// Webhook configuration
 	webhookUrl: varchar("webhook_url", { length: 2048 }),
+	webhookIncludePdf: boolean("webhook_include_pdf").notNull().default(false),
 
 	// Password protection (stored as plain text for admin visibility)
 	password: varchar("password", { length: 255 }),
@@ -330,6 +331,7 @@ export const submissionsTable = mysqlTable("submissions_table", {
 
 	// Webhook configuration (submission-level overrides form-level)
 	webhookUrl: varchar("webhook_url", { length: 2048 }),
+	webhookIncludePdf: boolean("webhook_include_pdf"),
 
 	// Password protection (submission-level overrides form-level, stored as plain text)
 	password: varchar("password", { length: 255 }),
