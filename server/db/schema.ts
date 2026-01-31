@@ -24,9 +24,12 @@ export const usersTable = mysqlTable("users_table", {
 	id: int().primaryKey().autoincrement(),
 	name: varchar({ length: 255 }).notNull(),
 	email: varchar({ length: 255 }).notNull().unique(),
-	password: varchar({ length: 255 }), // bcrypt hash
+	password: varchar({ length: 255 }),
 	apiKey: varchar("api_key", { length: 64 }).unique(),
 	role: mysqlEnum("role", userRoleEnum).notNull().default("viewer"),
+	googleId: varchar("google_id", { length: 255 }),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	lastLoginAt: timestamp("last_login_at"),
 });
 
 // ============================================

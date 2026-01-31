@@ -1,16 +1,6 @@
 import { eq } from "drizzle-orm";
 import { usersTable } from "~~/server/db/schema";
 import { db } from "~~/server/db";
-import { scrypt, randomBytes } from "crypto";
-import { promisify } from "util";
-
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string): Promise<string> {
-	const salt = randomBytes(16).toString("hex");
-	const hash = (await scryptAsync(password, salt, 64)) as Buffer;
-	return `${salt}:${hash.toString("hex")}`;
-}
 
 export default defineEventHandler(async (event) => {
 	const body = await readBody(event);

@@ -1,24 +1,6 @@
 import { eq } from "drizzle-orm";
 import { usersTable } from "~~/server/db/schema";
 import { db } from "~~/server/db";
-import { scrypt, randomBytes, timingSafeEqual } from "crypto";
-import { promisify } from "util";
-
-const scryptAsync = promisify(scrypt);
-
-async function verifyPassword(storedPassword: string, suppliedPassword: string): Promise<boolean> {
-	const parts = storedPassword.split(":");
-	if (parts.length !== 2) {
-		return false;
-	}
-	const [salt, hash] = parts;
-	if (!salt || !hash) {
-		return false;
-	}
-	const hashBuffer = Buffer.from(hash, "hex");
-	const suppliedHashBuffer = (await scryptAsync(suppliedPassword, salt, 64)) as Buffer;
-	return timingSafeEqual(hashBuffer, suppliedHashBuffer);
-}
 
 export default defineEventHandler(async (event) => {
 	const body = await readBody(event);
@@ -52,6 +34,9 @@ export default defineEventHandler(async (event) => {
 			statusMessage: "Invalid email or password",
 		});
 	}
+
+	// Update last login timestamp
+	await db.update(usersTable).set({ lastLoginAt: new Date() }).where(eq(usersTable.id, user.id));
 
 	// Set user session
 	await setUserSession(event, {

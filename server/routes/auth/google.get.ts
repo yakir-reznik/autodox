@@ -26,12 +26,13 @@ export default defineOAuthGoogleEventHandler({
 
 		let dbUser = existingUsers[0];
 
-		// Create new user if doesn't exist
 		if (!dbUser) {
+			// Create new user with googleId
 			const result = await db.insert(usersTable).values({
 				email,
 				name,
 				role: "admin",
+				googleId: user.sub,
 			});
 
 			const newUsers = await db
@@ -41,6 +42,15 @@ export default defineOAuthGoogleEventHandler({
 				.limit(1);
 
 			dbUser = newUsers[0];
+		} else {
+			// Existing user: update lastLoginAt, set googleId if missing
+			await db
+				.update(usersTable)
+				.set({
+					lastLoginAt: new Date(),
+					...(dbUser.googleId ? {} : { googleId: user.sub }),
+				})
+				.where(eq(usersTable.id, dbUser.id));
 		}
 
 		if (!dbUser) {

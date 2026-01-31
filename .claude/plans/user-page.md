@@ -11,21 +11,24 @@ ALTER TABLE users_table
 
 ## Steps
 
-### Step 1: Update DB schema + extract password utils
+### Step 1: Update DB schema + extract password utils ✅
 
 **Files to modify:**
+
 - `server/db/schema.ts` — add `googleId`, `createdAt`, `lastLoginAt` to `usersTable`
 
 **Files to create:**
+
 - `server/utils/password.ts` — extract `hashPassword()` and `verifyPassword()` from login/signup (scrypt-based). Nuxt auto-imports server utils.
 
 **Files to refactor:**
+
 - `server/api/auth/login.post.ts` — use shared `verifyPassword()`, add `lastLoginAt` update after successful login
 - `server/api/auth/signup.post.ts` — use shared `hashPassword()`
 
 ---
 
-### Step 2: Update Google OAuth handler
+### Step 2: Update Google OAuth handler ✅
 
 **File:** `server/routes/auth/google.get.ts`
 
@@ -34,21 +37,21 @@ ALTER TABLE users_table
 
 ---
 
-### Step 3: Create user profile API endpoints
+### Step 3: Create user profile API endpoints ✅
 
 All new files under `server/api/user/`:
 
-| File | Method | Purpose |
-|------|--------|---------|
-| `profile.get.ts` | GET | Return user data + formCount + submissionCount (join forms+submissions). Exclude password hash, return `hasPassword: boolean` and `googleId` |
-| `profile.patch.ts` | PATCH | Update display name. Update session so client reflects change |
-| `change-password.post.ts` | POST | Verify current password (skip if OAuth-only user setting first password), hash new password, save. Min 6 chars |
-| `reroll-api-key.post.ts` | POST | Generate `randomBytes(32).toString("hex")` (64 chars), save, update session |
-| `disconnect-google.post.ts` | POST | Set `googleId` to null. Block if user has no password (would be locked out) |
+| File                        | Method | Purpose                                                                                                                                      |
+| --------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `profile.get.ts`            | GET    | Return user data + formCount + submissionCount (join forms+submissions). Exclude password hash, return `hasPassword: boolean` and `googleId` |
+| `profile.patch.ts`          | PATCH  | Update display name. Update session so client reflects change                                                                                |
+| `change-password.post.ts`   | POST   | Verify current password (skip if OAuth-only user setting first password), hash new password, save. Min 6 chars                               |
+| `reroll-api-key.post.ts`    | POST   | Generate `randomBytes(32).toString("hex")` (64 chars), save, update session                                                                  |
+| `disconnect-google.post.ts` | POST   | Set `googleId` to null. Block if user has no password (would be locked out)                                                                  |
 
 ---
 
-### Step 4: Create global submissions endpoint
+### Step 4: Create global submissions endpoint ✅
 
 **File:** `server/api/user/submissions.get.ts`
 
@@ -66,6 +69,7 @@ All new files under `server/api/user/`:
 Card-based layout with RTL, Tailwind, same patterns as `forms/index.vue`.
 
 **Sections:**
+
 1. **Header** — back link to `/forms`, title "פרופיל משתמש", logout button
 2. **Account Info card** — email (read-only), name (inline edit with pencil icon), signup date, last login
 3. **Statistics card** — form count (links to `/forms`), submission count (links to `/user/submissions`)
@@ -73,6 +77,7 @@ Card-based layout with RTL, Tailwind, same patterns as `forms/index.vue`.
 5. **Connected Accounts card** — Google connection status. If connected: show "מחובר" + disconnect button (disabled if no password). If not: link to `/auth/google`
 
 **Modals (using BaseModal):**
+
 - Change password: current password input (hidden if `!hasPassword`), new password input, error display
 - Re-roll API key: confirmation warning, confirm/cancel
 
@@ -85,6 +90,7 @@ Card-based layout with RTL, Tailwind, same patterns as `forms/index.vue`.
 **File:** `app/pages/user/submissions.vue`
 
 Based closely on `app/pages/submissions/[form_id].vue` pattern with these differences:
+
 - Fetches from `/api/user/submissions` (no formId)
 - Table has extra "Form" column showing `formTitle` as link to `/submissions/${formId}`
 - Header says "כל ההגשות", back link goes to `/user`
@@ -95,21 +101,21 @@ Based closely on `app/pages/submissions/[form_id].vue` pattern with these differ
 
 ## Files Summary
 
-| Action | File |
-|--------|------|
-| Modify | `server/db/schema.ts` |
-| Create | `server/utils/password.ts` |
-| Modify | `server/api/auth/login.post.ts` |
-| Modify | `server/api/auth/signup.post.ts` |
-| Modify | `server/routes/auth/google.get.ts` |
-| Create | `server/api/user/profile.get.ts` |
-| Create | `server/api/user/profile.patch.ts` |
-| Create | `server/api/user/change-password.post.ts` |
-| Create | `server/api/user/reroll-api-key.post.ts` |
+| Action | File                                        |
+| ------ | ------------------------------------------- |
+| Modify | `server/db/schema.ts`                       |
+| Create | `server/utils/password.ts`                  |
+| Modify | `server/api/auth/login.post.ts`             |
+| Modify | `server/api/auth/signup.post.ts`            |
+| Modify | `server/routes/auth/google.get.ts`          |
+| Create | `server/api/user/profile.get.ts`            |
+| Create | `server/api/user/profile.patch.ts`          |
+| Create | `server/api/user/change-password.post.ts`   |
+| Create | `server/api/user/reroll-api-key.post.ts`    |
 | Create | `server/api/user/disconnect-google.post.ts` |
-| Create | `server/api/user/submissions.get.ts` |
-| Modify | `app/pages/user/index.vue` |
-| Create | `app/pages/user/submissions.vue` |
+| Create | `server/api/user/submissions.get.ts`        |
+| Modify | `app/pages/user/index.vue`                  |
+| Create | `app/pages/user/submissions.vue`            |
 
 ## Verification
 

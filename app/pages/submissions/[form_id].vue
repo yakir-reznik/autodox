@@ -72,7 +72,7 @@
 		error,
 		refresh,
 	} = await useFetch<PaginatedResponse>(
-		() => `/api/forms/${formId}/submissions?page=${currentPage.value}`,
+		() => `/api/submissions?formId=${formId}&page=${currentPage.value}`,
 	);
 
 	const submissions = computed(() => response.value?.data ?? []);
