@@ -1,85 +1,86 @@
 <script setup lang="ts">
-import type { BuilderElement, UploadResponse } from "~/types/form-builder";
+	import type { BuilderElement, UploadResponse } from "~/types/form-builder";
 
-interface Props {
-	element: BuilderElement;
-}
+	interface Props {
+		element: BuilderElement;
+	}
 
-const props = defineProps<Props>();
+	const props = defineProps<Props>();
 
-const emit = defineEmits<{
-	"update:config": [config: Record<string, any>];
-}>();
+	const emit = defineEmits<{
+		"update:config": [config: Record<string, any>];
+	}>();
 
-const config = computed(() => props.element.config as Record<string, any>);
+	const config = computed(() => props.element.config as Record<string, any>);
 
-const alignOptions = [
-	{ label: "Left", value: "left" },
-	{ label: "Center", value: "center" },
-	{ label: "Right", value: "right" },
-];
+	const alignOptions = [
+		{ label: "Left", value: "left" },
+		{ label: "Center", value: "center" },
+		{ label: "Right", value: "right" },
+	];
 
-const dividerStyles = [
-	{ label: "Solid", value: "solid" },
-	{ label: "Dashed", value: "dashed" },
-	{ label: "Dotted", value: "dotted" },
-];
+	const dividerStyles = [
+		{ label: "Solid", value: "solid" },
+		{ label: "Dashed", value: "dashed" },
+		{ label: "Dotted", value: "dotted" },
+	];
 
-// File upload state
-const fileInput = ref<HTMLInputElement | null>(null);
-const isUploading = ref(false);
-const uploadError = ref<string | null>(null);
+	// File upload state
+	const fileInput = ref<HTMLInputElement | null>(null);
+	const isUploading = ref(false);
+	const uploadError = ref<string | null>(null);
 
-const handleFileSelect = async (event: Event) => {
-	const input = event.target as HTMLInputElement;
-	const file = input.files?.[0];
+	const handleFileSelect = async (event: Event) => {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
 
-	if (!file) return;
+		if (!file) return;
 
-	// Validate file type (images only for image elements)
-	if (props.element.type === 'image') {
-		const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-		if (!validTypes.includes(file.type)) {
-			uploadError.value = 'Invalid file type. Please upload a JPEG, PNG, WebP, or GIF image.';
+		// Validate file type (images only for image elements)
+		if (props.element.type === "image") {
+			const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+			if (!validTypes.includes(file.type)) {
+				uploadError.value =
+					"Invalid file type. Please upload a JPEG, PNG, WebP, or GIF image.";
+				return;
+			}
+		}
+
+		// Validate file size (2MB max)
+		const maxSize = 2 * 1024 * 1024; // 2MB
+		if (file.size > maxSize) {
+			uploadError.value = "File size exceeds 2MB limit.";
 			return;
 		}
-	}
 
-	// Validate file size (2MB max)
-	const maxSize = 2 * 1024 * 1024; // 2MB
-	if (file.size > maxSize) {
-		uploadError.value = 'File size exceeds 2MB limit.';
-		return;
-	}
+		uploadError.value = null;
+		isUploading.value = true;
 
-	uploadError.value = null;
-	isUploading.value = true;
+		try {
+			const formData = new FormData();
+			formData.append("file", file);
 
-	try {
-		const formData = new FormData();
-		formData.append('file', file);
+			const response = await $fetch<UploadResponse>("/api/uploads", {
+				method: "POST",
+				body: formData,
+			});
 
-		const response = await $fetch<UploadResponse>('/api/uploads', {
-			method: 'POST',
-			body: formData,
-		});
-
-		if (response.success && response.upload) {
-			// Update the URL in the config
-			emit('update:config', { url: response.upload.url });
+			if (response.success && response.upload) {
+				// Update the URL in the config
+				emit("update:config", { url: response.upload.url });
+			}
+		} catch (error: any) {
+			uploadError.value = error.data?.message || "Failed to upload file. Please try again.";
+		} finally {
+			isUploading.value = false;
+			// Reset file input
+			if (input) input.value = "";
 		}
-	} catch (error: any) {
-		uploadError.value = error.data?.message || 'Failed to upload file. Please try again.';
-	} finally {
-		isUploading.value = false;
-		// Reset file input
-		if (input) input.value = '';
-	}
-};
+	};
 
-const triggerFileInput = () => {
-	fileInput.value?.click();
-};
+	const triggerFileInput = () => {
+		fileInput.value?.click();
+	};
 </script>
 
 <template>
@@ -89,7 +90,7 @@ const triggerFileInput = () => {
 		<!-- Heading / Paragraph text -->
 		<div v-if="['heading_h1', 'heading_h2', 'heading_h3', 'paragraph'].includes(element.type)">
 			<label class="mb-1 block text-sm text-gray-600">Text</label>
-			<UiTextarea
+			<BaseTextarea
 				:model-value="config.text || ''"
 				:rows="element.type === 'paragraph' ? 4 : 2"
 				@update:model-value="$emit('update:config', { text: $event })"
@@ -99,7 +100,7 @@ const triggerFileInput = () => {
 		<!-- Text alignment -->
 		<div v-if="['heading_h1', 'heading_h2', 'heading_h3', 'paragraph'].includes(element.type)">
 			<label class="mb-1 block text-sm text-gray-600">Alignment</label>
-			<UiSelect
+			<BaseSelect
 				:model-value="config.align || 'right'"
 				:options="alignOptions"
 				@update:model-value="$emit('update:config', { align: $event })"
@@ -123,17 +124,9 @@ const triggerFileInput = () => {
 					:disabled="isUploading"
 					@click="triggerFileInput"
 				>
-					<Icon
-						v-if="!isUploading"
-						name="heroicons:arrow-up-tray"
-						class="h-4 w-4"
-					/>
-					<Icon
-						v-else
-						name="heroicons:arrow-path"
-						class="h-4 w-4 animate-spin"
-					/>
-					{{ isUploading ? 'Uploading...' : 'Choose Image' }}
+					<Icon v-if="!isUploading" name="heroicons:arrow-up-tray" class="h-4 w-4" />
+					<Icon v-else name="heroicons:arrow-path" class="h-4 w-4 animate-spin" />
+					{{ isUploading ? "Uploading..." : "Choose Image" }}
 				</button>
 				<button
 					v-if="config.url"
@@ -149,28 +142,24 @@ const triggerFileInput = () => {
 			<p v-if="uploadError" class="mt-1 text-xs text-red-600">
 				{{ uploadError }}
 			</p>
-			<p class="mt-1 text-xs text-gray-500">
-				Max 2MB. Formats: JPEG, PNG, WebP, GIF
-			</p>
+			<p class="mt-1 text-xs text-gray-500">Max 2MB. Formats: JPEG, PNG, WebP, GIF</p>
 		</div>
 
 		<!-- Media URL -->
 		<div v-if="['image', 'video'].includes(element.type)">
 			<label class="mb-1 block text-sm text-gray-600">URL</label>
-			<UiInput
+			<BaseInput
 				:model-value="config.url || ''"
 				placeholder="https://..."
 				@update:model-value="$emit('update:config', { url: $event })"
 			/>
-			<p class="mt-1 text-xs text-gray-500">
-				Or enter external URL
-			</p>
+			<p class="mt-1 text-xs text-gray-500">Or enter external URL</p>
 		</div>
 
 		<!-- Image alt text -->
 		<div v-if="element.type === 'image'">
 			<label class="mb-1 block text-sm text-gray-600">Alt Text</label>
-			<UiInput
+			<BaseInput
 				:model-value="config.alt || ''"
 				placeholder="Image description..."
 				@update:model-value="$emit('update:config', { alt: $event })"
@@ -180,7 +169,7 @@ const triggerFileInput = () => {
 		<!-- Media caption -->
 		<div v-if="['image', 'video'].includes(element.type)">
 			<label class="mb-1 block text-sm text-gray-600">Caption</label>
-			<UiInput
+			<BaseInput
 				:model-value="config.caption || ''"
 				placeholder="Optional caption..."
 				@update:model-value="$emit('update:config', { caption: $event })"
@@ -190,29 +179,33 @@ const triggerFileInput = () => {
 		<!-- Media width -->
 		<div v-if="['image', 'video'].includes(element.type)">
 			<label class="mb-1 block text-sm text-gray-600">Max Width (px)</label>
-			<UiInput
+			<BaseInput
 				type="number"
 				:model-value="config.width || ''"
 				placeholder="Auto"
-				@update:model-value="$emit('update:config', { width: $event ? Number($event) : undefined })"
+				@update:model-value="
+					$emit('update:config', { width: $event ? Number($event) : undefined })
+				"
 			/>
 		</div>
 
 		<!-- Media height -->
 		<div v-if="['image', 'video'].includes(element.type)">
 			<label class="mb-1 block text-sm text-gray-600">Height (px)</label>
-			<UiInput
+			<BaseInput
 				type="number"
 				:model-value="config.height || ''"
 				placeholder="Auto"
-				@update:model-value="$emit('update:config', { height: $event ? Number($event) : undefined })"
+				@update:model-value="
+					$emit('update:config', { height: $event ? Number($event) : undefined })
+				"
 			/>
 		</div>
 
 		<!-- Divider style -->
 		<div v-if="element.type === 'divider'">
 			<label class="mb-1 block text-sm text-gray-600">Style</label>
-			<UiSelect
+			<BaseSelect
 				:model-value="config.style || 'solid'"
 				:options="dividerStyles"
 				@update:model-value="$emit('update:config', { style: $event })"
@@ -226,14 +219,16 @@ const triggerFileInput = () => {
 				type="color"
 				:value="config.color || '#e5e7eb'"
 				class="h-8 w-full cursor-pointer rounded border border-gray-300"
-				@input="$emit('update:config', { color: ($event.target as HTMLInputElement).value })"
+				@input="
+					$emit('update:config', { color: ($event.target as HTMLInputElement).value })
+				"
 			/>
 		</div>
 
 		<!-- Spacer height -->
 		<div v-if="element.type === 'spacer'">
 			<label class="mb-1 block text-sm text-gray-600">Height (px)</label>
-			<UiInput
+			<BaseInput
 				type="number"
 				:model-value="config.height || 24"
 				@update:model-value="$emit('update:config', { height: Number($event) })"
@@ -242,27 +237,27 @@ const triggerFileInput = () => {
 
 		<!-- Section settings -->
 		<template v-if="element.type === 'section'">
-			<UiToggle
+			<BaseToggle
 				:model-value="config.bordered || false"
 				@update:model-value="$emit('update:config', { bordered: $event })"
 			>
 				Show border
-			</UiToggle>
+			</BaseToggle>
 
-			<UiToggle
+			<BaseToggle
 				:model-value="config.collapsible || false"
 				@update:model-value="$emit('update:config', { collapsible: $event })"
 			>
 				Collapsible
-			</UiToggle>
+			</BaseToggle>
 
 			<div v-if="config.collapsible">
-				<UiToggle
+				<BaseToggle
 					:model-value="config.defaultCollapsed || false"
 					@update:model-value="$emit('update:config', { defaultCollapsed: $event })"
 				>
 					Collapsed by default
-				</UiToggle>
+				</BaseToggle>
 			</div>
 
 			<div>
@@ -271,7 +266,11 @@ const triggerFileInput = () => {
 					type="color"
 					:value="config.backgroundColor || '#f9fafb'"
 					class="h-8 w-full cursor-pointer rounded border border-gray-300"
-					@input="$emit('update:config', { backgroundColor: ($event.target as HTMLInputElement).value })"
+					@input="
+						$emit('update:config', {
+							backgroundColor: ($event.target as HTMLInputElement).value,
+						})
+					"
 				/>
 			</div>
 		</template>

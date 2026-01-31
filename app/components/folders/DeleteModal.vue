@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import type { Folder } from "~/types/form-builder";
+	import type { Folder } from "~/types/form-builder";
 
-interface Props {
-	modelValue: boolean;
-	folder: Folder | null;
-	formCount: number;
-}
+	interface Props {
+		modelValue: boolean;
+		folder: Folder | null;
+		formCount: number;
+	}
 
-defineProps<Props>();
+	defineProps<Props>();
 
-const emit = defineEmits<{
-	"update:modelValue": [value: boolean];
-	confirm: [];
-}>();
+	const emit = defineEmits<{
+		"update:modelValue": [value: boolean];
+		confirm: [];
+	}>();
 
-const close = () => emit("update:modelValue", false);
+	const close = () => emit("update:modelValue", false);
 
-const handleDelete = () => {
-	emit("confirm");
-	close();
-};
+	const handleDelete = () => {
+		emit("confirm");
+		close();
+	};
 </script>
 
 <template>
-	<UiModal
+	<BaseModal
 		:model-value="modelValue"
 		title="מחיקת תיקייה"
 		size="sm"
@@ -41,14 +41,13 @@ const handleDelete = () => {
 			<div class="text-center">
 				<p class="text-sm text-gray-700">
 					האם אתה בטוח שברצונך למחוק את התיקייה
-					<span class="font-semibold">{{ folder?.name }}</span>?
+					<span class="font-semibold">{{ folder?.name }}</span
+					>?
 				</p>
 				<p v-if="formCount > 0" class="mt-2 text-sm text-red-600 font-medium">
 					פעולה זו תמחק גם {{ formCount }} טפסים שנמצאים בתיקייה זו.
 				</p>
-				<p v-else class="mt-2 text-sm text-gray-500">
-					התיקייה ריקה ואין בה טפסים.
-				</p>
+				<p v-else class="mt-2 text-sm text-gray-500">התיקייה ריקה ואין בה טפסים.</p>
 			</div>
 
 			<!-- Additional Warning -->
@@ -60,8 +59,8 @@ const handleDelete = () => {
 		</div>
 
 		<template #footer>
-			<UiButton variant="secondary" @click="close">ביטול</UiButton>
-			<UiButton variant="danger" @click="handleDelete">מחיקה</UiButton>
+			<BaseButton variant="secondary" @click="close">ביטול</BaseButton>
+			<BaseButton variant="danger" @click="handleDelete">מחיקה</BaseButton>
 		</template>
-	</UiModal>
+	</BaseModal>
 </template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-useHead({
-	title: "Autodox - Form Builder",
-});
+	useHead({
+		title: "Autodox - Form Builder",
+	});
 </script>
 
 <template>
@@ -11,16 +11,16 @@ useHead({
 			<p class="mt-2 text-lg text-gray-600">Build and manage your forms</p>
 			<div class="mt-8 flex gap-4 justify-center">
 				<NuxtLink to="/forms">
-					<UiButton variant="primary" size="lg">
+					<BaseButton variant="primary" size="lg">
 						<Icon name="heroicons:document-text" class="h-5 w-5" />
 						View Forms
-					</UiButton>
+					</BaseButton>
 				</NuxtLink>
 				<NuxtLink to="/forms/new">
-					<UiButton variant="secondary" size="lg">
+					<BaseButton variant="secondary" size="lg">
 						<Icon name="heroicons:plus" class="h-5 w-5" />
 						Create New Form
-					</UiButton>
+					</BaseButton>
 				</NuxtLink>
 			</div>
 		</div>

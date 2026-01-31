@@ -170,9 +170,9 @@
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-4">
 						<NuxtLink to="/forms">
-							<UiButton variant="secondary" size="sm">
+							<BaseButton variant="secondary" size="sm">
 								<Icon name="heroicons:arrow-left" class="h-5 w-5" />
-							</UiButton>
+							</BaseButton>
 						</NuxtLink>
 						<div>
 							<h1 class="text-2xl font-bold text-gray-900">Submission Details</h1>
@@ -201,7 +201,9 @@
 				<p class="mt-2 text-red-700">
 					{{ error.message || "Failed to load submission details" }}
 				</p>
-				<UiButton variant="secondary" class="mt-4" @click="refresh"> Try Again </UiButton>
+				<BaseButton variant="secondary" class="mt-4" @click="refresh">
+					Try Again
+				</BaseButton>
 			</div>
 
 			<!-- Content -->
@@ -250,7 +252,7 @@
 							<label class="block text-sm font-medium mb-2 text-gray-700"
 								>Download PDF</label
 							>
-							<UiButton
+							<BaseButton
 								v-if="!pending && submission"
 								variant="primary"
 								size="sm"
@@ -266,7 +268,7 @@
 									class="h-4 w-4"
 								/>
 								{{ isDownloading ? "Downloading..." : "Download PDF" }}
-							</UiButton>
+							</BaseButton>
 						</div>
 					</div>
 
@@ -375,19 +377,19 @@
 						}}</pre>
 					</div>
 					<div class="mt-4 flex gap-2">
-						<UiButton
+						<BaseButton
 							variant="secondary"
 							size="sm"
 							@click="
 								copyToClipboard(
 									JSON.stringify(submission.submissionData, null, 2),
-									'Submission data'
+									'Submission data',
 								)
 							"
 						>
 							<Icon name="heroicons:clipboard-document" class="h-4 w-4" />
 							Copy JSON
-						</UiButton>
+						</BaseButton>
 					</div>
 				</div>
 
@@ -403,19 +405,19 @@
 						}}</pre>
 					</div>
 					<div class="mt-4 flex gap-2">
-						<UiButton
+						<BaseButton
 							variant="secondary"
 							size="sm"
 							@click="
 								copyToClipboard(
 									JSON.stringify(submission.prefillData, null, 2),
-									'Prefill data'
+									'Prefill data',
 								)
 							"
 						>
 							<Icon name="heroicons:clipboard-document" class="h-4 w-4" />
 							Copy JSON
-						</UiButton>
+						</BaseButton>
 					</div>
 				</div>
 
@@ -431,19 +433,19 @@
 						}}</pre>
 					</div>
 					<div class="mt-4 flex gap-2">
-						<UiButton
+						<BaseButton
 							variant="secondary"
 							size="sm"
 							@click="
 								copyToClipboard(
 									JSON.stringify(submission.additionalData, null, 2),
-									'Additional data'
+									'Additional data',
 								)
 							"
 						>
 							<Icon name="heroicons:clipboard-document" class="h-4 w-4" />
 							Copy JSON
-						</UiButton>
+						</BaseButton>
 					</div>
 				</div>
 
@@ -554,7 +556,10 @@
 				</div>
 
 				<!-- Webhook Deliveries -->
-				<div v-if="webhookDeliveries.length > 0" class="mb-8 rounded-lg bg-white p-6 shadow">
+				<div
+					v-if="webhookDeliveries.length > 0"
+					class="mb-8 rounded-lg bg-white p-6 shadow"
+				>
 					<h2 class="mb-4 text-lg font-medium text-gray-900">
 						Webhook Deliveries ({{ webhookDeliveries.length }})
 					</h2>
@@ -565,7 +570,9 @@
 							class="rounded-lg border border-gray-200 p-4"
 						>
 							<!-- Header with status and URL -->
-							<div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+							<div
+								class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between"
+							>
 								<div class="flex-1">
 									<div class="flex items-center gap-2">
 										<span
@@ -574,7 +581,10 @@
 										>
 											{{ webhookStatusLabels[delivery.status] }}
 										</span>
-										<span v-if="delivery.httpStatusCode" class="text-sm text-gray-600">
+										<span
+											v-if="delivery.httpStatusCode"
+											class="text-sm text-gray-600"
+										>
 											HTTP {{ delivery.httpStatusCode }}
 										</span>
 									</div>

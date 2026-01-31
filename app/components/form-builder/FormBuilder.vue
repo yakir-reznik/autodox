@@ -51,13 +51,13 @@
 				"Initial:",
 				initialTitle.value,
 				"FormID:",
-				state.formId
+				state.formId,
 			);
 			if (state.formId && newTitle !== initialTitle.value) {
 				console.log("Setting isDirty to true");
 				state.isDirty = true;
 			}
-		}
+		},
 	);
 
 	watch(
@@ -67,12 +67,12 @@
 				"Description changed:",
 				newDescription,
 				"Initial:",
-				initialDescription.value
+				initialDescription.value,
 			);
 			if (state.formId && newDescription !== initialDescription.value) {
 				state.isDirty = true;
 			}
-		}
+		},
 	);
 
 	watch(
@@ -82,7 +82,7 @@
 			if (state.formId && newStatus !== initialStatus.value) {
 				state.isDirty = true;
 			}
-		}
+		},
 	);
 
 	watch(
@@ -92,7 +92,7 @@
 			if (state.formId && newTheme !== initialTheme.value) {
 				state.isDirty = true;
 			}
-		}
+		},
 	);
 
 	// Debug watcher for isDirty
@@ -100,7 +100,7 @@
 		() => state.isDirty,
 		(value) => {
 			console.log("isDirty changed to:", value);
-		}
+		},
 	);
 
 	// Watch for changes and trigger auto-save
@@ -110,7 +110,7 @@
 			if (isDirty) {
 				triggerSave();
 			}
-		}
+		},
 	);
 
 	// Error state
@@ -147,7 +147,7 @@
 	function handleElementDrop(
 		type: ElementType,
 		position: number,
-		parentId: string | null = null
+		parentId: string | null = null,
 	) {
 		const config = getDefaultConfig(type);
 		addElement(type, config, parentId, position);
@@ -193,7 +193,7 @@
 			<Icon name="heroicons:exclamation-circle" class="mx-auto h-12 w-12 text-red-500" />
 			<h2 class="mt-4 text-lg font-semibold text-gray-900">Failed to load form</h2>
 			<p class="mt-2 text-sm text-gray-600">{{ loadError }}</p>
-			<UiButton class="mt-4" @click="$router.push('/forms')"> Back to forms </UiButton>
+			<BaseButton class="mt-4" @click="$router.push('/forms')"> Back to forms </BaseButton>
 		</div>
 	</div>
 

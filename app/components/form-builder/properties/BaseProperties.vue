@@ -1,31 +1,34 @@
 <script setup lang="ts">
-import type { BuilderElement } from "~/types/form-builder";
+	import type { BuilderElement } from "~/types/form-builder";
 
-interface Props {
-	element: BuilderElement;
-}
+	interface Props {
+		element: BuilderElement;
+	}
 
-const props = defineProps<Props>();
+	const props = defineProps<Props>();
 
-const emit = defineEmits<{
-	"update:name": [name: string];
-	"update:config": [config: Record<string, any>];
-	"update:required": [required: boolean];
-}>();
+	const emit = defineEmits<{
+		"update:name": [name: string];
+		"update:config": [config: Record<string, any>];
+		"update:required": [required: boolean];
+	}>();
 
-const config = computed(() => props.element.config as {
-	label?: string;
-	helpText?: string;
-	validation?: { required?: boolean };
-});
+	const config = computed(
+		() =>
+			props.element.config as {
+				label?: string;
+				helpText?: string;
+				validation?: { required?: boolean };
+			},
+	);
 
-function updateLabel(label: string) {
-	emit("update:config", { label });
-}
+	function updateLabel(label: string) {
+		emit("update:config", { label });
+	}
 
-function updateHelpText(helpText: string) {
-	emit("update:config", { helpText });
-}
+	function updateHelpText(helpText: string) {
+		emit("update:config", { helpText });
+	}
 </script>
 
 <template>
@@ -35,7 +38,7 @@ function updateHelpText(helpText: string) {
 		<!-- Field name -->
 		<div>
 			<label class="mb-1 block text-sm text-gray-600">Field Name</label>
-			<UiInput
+			<BaseInput
 				:model-value="element.name || ''"
 				placeholder="e.g., first_name"
 				@update:model-value="$emit('update:name', String($event))"
@@ -46,7 +49,7 @@ function updateHelpText(helpText: string) {
 		<!-- Label -->
 		<div>
 			<label class="mb-1 block text-sm text-gray-600">Label</label>
-			<UiInput
+			<BaseInput
 				:model-value="config.label || ''"
 				placeholder="Field label"
 				@update:model-value="updateLabel($event as string)"
@@ -56,7 +59,7 @@ function updateHelpText(helpText: string) {
 		<!-- Help text -->
 		<div>
 			<label class="mb-1 block text-sm text-gray-600">Help Text</label>
-			<UiInput
+			<BaseInput
 				:model-value="config.helpText || ''"
 				placeholder="Additional instructions..."
 				@update:model-value="updateHelpText($event as string)"
@@ -64,11 +67,11 @@ function updateHelpText(helpText: string) {
 		</div>
 
 		<!-- Required toggle -->
-		<UiToggle
+		<BaseToggle
 			:model-value="element.isRequired"
 			@update:model-value="$emit('update:required', $event)"
 		>
 			Required field
-		</UiToggle>
+		</BaseToggle>
 	</div>
 </template>

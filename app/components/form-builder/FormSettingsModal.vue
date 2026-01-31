@@ -1,128 +1,128 @@
 <script setup lang="ts">
-interface Props {
-	modelValue: boolean;
-	formId: number;
-}
+	interface Props {
+		modelValue: boolean;
+		formId: number;
+	}
 
-const props = defineProps<Props>();
+	const props = defineProps<Props>();
 
-const emit = defineEmits<{
-	"update:modelValue": [value: boolean];
-}>();
+	const emit = defineEmits<{
+		"update:modelValue": [value: boolean];
+	}>();
 
-const isOpen = computed({
-	get: () => props.modelValue,
-	set: (value) => emit("update:modelValue", value),
-});
+	const isOpen = computed({
+		get: () => props.modelValue,
+		set: (value) => emit("update:modelValue", value),
+	});
 
-// Form settings state
-const isLoading = ref(true);
-const isSaving = ref(false);
-const error = ref<string | null>(null);
+	// Form settings state
+	const isLoading = ref(true);
+	const isSaving = ref(false);
+	const error = ref<string | null>(null);
 
-const passwordEnabled = ref(false);
-const password = ref("");
-const passwordError = ref<string | null>(null);
-const allowPublicSubmissions = ref(true);
-const webhookUrl = ref("");
-const webhookIncludePdf = ref(false);
+	const passwordEnabled = ref(false);
+	const password = ref("");
+	const passwordError = ref<string | null>(null);
+	const allowPublicSubmissions = ref(true);
+	const webhookUrl = ref("");
+	const webhookIncludePdf = ref(false);
 
-// Fetch settings when modal opens
-watch(
-	() => props.modelValue,
-	async (open) => {
-		if (open) {
-			await fetchSettings();
+	// Fetch settings when modal opens
+	watch(
+		() => props.modelValue,
+		async (open) => {
+			if (open) {
+				await fetchSettings();
+			}
+		},
+		{ immediate: true },
+	);
+
+	async function fetchSettings() {
+		isLoading.value = true;
+		error.value = null;
+
+		try {
+			const data = await $fetch<{
+				id: number;
+				title: string;
+				password: string | null;
+				allowPublicSubmissions: boolean;
+				webhookUrl: string | null;
+				webhookIncludePdf: boolean;
+			}>(`/api/forms/${props.formId}/settings`);
+
+			passwordEnabled.value = !!data.password;
+			password.value = data.password ?? "";
+			allowPublicSubmissions.value = data.allowPublicSubmissions ?? true;
+			webhookUrl.value = data.webhookUrl ?? "";
+			webhookIncludePdf.value = data.webhookIncludePdf ?? false;
+		} catch (e: any) {
+			error.value = e.data?.message || "Failed to load settings";
+		} finally {
+			isLoading.value = false;
 		}
-	},
-	{ immediate: true }
-);
-
-async function fetchSettings() {
-	isLoading.value = true;
-	error.value = null;
-
-	try {
-		const data = await $fetch<{
-			id: number;
-			title: string;
-			password: string | null;
-			allowPublicSubmissions: boolean;
-			webhookUrl: string | null;
-			webhookIncludePdf: boolean;
-		}>(`/api/forms/${props.formId}/settings`);
-
-		passwordEnabled.value = !!data.password;
-		password.value = data.password ?? "";
-		allowPublicSubmissions.value = data.allowPublicSubmissions ?? true;
-		webhookUrl.value = data.webhookUrl ?? "";
-		webhookIncludePdf.value = data.webhookIncludePdf ?? false;
-	} catch (e: any) {
-		error.value = e.data?.message || "Failed to load settings";
-	} finally {
-		isLoading.value = false;
 	}
-}
 
-// Validate password when toggle is enabled
-watch(passwordEnabled, (enabled) => {
-	if (!enabled) {
-		password.value = "";
+	// Validate password when toggle is enabled
+	watch(passwordEnabled, (enabled) => {
+		if (!enabled) {
+			password.value = "";
+			passwordError.value = null;
+		} else {
+			validatePassword();
+		}
+	});
+
+	watch(password, () => {
+		if (passwordEnabled.value) {
+			validatePassword();
+		}
+	});
+
+	function validatePassword(): boolean {
+		if (passwordEnabled.value && !password.value.trim()) {
+			passwordError.value = "יש להזין סיסמה";
+			return false;
+		}
 		passwordError.value = null;
-	} else {
-		validatePassword();
-	}
-});
-
-watch(password, () => {
-	if (passwordEnabled.value) {
-		validatePassword();
-	}
-});
-
-function validatePassword(): boolean {
-	if (passwordEnabled.value && !password.value.trim()) {
-		passwordError.value = "יש להזין סיסמה";
-		return false;
-	}
-	passwordError.value = null;
-	return true;
-}
-
-async function saveSettings() {
-	if (!validatePassword()) {
-		return;
+		return true;
 	}
 
-	isSaving.value = true;
-	error.value = null;
+	async function saveSettings() {
+		if (!validatePassword()) {
+			return;
+		}
 
-	try {
-		await $fetch(`/api/forms/${props.formId}`, {
-			method: "PATCH",
-			body: {
-				password: passwordEnabled.value ? password.value : null,
-				allowPublicSubmissions: allowPublicSubmissions.value,
-				webhookUrl: webhookUrl.value.trim() || null,
-				webhookIncludePdf: webhookIncludePdf.value,
-			},
-		});
+		isSaving.value = true;
+		error.value = null;
 
+		try {
+			await $fetch(`/api/forms/${props.formId}`, {
+				method: "PATCH",
+				body: {
+					password: passwordEnabled.value ? password.value : null,
+					allowPublicSubmissions: allowPublicSubmissions.value,
+					webhookUrl: webhookUrl.value.trim() || null,
+					webhookIncludePdf: webhookIncludePdf.value,
+				},
+			});
+
+			isOpen.value = false;
+		} catch (e: any) {
+			error.value = e.data?.message || "Failed to save settings";
+		} finally {
+			isSaving.value = false;
+		}
+	}
+
+	function close() {
 		isOpen.value = false;
-	} catch (e: any) {
-		error.value = e.data?.message || "Failed to save settings";
-	} finally {
-		isSaving.value = false;
 	}
-}
-
-function close() {
-	isOpen.value = false;
-}
 </script>
 
 <template>
-	<UiModal v-model="isOpen" title="הגדרות טופס" size="md">
+	<BaseModal v-model="isOpen" title="הגדרות טופס" size="md">
 		<!-- Loading state -->
 		<div v-if="isLoading" class="flex items-center justify-center py-8">
 			<Icon name="heroicons:arrow-path" class="h-6 w-6 animate-spin text-gray-400" />
@@ -139,9 +139,7 @@ function close() {
 			<div class="space-y-4">
 				<div>
 					<h3 class="text-sm font-medium text-gray-900">גישה לטופס</h3>
-					<p class="text-sm text-gray-500 mt-1">
-						בחר מי יכול למלא ולשלוח את הטופס
-					</p>
+					<p class="text-sm text-gray-500 mt-1">בחר מי יכול למלא ולשלוח את הטופס</p>
 				</div>
 
 				<div class="space-y-3">
@@ -185,11 +183,9 @@ function close() {
 				<div class="flex items-center justify-between">
 					<div>
 						<h3 class="text-sm font-medium text-gray-900">הגנה בסיסמה</h3>
-						<p class="text-sm text-gray-500">
-							דרוש סיסמה כדי למלא את הטופס
-						</p>
+						<p class="text-sm text-gray-500">דרוש סיסמה כדי למלא את הטופס</p>
 					</div>
-					<UiToggle v-model="passwordEnabled" />
+					<BaseToggle v-model="passwordEnabled" />
 				</div>
 
 				<!-- Password input (shown when toggle is on) -->
@@ -197,7 +193,7 @@ function close() {
 					<label for="form-password" class="block text-sm font-medium text-gray-700">
 						סיסמה
 					</label>
-					<UiInput
+					<BaseInput
 						id="form-password"
 						v-model="password"
 						type="text"
@@ -222,7 +218,7 @@ function close() {
 					</p>
 				</div>
 
-				<UiInput
+				<BaseInput
 					v-model="webhookUrl"
 					type="url"
 					placeholder="https://example.com/webhook"
@@ -232,11 +228,9 @@ function close() {
 				<div class="flex items-center justify-between">
 					<div>
 						<p class="text-sm font-medium text-gray-900">צירוף PDF</p>
-						<p class="text-sm text-gray-500">
-							צרף קובץ PDF של הטופס לנתוני ה-Webhook
-						</p>
+						<p class="text-sm text-gray-500">צרף קובץ PDF של הטופס לנתוני ה-Webhook</p>
 					</div>
-					<UiToggle v-model="webhookIncludePdf" />
+					<BaseToggle v-model="webhookIncludePdf" />
 				</div>
 
 				<p class="text-xs text-gray-500">
@@ -251,17 +245,15 @@ function close() {
 		</div>
 
 		<template #footer>
-			<UiButton variant="secondary" @click="close">
-				ביטול
-			</UiButton>
-			<UiButton
+			<BaseButton variant="secondary" @click="close"> ביטול </BaseButton>
+			<BaseButton
 				variant="primary"
 				:loading="isSaving"
 				:disabled="isLoading || (passwordEnabled && !!passwordError)"
 				@click="saveSettings"
 			>
 				שמור
-			</UiButton>
+			</BaseButton>
 		</template>
-	</UiModal>
+	</BaseModal>
 </template>

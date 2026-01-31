@@ -1,27 +1,30 @@
 <script setup lang="ts">
-import type { BuilderElement, SelectionOption } from "~/types/form-builder";
+	import type { BuilderElement, SelectionOption } from "~/types/form-builder";
 
-interface Props {
-	element: BuilderElement;
-}
+	interface Props {
+		element: BuilderElement;
+	}
 
-const props = defineProps<Props>();
+	const props = defineProps<Props>();
 
-const emit = defineEmits<{
-	"update:config": [config: Record<string, any>];
-}>();
+	const emit = defineEmits<{
+		"update:config": [config: Record<string, any>];
+	}>();
 
-const config = computed(() => props.element.config as {
-	placeholder?: string;
-	options?: SelectionOption[];
-	allowOther?: boolean;
-});
+	const config = computed(
+		() =>
+			props.element.config as {
+				placeholder?: string;
+				options?: SelectionOption[];
+				allowOther?: boolean;
+			},
+	);
 
-const options = computed(() => config.value.options || []);
+	const options = computed(() => config.value.options || []);
 
-function updateOptions(newOptions: SelectionOption[]) {
-	emit("update:config", { options: newOptions });
-}
+	function updateOptions(newOptions: SelectionOption[]) {
+		emit("update:config", { options: newOptions });
+	}
 </script>
 
 <template>
@@ -31,7 +34,7 @@ function updateOptions(newOptions: SelectionOption[]) {
 		<!-- Placeholder (for dropdown) -->
 		<div v-if="element.type === 'dropdown'">
 			<label class="mb-1 block text-sm text-gray-600">Placeholder</label>
-			<UiInput
+			<BaseInput
 				:model-value="config.placeholder || ''"
 				placeholder="Select an option..."
 				@update:model-value="$emit('update:config', { placeholder: $event })"
@@ -39,17 +42,14 @@ function updateOptions(newOptions: SelectionOption[]) {
 		</div>
 
 		<!-- Options editor -->
-		<FormBuilderPropertiesOptionsEditor
-			:options="options"
-			@update:options="updateOptions"
-		/>
+		<FormBuilderPropertiesOptionsEditor :options="options" @update:options="updateOptions" />
 
 		<!-- Allow other -->
-		<UiToggle
+		<BaseToggle
 			:model-value="config.allowOther || false"
 			@update:model-value="$emit('update:config', { allowOther: $event })"
 		>
 			Allow "Other" option
-		</UiToggle>
+		</BaseToggle>
 	</div>
 </template>

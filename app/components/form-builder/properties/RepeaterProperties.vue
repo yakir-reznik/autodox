@@ -1,55 +1,55 @@
 <script setup lang="ts">
-import type { BuilderElement } from "~/types/form-builder";
+	import type { BuilderElement } from "~/types/form-builder";
 
-interface RepeaterConfig {
-	label?: string;
-	helpText?: string;
-	itemName?: string;
-	minItems?: number;
-	maxItems?: number;
-	addButtonText?: string;
-	bordered?: boolean;
-	backgroundColor?: string;
-}
+	interface RepeaterConfig {
+		label?: string;
+		helpText?: string;
+		itemName?: string;
+		minItems?: number;
+		maxItems?: number;
+		addButtonText?: string;
+		bordered?: boolean;
+		backgroundColor?: string;
+	}
 
-interface Props {
-	element: BuilderElement;
-}
+	interface Props {
+		element: BuilderElement;
+	}
 
-const props = defineProps<Props>();
+	const props = defineProps<Props>();
 
-const emit = defineEmits<{
-	"update:config": [config: Partial<RepeaterConfig>];
-	"update:name": [name: string];
-}>();
+	const emit = defineEmits<{
+		"update:config": [config: Partial<RepeaterConfig>];
+		"update:name": [name: string];
+	}>();
 
-const config = computed(() => props.element.config as RepeaterConfig);
+	const config = computed(() => props.element.config as RepeaterConfig);
 
-const isFixedLength = computed(() => {
-	const min = config.value.minItems ?? 1;
-	const max = config.value.maxItems;
-	return max !== undefined && min === max;
-});
+	const isFixedLength = computed(() => {
+		const min = config.value.minItems ?? 1;
+		const max = config.value.maxItems;
+		return max !== undefined && min === max;
+	});
 
-function updateMinItems(value: string) {
-	const num = parseInt(value);
-	emit("update:config", { minItems: isNaN(num) ? 1 : Math.max(0, num) });
-}
-
-function updateMaxItems(value: string) {
-	if (value === "" || value === undefined) {
-		emit("update:config", { maxItems: undefined });
-	} else {
+	function updateMinItems(value: string) {
 		const num = parseInt(value);
-		if (!isNaN(num) && num >= (config.value.minItems ?? 1)) {
-			emit("update:config", { maxItems: num });
+		emit("update:config", { minItems: isNaN(num) ? 1 : Math.max(0, num) });
+	}
+
+	function updateMaxItems(value: string) {
+		if (value === "" || value === undefined) {
+			emit("update:config", { maxItems: undefined });
+		} else {
+			const num = parseInt(value);
+			if (!isNaN(num) && num >= (config.value.minItems ?? 1)) {
+				emit("update:config", { maxItems: num });
+			}
 		}
 	}
-}
 
-function clearMaxLimit() {
-	emit("update:config", { maxItems: undefined });
-}
+	function clearMaxLimit() {
+		emit("update:config", { maxItems: undefined });
+	}
 </script>
 
 <template>
@@ -59,7 +59,7 @@ function clearMaxLimit() {
 		<!-- Field name -->
 		<div>
 			<label class="mb-1 block text-sm text-gray-600">שם שדה</label>
-			<UiInput
+			<BaseInput
 				:model-value="element.name || ''"
 				placeholder="e.g., contacts"
 				@update:model-value="emit('update:name', String($event))"
@@ -70,7 +70,7 @@ function clearMaxLimit() {
 		<!-- Label -->
 		<div>
 			<label class="mb-1 block text-sm text-gray-600">תווית</label>
-			<UiInput
+			<BaseInput
 				:model-value="config.label || ''"
 				placeholder="שדה חזרה"
 				@update:model-value="emit('update:config', { label: String($event) })"
@@ -80,18 +80,20 @@ function clearMaxLimit() {
 		<!-- Item name -->
 		<div>
 			<label class="mb-1 block text-sm text-gray-600">שם הפריט</label>
-			<UiInput
+			<BaseInput
 				:model-value="config.itemName || ''"
 				placeholder="e.g., איש קשר"
 				@update:model-value="emit('update:config', { itemName: String($event) })"
 			/>
-			<p class="mt-1 text-xs text-gray-500">כיצד כל פריט יוצג (למשל: איש קשר #1, איש קשר #2)</p>
+			<p class="mt-1 text-xs text-gray-500">
+				כיצד כל פריט יוצג (למשל: איש קשר #1, איש קשר #2)
+			</p>
 		</div>
 
 		<!-- Help text -->
 		<div>
 			<label class="mb-1 block text-sm text-gray-600">טקסט עזרה</label>
-			<UiInput
+			<BaseInput
 				:model-value="config.helpText || ''"
 				placeholder="הסבר לשדה..."
 				@update:model-value="emit('update:config', { helpText: String($event) })"
@@ -101,7 +103,7 @@ function clearMaxLimit() {
 		<!-- Min items -->
 		<div>
 			<label class="mb-1 block text-sm text-gray-600">מינימום פריטים</label>
-			<UiInput
+			<BaseInput
 				type="number"
 				:model-value="String(config.minItems ?? 1)"
 				min="0"
@@ -113,7 +115,7 @@ function clearMaxLimit() {
 		<div>
 			<label class="mb-1 block text-sm text-gray-600">מקסימום פריטים</label>
 			<div class="flex gap-2">
-				<UiInput
+				<BaseInput
 					type="number"
 					:model-value="config.maxItems !== undefined ? String(config.maxItems) : ''"
 					:min="String(config.minItems ?? 1)"
@@ -138,7 +140,7 @@ function clearMaxLimit() {
 		<!-- Add button text -->
 		<div>
 			<label class="mb-1 block text-sm text-gray-600">טקסט כפתור הוספה</label>
-			<UiInput
+			<BaseInput
 				:model-value="config.addButtonText || ''"
 				placeholder="הוסף עוד"
 				@update:model-value="emit('update:config', { addButtonText: String($event) })"
@@ -155,7 +157,11 @@ function clearMaxLimit() {
 					type="checkbox"
 					:checked="config.bordered !== false"
 					class="h-4 w-4 rounded border-gray-300"
-					@change="emit('update:config', { bordered: ($event.target as HTMLInputElement).checked })"
+					@change="
+						emit('update:config', {
+							bordered: ($event.target as HTMLInputElement).checked,
+						})
+					"
 				/>
 				<span class="text-sm text-gray-600">הצג מסגרת</span>
 			</label>
@@ -168,12 +174,18 @@ function clearMaxLimit() {
 						type="color"
 						:value="config.backgroundColor || '#f9fafb'"
 						class="h-9 w-12 cursor-pointer rounded border border-gray-200"
-						@input="emit('update:config', { backgroundColor: ($event.target as HTMLInputElement).value })"
+						@input="
+							emit('update:config', {
+								backgroundColor: ($event.target as HTMLInputElement).value,
+							})
+						"
 					/>
-					<UiInput
+					<BaseInput
 						:model-value="config.backgroundColor || '#f9fafb'"
 						class="flex-1"
-						@update:model-value="emit('update:config', { backgroundColor: String($event) })"
+						@update:model-value="
+							emit('update:config', { backgroundColor: String($event) })
+						"
 					/>
 				</div>
 			</div>

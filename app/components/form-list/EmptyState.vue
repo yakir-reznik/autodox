@@ -4,10 +4,10 @@
 		<h3 class="mt-4 text-lg font-medium text-gray-900">אין טפסים</h3>
 		<p class="mt-2 text-gray-500">התחל ליצור את הטופס הראשון שלך.</p>
 		<NuxtLink to="/forms/new" class="mt-6 inline-block">
-			<UiButton variant="primary">
+			<BaseButton variant="primary">
 				<Icon name="heroicons:plus" class="h-5 w-5" />
 				יצירת טופס
-			</UiButton>
+			</BaseButton>
 		</NuxtLink>
 	</div>
 </template>

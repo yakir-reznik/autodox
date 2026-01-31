@@ -40,27 +40,27 @@
 		<div class="flex flex-col gap-2 mt-auto">
 			<!-- Primary Action -->
 			<NuxtLink :to="`/edit/${form.id}`">
-				<UiButton variant="primary" class="w-full justify-center">
+				<BaseButton variant="primary" class="w-full justify-center">
 					<Icon name="heroicons:pencil-square" class="h-4 w-4" />
 					עריכה
-				</UiButton>
+				</BaseButton>
 			</NuxtLink>
 
 			<!-- Secondary Actions Grid -->
 			<div class="grid grid-cols-3 gap-2">
 				<NuxtLink :to="`/fill/${form.id}`">
-					<UiButton variant="secondary" class="w-full justify-center" size="sm">
+					<BaseButton variant="secondary" class="w-full justify-center" size="sm">
 						<Icon name="heroicons:document-text" class="h-4 w-4" />
 						מילוי
-					</UiButton>
+					</BaseButton>
 				</NuxtLink>
 				<NuxtLink :to="`/submissions/${form.id}`">
-					<UiButton variant="secondary" class="w-full justify-center" size="sm">
+					<BaseButton variant="secondary" class="w-full justify-center" size="sm">
 						<Icon name="heroicons:inbox" class="h-4 w-4" />
 						הגשות
-					</UiButton>
+					</BaseButton>
 				</NuxtLink>
-				<UiButton
+				<BaseButton
 					variant="ghost"
 					size="sm"
 					class="w-full justify-center"
@@ -68,7 +68,7 @@
 				>
 					<Icon name="mdi:folder-move" class="h-4 w-4" />
 					העבר
-				</UiButton>
+				</BaseButton>
 			</div>
 		</div>
 	</div>

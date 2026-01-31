@@ -263,7 +263,7 @@ const config = computed(() => props.element.config as YourNewTypeConfig);
 
     <div>
       <label class="mb-1 block text-sm text-gray-600">אפשרות מותאמת</label>
-      <UiInput
+      <BaseInput
         :model-value="config.customOption || ''"
         @update:model-value="emit('update:config', { customOption: $event })"
       />

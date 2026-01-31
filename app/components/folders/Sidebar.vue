@@ -27,7 +27,7 @@
 		(newFolders) => {
 			localFolders.value = [...newFolders];
 		},
-		{ deep: true }
+		{ deep: true },
 	);
 
 	const hoveredFolderId = ref<number | null>(null);
@@ -294,10 +294,10 @@
 
 		<!-- Footer: New Folder Button -->
 		<div class="border-t border-gray-200 p-3">
-			<UiButton variant="secondary" size="sm" class="w-full" @click="handleCreateFolder">
+			<BaseButton variant="secondary" size="sm" class="w-full" @click="handleCreateFolder">
 				<Icon name="mdi:folder-plus" class="h-4 w-4" />
 				<span>תיקייה חדשה</span>
-			</UiButton>
+			</BaseButton>
 		</div>
 
 		<!-- Modals -->

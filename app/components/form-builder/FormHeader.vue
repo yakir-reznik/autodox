@@ -1,84 +1,84 @@
 <script setup lang="ts">
-import type { SaveStatus, FormStatus, FormTheme } from "~/types/form-builder";
-import { getThemeOptionsForSelect } from "~/composables/useThemes";
+	import type { SaveStatus, FormStatus, FormTheme } from "~/types/form-builder";
+	import { getThemeOptionsForSelect } from "~/composables/useThemes";
 
-interface Props {
-	title: string;
-	description: string;
-	status: FormStatus;
-	theme: FormTheme;
-	saveStatus: SaveStatus;
-	lastSavedAt: Date | null;
-	isDirty: boolean;
-	formId?: number;
-	canUndo?: boolean;
-	canRedo?: boolean;
-}
+	interface Props {
+		title: string;
+		description: string;
+		status: FormStatus;
+		theme: FormTheme;
+		saveStatus: SaveStatus;
+		lastSavedAt: Date | null;
+		isDirty: boolean;
+		formId?: number;
+		canUndo?: boolean;
+		canRedo?: boolean;
+	}
 
-const props = withDefaults(defineProps<Props>(), {
-	canUndo: false,
-	canRedo: false,
-});
-const router = useRouter();
+	const props = withDefaults(defineProps<Props>(), {
+		canUndo: false,
+		canRedo: false,
+	});
+	const router = useRouter();
 
-// Settings modal state
-const showSettingsModal = ref(false);
+	// Settings modal state
+	const showSettingsModal = ref(false);
 
-const emit = defineEmits<{
-	"update:title": [value: string];
-	"update:description": [value: string];
-	"update:status": [value: FormStatus];
-	"update:theme": [value: FormTheme];
-	save: [];
-	undo: [];
-	redo: [];
-}>();
+	const emit = defineEmits<{
+		"update:title": [value: string];
+		"update:description": [value: string];
+		"update:status": [value: FormStatus];
+		"update:theme": [value: FormTheme];
+		save: [];
+		undo: [];
+		redo: [];
+	}>();
 
-// Detect Mac for keyboard shortcut tooltips
-const isMac = computed(() => {
-	if (typeof navigator === 'undefined') return false;
-	return navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-});
+	// Detect Mac for keyboard shortcut tooltips
+	const isMac = computed(() => {
+		if (typeof navigator === "undefined") return false;
+		return navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+	});
 
-const undoShortcut = computed(() => isMac.value ? '⌘Z' : 'Ctrl+Z');
-const redoShortcut = computed(() => isMac.value ? '⌘⇧Z' : 'Ctrl+Shift+Z');
+	const undoShortcut = computed(() => (isMac.value ? "⌘Z" : "Ctrl+Z"));
+	const redoShortcut = computed(() => (isMac.value ? "⌘⇧Z" : "Ctrl+Shift+Z"));
 
-const localTitle = computed({
-	get: () => props.title,
-	set: (value) => emit("update:title", value),
-});
+	const localTitle = computed({
+		get: () => props.title,
+		set: (value) => emit("update:title", value),
+	});
 
-const localDescription = computed({
-	get: () => props.description,
-	set: (value) => emit("update:description", value),
-});
+	const localDescription = computed({
+		get: () => props.description,
+		set: (value) => emit("update:description", value),
+	});
 
-const statusOptions: { value: FormStatus; label: string }[] = [
-	{ value: "draft", label: "טיוטה" },
-	{ value: "published", label: "פורסם" },
-	{ value: "archived", label: "בארכיון" },
-];
+	const statusOptions: { value: FormStatus; label: string }[] = [
+		{ value: "draft", label: "טיוטה" },
+		{ value: "published", label: "פורסם" },
+		{ value: "archived", label: "בארכיון" },
+	];
 
-const themeOptions = getThemeOptionsForSelect();
+	const themeOptions = getThemeOptionsForSelect();
 
-function handleStatusChange(event: Event) {
-	const target = event.target as HTMLSelectElement;
-	emit("update:status", target.value as FormStatus);
-}
+	function handleStatusChange(event: Event) {
+		const target = event.target as HTMLSelectElement;
+		emit("update:status", target.value as FormStatus);
+	}
 
-function handleThemeChange(event: Event) {
-	const target = event.target as HTMLSelectElement;
-	emit("update:theme", target.value as FormTheme);
-}
+	function handleThemeChange(event: Event) {
+		const target = event.target as HTMLSelectElement;
+		emit("update:theme", target.value as FormTheme);
+	}
 
-function goBack() {
-	router.push("/forms");
-}
+	function goBack() {
+		router.push("/forms");
+	}
 
-// Debug
-watchEffect(() => {
-	console.log("FormHeader - isDirty:", props.isDirty, "saveStatus:", props.saveStatus);
-});
+	// Debug
+	watchEffect(() => {
+		console.log("FormHeader - isDirty:", props.isDirty, "saveStatus:", props.saveStatus);
+	});
 </script>
 
 <template>
@@ -153,10 +153,7 @@ watchEffect(() => {
 					</select>
 				</div>
 
-				<FormBuilderSaveIndicator
-					:status="saveStatus"
-					:last-saved-at="lastSavedAt"
-				/>
+				<FormBuilderSaveIndicator :status="saveStatus" :last-saved-at="lastSavedAt" />
 
 				<!-- Undo/Redo buttons -->
 				<div class="flex items-center gap-1">
@@ -182,41 +179,37 @@ watchEffect(() => {
 
 				<div class="h-6 w-px bg-gray-300" />
 
-				<UiButton
+				<BaseButton
 					variant="secondary"
 					size="sm"
 					title="הגדרות טופס"
 					@click="showSettingsModal = true"
 				>
 					<Icon name="heroicons:cog-6-tooth" class="h-4 w-4" />
-				</UiButton>
+				</BaseButton>
 
 				<NuxtLink
 					:to="`/forms/upload?formId=${formId}`"
 					title="Upload JSON to replace form structure"
 				>
-					<UiButton variant="secondary" size="sm">
+					<BaseButton variant="secondary" size="sm">
 						<Icon name="heroicons:arrow-up-tray" class="h-4 w-4" />
 						Import JSON
-					</UiButton>
+					</BaseButton>
 				</NuxtLink>
 
-				<UiButton
+				<BaseButton
 					variant="primary"
 					:disabled="!isDirty && saveStatus !== 'error'"
 					:loading="saveStatus === 'saving'"
 					@click="$emit('save')"
 				>
 					שמור
-				</UiButton>
+				</BaseButton>
 			</div>
 		</div>
 	</header>
 
 	<!-- Settings Modal -->
-	<FormBuilderFormSettingsModal
-		v-if="formId"
-		v-model="showSettingsModal"
-		:form-id="formId"
-	/>
+	<FormBuilderFormSettingsModal v-if="formId" v-model="showSettingsModal" :form-id="formId" />
 </template>

@@ -1,48 +1,48 @@
 <script setup lang="ts">
-import type { Folder } from "~/types/form-builder";
+	import type { Folder } from "~/types/form-builder";
 
-interface Props {
-	modelValue: boolean;
-	folders: Folder[];
-	currentFolderId: number | null;
-	formTitle: string;
-}
+	interface Props {
+		modelValue: boolean;
+		folders: Folder[];
+		currentFolderId: number | null;
+		formTitle: string;
+	}
 
-const props = defineProps<Props>();
+	const props = defineProps<Props>();
 
-const emit = defineEmits<{
-	"update:modelValue": [value: boolean];
-	move: [folderId: number | null];
-}>();
+	const emit = defineEmits<{
+		"update:modelValue": [value: boolean];
+		move: [folderId: number | null];
+	}>();
 
-const selectedFolderId = ref<number | null>(null);
+	const selectedFolderId = ref<number | null>(null);
 
-// Initialize selected folder when modal opens
-watch(
-	() => props.modelValue,
-	(isOpen) => {
-		if (isOpen) selectedFolderId.value = props.currentFolderId;
-	},
-);
+	// Initialize selected folder when modal opens
+	watch(
+		() => props.modelValue,
+		(isOpen) => {
+			if (isOpen) selectedFolderId.value = props.currentFolderId;
+		},
+	);
 
-const close = () => emit("update:modelValue", false);
+	const close = () => emit("update:modelValue", false);
 
-const handleMove = () => {
-	emit("move", selectedFolderId.value);
-	close();
-};
+	const handleMove = () => {
+		emit("move", selectedFolderId.value);
+		close();
+	};
 
-// Folder options including "unfiled"
-const folderOptions = computed(() => [
-	{ id: null, name: "ללא תיקייה", icon: "mdi:folder-open-outline" },
-	...props.folders.map((f) => ({ id: f.id, name: f.name, icon: "mdi:folder" })),
-]);
+	// Folder options including "unfiled"
+	const folderOptions = computed(() => [
+		{ id: null, name: "ללא תיקייה", icon: "mdi:folder-open-outline" },
+		...props.folders.map((f) => ({ id: f.id, name: f.name, icon: "mdi:folder" })),
+	]);
 
-const isCurrentFolder = computed(() => selectedFolderId.value === props.currentFolderId);
+	const isCurrentFolder = computed(() => selectedFolderId.value === props.currentFolderId);
 </script>
 
 <template>
-	<UiModal
+	<BaseModal
 		:model-value="modelValue"
 		title="העברת טופס לתיקייה"
 		size="md"
@@ -75,12 +75,21 @@ const isCurrentFolder = computed(() => selectedFolderId.value === props.currentF
 						<div class="flex items-center gap-3">
 							<div
 								class="flex h-5 w-5 items-center justify-center rounded-full border-2"
-								:class="selectedFolderId === option.id ? 'border-blue-500' : 'border-gray-300'"
+								:class="
+									selectedFolderId === option.id
+										? 'border-blue-500'
+										: 'border-gray-300'
+								"
 							>
-								<div v-if="selectedFolderId === option.id" class="h-2.5 w-2.5 rounded-full bg-blue-500" />
+								<div
+									v-if="selectedFolderId === option.id"
+									class="h-2.5 w-2.5 rounded-full bg-blue-500"
+								/>
 							</div>
 							<Icon :name="option.icon" class="h-5 w-5 text-gray-600" />
-							<span class="text-sm font-medium text-gray-900 flex-1 truncate">{{ option.name }}</span>
+							<span class="text-sm font-medium text-gray-900 flex-1 truncate">{{
+								option.name
+							}}</span>
 						</div>
 					</button>
 				</div>
@@ -88,8 +97,10 @@ const isCurrentFolder = computed(() => selectedFolderId.value === props.currentF
 		</div>
 
 		<template #footer>
-			<UiButton variant="secondary" @click="close">ביטול</UiButton>
-			<UiButton variant="primary" :disabled="isCurrentFolder" @click="handleMove">העברה</UiButton>
+			<BaseButton variant="secondary" @click="close">ביטול</BaseButton>
+			<BaseButton variant="primary" :disabled="isCurrentFolder" @click="handleMove"
+				>העברה</BaseButton
+			>
 		</template>
-	</UiModal>
+	</BaseModal>
 </template>

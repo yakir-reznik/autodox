@@ -1,22 +1,25 @@
 <script setup lang="ts">
-import type { BuilderElement } from "~/types/form-builder";
+	import type { BuilderElement } from "~/types/form-builder";
 
-interface Props {
-	element: BuilderElement;
-}
+	interface Props {
+		element: BuilderElement;
+	}
 
-const props = defineProps<Props>();
+	const props = defineProps<Props>();
 
-const emit = defineEmits<{
-	"update:config": [config: Record<string, any>];
-}>();
+	const emit = defineEmits<{
+		"update:config": [config: Record<string, any>];
+	}>();
 
-const config = computed(() => props.element.config as {
-	placeholder?: string;
-	pattern?: string;
-	rows?: number;
-	step?: number;
-});
+	const config = computed(
+		() =>
+			props.element.config as {
+				placeholder?: string;
+				pattern?: string;
+				rows?: number;
+				step?: number;
+			},
+	);
 </script>
 
 <template>
@@ -26,7 +29,7 @@ const config = computed(() => props.element.config as {
 		<!-- Placeholder -->
 		<div>
 			<label class="mb-1 block text-sm text-gray-600">Placeholder</label>
-			<UiInput
+			<BaseInput
 				:model-value="config.placeholder || ''"
 				placeholder="Placeholder text..."
 				@update:model-value="$emit('update:config', { placeholder: $event })"
@@ -36,7 +39,7 @@ const config = computed(() => props.element.config as {
 		<!-- Pattern (for email, text, etc.) -->
 		<div v-if="['email', 'text'].includes(element.type)">
 			<label class="mb-1 block text-sm text-gray-600">Pattern</label>
-			<UiInput
+			<BaseInput
 				:model-value="config.pattern || ''"
 				placeholder="Regex pattern..."
 				@update:model-value="$emit('update:config', { pattern: $event })"
@@ -49,7 +52,7 @@ const config = computed(() => props.element.config as {
 		<!-- Rows (for textarea) -->
 		<div v-if="element.type === 'textarea'">
 			<label class="mb-1 block text-sm text-gray-600">Rows</label>
-			<UiInput
+			<BaseInput
 				type="number"
 				:model-value="config.rows || 4"
 				@update:model-value="$emit('update:config', { rows: Number($event) })"
@@ -59,7 +62,7 @@ const config = computed(() => props.element.config as {
 		<!-- Step (for number) -->
 		<div v-if="element.type === 'number'">
 			<label class="mb-1 block text-sm text-gray-600">Step</label>
-			<UiInput
+			<BaseInput
 				type="number"
 				:model-value="config.step || 1"
 				@update:model-value="$emit('update:config', { step: Number($event) })"

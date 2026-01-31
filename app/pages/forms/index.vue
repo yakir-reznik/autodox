@@ -96,9 +96,9 @@
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-4">
 						<NuxtLink to="/">
-							<UiButton variant="secondary" size="sm">
+							<BaseButton variant="secondary" size="sm">
 								<Icon name="heroicons:arrow-left" class="h-5 w-5" />
-							</UiButton>
+							</BaseButton>
 						</NuxtLink>
 						<h1 class="text-2xl font-bold text-gray-900">Forms</h1>
 					</div>
@@ -107,21 +107,21 @@
 							{{ user?.name }}
 						</div>
 						<NuxtLink to="/forms/upload">
-							<UiButton variant="secondary">
+							<BaseButton variant="secondary">
 								<Icon name="heroicons:arrow-up-tray" class="h-5 w-5" />
 								Upload JSON
-							</UiButton>
+							</BaseButton>
 						</NuxtLink>
 						<NuxtLink to="/forms/new">
-							<UiButton variant="primary">
+							<BaseButton variant="primary">
 								<Icon name="heroicons:plus" class="h-5 w-5" />
 								New Form
-							</UiButton>
+							</BaseButton>
 						</NuxtLink>
-						<UiButton variant="secondary" @click="handleLogout">
+						<BaseButton variant="secondary" @click="handleLogout">
 							<Icon name="heroicons:arrow-right-on-rectangle" class="h-5 w-5" />
 							Logout
-						</UiButton>
+						</BaseButton>
 					</div>
 				</div>
 			</div>
@@ -184,9 +184,9 @@
 							class="mx-auto h-12 w-12 text-red-500"
 						/>
 						<p class="mt-2 text-red-700">Failed to load forms</p>
-						<UiButton variant="secondary" class="mt-4" @click="refresh">
+						<BaseButton variant="secondary" class="mt-4" @click="refresh">
 							Try Again
-						</UiButton>
+						</BaseButton>
 					</div>
 
 					<!-- Empty state -->

@@ -72,7 +72,7 @@
 		error,
 		refresh,
 	} = await useFetch<PaginatedResponse>(
-		() => `/api/forms/${formId}/submissions?page=${currentPage.value}`
+		() => `/api/forms/${formId}/submissions?page=${currentPage.value}`,
 	);
 
 	const submissions = computed(() => response.value?.data ?? []);
@@ -84,7 +84,7 @@
 		() => currentPage.value,
 		async () => {
 			await refresh();
-		}
+		},
 	);
 
 	const statusColors = {
@@ -307,14 +307,16 @@
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-4">
 						<NuxtLink to="/forms">
-							<UiButton variant="secondary" size="sm">
+							<BaseButton variant="secondary" size="sm">
 								<Icon name="heroicons:arrow-left" class="h-5 w-5" />
-							</UiButton>
+							</BaseButton>
 						</NuxtLink>
 						<div>
 							<h1 class="text-2xl font-bold text-gray-900">Submissions</h1>
 							<div class="flex items-center gap-2 mt-1">
-								<p class="text-sm font-medium text-gray-900">{{ formData?.title }}</p>
+								<p class="text-sm font-medium text-gray-900">
+									{{ formData?.title }}
+								</p>
 								<span
 									v-if="formData?.folder"
 									class="text-xs text-indigo-800 bg-indigo-100 rounded px-2 py-1"
@@ -338,7 +340,7 @@
 		<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 			<!-- Create New Submission Button -->
 			<div class="mb-6 flex justify-end gap-3">
-				<UiButton
+				<BaseButton
 					variant="secondary"
 					@click="refresh"
 					:disabled="pending"
@@ -347,14 +349,14 @@
 					<Icon v-if="pending" name="svg-spinners:ring-resize" class="h-4 w-4" />
 					<Icon v-else name="heroicons:arrow-path" class="h-4 w-4" />
 					{{ pending ? "טוען..." : "רענן" }}
-				</UiButton>
+				</BaseButton>
 				<NuxtLink :to="`/edit/${formId}`">
-					<UiButton variant="secondary">
+					<BaseButton variant="secondary">
 						<Icon name="heroicons:pencil" class="h-4 w-4" />
 						עריכת טופס
-					</UiButton>
+					</BaseButton>
 				</NuxtLink>
-				<UiButton
+				<BaseButton
 					variant="primary"
 					@click="createNewSubmission"
 					:disabled="isCreatingSubmission || !loggedIn || !isFormPublished"
@@ -367,7 +369,7 @@
 					/>
 					<Icon v-else name="heroicons:plus" class="h-4 w-4" />
 					{{ isCreatingSubmission ? "יוצר הגשה..." : "צור הגשה חדשה" }}
-				</UiButton>
+				</BaseButton>
 			</div>
 
 			<!-- Loading state -->
@@ -379,7 +381,9 @@
 			<div v-else-if="error" class="rounded-lg bg-red-50 p-6 text-center">
 				<Icon name="heroicons:exclamation-circle" class="mx-auto h-12 w-12 text-red-500" />
 				<p class="mt-2 text-red-700">Failed to load submissions</p>
-				<UiButton variant="secondary" class="mt-4" @click="refresh"> Try Again </UiButton>
+				<BaseButton variant="secondary" class="mt-4" @click="refresh">
+					Try Again
+				</BaseButton>
 			</div>
 
 			<!-- Empty state -->
@@ -479,12 +483,12 @@
 							<td class="px-6 py-4 text-sm whitespace-nowrap">
 								<div class="flex gap-2">
 									<NuxtLink :to="`/submission-detail/${submission.token}`">
-										<UiButton variant="primary" size="sm">
+										<BaseButton variant="primary" size="sm">
 											<Icon name="heroicons:eye" class="h-4 w-4" />
 											Details
-										</UiButton>
+										</BaseButton>
 									</NuxtLink>
-									<UiButton
+									<BaseButton
 										variant="secondary"
 										size="sm"
 										@click="downloadPDF(submission.token)"
@@ -500,8 +504,8 @@
 											class="h-4 w-4"
 										/>
 										PDF
-									</UiButton>
-									<UiButton
+									</BaseButton>
+									<BaseButton
 										v-if="submission.submissionData"
 										variant="secondary"
 										size="sm"
@@ -509,8 +513,8 @@
 									>
 										<Icon name="heroicons:document-text" class="h-4 w-4" />
 										View Data
-									</UiButton>
-									<UiButton
+									</BaseButton>
+									<BaseButton
 										v-if="!['submitted', 'locked'].includes(submission.status)"
 										variant="secondary"
 										size="sm"
@@ -521,7 +525,7 @@
 											class="h-4 w-4"
 										/>
 										Open Form
-									</UiButton>
+									</BaseButton>
 								</div>
 							</td>
 							<td class="px-6 py-4 text-sm whitespace-nowrap">
@@ -560,7 +564,7 @@
 				</div>
 
 				<div class="flex gap-2">
-					<UiButton
+					<BaseButton
 						variant="secondary"
 						size="sm"
 						:disabled="!pagination.hasPreviousPage"
@@ -568,7 +572,7 @@
 					>
 						<Icon name="heroicons:arrow-right" class="h-4 w-4" />
 						Previous
-					</UiButton>
+					</BaseButton>
 
 					<!-- Page numbers -->
 					<div class="flex gap-1">
@@ -588,7 +592,7 @@
 						</button>
 					</div>
 
-					<UiButton
+					<BaseButton
 						variant="secondary"
 						size="sm"
 						:disabled="!pagination.hasNextPage"
@@ -596,7 +600,7 @@
 					>
 						Next
 						<Icon name="heroicons:arrow-left" class="h-4 w-4" />
-					</UiButton>
+					</BaseButton>
 				</div>
 			</div>
 		</main>
@@ -629,11 +633,11 @@
 
 				<!-- Modal Footer -->
 				<div class="flex gap-3 border-t border-gray-200 px-6 py-4">
-					<UiButton variant="primary" @click="copyJsonToClipboard">
+					<BaseButton variant="primary" @click="copyJsonToClipboard">
 						<Icon name="heroicons:clipboard-document" class="h-4 w-4" />
 						Copy JSON
-					</UiButton>
-					<UiButton variant="secondary" @click="closeJsonModal"> Close </UiButton>
+					</BaseButton>
+					<BaseButton variant="secondary" @click="closeJsonModal"> Close </BaseButton>
 				</div>
 			</div>
 		</div>
