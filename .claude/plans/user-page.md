@@ -85,7 +85,7 @@ Card-based layout with RTL, Tailwind, same patterns as `forms/index.vue`.
 
 ---
 
-### Step 6: Build global submissions page
+### Step 6: Build global submissions page (modify existing page to support filtering by userid)
 
 **File:** `app/pages/user/submissions.vue`
 
