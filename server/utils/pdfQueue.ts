@@ -7,7 +7,6 @@ const PDF_TIMEOUT_MS = 60000; // 60 seconds
 const pdfQueue = new PQueue({
   concurrency: PDF_CONCURRENCY,
   timeout: PDF_TIMEOUT_MS,
-  throwOnTimeout: true,
 });
 
 // Track in-flight requests for deduplication
@@ -28,7 +27,7 @@ export async function queuePDFGeneration(token: string): Promise<Buffer> {
     async () => {
       return generateSubmissionPDF(token);
     },
-    { throwOnTimeout: true },
+    { timeout: PDF_TIMEOUT_MS },
   ) as Promise<Buffer>;
 
   inFlightRequests.set(token, promise);

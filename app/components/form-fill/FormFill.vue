@@ -294,7 +294,7 @@
 		let isValid = true;
 
 		for (let itemIndex = 0; itemIndex < repeaterItems.length; itemIndex++) {
-			const item = repeaterItems[itemIndex];
+			const item = repeaterItems[itemIndex]!;
 			for (const child of children) {
 				if (isFieldElement(child.type)) {
 					const value = item[child.clientId];
@@ -375,7 +375,7 @@
 		let targetFieldId = errorKey;
 		if (errorKey.includes("[")) {
 			const match = errorKey.match(/^(el_\d+)\[/);
-			if (match) {
+			if (match?.[1]) {
 				targetFieldId = match[1]; // Scroll to the repeater container
 			}
 		}

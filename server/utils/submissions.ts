@@ -13,7 +13,7 @@ import type {
 	SubmissionLifecycleEvent,
 	SubmissionEntranceEvent,
 	SubmissionWebhookEvent,
-} from "~/app/types/submission-timeline";
+} from "~~/app/types/submission-timeline";
 
 export type SubmissionData = {
 	submission: {

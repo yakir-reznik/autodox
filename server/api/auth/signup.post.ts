@@ -58,6 +58,13 @@ export default defineEventHandler(async (event) => {
 		})
 		.$returningId();
 
+	if (!newUser) {
+		throw createError({
+			statusCode: 500,
+			statusMessage: "שגיאה ביצירת המשתמש",
+		});
+	}
+
 	// Set user session
 	await setUserSession(event, {
 		user: {
