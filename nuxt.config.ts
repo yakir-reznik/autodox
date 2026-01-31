@@ -2,8 +2,15 @@
 export default defineNuxtConfig({
 	compatibilityDate: "2025-07-15",
 	devtools: { enabled: true },
-	modules: ["@nuxt/fonts", "@nuxt/icon", "@nuxtjs/tailwindcss", "nuxt-auth-utils", "@pinia/nuxt"],
-	css: ["~/assets/css/main.css"],
+	modules: [
+		"@nuxt/fonts",
+		"@nuxt/icon",
+		"@nuxtjs/tailwindcss",
+		"nuxt-auth-utils",
+		"@pinia/nuxt",
+		"shadcn-nuxt",
+	],
+	css: ["~/assets/css/main.css", "~/assets/css/tailwind.css"],
 	app: {
 		head: {
 			title: "Autodox",
@@ -29,6 +36,10 @@ export default defineNuxtConfig({
 				{ rel: "manifest", href: "/favicon/site.webmanifest" },
 			],
 		},
+	},
+	shadcn: {
+		prefix: "Ui",
+		componentDir: "@/components/ui",
 	},
 	runtimeConfig: {
 		databaseUrl: process.env.DATABASE_URL,

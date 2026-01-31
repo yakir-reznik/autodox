@@ -81,7 +81,9 @@
 	padding: var(--fill-spacing-sm) var(--fill-spacing-md);
 	font-size: var(--fill-font-size-base);
 	color: rgb(var(--fill-input-text));
-	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+	transition:
+		border-color 0.15s ease,
+		box-shadow 0.15s ease;
 }
 
 .form-fill-input:focus {
@@ -109,7 +111,9 @@
 	color: rgb(var(--fill-input-text));
 	resize: vertical;
 	min-height: 100px;
-	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+	transition:
+		border-color 0.15s ease,
+		box-shadow 0.15s ease;
 }
 
 .form-fill-textarea:focus {

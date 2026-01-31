@@ -5,6 +5,11 @@
 </script>
 
 <template>
+	<div class="p-24">
+		<UiButton>primary large</UiButton>
+		<button class="bg-primary">Actual HTML button</button>
+	</div>
+
 	<div dir="rtl" class="flex min-h-screen flex-col items-center justify-center bg-gray-100">
 		<div class="text-center">
 			<h1 class="text-4xl font-bold text-gray-900">Autodox</h1>
