@@ -64,6 +64,18 @@ All new files under `server/api/user/`:
 
 ### Step 5: Build user profile page
 
+**Files to read before implementing:**
+- `app/pages/forms/index.vue` — layout patterns, RTL card structure to replicate
+- `app/pages/user/index.vue` — existing file to modify (if any content already there)
+- `app/components/folders/Modal.vue` — BaseModal usage pattern
+- `app/components/folders/DeleteModal.vue` — confirmation modal pattern
+- `app/stores/toasts.ts` — useToasts store API
+- `server/api/user/profile.get.ts` — response shape for data fetching
+- `server/api/user/profile.patch.ts` — name update API
+- `server/api/user/change-password.post.ts` — password change API
+- `server/api/user/reroll-api-key.post.ts` — API key reroll API
+- `server/api/user/disconnect-google.post.ts` — Google disconnect API
+
 **File:** `app/pages/user/index.vue`
 
 Card-based layout with RTL, Tailwind, same patterns as `forms/index.vue`.
@@ -87,11 +99,16 @@ Card-based layout with RTL, Tailwind, same patterns as `forms/index.vue`.
 
 ### Step 6: Build global submissions page (modify existing page to support filtering by userid)
 
+**Files to read before implementing:**
+- `app/pages/submissions/[form_id].vue` — base page to replicate (table structure, pagination, status colors, date formatting, PDF download, view details)
+- `server/api/submissions.get.ts` — unified endpoint; call with `?userId=X` to get all user submissions (returns `formTitle` when userId is provided)
+- `app/stores/toasts.ts` — useToasts store API
+
 **File:** `app/pages/user/submissions.vue`
 
 Based closely on `app/pages/submissions/[form_id].vue` pattern with these differences:
 
-- Fetches from `/api/user/submissions` (no formId)
+- Fetches from `/api/submissions?userId=X` (no formId)
 - Table has extra "Form" column showing `formTitle` as link to `/submissions/${formId}`
 - Header says "כל ההגשות", back link goes to `/user`
 - No "Create Submission" button
