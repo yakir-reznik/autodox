@@ -68,7 +68,7 @@ Replace the direct `createNewSubmission()` call with a scrollable modal that let
 
 ## Implementation Steps
 
-### Step 1: Create `app/components/submissions/CreateSubmissionModal.vue`
+### Step 1: Create `app/components/submissions/CreateSubmissionModal.vue` ✅
 
 **Props & emits:**
 - Props: `modelValue: boolean`, `formId: number`, `apiKey: string`
@@ -108,7 +108,7 @@ Replace the direct `createNewSubmission()` call with a scrollable modal that let
 - On success: emit `created`, toast, close
 - On error: show error in modal
 
-### Step 2: Update `app/pages/submissions/form/[form_id].vue`
+### Step 2: Update `app/pages/submissions/form/[form_id].vue` ✅
 - Add `const showCreateModal = ref(false)`
 - Change button `@click` to `showCreateModal = true`
 - Remove `createNewSubmission` function and `isCreatingSubmission` ref

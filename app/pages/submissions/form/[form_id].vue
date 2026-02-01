@@ -49,12 +49,11 @@
 	}
 
 	const route = useRoute();
-	const toasts = useToasts();
 	const { user, loggedIn } = useUserSession();
 	const router = useRouter();
 	const formId = Number(route.params.form_id);
 	const currentPage = ref(Number(route.query.page) || 1);
-	const isCreatingSubmission = ref(false);
+	const showCreateModal = ref(false);
 
 	watch(currentPage, (newPage) => {
 		router.replace({ query: { ...route.query, page: newPage > 1 ? String(newPage) : undefined } });
@@ -78,59 +77,6 @@
 	const submissions = computed(() => response.value?.data ?? []);
 	const pagination = computed(() => response.value?.pagination);
 	const isFormPublished = computed(() => formData.value?.status === "published");
-
-
-	async function createNewSubmission() {
-		if (!user.value?.apiKey) {
-			toasts.add({
-				title: "שגיאה: לא נמצא API Key",
-				theme: "error",
-				duration: 3000,
-			});
-			return;
-		}
-
-		isCreatingSubmission.value = true;
-
-		try {
-			const response = await $fetch<{
-				success: boolean;
-				link?: string;
-				token?: string;
-				formId?: number;
-				expiresAt?: string;
-				message?: string;
-			}>(`/api/forms/${formId}/create-submission-link`, {
-				method: "POST",
-				headers: {
-					"x-api-key": user.value.apiKey,
-				},
-			});
-
-			if (response.success) {
-				toasts.add({
-					title: "הגשה חדשה נוצרה בהצלחה",
-					theme: "success",
-					duration: 3000,
-				});
-				await refresh();
-			} else {
-				toasts.add({
-					title: `שגיאה: ${response.message || "לא ניתן ליצור הגשה"}`,
-					theme: "error",
-					duration: 3000,
-				});
-			}
-		} catch (error: any) {
-			toasts.add({
-				title: `שגיאה: ${error.message || "לא ניתן ליצור הגשה"}`,
-				theme: "error",
-				duration: 3000,
-			});
-		} finally {
-			isCreatingSubmission.value = false;
-		}
-	}
 
 	useHead({
 		title: "Submissions - Autodox",
@@ -177,17 +123,12 @@
 				</NuxtLink>
 				<BaseButton
 					variant="primary"
-					@click="createNewSubmission"
-					:disabled="isCreatingSubmission || !loggedIn || !isFormPublished"
+					@click="showCreateModal = true"
+					:disabled="!loggedIn || !isFormPublished"
 					:title="!isFormPublished ? 'צור הגשה רק עבור טפסים פורסומים' : ''"
 				>
-					<Icon
-						v-if="isCreatingSubmission"
-						name="svg-spinners:ring-resize"
-						class="h-4 w-4"
-					/>
-					<Icon v-else name="heroicons:plus" class="h-4 w-4" />
-					{{ isCreatingSubmission ? "יוצר הגשה..." : "צור הגשה חדשה" }}
+					<Icon name="heroicons:plus" class="h-4 w-4" />
+					צור הגשה חדשה
 				</BaseButton>
 			</div>
 
@@ -200,5 +141,12 @@
 				@refresh="refresh"
 			/>
 		</main>
+
+		<SubmissionsCreateSubmissionModal
+			v-model="showCreateModal"
+			:form-id="formId"
+			:api-key="user?.apiKey ?? ''"
+			@created="refresh"
+		/>
 	</div>
 </template>
