@@ -37,9 +37,14 @@
 	const route = useRoute();
 	const { user, loggedIn } = useUserSession();
 
+	const router = useRouter();
 	const userId = Number(route.params.user_id);
-	const currentPage = ref(1);
+	const currentPage = ref(Number(route.query.page) || 1);
 	const selectedFormId = ref<number | null>(null);
+
+	watch(currentPage, (newPage) => {
+		router.replace({ query: { ...route.query, page: newPage > 1 ? String(newPage) : undefined } });
+	});
 
 	const fetchUrl = computed(() => {
 		let url = `/api/submissions?userId=${userId}&page=${currentPage.value}`;

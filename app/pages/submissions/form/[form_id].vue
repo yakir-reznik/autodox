@@ -52,9 +52,14 @@
 	const toasts = useToasts();
 	const { user, loggedIn } = useUserSession();
 
+	const router = useRouter();
 	const formId = Number(route.params.form_id);
-	const currentPage = ref(1);
+	const currentPage = ref(Number(route.query.page) || 1);
 	const isCreatingSubmission = ref(false);
+
+	watch(currentPage, (newPage) => {
+		router.replace({ query: { ...route.query, page: newPage > 1 ? String(newPage) : undefined } });
+	});
 
 	const {
 		data: formData,
