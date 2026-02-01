@@ -415,20 +415,16 @@
 				</BaseButton>
 
 				<div class="flex gap-1">
-					<button
+					<UiButton
 						v-for="(pg, index) in paginationPages"
 						:key="`${pg}-${index}`"
 						:disabled="pg === '...'"
-						class="rounded border px-3 py-1 text-sm font-medium transition-colors disabled:cursor-default disabled:border-gray-200 disabled:bg-white disabled:text-gray-400"
-						:class="
-							pg === pagination.page
-								? 'border-blue-500 bg-blue-50 text-blue-700'
-								: 'border-gray-300 text-gray-700 hover:bg-gray-50 disabled:hover:bg-white'
-						"
+						:variant="pg === pagination.page ? 'default' : 'outline'"
+						size="sm"
 						@click="pg !== '...' && goToPage(Number(pg))"
 					>
 						{{ pg }}
-					</button>
+					</UiButton>
 				</div>
 
 				<BaseButton

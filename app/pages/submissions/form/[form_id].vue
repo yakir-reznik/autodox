@@ -75,12 +75,6 @@
 	const pagination = computed(() => response.value?.pagination);
 	const isFormPublished = computed(() => formData.value?.status === "published");
 
-	watch(
-		() => currentPage.value,
-		async () => {
-			await refresh();
-		},
-	);
 
 	async function createNewSubmission() {
 		if (!user.value?.apiKey) {

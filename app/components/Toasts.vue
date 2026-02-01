@@ -1,11 +1,11 @@
 <template>
-	<div class="fixed bottom-0 right-0 z-[60] w-full p-8 md:bottom-8 md:p-2">
+	<div class="fixed bottom-0 right-0 z-[60] w-full p-8 md:bottom-8 md:p-2 pointer-events-none">
 		<div class="flex flex-col items-start justify-start gap-4">
 			<TransitionGroup name="toast">
 				<div
 					v-for="toast in toasts"
 					:key="toast.id"
-					class="toast-item"
+					class="toast-item pointer-events-auto"
 					:class="mergedClasses(toast, 'container')"
 				>
 					<div class="flex items-start gap-4 w-full">
@@ -111,27 +111,27 @@
 			el === "container"
 				? themeConfig?.containerClasses
 				: el === "icon"
-				? themeConfig?.iconClasses
-				: el === "title"
-				? themeConfig?.titleClasses
-				: el === "text"
-				? themeConfig?.textClasses
-				: el === "progress"
-				? themeConfig?.progressClasses
-				: "";
+					? themeConfig?.iconClasses
+					: el === "title"
+						? themeConfig?.titleClasses
+						: el === "text"
+							? themeConfig?.textClasses
+							: el === "progress"
+								? themeConfig?.progressClasses
+								: "";
 
 		const passedClass =
 			el === "container"
 				? toast.containerClasses
 				: el === "icon"
-				? toast.iconClasses
-				: el === "title"
-				? toast.titleClasses
-				: el === "text"
-				? toast.textClasses
-				: el === "progress"
-				? toast.progressClasses
-				: "";
+					? toast.iconClasses
+					: el === "title"
+						? toast.titleClasses
+						: el === "text"
+							? toast.textClasses
+							: el === "progress"
+								? toast.progressClasses
+								: "";
 
 		return [base, themeClass, passedClass].filter(Boolean).join(" ");
 	};
@@ -149,7 +149,9 @@
 	}
 
 	.toast-item {
-		transition: opacity 0.3s ease, transform 0.3s ease-out;
+		transition:
+			opacity 0.3s ease,
+			transform 0.3s ease-out;
 	}
 
 	@keyframes progress {

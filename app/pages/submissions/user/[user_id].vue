@@ -61,12 +61,6 @@
 	const submissions = computed(() => response.value?.data ?? []);
 	const pagination = computed(() => response.value?.pagination);
 
-	watch(
-		() => currentPage.value,
-		async () => {
-			await refresh();
-		},
-	);
 
 	function onFormFilterChange() {
 		currentPage.value = 1;
