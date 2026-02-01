@@ -46,6 +46,18 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 		return navigateTo("/login");
 	}
 
+	// Submissions routes: allow authenticated users with specific access rules
+	if (to.path === "/submissions" || to.path.startsWith("/submissions/user/")) {
+		const match = to.path.match(/^\/submissions\/user\/(\d+)$/);
+		if (match) {
+			const targetUserId = Number(match[1]);
+			if (user.value?.id !== targetUserId && user.value?.role !== "admin") {
+				return showError({ statusCode: 401 });
+			}
+		}
+		return;
+	}
+
 	// Only admins can access admin routes (everything except fill)
 	if (user.value?.role !== "admin") {
 		return navigateTo("/");

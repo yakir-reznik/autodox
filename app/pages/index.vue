@@ -22,6 +22,12 @@
 						Create New Form
 					</BaseButton>
 				</NuxtLink>
+				<NuxtLink to="/user">
+					<BaseButton variant="secondary" size="lg">
+						<Icon name="heroicons:user" class="h-5 w-5" />
+						Profile
+					</BaseButton>
+				</NuxtLink>
 			</div>
 		</div>
 	</div>

@@ -43,6 +43,13 @@
       "when": 1769797752683,
       "tag": "0005_round_kitty_pryde",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1769930334310,
+      "tag": "0006_puzzling_lifeguard",
+      "breakpoints": true
     }
   ]
 }

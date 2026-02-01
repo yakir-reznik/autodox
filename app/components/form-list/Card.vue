@@ -54,7 +54,7 @@
 						מילוי
 					</BaseButton>
 				</NuxtLink>
-				<NuxtLink :to="`/submissions/${form.id}`">
+				<NuxtLink :to="`/submissions/form/${form.id}`">
 					<BaseButton variant="secondary" class="w-full justify-center" size="sm">
 						<Icon name="heroicons:inbox" class="h-4 w-4" />
 						הגשות

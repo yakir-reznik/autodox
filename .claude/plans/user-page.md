@@ -62,7 +62,7 @@ All new files under `server/api/user/`:
 
 ---
 
-### Step 5: Build user profile page
+### Step 5: Build user profile page ✅
 
 **Files to read before implementing:**
 - `app/pages/forms/index.vue` — layout patterns, RTL card structure to replicate
@@ -97,7 +97,7 @@ Card-based layout with RTL, Tailwind, same patterns as `forms/index.vue`.
 
 ---
 
-### Step 6: Build global submissions page (modify existing page to support filtering by userid)
+### Step 6: Build global submissions page (modify existing page to support filtering by userid) ✅
 
 **Files to read before implementing:**
 - `app/pages/submissions/[form_id].vue` — base page to replicate (table structure, pagination, status colors, date formatting, PDF download, view details)
