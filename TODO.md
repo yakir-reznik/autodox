@@ -1,6 +1,9 @@
+## Bugs
+
+- [ ] Signature fields inside repeater don't export in pdf
+
 ## Features
 
-- [ ] Form to create a new submission with overrides for form settings
 - [ ] Users can only see their own forms and submissions, Admins can see every users forms
 - [ ] Be able to delete (archive / soft delete) forms
 - [ ] Show/hide fields or sections based on previous answers
@@ -19,6 +22,7 @@
 - [ ] Sending emails on submission (or other events)
 - [ ] Custom thank-you pages
 - [ ] Multi-language forms - Per form or per submission
+- [x] Form to create a new submission with overrides for form settings
 - [x] Ability to define wether or not to post pdf to submission webhook - settings in form level and ability to override in submission level
 - [x] Ability to define webhook url setting in form level and ability to override in submission level
 
