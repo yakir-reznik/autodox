@@ -35,8 +35,6 @@
 	}
 
 	const route = useRoute();
-	const { user, loggedIn } = useUserSession();
-
 	const router = useRouter();
 	const userId = Number(route.params.user_id);
 	const currentPage = ref(Number(route.query.page) || 1);
@@ -79,29 +77,10 @@
 
 <template>
 	<div dir="rtl" class="min-h-screen bg-gray-100">
-		<!-- Header -->
-		<header class="bg-white shadow">
-			<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-				<div class="flex items-center justify-between">
-					<div class="flex items-center gap-4">
-						<NuxtLink to="/forms">
-							<BaseButton variant="secondary" size="sm">
-								<Icon name="heroicons:arrow-left" class="h-5 w-5" />
-							</BaseButton>
-						</NuxtLink>
-						<div>
-							<h1 class="text-2xl font-bold text-gray-900">הגשות</h1>
-							<p class="text-xs text-gray-500">User ID: {{ userId }}</p>
-						</div>
-					</div>
-					<div class="flex items-center gap-3">
-						<div class="text-sm text-gray-600" v-if="loggedIn">
-							{{ user?.name }}
-						</div>
-					</div>
-				</div>
-			</div>
-		</header>
+		<SubmissionsHeader>
+			<h1 class="text-2xl font-bold text-gray-900">הגשות</h1>
+			<p class="text-xs text-gray-500">User ID: {{ userId }}</p>
+		</SubmissionsHeader>
 
 		<!-- Content -->
 		<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

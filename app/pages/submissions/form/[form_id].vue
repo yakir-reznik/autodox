@@ -51,7 +51,6 @@
 	const route = useRoute();
 	const toasts = useToasts();
 	const { user, loggedIn } = useUserSession();
-
 	const router = useRouter();
 	const formId = Number(route.params.form_id);
 	const currentPage = ref(Number(route.query.page) || 1);
@@ -140,40 +139,21 @@
 
 <template>
 	<div dir="rtl" class="min-h-screen bg-gray-100">
-		<!-- Header -->
-		<header class="bg-white shadow">
-			<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-				<div class="flex items-center justify-between">
-					<div class="flex items-center gap-4">
-						<NuxtLink to="/forms">
-							<BaseButton variant="secondary" size="sm">
-								<Icon name="heroicons:arrow-left" class="h-5 w-5" />
-							</BaseButton>
-						</NuxtLink>
-						<div>
-							<h1 class="text-2xl font-bold text-gray-900">Submissions</h1>
-							<div class="flex items-center gap-2 mt-1">
-								<p class="text-sm font-medium text-gray-900">
-									{{ formData?.title }}
-								</p>
-								<span
-									v-if="formData?.folder"
-									class="text-xs text-indigo-800 bg-indigo-100 rounded px-2 py-1"
-								>
-									{{ formData.folder.name }}
-								</span>
-							</div>
-							<p class="text-xs text-gray-500">Form ID: {{ formId }}</p>
-						</div>
-					</div>
-					<div class="flex items-center gap-3">
-						<div class="text-sm text-gray-600" v-if="loggedIn">
-							{{ user?.name }}
-						</div>
-					</div>
-				</div>
+		<SubmissionsHeader>
+			<h1 class="text-2xl font-bold text-gray-900">Submissions</h1>
+			<div class="flex items-center gap-2 mt-1">
+				<p class="text-sm font-medium text-gray-900">
+					{{ formData?.title }}
+				</p>
+				<span
+					v-if="formData?.folder"
+					class="text-xs text-indigo-800 bg-indigo-100 rounded px-2 py-1"
+				>
+					{{ formData.folder.name }}
+				</span>
 			</div>
-		</header>
+			<p class="text-xs text-gray-500">Form ID: {{ formId }}</p>
+		</SubmissionsHeader>
 
 		<!-- Content -->
 		<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
