@@ -276,10 +276,7 @@
 						<td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
 							{{ submission.id }}
 						</td>
-						<td
-							v-if="showFormColumn"
-							class="px-6 py-4 text-sm whitespace-nowrap"
-						>
+						<td v-if="showFormColumn" class="px-6 py-4 text-sm whitespace-nowrap">
 							<NuxtLink
 								:to="`/submissions/form/${submission.formId}`"
 								class="text-blue-600 hover:text-blue-800 hover:underline"
@@ -305,28 +302,22 @@
 								</span>
 							</div>
 						</td>
-						<td
-							class="px-6 py-4 text-sm text-gray-600 text-center whitespace-nowrap"
-						>
+						<td class="px-6 py-4 text-sm text-gray-600 text-center whitespace-nowrap">
 							{{ submission.createdByUserId ?? "-" }}
 						</td>
 						<td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
 							{{ formatDate(submission.createdAt) }}
 						</td>
 						<td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
-							{{
-								submission.submittedAt
-									? formatDate(submission.submittedAt)
-									: "-"
-							}}
+							{{ submission.submittedAt ? formatDate(submission.submittedAt) : "-" }}
 						</td>
 						<td class="px-6 py-4 text-sm whitespace-nowrap">
 							<div class="flex gap-2">
 								<NuxtLink :to="`/submission-detail/${submission.token}`">
-									<BaseButton variant="primary" size="sm">
+									<UiButton size="sm">
 										<Icon name="heroicons:eye" class="h-4 w-4" />
 										Details
-									</BaseButton>
+									</UiButton>
 								</NuxtLink>
 								<BaseButton
 									variant="secondary"
@@ -369,7 +360,7 @@
 							</div>
 						</td>
 						<td class="px-6 py-4 text-sm whitespace-nowrap">
-							<button
+							<UiButton
 								@click="copyTokenToClipboard(submission.token)"
 								class="flex items-center gap-2 rounded bg-gray-100 px-2 py-1 hover:bg-gray-200 transition-colors cursor-pointer"
 								:title="`Copy token: ${submission.token}`"
@@ -381,7 +372,7 @@
 									name="heroicons:clipboard-document"
 									class="h-4 w-4 text-gray-500"
 								/>
-							</button>
+							</UiButton>
 						</td>
 					</tr>
 				</tbody>
