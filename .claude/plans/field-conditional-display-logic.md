@@ -232,3 +232,4 @@ In the DB, `sourceFieldId` values are server element IDs (as strings). On the fi
 
 - [ ] in form 3 email field has a conditional rule to show when firstName="אימייל". if i paste "אימייל" in firstName field - the email field is shown. But if i type it in letter by letter it doesnt show the email field... now im not sure it works when pasting...
 - [ ] When a field becomes mandatory because of a conditional rule - we need to display a red asterisk next to it. if it stops being a required field - don't show the asterisk
+- [ ] In the FormBuilder - change the conditional logic rules to be viewed and managed in a modal, It clunky in the field properties sidebar.
