@@ -1,0 +1,21 @@
+/* Drag & Drop Ghost — blue dashed insertion indicator */
+.sortable-ghost {
+  opacity: 1 !important;
+  background: #eff6ff !important;
+  border: 2px dashed #3b82f6 !important;
+  border-radius: 0.5rem;
+  min-height: 3rem;
+  overflow: hidden;
+}
+
+.sortable-ghost > * {
+  opacity: 0 !important;
+}
+
+/* Drag element — lifted shadow + slight rotation */
+.sortable-drag {
+  opacity: 0.85 !important;
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.2) !important;
+  transform: rotate(1.5deg);
+  z-index: 9999 !important;
+}

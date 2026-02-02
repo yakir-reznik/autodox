@@ -181,7 +181,6 @@
 					group="form-elements"
 					item-key="clientId"
 					handle=".drag-handle"
-					ghost-class="opacity-50"
 					animation="200"
 					:class="children.length > 0 ? 'space-y-3' : 'min-h-[80px]'"
 					@change="handleNestedChange"

@@ -56,7 +56,6 @@
 			v-model="localOptions"
 			item-key="id"
 			handle=".option-drag-handle"
-			ghost-class="opacity-50"
 			animation="200"
 			class="space-y-2"
 		>

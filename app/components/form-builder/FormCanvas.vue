@@ -72,7 +72,6 @@
 			group="form-elements"
 			item-key="clientId"
 			handle=".drag-handle"
-			ghost-class="opacity-50"
 			animation="200"
 			class="min-h-[400px]"
 			:class="{
