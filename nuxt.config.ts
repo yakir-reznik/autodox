@@ -10,7 +10,7 @@ export default defineNuxtConfig({
 		"@pinia/nuxt",
 		"shadcn-nuxt",
 	],
-	css: ["~/assets/css/main.css", "~/assets/css/tailwind.css", "~/assets/css/form-builder.css"],
+	css: ["~/assets/css/tailwind.css"],
 	app: {
 		head: {
 			title: "Autodox",

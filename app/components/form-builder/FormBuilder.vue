@@ -176,6 +176,10 @@
 	function handleCanvasClick() {
 		selectElement(null);
 	}
+
+	// Auto-scroll canvas when dragging near viewport edges
+	const canvasRef = ref<HTMLElement | null>(null);
+	useEdgeScroll(canvasRef);
 </script>
 
 <template>
@@ -238,7 +242,7 @@
 			</aside>
 
 			<!-- Canvas (Center) -->
-			<main class="flex-1 overflow-y-auto p-6" @click.self="handleCanvasClick">
+			<main ref="canvasRef" class="flex-1 overflow-y-auto p-6" @click.self="handleCanvasClick">
 				<FormBuilderFormCanvas
 					:elements="rootElements"
 					:selected-id="state.selectedElementId"
