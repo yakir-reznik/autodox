@@ -49,20 +49,20 @@ Conditions are stored inside the existing `config` JSON column under a `_conditi
 
 ## Implementation Steps
 
-### Step 1: Add type definitions
+### Step 1: Add type definitions ✅
 
 **Files:**
 
 - `server/db/schema.ts` — Add `ConditionOperator`, `ConditionRule`, `ConditionAction`, `ConditionGroup` type exports (after `ValidationRules`)
 - `app/types/form-builder.ts` — Import/re-export `ConditionGroup`. Add `conditions?: ConditionGroup | null` to `BuilderElement`
 
-### Step 2: Add `isConditionSource` helper
+### Step 2: Add `isConditionSource` helper ✅
 
 **File:** `app/composables/useElementDefaults.ts`
 
 - Add `isConditionSource(type: ElementType): boolean` — returns true for: text, email, number, textarea, date, time, datetime, dropdown, radio, checkbox, checkboxes
 
-### Step 3: Condition serialization in save/load
+### Step 3: Condition serialization in save/load ✅
 
 **File:** `app/composables/useFormBuilder.ts`
 
@@ -78,7 +78,7 @@ conditions: element.conditions ? JSON.parse(JSON.stringify(element.conditions)) 
 
 **In `removeElement()`:** After removing, scan all remaining elements and remove condition rules that reference the deleted element's clientId. If rules array becomes empty, set `conditions.enabled = false`.
 
-### Step 4: Create condition evaluator composable
+### Step 4: Create condition evaluator composable ✅
 
 **New file:** `app/composables/useConditionEvaluator.ts`
 
@@ -96,7 +96,7 @@ export function useConditionEvaluator(
 - Section hiding cascades to children
 - Returns reactive `isVisible(clientId)` and `isRequiredByCondition(clientId)` functions
 
-### Step 5: Create ConditionEditor UI component
+### Step 5: Create ConditionEditor UI component ✅
 
 **New file:** `app/components/form-builder/properties/ConditionEditor.vue`
 
@@ -128,7 +128,7 @@ Value input adapts to source field type:
 
 Operator labels (Hebrew): שווה ל, שונה מ, ריק, לא ריק, מכיל, גדול מ, קטן מ
 
-### Step 6: Integrate ConditionEditor into PropertyPanel
+### Step 6: Integrate ConditionEditor into PropertyPanel ✅
 
 **Files:**
 
@@ -145,7 +145,7 @@ When `element.conditions?.enabled && element.conditions.rules.length > 0`, show 
 <Icon name="heroicons:bolt" class="h-3.5 w-3.5" />
 ```
 
-### Step 8: Form fill integration
+### Step 8: Form fill integration ✅
 
 **File:** `app/components/form-fill/FormFill.vue`
 
@@ -157,7 +157,52 @@ When `element.conditions?.enabled && element.conditions.rules.length > 0`, show 
 6. Update submit handler to exclude hidden elements from submission data
 7. Update template to use filtered element lists
 
-### Step 9: Section and repeater fill-side visibility
+#### Implementation Notes (context for standalone agent)
+
+**useConditionEvaluator API** (file: `app/composables/useConditionEvaluator.ts`):
+
+```typescript
+const { isVisible, isRequiredByCondition } = useConditionEvaluator(elements, formData);
+// isVisible(clientId: string): boolean — checks show/hide conditions + parent cascade
+// isRequiredByCondition(clientId: string): boolean — checks "require" action conditions
+```
+
+Both functions are reactive — they access `formData` (reactive object) and `elements` (Ref/ComputedRef), so they auto-track when used inside computed/templates.
+
+**Key details about FormFill.vue** (590 lines total):
+
+- `allElements` computed (line ~148): Converts server elements to `BuilderElement[]`. Currently does NOT extract `_conditions` from config. ClientIds follow pattern `el_${serverId}` (e.g., `el_5`). Must add: destructure `_conditions` from `el.config`, map each rule's `sourceFieldId` from serverId string to fill-side clientId (`el_${sourceServerId}`), and set `conditions` field on the BuilderElement.
+
+- `rootElements` computed (line ~168): Filters `allElements` by `!el.parentId`. Replace usage in template with `visibleRootElements` that also filters by `isVisible`.
+
+- `getChildElements` function (line ~177): Returns children of a parent. Add a `getVisibleChildElements` variant that filters by `isVisible`. Pass this to `FormField` components so sections/repeaters only see visible children.
+
+- `validateAll()` function (line ~313): Loops over `allElements`. Must skip hidden elements (`!isVisible(element.clientId)`). Must also treat `isRequiredByCondition(clientId)` as making a field required (same as `element.isRequired`).
+
+- `validateFieldValue()` function (line ~193): Called by `validateField` and `validateRepeater`. The required check at line ~210 currently checks `element.isRequired || config.validation?.required`. For condition-based require, the caller should pass an additional flag or check `isRequiredByCondition` before calling.
+
+- `handleSubmit()` function (line ~399): Builds `submissionData` from `formData`. Must skip hidden elements — add `isVisible(clientId)` check before including in submission data.
+
+- Template `rootElements` usage (line ~544): `<FormField v-for="element in rootElements" ...>`. Change to `visibleRootElements`.
+
+- Template `getChildElements` prop (line ~548): `:get-children="getChildElements"`. Change to `getVisibleChildElements`.
+
+- `formData` is `reactive<Record<string, any>>({})` keyed by clientId.
+
+- `errors` is `reactive<Record<string, string>>({})` keyed by clientId.
+
+**\_conditions storage**: Conditions are stored inside the element's `config` JSON column under a `_conditions` key by the builder's save function. The `_conditions` object shape is `ConditionGroup`:
+
+```typescript
+{ enabled: boolean, action: "show"|"hide"|"require", logic: "and"|"or", rules: ConditionRule[] }
+// ConditionRule: { sourceFieldId: string, operator: ConditionOperator, value?: string|number|boolean }
+```
+
+In the DB, `sourceFieldId` values are server element IDs (as strings). On the fill side, they must be mapped to fill-side clientIds: `el_${sourceFieldId}`.
+
+**Imports needed**: `ConditionGroup` from `~/types/form-builder`, `useConditionEvaluator` is auto-imported by Nuxt (it's in `app/composables/`).
+
+### Step 9: Section and repeater fill-side visibility ✅
 
 **Files:**
 
@@ -182,3 +227,8 @@ When `element.conditions?.enabled && element.conditions.rules.length > 0`, show 
 4. **Sections**: Add condition to a section. Verify all children hide/show together.
 5. **Delete source**: Delete a field referenced by a condition. Verify the orphaned rule is cleaned up.
 6. **Require action**: Set a condition with "require" action. Verify the field becomes required only when the condition is met.
+
+## Todo's and bugs
+
+- [ ] in form 3 email field has a conditional rule to show when firstName="אימייל". if i paste "אימייל" in firstName field - the email field is shown. But if i type it in letter by letter it doesnt show the email field... now im not sure it works when pasting...
+- [ ] When a field becomes mandatory because of a conditional rule - we need to display a red asterisk next to it. if it stops being a required field - don't show the asterisk

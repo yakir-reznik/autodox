@@ -4,6 +4,7 @@ import { isFieldElement, supportsValidation, hasOptions } from "~/composables/us
 
 interface Props {
 	element: BuilderElement;
+	allElements: BuilderElement[];
 }
 
 const props = defineProps<Props>();
@@ -60,6 +61,10 @@ function updateRequired(isRequired: boolean) {
 	if (config.validation) {
 		updateConfig({ validation: { ...config.validation, required: isRequired } });
 	}
+}
+
+function updateConditions(conditions: BuilderElement["conditions"]) {
+	emit("update", { conditions });
 }
 </script>
 
@@ -120,6 +125,13 @@ function updateRequired(isRequired: boolean) {
 				v-if="supportsValidation(element.type)"
 				:element="element"
 				@update:config="updateConfig"
+			/>
+
+			<!-- Condition editor (available for all element types) -->
+			<FormBuilderPropertiesConditionEditor
+				:element="element"
+				:all-elements="allElements"
+				@update:conditions="updateConditions"
 			/>
 		</div>
 	</div>

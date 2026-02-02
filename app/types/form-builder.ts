@@ -5,6 +5,7 @@ import type {
 	FormTheme,
 	ValidationRules,
 	SelectionOption,
+	ConditionGroup,
 } from "~~/server/db/schema";
 
 // Re-export schema types for convenience
@@ -15,6 +16,7 @@ export type {
 	FormTheme,
 	ValidationRules,
 	SelectionOption,
+	ConditionGroup,
 };
 
 // Client-side element type (may not have real ID yet)
@@ -27,6 +29,7 @@ export interface BuilderElement {
 	name: string | null;
 	config: ElementConfig;
 	isRequired: boolean;
+	conditions?: ConditionGroup | null;
 }
 
 // Form builder state

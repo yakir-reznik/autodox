@@ -5,6 +5,7 @@ import type {
 	ElementConfig,
 	FormWithElements,
 	HistoryEntry,
+	ConditionGroup,
 } from "~/types/form-builder";
 import { isFieldElement } from "./useElementDefaults";
 import { useHistory } from "./useHistory";
@@ -167,6 +168,20 @@ export function useFormBuilder() {
 				state.selectedElementId = null;
 			}
 		}
+
+		// Top-level call: remove condition rules that reference any deleted elements
+		if (!isRecursiveCall) {
+			const existingIds = new Set(state.elements.map((el) => el.clientId));
+			for (const el of state.elements) {
+				if (!el.conditions?.rules.length) continue;
+				el.conditions.rules = el.conditions.rules.filter((rule) =>
+					existingIds.has(rule.sourceFieldId)
+				);
+				if (el.conditions.rules.length === 0) {
+					el.conditions.enabled = false;
+				}
+			}
+		}
 	}
 
 	function updateElement(clientId: string, updates: Partial<BuilderElement>) {
@@ -226,6 +241,9 @@ export function useFormBuilder() {
 			name: elementName,
 			config: JSON.parse(JSON.stringify(element.config)),
 			isRequired: false,
+			conditions: element.conditions
+				? JSON.parse(JSON.stringify(element.conditions))
+				: null,
 		};
 
 		state.elements.push(newElement);
@@ -283,6 +301,11 @@ export function useFormBuilder() {
 		state.elements = response.elements.map((el) => {
 			const clientId = generateClientId();
 			serverIdToClientId.set(el.id, clientId);
+
+			const { _conditions, ...config } = el.config as ElementConfig & {
+				_conditions?: ConditionGroup;
+			};
+
 			return {
 				id: el.id,
 				clientId,
@@ -290,8 +313,9 @@ export function useFormBuilder() {
 				position: parseFloat(el.position),
 				parentId: null, // Will be set in second pass
 				name: el.name,
-				config: el.config,
+				config,
 				isRequired: el.isRequired,
+				conditions: _conditions ?? null,
 			};
 		});
 
@@ -306,6 +330,15 @@ export function useFormBuilder() {
 						el.parentId = parentClientId;
 					}
 				}
+			}
+		}
+
+		// Third pass: Map condition sourceFieldIds from serverId to clientId
+		for (const el of state.elements) {
+			if (!el.conditions?.rules.length) continue;
+			for (const rule of el.conditions.rules) {
+				rule.sourceFieldId =
+					serverIdToClientId.get(Number(rule.sourceFieldId)) ?? rule.sourceFieldId;
 			}
 		}
 
@@ -346,18 +379,35 @@ export function useFormBuilder() {
 			}
 
 			// Prepare elements for API
-			const elementsPayload = state.elements.map((el) => ({
-				id: el.id,
-				tempId: el.id ? undefined : el.clientId,
-				type: el.type,
-				position: el.position.toFixed(5),
-				parentId: el.parentId
-					? clientIdToServerId.get(el.parentId) || el.parentId
-					: null,
-				name: el.name,
-				config: el.config,
-				isRequired: el.isRequired,
-			}));
+			const elementsPayload = state.elements.map((el) => {
+				const config = { ...el.config };
+
+				// Embed conditions into config, mapping clientIds to serverIds
+				if (el.conditions?.enabled && el.conditions.rules.length > 0) {
+					(config as Record<string, unknown>)._conditions = {
+						...el.conditions,
+						rules: el.conditions.rules.map((rule) => ({
+							...rule,
+							sourceFieldId: String(
+								clientIdToServerId.get(rule.sourceFieldId) ?? rule.sourceFieldId
+							),
+						})),
+					};
+				}
+
+				return {
+					id: el.id,
+					tempId: el.id ? undefined : el.clientId,
+					type: el.type,
+					position: el.position.toFixed(5),
+					parentId: el.parentId
+						? clientIdToServerId.get(el.parentId) || el.parentId
+						: null,
+					name: el.name,
+					config,
+					isRequired: el.isRequired,
+				};
+			});
 
 			// Save elements
 			const response = await $fetch(`/api/forms/${state.formId}/elements`, {

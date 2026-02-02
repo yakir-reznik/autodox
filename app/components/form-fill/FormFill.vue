@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	import type { FormWithElements, BuilderElement, ElementType } from "~/types/form-builder";
+	import type { FormWithElements, BuilderElement, ElementType, ConditionGroup } from "~/types/form-builder";
 	import { isFieldElement, isSubmittableElement } from "~/composables/useElementDefaults";
 	import FormField from "./FormField.vue";
 
@@ -151,32 +151,53 @@
 
 		return form.value.elements
 			.filter((el) => !el.isDeleted)
-			.map((el) => ({
-				id: el.id,
-				clientId: `el_${el.id}`,
-				type: el.type as ElementType,
-				position: parseFloat(el.position),
-				parentId: el.parentId ? `el_${el.parentId}` : null,
-				name: el.name,
-				config: el.config,
-				isRequired: el.isRequired,
-			}))
+			.map((el) => {
+				const { _conditions, ...config } = el.config as any;
+				let conditions: ConditionGroup | null = null;
+				if (_conditions) {
+					conditions = {
+						..._conditions,
+						rules: (_conditions.rules || []).map((rule: any) => ({
+							...rule,
+							sourceFieldId: `el_${rule.sourceFieldId}`,
+						})),
+					};
+				}
+
+				return {
+					id: el.id,
+					clientId: `el_${el.id}`,
+					type: el.type as ElementType,
+					position: parseFloat(el.position),
+					parentId: el.parentId ? `el_${el.parentId}` : null,
+					name: el.name,
+					config,
+					isRequired: el.isRequired,
+					conditions,
+				};
+			})
 			.sort((a, b) => a.position - b.position);
 	});
 
-	// Get root elements (no parent)
-	const rootElements = computed(() => {
-		const roots = allElements.value.filter((el) => !el.parentId);
-		console.log("Form data:", form.value);
-		console.log("All elements:", allElements.value);
-		console.log("Root elements:", roots);
-		return roots;
+	// Condition evaluator
+	const { isVisible, isRequiredByCondition } = useConditionEvaluator(allElements, formData);
+
+	// Get visible root elements (no parent, passes visibility check)
+	const visibleRootElements = computed(() => {
+		return allElements.value.filter((el) => !el.parentId && isVisible(el.clientId));
 	});
 
 	// Get children of a parent element
 	function getChildElements(parentClientId: string): BuilderElement[] {
 		return allElements.value
 			.filter((el) => el.parentId === parentClientId)
+			.sort((a, b) => a.position - b.position);
+	}
+
+	// Get visible children of a parent element
+	function getVisibleChildElements(parentClientId: string): BuilderElement[] {
+		return allElements.value
+			.filter((el) => el.parentId === parentClientId && isVisible(el.clientId))
 			.sort((a, b) => a.position - b.position);
 	}
 
@@ -190,7 +211,7 @@
 	}
 
 	// Validate a single field with a given value
-	function validateFieldValue(element: BuilderElement, value: any, errorKey: string): boolean {
+	function validateFieldValue(element: BuilderElement, value: any, errorKey: string, conditionRequired = false): boolean {
 		if (!isFieldElement(element.type)) return true;
 
 		const config = element.config as {
@@ -207,7 +228,7 @@
 		};
 
 		// Required validation
-		if (element.isRequired || config.validation?.required) {
+		if (element.isRequired || config.validation?.required || conditionRequired) {
 			if (
 				value === undefined ||
 				value === null ||
@@ -282,7 +303,7 @@
 	function validateField(clientId: string): boolean {
 		const element = allElements.value.find((el) => el.clientId === clientId);
 		if (!element) return true;
-		return validateFieldValue(element, formData[clientId], clientId);
+		return validateFieldValue(element, formData[clientId], clientId, isRequiredByCondition(clientId));
 	}
 
 	// Validate repeater children
@@ -296,10 +317,11 @@
 		for (let itemIndex = 0; itemIndex < repeaterItems.length; itemIndex++) {
 			const item = repeaterItems[itemIndex]!;
 			for (const child of children) {
+				if (!isVisible(child.clientId)) continue;
 				if (isFieldElement(child.type)) {
 					const value = item[child.clientId];
 					const errorKey = `${repeaterClientId}[${itemIndex}].${child.clientId}`;
-					if (!validateFieldValue(child, value, errorKey)) {
+					if (!validateFieldValue(child, value, errorKey, isRequiredByCondition(child.clientId))) {
 						isValid = false;
 					}
 				}
@@ -316,6 +338,12 @@
 		for (const element of allElements.value) {
 			// Skip elements with a parent - they're validated by their parent container
 			if (element.parentId) continue;
+
+			// Skip hidden elements and clear any stale errors
+			if (!isVisible(element.clientId)) {
+				delete errors[element.clientId];
+				continue;
+			}
 
 			if (isFieldElement(element.type)) {
 				if (!validateField(element.clientId)) {
@@ -412,7 +440,7 @@
 			const submissionData: Record<string, any> = {};
 			Object.entries(formData).forEach(([clientId, value]) => {
 				const element = allElements.value.find((el) => el.clientId === clientId);
-				if (element && isSubmittableElement(element.type)) {
+				if (element && isSubmittableElement(element.type) && isVisible(element.clientId)) {
 					// Use element name if set, otherwise fall back to clientId
 					const key = element.name || clientId;
 
@@ -542,10 +570,10 @@
 			<!-- Elements -->
 			<div class="form-fill-elements">
 				<FormField
-					v-for="element in rootElements"
+					v-for="element in visibleRootElements"
 					:key="element.clientId"
 					:element="element"
-					:get-children="getChildElements"
+					:get-children="getVisibleChildElements"
 					:model-value="formData[element.clientId]"
 					:error="errors[element.clientId]"
 					:form-data="formData"

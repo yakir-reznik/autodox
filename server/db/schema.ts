@@ -94,6 +94,31 @@ export type ValidationRules = {
 	customRules?: Record<string, any>; // extensible for future custom validations
 };
 
+// Condition logic types (for conditional show/hide/require)
+export type ConditionOperator =
+	| "equals"
+	| "not_equals"
+	| "is_empty"
+	| "is_not_empty"
+	| "contains"
+	| "greater_than"
+	| "less_than";
+
+export type ConditionAction = "show" | "hide" | "require";
+
+export type ConditionRule = {
+	sourceFieldId: string;
+	operator: ConditionOperator;
+	value?: string | number | boolean;
+};
+
+export type ConditionGroup = {
+	enabled: boolean;
+	action: ConditionAction;
+	logic: "and" | "or";
+	rules: ConditionRule[];
+};
+
 // Selection option structure (for dropdown, radio, checkboxes)
 export type SelectionOption = {
 	id: string; // unique identifier for the option

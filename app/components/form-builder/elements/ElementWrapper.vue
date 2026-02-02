@@ -160,6 +160,15 @@
 			>
 				<Icon name="heroicons:trash" class="h-4 w-4" />
 			</button>
+
+			<!-- Condition indicator -->
+			<div
+				v-if="element.conditions?.enabled && element.conditions.rules.length > 0"
+				class="rounded bg-amber-100 p-1 text-amber-600"
+				title="לוגיקה מותנית"
+			>
+				<Icon name="heroicons:bolt" class="h-3.5 w-3.5" />
+			</div>
 		</div>
 
 		<!-- Element content -->

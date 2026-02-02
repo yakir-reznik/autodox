@@ -390,6 +390,24 @@ export function supportsValidation(type: ElementType): boolean {
 	return isFieldElement(type);
 }
 
+// Check if element type can be used as a condition source
+export function isConditionSource(type: ElementType): boolean {
+	const sourceTypes: ElementType[] = [
+		"text",
+		"email",
+		"number",
+		"textarea",
+		"date",
+		"time",
+		"datetime",
+		"dropdown",
+		"radio",
+		"checkbox",
+		"checkboxes",
+	];
+	return sourceTypes.includes(type);
+}
+
 // Check if element type has options (dropdown, radio, checkboxes)
 export function hasOptions(type: ElementType): boolean {
 	return ["dropdown", "radio", "checkboxes"].includes(type);

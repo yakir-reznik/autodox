@@ -227,6 +227,7 @@
 				<FormBuilderPropertyPanel
 					v-if="selectedElement"
 					:element="selectedElement"
+					:all-elements="state.elements"
 					@update="handlePropertyUpdate"
 					@close="selectElement(null)"
 				/>
