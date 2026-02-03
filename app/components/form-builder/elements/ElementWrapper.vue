@@ -160,15 +160,18 @@
 			>
 				<Icon name="heroicons:trash" class="h-4 w-4" />
 			</button>
+		</div>
 
-			<!-- Condition indicator -->
-			<div
-				v-if="element.conditions?.enabled && element.conditions.rules.length > 0"
-				class="rounded bg-amber-100 p-1 text-amber-600"
-				title="לוגיקה מותנית"
-			>
+		<!-- Condition indicator (always visible) -->
+		<div
+			v-if="element.conditions?.enabled && element.conditions.rules.length > 0"
+			class="absolute -top-2.5 end-4 rounded bg-amber-100 p-1 text-amber-600 cursor-pointer hover:bg-amber-200"
+			title="לוגיקה מותנית"
+		>
+			<button class="flex items-center gap-2 px-2">
+				<span>עריכת לוגיקה</span>
 				<Icon name="heroicons:bolt" class="h-3.5 w-3.5" />
-			</div>
+			</button>
 		</div>
 
 		<!-- Element content -->
