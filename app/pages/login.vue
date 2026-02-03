@@ -49,7 +49,7 @@
 				<div class="mb-8">
 					<div class="flex items-center gap-2">
 						<div
-							class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center"
+							class="w-10 h-10 rounded-xl bg-linear-to-br from-blue-600 to-blue-700 flex items-center justify-center"
 						>
 							<Icon name="ph:stack-fill" class="w-6 h-6 text-white" />
 						</div>

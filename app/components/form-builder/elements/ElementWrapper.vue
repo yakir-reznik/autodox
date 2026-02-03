@@ -196,7 +196,7 @@
 					item-key="clientId"
 					handle=".drag-handle"
 					animation="200"
-					:class="children.length > 0 ? 'space-y-3' : 'min-h-[80px]'"
+					:class="children.length > 0 ? 'space-y-3' : 'min-h-20'"
 					@change="handleNestedChange"
 				>
 					<template #item="{ element: child }">
@@ -218,7 +218,7 @@
 					<template #footer>
 						<div
 							v-if="children.length === 0"
-							class="flex min-h-[80px] items-center justify-center rounded border-2 border-dashed border-gray-200 bg-gray-50"
+							class="flex min-h-20 items-center justify-center rounded border-2 border-dashed border-gray-200 bg-gray-50"
 						>
 							<p class="text-sm text-gray-400">הוספ/י אלמנטים לכאן</p>
 						</div>

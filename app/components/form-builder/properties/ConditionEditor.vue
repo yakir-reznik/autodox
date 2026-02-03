@@ -237,7 +237,7 @@ function getValueOptions(source: BuilderElement | undefined) {
 						<BaseInput
 							v-else-if="getSourceElement(rule.sourceFieldId)?.type === 'number'"
 							type="number"
-							:model-value="rule.value ?? ''"
+							:model-value="(rule.value as string | number) ?? ''"
 							placeholder="ערך"
 							@update:model-value="
 								updateRule(index, { value: $event ? Number($event) : '' })
