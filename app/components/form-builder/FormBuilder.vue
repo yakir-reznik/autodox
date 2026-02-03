@@ -177,6 +177,30 @@
 		selectElement(null);
 	}
 
+	// Condition modal state
+	const conditionModalElementId = ref<string | null>(null);
+	const conditionModalElement = computed(() =>
+		conditionModalElementId.value
+			? state.elements.find((el) => el.clientId === conditionModalElementId.value) ?? null
+			: null,
+	);
+
+	function handleEditConditions(clientId: string) {
+		conditionModalElementId.value = clientId;
+	}
+
+	function handleEditConditionsFromPanel() {
+		if (selectedElement.value) {
+			conditionModalElementId.value = selectedElement.value.clientId;
+		}
+	}
+
+	function handleConditionUpdate(conditions: BuilderElement["conditions"]) {
+		if (conditionModalElementId.value) {
+			updateElement(conditionModalElementId.value, { conditions });
+		}
+	}
+
 	// Auto-scroll canvas when dragging near viewport edges
 	const canvasRef = ref<HTMLElement | null>(null);
 	useEdgeScroll(canvasRef);
@@ -230,6 +254,7 @@
 					:all-elements="state.elements"
 					@update="handlePropertyUpdate"
 					@close="selectElement(null)"
+					@edit-conditions="handleEditConditionsFromPanel"
 				/>
 				<div v-else class="flex h-full items-center justify-center p-6 text-center">
 					<div class="text-gray-400">
@@ -254,6 +279,7 @@
 					@reorder="handleReorder"
 					@drop="handleElementDrop"
 					@update="handleElementUpdate"
+					@edit-conditions="handleEditConditions"
 				/>
 			</main>
 
@@ -262,5 +288,15 @@
 				<FormBuilderElementPalette @add="handleAddElement" />
 			</aside>
 		</div>
+
+		<!-- Condition logic modal -->
+		<FormBuilderConditionModal
+			v-if="conditionModalElement"
+			:model-value="!!conditionModalElement"
+			:element="conditionModalElement"
+			:all-elements="state.elements"
+			@update:model-value="conditionModalElementId = $event ? conditionModalElementId : null"
+			@update:conditions="handleConditionUpdate"
+		/>
 	</div>
 </template>

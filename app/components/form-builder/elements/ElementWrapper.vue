@@ -29,6 +29,7 @@
 		reorder: [elements: BuilderElement[], parentId: string];
 		drop: [type: ElementType, position: number, parentId: string];
 		update: [clientId: string, updates: Partial<BuilderElement>];
+		editConditions: [clientId: string];
 	}>();
 
 	// Handle config updates from child elements (e.g., drag-and-drop upload in MediaElement)
@@ -167,6 +168,7 @@
 			v-if="element.conditions?.enabled && element.conditions.rules.length > 0"
 			class="absolute -top-2.5 end-4 rounded bg-amber-100 p-1 text-amber-600 cursor-pointer hover:bg-amber-200"
 			title="לוגיקה מותנית"
+			@click.stop="$emit('editConditions', element.clientId)"
 		>
 			<button class="flex items-center gap-2 px-2">
 				<span>עריכת לוגיקה</span>
@@ -208,6 +210,7 @@
 							@reorder="(els, parentId) => $emit('reorder', els, parentId)"
 							@drop="(type, pos, parentId) => $emit('drop', type, pos, parentId)"
 							@update="(clientId, updates) => $emit('update', clientId, updates)"
+							@edit-conditions="(clientId) => $emit('editConditions', clientId)"
 						/>
 					</template>
 

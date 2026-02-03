@@ -50,13 +50,13 @@ const sizeClasses = {
 				>
 					<div
 						v-if="modelValue"
-						class="w-full rounded-lg bg-white shadow-xl"
+						class="flex w-full max-h-[90vh] flex-col rounded-lg bg-white shadow-xl"
 						:class="sizeClasses[size]"
 					>
 						<!-- Header -->
 						<div
 							v-if="title || $slots.header"
-							class="flex items-center justify-between border-b border-gray-200 px-6 py-4"
+							class="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4"
 						>
 							<h2 class="text-lg font-semibold text-gray-900">
 								<slot name="header">
@@ -73,14 +73,14 @@ const sizeClasses = {
 						</div>
 
 						<!-- Content -->
-						<div class="px-6 py-4">
+						<div class="overflow-y-auto px-6 py-4">
 							<slot />
 						</div>
 
 						<!-- Footer -->
 						<div
 							v-if="$slots.footer"
-							class="flex items-center justify-end gap-2 border-t border-gray-200 px-6 py-4"
+							class="flex shrink-0 items-center justify-end gap-2 border-t border-gray-200 px-6 py-4"
 						>
 							<slot name="footer" />
 						</div>

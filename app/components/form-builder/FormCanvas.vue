@@ -17,6 +17,7 @@
 		reorder: [elements: BuilderElement[], parentId: string | null];
 		drop: [type: ElementType, position: number, parentId: string | null];
 		update: [clientId: string, updates: Partial<BuilderElement>];
+		editConditions: [clientId: string];
 	}>();
 
 	// Track dragging over drop zones
@@ -91,6 +92,7 @@
 					@reorder="(els, parentId) => $emit('reorder', els, parentId)"
 					@drop="(type, pos, parentId) => $emit('drop', type, pos, parentId)"
 					@update="(clientId, updates) => $emit('update', clientId, updates)"
+					@edit-conditions="(clientId) => $emit('editConditions', clientId)"
 				/>
 			</template>
 		</draggable>

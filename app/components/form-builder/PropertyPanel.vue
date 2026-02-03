@@ -12,6 +12,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
 	update: [updates: Partial<BuilderElement>];
 	close: [];
+	editConditions: [];
 }>();
 
 // Element type display name
@@ -63,9 +64,6 @@ function updateRequired(isRequired: boolean) {
 	}
 }
 
-function updateConditions(conditions: BuilderElement["conditions"]) {
-	emit("update", { conditions });
-}
 </script>
 
 <template>
@@ -127,12 +125,29 @@ function updateConditions(conditions: BuilderElement["conditions"]) {
 				@update:config="updateConfig"
 			/>
 
-			<!-- Condition editor (available for all element types) -->
-			<FormBuilderPropertiesConditionEditor
-				:element="element"
-				:all-elements="allElements"
-				@update:conditions="updateConditions"
-			/>
+			<!-- Conditional logic button -->
+			<div class="space-y-2">
+				<button
+					class="flex w-full items-center justify-between rounded-lg border px-3 py-2 text-sm transition-colors"
+					:class="
+						element.conditions?.enabled && element.conditions.rules.length > 0
+							? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100'
+							: 'border-gray-200 text-gray-700 hover:bg-gray-50'
+					"
+					@click="$emit('editConditions')"
+				>
+					<span class="flex items-center gap-2">
+						<Icon name="heroicons:bolt" class="h-4 w-4" />
+						לוגיקה מותנית
+					</span>
+					<span
+						v-if="element.conditions?.enabled && element.conditions.rules.length > 0"
+						class="rounded-full bg-amber-200 px-2 py-0.5 text-xs font-medium text-amber-800"
+					>
+						{{ element.conditions.rules.length }}
+					</span>
+				</button>
+			</div>
 		</div>
 	</div>
 </template>
