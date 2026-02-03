@@ -5,6 +5,7 @@ interface Props {
 	element: BuilderElement;
 	modelValue?: string | string[] | boolean;
 	error?: string;
+	conditionRequired?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -22,7 +23,7 @@ const config = computed(() => props.element.config as {
 	validation?: { required?: boolean };
 });
 
-const isRequired = computed(() => props.element.isRequired || config.value.validation?.required);
+const isRequired = computed(() => props.element.isRequired || config.value.validation?.required || props.conditionRequired);
 
 // Handle checkbox group changes
 function handleCheckboxChange(optionValue: string, checked: boolean) {

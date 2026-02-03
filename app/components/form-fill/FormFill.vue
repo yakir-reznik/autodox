@@ -578,6 +578,8 @@
 					:error="errors[element.clientId]"
 					:form-data="formData"
 					:errors="errors"
+					:condition-required="isRequiredByCondition(element.clientId)"
+					:get-condition-required="isRequiredByCondition"
 					@update:model-value="updateFormData(element.clientId, $event)"
 					@blur="validateField(element.clientId)"
 				/>

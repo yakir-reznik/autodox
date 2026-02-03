@@ -19,6 +19,7 @@ interface Props {
 	error?: string;
 	formData: Record<string, any>;
 	errors: Record<string, string>;
+	getConditionRequired?: (clientId: string) => boolean;
 }
 
 const props = defineProps<Props>();
@@ -168,6 +169,8 @@ const itemStyle = computed(() => {
 						:error="getFieldError(itemIndex, child.clientId)"
 						:form-data="item"
 						:errors="errors"
+						:condition-required="getConditionRequired?.(child.clientId)"
+						:get-condition-required="getConditionRequired"
 						@update:model-value="updateItemField(itemIndex, child.clientId, $event)"
 					/>
 				</div>

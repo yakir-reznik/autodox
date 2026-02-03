@@ -21,6 +21,8 @@
 		formData: Record<string, any>;
 		errors: Record<string, string>;
 		readonly?: boolean;
+		conditionRequired?: boolean;
+		getConditionRequired?: (clientId: string) => boolean;
 	}
 
 	const props = defineProps<Props>();
@@ -88,6 +90,8 @@
 			:form-data="formData"
 			:errors="errors"
 			:readonly="readonly"
+			:condition-required="conditionRequired"
+			:get-condition-required="getConditionRequired"
 			@update:model-value="emit('update:modelValue', $event)"
 			@blur="emit('blur')"
 		/>

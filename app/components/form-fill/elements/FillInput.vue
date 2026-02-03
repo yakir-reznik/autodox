@@ -5,6 +5,7 @@ interface Props {
 	element: BuilderElement;
 	modelValue?: string | number;
 	error?: string;
+	conditionRequired?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -39,7 +40,7 @@ const inputType = computed(() => {
 	}
 });
 
-const isRequired = computed(() => props.element.isRequired || config.value.validation?.required);
+const isRequired = computed(() => props.element.isRequired || config.value.validation?.required || props.conditionRequired);
 
 function handleInput(event: Event) {
 	const target = event.target as HTMLInputElement;

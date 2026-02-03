@@ -6,6 +6,7 @@ interface Props {
 	getChildren: (parentClientId: string) => BuilderElement[];
 	formData: Record<string, any>;
 	errors: Record<string, string>;
+	getConditionRequired?: (clientId: string) => boolean;
 }
 
 const props = defineProps<Props>();
@@ -81,6 +82,8 @@ function updateChildData(clientId: string, value: any) {
 				:error="errors[child.clientId]"
 				:form-data="formData"
 				:errors="errors"
+				:condition-required="getConditionRequired?.(child.clientId)"
+				:get-condition-required="getConditionRequired"
 				@update:model-value="updateChildData(child.clientId, $event)"
 			/>
 		</div>
