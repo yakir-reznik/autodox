@@ -34,7 +34,7 @@ function update(changes: Partial<ConditionGroup>) {
 
 function updateRule(index: number, changes: Partial<ConditionRule>) {
 	const rules = [...conditions.value.rules];
-	rules[index] = { ...rules[index], ...changes };
+	rules[index] = { ...rules[index], ...changes } as ConditionRule;
 	update({ rules });
 }
 
