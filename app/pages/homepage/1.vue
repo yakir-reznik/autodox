@@ -633,6 +633,28 @@
 </template>
 
 <style>
+	@import url("https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap");
+
+	* {
+		/* font-family: "Rubik", sans-serif; */
+		font-family: "Rubik", sans-serif;
+	}
+
+	h1,
+	h1 > *,
+	h2,
+	h2 > *,
+	h3,
+	h3 > *,
+	h4,
+	h4 > *,
+	h5,
+	h5 > *,
+	h6,
+	h6 > * {
+		font-family: "Google Sans", sans-serif;
+	}
+
 	/* ---- Dot grid ---- */
 	.dot-grid {
 		background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);

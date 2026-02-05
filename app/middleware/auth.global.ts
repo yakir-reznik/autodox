@@ -9,7 +9,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 	const { loggedIn, user } = useUserSession();
 
 	// Public routes that don't require authentication
-	const publicRoutes = ["/", "/login", "/signup"];
+	const publicRoutes = ["/", "/login", "/signup", "/homepage/1"];
 
 	// Routes that start with /fill are also public
 	if (to.path.startsWith("/fill/")) {

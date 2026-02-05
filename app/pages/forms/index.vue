@@ -120,9 +120,10 @@
 				method: "PATCH",
 				body: { status },
 			});
-			forms.value = forms.value?.map((f) =>
-				f.id === changeStatusForm.value!.id ? { ...f, status } : f,
-			) ?? null;
+			forms.value =
+				forms.value?.map((f) =>
+					f.id === changeStatusForm.value!.id ? { ...f, status } : f,
+				) ?? null;
 		} catch (error) {
 			console.error("Failed to change form status:", error);
 		}
@@ -172,7 +173,9 @@
 					</div>
 					<div class="flex items-center gap-3">
 						<div class="text-sm text-gray-600">
-							{{ user?.name }}
+							<NuxtLink to="/user">
+								{{ user?.name }}
+							</NuxtLink>
 						</div>
 						<NuxtLink to="/forms/upload">
 							<BaseButton variant="secondary">

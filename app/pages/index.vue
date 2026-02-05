@@ -1,145 +1,148 @@
 <script setup lang="ts">
-definePageMeta({
-	layout: false,
-})
+	definePageMeta({
+		layout: false,
+	});
 
-useHead({
-	title: "Autodox - בונה הטפסים החכם",
-	meta: [
+	useHead({
+		title: "Autodox - בונה הטפסים החכם",
+		meta: [
+			{
+				name: "description",
+				content:
+					"צור טפסים דינמיים ומקצועיים בדקות. גרור ושחרר, לוגיקה חכמה, עיצובים מותאמים ועוד.",
+			},
+		],
+		bodyAttrs: {
+			style: "background-color: #020617",
+		},
+	});
+
+	const scrolled = ref(false);
+	const statsTriggered = ref(false);
+
+	const counters = reactive({
+		users: 0,
+		forms: 0,
+		submissions: 0,
+		uptime: 0,
+	});
+
+	function animateCounter(
+		key: keyof typeof counters,
+		target: number,
+		duration: number,
+		decimals = 0,
+	) {
+		const start = performance.now();
+		const tick = (now: number) => {
+			const t = Math.min((now - start) / duration, 1);
+			const eased = 1 - Math.pow(1 - t, 3);
+			counters[key] = Number((eased * target).toFixed(decimals));
+			if (t < 1) requestAnimationFrame(tick);
+		};
+		requestAnimationFrame(tick);
+	}
+
+	function triggerCounters() {
+		if (statsTriggered.value) return;
+		statsTriggered.value = true;
+		animateCounter("users", 12500, 2000);
+		animateCounter("forms", 48000, 2500);
+		animateCounter("submissions", 250000, 3000);
+		animateCounter("uptime", 99.9, 1500, 1);
+	}
+
+	function scrollTo(id: string) {
+		document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+	}
+
+	onMounted(() => {
+		const onScroll = () => {
+			scrolled.value = window.scrollY > 50;
+		};
+		window.addEventListener("scroll", onScroll, { passive: true });
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						entry.target.classList.add("revealed");
+						if (entry.target.hasAttribute("data-stats")) triggerCounters();
+						observer.unobserve(entry.target);
+					}
+				});
+			},
+			{ threshold: 0.1, rootMargin: "0px 0px -40px 0px" },
+		);
+
+		nextTick(() => {
+			document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+		});
+
+		onUnmounted(() => {
+			window.removeEventListener("scroll", onScroll);
+			observer.disconnect();
+		});
+	});
+
+	const features = [
 		{
-			name: "description",
-			content:
-				"צור טפסים דינמיים ומקצועיים בדקות. גרור ושחרר, לוגיקה חכמה, עיצובים מותאמים ועוד.",
+			icon: "ph:hand-grabbing-fill",
+			title: "גרור ושחרר",
+			desc: "בנה טפסים בקלות עם ממשק אינטואיטיבי. פשוט גרור רכיבים למקום הרצוי.",
+			color: "text-blue-500",
+			bg: "bg-blue-500/10",
 		},
-	],
-})
-
-const scrolled = ref(false)
-const statsTriggered = ref(false)
-
-const counters = reactive({
-	users: 0,
-	forms: 0,
-	submissions: 0,
-	uptime: 0,
-})
-
-function animateCounter(
-	key: keyof typeof counters,
-	target: number,
-	duration: number,
-	decimals = 0,
-) {
-	const start = performance.now()
-	const tick = (now: number) => {
-		const t = Math.min((now - start) / duration, 1)
-		const eased = 1 - Math.pow(1 - t, 3)
-		counters[key] = Number((eased * target).toFixed(decimals))
-		if (t < 1) requestAnimationFrame(tick)
-	}
-	requestAnimationFrame(tick)
-}
-
-function triggerCounters() {
-	if (statsTriggered.value) return
-	statsTriggered.value = true
-	animateCounter("users", 12500, 2000)
-	animateCounter("forms", 48000, 2500)
-	animateCounter("submissions", 250000, 3000)
-	animateCounter("uptime", 99.9, 1500, 1)
-}
-
-function scrollTo(id: string) {
-	document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
-}
-
-onMounted(() => {
-	const onScroll = () => {
-		scrolled.value = window.scrollY > 50
-	}
-	window.addEventListener("scroll", onScroll, { passive: true })
-
-	const observer = new IntersectionObserver(
-		(entries) => {
-			entries.forEach((entry) => {
-				if (entry.isIntersecting) {
-					entry.target.classList.add("revealed")
-					if (entry.target.hasAttribute("data-stats")) triggerCounters()
-					observer.unobserve(entry.target)
-				}
-			})
+		{
+			icon: "ph:git-branch-fill",
+			title: "לוגיקה מותנית",
+			desc: "הצג או הסתר שדות אוטומטית לפי תשובות קודמות. טפסים חכמים באמת.",
+			color: "text-violet-500",
+			bg: "bg-violet-500/10",
 		},
-		{ threshold: 0.1, rootMargin: "0px 0px -40px 0px" },
-	)
-
-	nextTick(() => {
-		document.querySelectorAll(".reveal").forEach((el) => observer.observe(el))
-	})
-
-	onUnmounted(() => {
-		window.removeEventListener("scroll", onScroll)
-		observer.disconnect()
-	})
-})
-
-const features = [
-	{
-		icon: "ph:hand-grabbing-fill",
-		title: "גרור ושחרר",
-		desc: "בנה טפסים בקלות עם ממשק אינטואיטיבי. פשוט גרור רכיבים למקום הרצוי.",
-		color: "text-blue-500",
-		bg: "bg-blue-500/10",
-	},
-	{
-		icon: "ph:git-branch-fill",
-		title: "לוגיקה מותנית",
-		desc: "הצג או הסתר שדות אוטומטית לפי תשובות קודמות. טפסים חכמים באמת.",
-		color: "text-violet-500",
-		bg: "bg-violet-500/10",
-	},
-	{
-		icon: "ph:palette-fill",
-		title: "ערכות עיצוב",
-		desc: "בחר מתוך ערכות נושא מעוצבות מראש או התאם צבעים וסגנונות.",
-		color: "text-pink-500",
-		bg: "bg-pink-500/10",
-	},
-	{
-		icon: "ph:share-network-fill",
-		title: "שיתוף בקליק",
-		desc: "שתף טפסים בקישור ישיר, QR קוד, או הטמע באתר שלך.",
-		color: "text-emerald-500",
-		bg: "bg-emerald-500/10",
-	},
-	{
-		icon: "ph:chart-bar-fill",
-		title: "מעקב תשובות",
-		desc: "צפה בתשובות בזמן אמת. סנן, מיין וייצא נתונים בקלות.",
-		color: "text-amber-500",
-		bg: "bg-amber-500/10",
-	},
-	{
-		icon: "ph:devices-fill",
-		title: "מותאם לכל מסך",
-		desc: "הטפסים שלך נראים מושלם בנייד, טאבלט ומחשב.",
-		color: "text-cyan-500",
-		bg: "bg-cyan-500/10",
-	},
-	{
-		icon: "ph:shield-check-fill",
-		title: "הגנה בסיסמה",
-		desc: "הגן על הטפסים שלך עם סיסמה או טוקן. שליטה מלאה בגישה.",
-		color: "text-slate-500",
-		bg: "bg-slate-500/10",
-	},
-	{
-		icon: "ph:file-pdf-fill",
-		title: "ייצוא ל-PDF",
-		desc: "ייצא תשובות ל-PDF מקצועי בלחיצת כפתור.",
-		color: "text-red-500",
-		bg: "bg-red-500/10",
-	},
-]
+		{
+			icon: "ph:palette-fill",
+			title: "ערכות עיצוב",
+			desc: "בחר מתוך ערכות נושא מעוצבות מראש או התאם צבעים וסגנונות.",
+			color: "text-pink-500",
+			bg: "bg-pink-500/10",
+		},
+		{
+			icon: "ph:share-network-fill",
+			title: "שיתוף בקליק",
+			desc: "שתף טפסים בקישור ישיר, QR קוד, או הטמע באתר שלך.",
+			color: "text-emerald-500",
+			bg: "bg-emerald-500/10",
+		},
+		{
+			icon: "ph:chart-bar-fill",
+			title: "מעקב תשובות",
+			desc: "צפה בתשובות בזמן אמת. סנן, מיין וייצא נתונים בקלות.",
+			color: "text-amber-500",
+			bg: "bg-amber-500/10",
+		},
+		{
+			icon: "ph:devices-fill",
+			title: "מותאם לכל מסך",
+			desc: "הטפסים שלך נראים מושלם בנייד, טאבלט ומחשב.",
+			color: "text-cyan-500",
+			bg: "bg-cyan-500/10",
+		},
+		{
+			icon: "ph:shield-check-fill",
+			title: "הגנה בסיסמה",
+			desc: "הגן על הטפסים שלך עם סיסמה או טוקן. שליטה מלאה בגישה.",
+			color: "text-slate-500",
+			bg: "bg-slate-500/10",
+		},
+		{
+			icon: "ph:file-pdf-fill",
+			title: "ייצוא ל-PDF",
+			desc: "ייצא תשובות ל-PDF מקצועי בלחיצת כפתור.",
+			color: "text-red-500",
+			bg: "bg-red-500/10",
+		},
+	];
 </script>
 
 <template>
@@ -175,7 +178,7 @@ const features = [
 							@click="scrollTo('how-it-works')"
 							class="cursor-pointer text-sm text-white/60 transition-colors hover:text-white"
 						>
-							איך זה עובד
+							איך זה עובד?
 						</button>
 						<NuxtLink
 							to="/login"
@@ -247,8 +250,8 @@ const features = [
 						<p
 							class="hero-enter-d2 mx-auto mt-6 max-w-xl text-lg leading-relaxed text-slate-400 sm:text-xl"
 						>
-							צור טפסים דינמיים בדקות עם ממשק גרירה ושחרור. שתף, אסוף ונתח
-							תשובות — הכל במקום אחד.
+							צור טפסים דינמיים בדקות עם ממשק גרירה ושחרור. שתף, אסוף ונתח תשובות —
+							הכל במקום אחד.
 						</p>
 
 						<div
@@ -315,16 +318,14 @@ const features = [
 
 									<div class="mockup-field" style="animation-delay: 1.2s">
 										<label
-											class="mb-1.5 block text-sm font-medium text-gray-700"
+											class="mb-1.5 block w-full text-sm font-medium text-gray-700"
 										>
 											שם מלא
 										</label>
 										<div
-											class="flex h-10 items-center rounded-lg border border-gray-200 bg-gray-50 px-3"
+											class="flex h-10 w-full items-center rounded-lg border border-gray-200 bg-gray-50 px-3"
 										>
-											<span class="text-sm text-gray-900"
-												>ישראל ישראלי</span
-											>
+											<span class="text-sm text-gray-900">ישראל ישראלי</span>
 											<span
 												class="typing-cursor mr-0.5 h-4 w-0.5 bg-blue-500"
 											></span>
@@ -333,15 +334,14 @@ const features = [
 
 									<div class="mockup-field" style="animation-delay: 1.4s">
 										<label
-											class="mb-1.5 block text-sm font-medium text-gray-700"
+											class="mb-1.5 block w-full text-sm font-medium text-gray-700"
 										>
 											אימייל
 										</label>
 										<div
-											dir="ltr"
-											class="flex h-10 items-center rounded-lg border border-gray-200 bg-white px-3"
+											class="flex h-10 w-full items-center rounded-lg border border-gray-200 bg-white px-3"
 										>
-											<span class="text-sm text-gray-300"
+											<span dir="ltr" class="text-sm text-gray-300"
 												>your@email.com</span
 											>
 										</div>
@@ -349,14 +349,14 @@ const features = [
 
 									<div class="mockup-field" style="animation-delay: 1.6s">
 										<label
-											class="mb-2 block text-sm font-medium text-gray-700"
+											class="mb-2 block w-full text-sm font-medium text-gray-700"
 										>
 											בחר מסלול
 										</label>
-										<div class="flex gap-4">
+										<div class="flex w-full gap-4">
 											<label class="flex items-center gap-2">
 												<div
-													class="flex h-4 w-4 items-center justify-center rounded-full border-2 border-blue-500"
+													class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-blue-500"
 												>
 													<div
 														class="h-2 w-2 rounded-full bg-blue-500"
@@ -366,13 +366,13 @@ const features = [
 											</label>
 											<label class="flex items-center gap-2">
 												<div
-													class="h-4 w-4 rounded-full border-2 border-gray-300"
+													class="h-4 w-4 shrink-0 rounded-full border-2 border-gray-300"
 												></div>
 												<span class="text-sm text-gray-500">מתקדמים</span>
 											</label>
 											<label class="flex items-center gap-2">
 												<div
-													class="h-4 w-4 rounded-full border-2 border-gray-300"
+													class="h-4 w-4 shrink-0 rounded-full border-2 border-gray-300"
 												></div>
 												<span class="text-sm text-gray-500">מקצוענים</span>
 											</label>
@@ -381,7 +381,7 @@ const features = [
 
 									<div class="mockup-field" style="animation-delay: 1.8s">
 										<div
-											class="flex h-10 items-center justify-center rounded-lg bg-blue-600"
+											class="flex h-10 w-full items-center justify-center rounded-lg bg-blue-600"
 										>
 											<span class="text-sm font-medium text-white"
 												>שלח טופס</span
@@ -400,10 +400,7 @@ const features = [
 							<div
 								class="flex h-7 w-7 items-center justify-center rounded-full bg-green-100"
 							>
-								<Icon
-									name="ph:check-circle-fill"
-									class="h-4 w-4 text-green-500"
-								/>
+								<Icon name="ph:check-circle-fill" class="h-4 w-4 text-green-500" />
 							</div>
 							<span class="whitespace-nowrap text-xs font-medium text-gray-700"
 								>שמירה אוטומטית</span
@@ -516,9 +513,7 @@ const features = [
 					<h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
 						פשוט. מהיר. יעיל.
 					</h2>
-					<p class="mt-4 text-lg text-gray-500">
-						שלושה צעדים זה כל מה שצריך
-					</p>
+					<p class="mt-4 text-lg text-gray-500">שלושה צעדים זה כל מה שצריך</p>
 				</div>
 
 				<div class="relative mt-20">
@@ -526,9 +521,7 @@ const features = [
 						class="absolute top-16 right-[16.67%] left-[16.67%] hidden h-0.5 bg-linear-to-l from-blue-200 via-blue-400 to-blue-200 lg:block"
 					></div>
 
-					<div
-						class="reveal stagger grid grid-cols-1 gap-12 lg:grid-cols-3 lg:gap-8"
-					>
+					<div class="reveal stagger grid grid-cols-1 gap-12 lg:grid-cols-3 lg:gap-8">
 						<div class="text-center">
 							<div
 								class="relative z-10 mx-auto mb-6 flex h-32 w-32 items-center justify-center rounded-full bg-blue-50"
@@ -536,13 +529,10 @@ const features = [
 								<div
 									class="flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/25"
 								>
-									<Icon
-										name="ph:plus-circle-fill"
-										class="h-9 w-9 text-white"
-									/>
+									<Icon name="ph:plus-circle-fill" class="h-9 w-9 text-white" />
 								</div>
 							</div>
-							<span class="text-5xl font-black text-blue-100">01</span>
+							<span class="text-5xl font-black text-blue-300">01</span>
 							<h3 class="mt-2 text-xl font-bold text-gray-900">צור טופס</h3>
 							<p class="mt-2 text-gray-500">
 								בחר רכיבים, גרור ושחרר, והתאם אישית בקלות
@@ -559,11 +549,9 @@ const features = [
 									<Icon name="ph:share-fill" class="h-9 w-9 text-white" />
 								</div>
 							</div>
-							<span class="text-5xl font-black text-violet-100">02</span>
+							<span class="text-5xl font-black text-violet-300">02</span>
 							<h3 class="mt-2 text-xl font-bold text-gray-900">שתף</h3>
-							<p class="mt-2 text-gray-500">
-								שלח קישור, הטמע באתר, או שתף QR קוד
-							</p>
+							<p class="mt-2 text-gray-500">שלח קישור, הטמע באתר, או שתף QR קוד</p>
 						</div>
 
 						<div class="text-center">
@@ -573,17 +561,12 @@ const features = [
 								<div
 									class="flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-emerald-500 to-emerald-700 shadow-lg shadow-emerald-500/25"
 								>
-									<Icon
-										name="ph:chart-line-up-fill"
-										class="h-9 w-9 text-white"
-									/>
+									<Icon name="ph:chart-line-up-fill" class="h-9 w-9 text-white" />
 								</div>
 							</div>
-							<span class="text-5xl font-black text-emerald-100">03</span>
+							<span class="text-5xl font-black text-emerald-300">03</span>
 							<h3 class="mt-2 text-xl font-bold text-gray-900">אסוף ונתח</h3>
-							<p class="mt-2 text-gray-500">
-								צפה בתשובות בזמן אמת וייצא דוחות
-							</p>
+							<p class="mt-2 text-gray-500">צפה בתשובות בזמן אמת וייצא דוחות</p>
 						</div>
 					</div>
 				</div>
@@ -597,20 +580,13 @@ const features = [
 			></div>
 			<div class="dot-grid absolute inset-0 opacity-50"></div>
 
-			<div
-				class="relative z-10 mx-auto max-w-7xl px-6 text-center lg:px-8"
-			>
+			<div class="relative z-10 mx-auto max-w-7xl px-6 text-center lg:px-8">
 				<div class="reveal">
-					<h2
-						class="text-3xl font-extrabold text-white sm:text-4xl md:text-5xl"
-					>
+					<h2 class="text-3xl font-extrabold text-white sm:text-4xl md:text-5xl">
 						מוכנים ליצור טפסים שעובדים?
 					</h2>
-					<p
-						class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-slate-400"
-					>
-						הצטרפו לאלפי משתמשים שכבר משתמשים ב-Autodox ליצירת טפסים חכמים
-						ומקצועיים
+					<p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-slate-400">
+						הצטרפו לאלפי משתמשים שכבר משתמשים ב-Autodox ליצירת טפסים חכמים ומקצועיים
 					</p>
 					<div class="mt-10">
 						<div class="relative inline-block">
@@ -629,9 +605,7 @@ const features = [
 							</NuxtLink>
 						</div>
 					</div>
-					<p class="mt-4 text-sm text-slate-500">
-						ללא כרטיס אשראי. ללא התחייבות.
-					</p>
+					<p class="mt-4 text-sm text-slate-500">ללא כרטיס אשראי. ללא התחייבות.</p>
 				</div>
 			</div>
 		</section>
@@ -639,9 +613,7 @@ const features = [
 		<!-- ==================== FOOTER ==================== -->
 		<footer class="border-t border-slate-800 bg-slate-950 py-8">
 			<div class="mx-auto max-w-7xl px-6 lg:px-8">
-				<div
-					class="flex flex-col items-center justify-between gap-4 sm:flex-row"
-				>
+				<div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
 					<div class="flex items-center gap-2">
 						<div
 							class="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-blue-500 to-blue-700"
@@ -651,15 +623,9 @@ const features = [
 						<span class="text-sm font-semibold text-white">Autodox</span>
 					</div>
 					<div class="flex gap-6 text-sm text-slate-500">
-						<a href="#" class="transition-colors hover:text-slate-300"
-							>תנאי שימוש</a
-						>
-						<a href="#" class="transition-colors hover:text-slate-300"
-							>פרטיות</a
-						>
-						<a href="#" class="transition-colors hover:text-slate-300"
-							>צור קשר</a
-						>
+						<a href="#" class="transition-colors hover:text-slate-300">תנאי שימוש</a>
+						<a href="#" class="transition-colors hover:text-slate-300">פרטיות</a>
+						<a href="#" class="transition-colors hover:text-slate-300">צור קשר</a>
 					</div>
 					<p class="text-sm text-slate-500">
 						&copy; {{ new Date().getFullYear() }} Autodox. כל הזכויות שמורות.
@@ -671,241 +637,261 @@ const features = [
 </template>
 
 <style>
-/* ---- Dot grid ---- */
-.dot-grid {
-	background-image: radial-gradient(
-		circle,
-		rgba(255, 255, 255, 0.04) 1px,
-		transparent 1px
-	);
-	background-size: 32px 32px;
-}
+	@import url("https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap");
 
-/* ---- Hero entrance ---- */
-.hero-enter {
-	animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
-}
-.hero-enter-d2 {
-	animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
-}
-.hero-enter-d3 {
-	animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
-}
-.hero-enter-d4 {
-	animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.7s both;
-}
+	* {
+		/* font-family: "Rubik", sans-serif; */
+		font-family: "Rubik", sans-serif;
+	}
 
-@keyframes fadeUp {
-	from {
+	h1,
+	h1 > *,
+	h2,
+	h2 > *,
+	h3,
+	h3 > *,
+	h4,
+	h4 > *,
+	h5,
+	h5 > *,
+	h6,
+	h6 > * {
+		font-family: "Google Sans", sans-serif;
+	}
+
+	/* ---- Dot grid ---- */
+	.dot-grid {
+		background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+		background-size: 32px 32px;
+	}
+
+	/* ---- Hero entrance ---- */
+	.hero-enter {
+		animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+	}
+	.hero-enter-d2 {
+		animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+	}
+	.hero-enter-d3 {
+		animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+	}
+	.hero-enter-d4 {
+		animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.7s both;
+	}
+
+	@keyframes fadeUp {
+		from {
+			opacity: 0;
+			transform: translateY(30px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	/* ---- Mockup fields ---- */
+	.mockup-field {
+		display: block;
+		width: 100%;
+		animation: fieldSlide 0.5s ease-out both;
+	}
+
+	@keyframes fieldSlide {
+		from {
+			opacity: 0;
+			transform: translateY(12px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	/* ---- Typing cursor ---- */
+	.typing-cursor {
+		animation: cursorBlink 0.8s step-end infinite;
+	}
+
+	@keyframes cursorBlink {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0;
+		}
+	}
+
+	/* ---- Badge entrance ---- */
+	.badge-enter {
+		animation: badgeIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+	}
+
+	@keyframes badgeIn {
+		from {
+			opacity: 0;
+			transform: translateY(15px) scale(0.85);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	/* ---- Gradient mesh ---- */
+	.mesh-1 {
+		animation: meshDrift1 20s ease-in-out infinite;
+	}
+	.mesh-2 {
+		animation: meshDrift2 25s ease-in-out infinite 2s;
+	}
+	.mesh-3 {
+		animation: meshDrift3 18s ease-in-out infinite 4s;
+	}
+
+	@keyframes meshDrift1 {
+		0%,
+		100% {
+			transform: translate(0, 0) scale(1);
+		}
+		25% {
+			transform: translate(40px, -30px) scale(1.05);
+		}
+		50% {
+			transform: translate(-20px, 40px) scale(0.95);
+		}
+		75% {
+			transform: translate(-40px, -20px) scale(1.02);
+		}
+	}
+
+	@keyframes meshDrift2 {
+		0%,
+		100% {
+			transform: translate(0, 0) scale(1);
+		}
+		33% {
+			transform: translate(-50px, 30px) scale(1.1);
+		}
+		66% {
+			transform: translate(30px, -40px) scale(0.9);
+		}
+	}
+
+	@keyframes meshDrift3 {
+		0%,
+		100% {
+			transform: translate(0, 0) scale(1);
+		}
+		50% {
+			transform: translate(40px, -30px) scale(1.08);
+		}
+	}
+
+	/* ---- Floating shapes ---- */
+	.shape-float {
+		animation: shapeFloat 12s ease-in-out infinite;
+	}
+	.shape-float-delayed {
+		animation: shapeFloat 15s ease-in-out infinite 2s;
+	}
+	.shape-spin {
+		animation: shapeSpin 20s linear infinite;
+	}
+
+	@keyframes shapeFloat {
+		0%,
+		100% {
+			transform: translate(0, 0) rotate(0deg);
+		}
+		25% {
+			transform: translate(15px, -20px) rotate(5deg);
+		}
+		50% {
+			transform: translate(-10px, -35px) rotate(-3deg);
+		}
+		75% {
+			transform: translate(-25px, -15px) rotate(2deg);
+		}
+	}
+
+	@keyframes shapeSpin {
+		from {
+			transform: rotate(45deg);
+		}
+		to {
+			transform: rotate(405deg);
+		}
+	}
+
+	/* ---- Scroll reveal ---- */
+	.reveal {
 		opacity: 0;
-		transform: translateY(30px);
+		transform: translateY(40px);
+		transition:
+			opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+			transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 	}
-	to {
+
+	.reveal.revealed {
 		opacity: 1;
-		transform: translateY(0);
+		transform: none;
 	}
-}
 
-/* ---- Mockup fields ---- */
-.mockup-field {
-	animation: fieldSlide 0.5s ease-out both;
-}
-
-@keyframes fieldSlide {
-	from {
+	/* ---- Stagger children ---- */
+	.stagger > * {
 		opacity: 0;
-		transform: translateY(12px);
+		transform: translateY(20px);
+		transition:
+			opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+			transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 	}
-	to {
+
+	.stagger.revealed > * {
 		opacity: 1;
-		transform: translateY(0);
+		transform: none;
 	}
-}
 
-/* ---- Typing cursor ---- */
-.typing-cursor {
-	animation: cursorBlink 0.8s step-end infinite;
-}
+	.stagger.revealed > *:nth-child(1) {
+		transition-delay: 0ms;
+	}
+	.stagger.revealed > *:nth-child(2) {
+		transition-delay: 60ms;
+	}
+	.stagger.revealed > *:nth-child(3) {
+		transition-delay: 120ms;
+	}
+	.stagger.revealed > *:nth-child(4) {
+		transition-delay: 180ms;
+	}
+	.stagger.revealed > *:nth-child(5) {
+		transition-delay: 240ms;
+	}
+	.stagger.revealed > *:nth-child(6) {
+		transition-delay: 300ms;
+	}
+	.stagger.revealed > *:nth-child(7) {
+		transition-delay: 360ms;
+	}
+	.stagger.revealed > *:nth-child(8) {
+		transition-delay: 420ms;
+	}
 
-@keyframes cursorBlink {
-	0%,
-	100% {
-		opacity: 1;
+	/* ---- Scroll indicator ---- */
+	.scroll-dot {
+		animation: scrollBounce 1.5s ease-in-out infinite;
 	}
-	50% {
-		opacity: 0;
-	}
-}
 
-/* ---- Badge entrance ---- */
-.badge-enter {
-	animation: badgeIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-@keyframes badgeIn {
-	from {
-		opacity: 0;
-		transform: translateY(15px) scale(0.85);
+	@keyframes scrollBounce {
+		0%,
+		100% {
+			opacity: 0.5;
+			transform: translateY(0);
+		}
+		50% {
+			opacity: 1;
+			transform: translateY(8px);
+		}
 	}
-	to {
-		opacity: 1;
-		transform: translateY(0) scale(1);
-	}
-}
-
-/* ---- Gradient mesh ---- */
-.mesh-1 {
-	animation: meshDrift1 20s ease-in-out infinite;
-}
-.mesh-2 {
-	animation: meshDrift2 25s ease-in-out infinite 2s;
-}
-.mesh-3 {
-	animation: meshDrift3 18s ease-in-out infinite 4s;
-}
-
-@keyframes meshDrift1 {
-	0%,
-	100% {
-		transform: translate(0, 0) scale(1);
-	}
-	25% {
-		transform: translate(40px, -30px) scale(1.05);
-	}
-	50% {
-		transform: translate(-20px, 40px) scale(0.95);
-	}
-	75% {
-		transform: translate(-40px, -20px) scale(1.02);
-	}
-}
-
-@keyframes meshDrift2 {
-	0%,
-	100% {
-		transform: translate(0, 0) scale(1);
-	}
-	33% {
-		transform: translate(-50px, 30px) scale(1.1);
-	}
-	66% {
-		transform: translate(30px, -40px) scale(0.9);
-	}
-}
-
-@keyframes meshDrift3 {
-	0%,
-	100% {
-		transform: translate(0, 0) scale(1);
-	}
-	50% {
-		transform: translate(40px, -30px) scale(1.08);
-	}
-}
-
-/* ---- Floating shapes ---- */
-.shape-float {
-	animation: shapeFloat 12s ease-in-out infinite;
-}
-.shape-float-delayed {
-	animation: shapeFloat 15s ease-in-out infinite 2s;
-}
-.shape-spin {
-	animation: shapeSpin 20s linear infinite;
-}
-
-@keyframes shapeFloat {
-	0%,
-	100% {
-		transform: translate(0, 0) rotate(0deg);
-	}
-	25% {
-		transform: translate(15px, -20px) rotate(5deg);
-	}
-	50% {
-		transform: translate(-10px, -35px) rotate(-3deg);
-	}
-	75% {
-		transform: translate(-25px, -15px) rotate(2deg);
-	}
-}
-
-@keyframes shapeSpin {
-	from {
-		transform: rotate(45deg);
-	}
-	to {
-		transform: rotate(405deg);
-	}
-}
-
-/* ---- Scroll reveal ---- */
-.reveal {
-	opacity: 0;
-	transform: translateY(40px);
-	transition:
-		opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-		transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.reveal.revealed {
-	opacity: 1;
-	transform: none;
-}
-
-/* ---- Stagger children ---- */
-.stagger > * {
-	opacity: 0;
-	transform: translateY(20px);
-	transition:
-		opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-		transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.stagger.revealed > * {
-	opacity: 1;
-	transform: none;
-}
-
-.stagger.revealed > *:nth-child(1) {
-	transition-delay: 0ms;
-}
-.stagger.revealed > *:nth-child(2) {
-	transition-delay: 60ms;
-}
-.stagger.revealed > *:nth-child(3) {
-	transition-delay: 120ms;
-}
-.stagger.revealed > *:nth-child(4) {
-	transition-delay: 180ms;
-}
-.stagger.revealed > *:nth-child(5) {
-	transition-delay: 240ms;
-}
-.stagger.revealed > *:nth-child(6) {
-	transition-delay: 300ms;
-}
-.stagger.revealed > *:nth-child(7) {
-	transition-delay: 360ms;
-}
-.stagger.revealed > *:nth-child(8) {
-	transition-delay: 420ms;
-}
-
-/* ---- Scroll indicator ---- */
-.scroll-dot {
-	animation: scrollBounce 1.5s ease-in-out infinite;
-}
-
-@keyframes scrollBounce {
-	0%,
-	100% {
-		opacity: 0.5;
-		transform: translateY(0);
-	}
-	50% {
-		opacity: 1;
-		transform: translateY(8px);
-	}
-}
 </style>
