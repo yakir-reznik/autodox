@@ -37,39 +37,50 @@
 		</div>
 
 		<!-- Actions -->
-		<div class="flex flex-col gap-2 mt-auto">
-			<!-- Primary Action -->
-			<NuxtLink :to="`/edit/${form.id}`">
-				<BaseButton variant="primary" class="w-full justify-center">
+		<div class="flex items-center gap-2 mt-auto">
+			<NuxtLink :to="`/edit/${form.id}`" class="flex-1">
+				<BaseButton variant="primary" class="w-full justify-center" size="sm">
 					<Icon name="heroicons:pencil-square" class="h-4 w-4" />
 					עריכה
 				</BaseButton>
 			</NuxtLink>
-
-			<!-- Secondary Actions Grid -->
-			<div class="grid grid-cols-3 gap-2">
-				<NuxtLink :to="`/fill/${form.id}`">
-					<BaseButton variant="secondary" class="w-full justify-center" size="sm">
-						<Icon name="heroicons:document-text" class="h-4 w-4" />
-						מילוי
-					</BaseButton>
-				</NuxtLink>
-				<NuxtLink :to="`/submissions/form/${form.id}`">
-					<BaseButton variant="secondary" class="w-full justify-center" size="sm">
-						<Icon name="heroicons:inbox" class="h-4 w-4" />
-						הגשות
-					</BaseButton>
-				</NuxtLink>
-				<BaseButton
-					variant="ghost"
-					size="sm"
-					class="w-full justify-center"
-					@click="handleMoveForm(form)"
-				>
-					<Icon name="mdi:folder-move" class="h-4 w-4" />
-					העבר
+			<NuxtLink :to="`/submissions/form/${form.id}`" class="flex-1">
+				<BaseButton variant="secondary" class="w-full justify-center" size="sm">
+					<Icon name="heroicons:inbox" class="h-4 w-4" />
+					הגשות
 				</BaseButton>
-			</div>
+			</NuxtLink>
+			<UiDropdownMenu>
+				<UiDropdownMenuTrigger as-child>
+					<BaseButton variant="ghost" size="sm">
+						<Icon name="heroicons:ellipsis-vertical" class="h-4 w-4" />
+						פעולות נוספות
+					</BaseButton>
+				</UiDropdownMenuTrigger>
+				<UiDropdownMenuContent align="end">
+					<UiDropdownMenuItem class="px-4" @select="handleMoveForm(form)">
+						<Icon name="mdi:folder-move" class="h-4 w-4" />
+						העבר לתיקייה
+					</UiDropdownMenuItem class="px-4">
+					<UiDropdownMenuItem class="px-4" @select="emit('duplicateForm', form)">
+						<Icon name="heroicons:document-duplicate" class="h-4 w-4" />
+						שכפול טופס
+					</UiDropdownMenuItem class="px-4">
+					<UiDropdownMenuItem class="px-4" @select="emit('createSubmission', form)">
+						<Icon name="heroicons:document-text" class="h-4 w-4" />
+						יצירת הגשה
+					</UiDropdownMenuItem class="px-4">
+					<UiDropdownMenuItem class="px-4" @select="emit('changeStatus', form)">
+						<Icon name="heroicons:arrow-path" class="h-4 w-4" />
+						שינוי סטטוס
+					</UiDropdownMenuItem class="px-4">
+					<UiDropdownMenuSeparator />
+					<UiDropdownMenuItem class="px-4" variant="destructive" @select="emit('deleteForm', form)">
+						<Icon name="heroicons:trash" class="h-4 w-4" />
+						מחיקה
+					</UiDropdownMenuItem class="px-4">
+				</UiDropdownMenuContent>
+			</UiDropdownMenu>
 		</div>
 	</div>
 </template>
@@ -87,6 +98,10 @@
 
 	const emit = defineEmits<{
 		moveForm: [form: FormListItem];
+		duplicateForm: [form: FormListItem];
+		createSubmission: [form: FormListItem];
+		changeStatus: [form: FormListItem];
+		deleteForm: [form: FormListItem];
 	}>();
 
 	function handleMoveForm(form: FormListItem) {

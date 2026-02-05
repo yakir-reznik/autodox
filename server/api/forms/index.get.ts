@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
 		.from(formsTable)
 		.leftJoin(foldersTable, eq(formsTable.folderId, foldersTable.id))
 		.where(filter)
-		.orderBy(desc(formsTable.updatedAt));
+		.orderBy(desc(formsTable.createdAt));
 
 	return results;
 });

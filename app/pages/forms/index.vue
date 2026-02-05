@@ -9,6 +9,12 @@
 	const selectedFolderId = ref<number | null | "all" | "unfiled">("all");
 	const showMoveFormModal = ref(false);
 	const movingForm = ref<FormListItem | null>(null);
+	const showDeleteFormModal = ref(false);
+	const deletingForm = ref<FormListItem | null>(null);
+	const showCreateSubmissionModal = ref(false);
+	const createSubmissionForm = ref<FormListItem | null>(null);
+	const showChangeStatusModal = ref(false);
+	const changeStatusForm = ref<FormListItem | null>(null);
 	const searchQuery = ref("");
 
 	// Fetch folders
@@ -58,6 +64,68 @@
 	async function handleFoldersChanged() {
 		await refreshFolders();
 		await refresh();
+	}
+
+	// Form duplicate handler
+	async function handleDuplicateForm(form: FormListItem) {
+		try {
+			await $fetch(`/api/forms/${form.id}/duplicate`, {
+				method: "POST",
+				body: { createdBy: user.value?.id },
+			});
+			await refresh();
+		} catch (error) {
+			console.error("Failed to duplicate form:", error);
+		}
+	}
+
+	// Form delete handlers
+	function handleDeleteForm(form: FormListItem) {
+		deletingForm.value = form;
+		showDeleteFormModal.value = true;
+	}
+
+	async function deleteForm() {
+		if (!deletingForm.value) return;
+
+		try {
+			await $fetch(`/api/forms/${deletingForm.value.id}`, {
+				method: "DELETE",
+			});
+			await refresh();
+		} catch (error) {
+			console.error("Failed to delete form:", error);
+		}
+	}
+
+	// Create submission handler
+	function handleCreateSubmission(form: FormListItem) {
+		createSubmissionForm.value = form;
+		nextTick(() => {
+			showCreateSubmissionModal.value = true;
+		});
+	}
+
+	// Change status handlers
+	function handleChangeStatus(form: FormListItem) {
+		changeStatusForm.value = form;
+		showChangeStatusModal.value = true;
+	}
+
+	async function changeStatus(status: FormListItem["status"]) {
+		if (!changeStatusForm.value) return;
+
+		try {
+			await $fetch(`/api/forms/${changeStatusForm.value.id}`, {
+				method: "PATCH",
+				body: { status },
+			});
+			forms.value = forms.value?.map((f) =>
+				f.id === changeStatusForm.value!.id ? { ...f, status } : f,
+			) ?? null;
+		} catch (error) {
+			console.error("Failed to change form status:", error);
+		}
 	}
 
 	// Form move handlers
@@ -199,6 +267,10 @@
 							:key="form.id"
 							:form="form"
 							@move-form="handleMoveForm"
+							@duplicate-form="handleDuplicateForm"
+							@delete-form="handleDeleteForm"
+							@create-submission="handleCreateSubmission"
+							@change-status="handleChangeStatus"
 						/>
 					</div>
 				</div>
@@ -213,6 +285,25 @@
 			:current-folder-id="movingForm.folderId"
 			:form-title="movingForm.title"
 			@move="moveForm"
+		/>
+
+		<FormListDeleteFormModal
+			v-model="showDeleteFormModal"
+			:form="deletingForm"
+			@confirm="deleteForm"
+		/>
+
+		<FormListChangeStatusModal
+			v-model="showChangeStatusModal"
+			:form="changeStatusForm"
+			@confirm="changeStatus"
+		/>
+
+		<SubmissionsCreateSubmissionModal
+			v-if="createSubmissionForm"
+			v-model="showCreateSubmissionModal"
+			:form-id="createSubmissionForm.id"
+			:api-key="user?.apiKey ?? ''"
 		/>
 	</div>
 </template>
