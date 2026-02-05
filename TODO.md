@@ -4,6 +4,7 @@
 
 ## Features
 
+- [ ] Generate a QR code for submission link (generic or with token)
 - [ ] Users can only see their own forms and submissions, Admins can see every users forms
 - [ ] Calculated fields, Auto-sum, scores, pricing, percentages
 - [ ] Reusable blocks - Save a section as a reusable component
