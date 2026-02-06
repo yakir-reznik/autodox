@@ -1,151 +1,151 @@
 <script setup lang="ts">
-definePageMeta({
-	layout: false,
-});
+	definePageMeta({
+		layout: false,
+	});
 
-useHead({
-	title: "Autodox - בונה הטפסים החכם",
-	meta: [
+	useHead({
+		title: "Autodox - בונה הטפסים החכם",
+		meta: [
+			{
+				name: "description",
+				content:
+					"צור טפסים דינמיים ומקצועיים בדקות. גרור ושחרר, לוגיקה חכמה, עיצובים מותאמים ועוד.",
+			},
+		],
+		bodyAttrs: {
+			style: "background-color: #020617",
+		},
+	});
+
+	const scrolled = ref(false);
+	const statsTriggered = ref(false);
+
+	const counters = reactive({
+		users: 0,
+		forms: 0,
+		submissions: 0,
+		uptime: 0,
+	});
+
+	function animateCounter(
+		key: keyof typeof counters,
+		target: number,
+		duration: number,
+		decimals = 0,
+	) {
+		const start = performance.now();
+		const tick = (now: number) => {
+			const t = Math.min((now - start) / duration, 1);
+			const eased = 1 - Math.pow(1 - t, 3);
+			counters[key] = Number((eased * target).toFixed(decimals));
+			if (t < 1) requestAnimationFrame(tick);
+		};
+		requestAnimationFrame(tick);
+	}
+
+	function triggerCounters() {
+		if (statsTriggered.value) return;
+		statsTriggered.value = true;
+		animateCounter("users", 12500, 2000);
+		animateCounter("forms", 48000, 2500);
+		animateCounter("submissions", 250000, 3000);
+		animateCounter("uptime", 99.9, 1500, 1);
+	}
+
+	function scrollTo(id: string) {
+		document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+	}
+
+	onMounted(() => {
+		const onScroll = () => {
+			scrolled.value = window.scrollY > 50;
+		};
+		window.addEventListener("scroll", onScroll, { passive: true });
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						entry.target.classList.add("revealed");
+						if (entry.target.hasAttribute("data-stats")) triggerCounters();
+						observer.unobserve(entry.target);
+					}
+				});
+			},
+			{ threshold: 0, rootMargin: "0px 0px 0px 0px" },
+		);
+
+		// iOS Safari needs extra time after layout before IntersectionObserver works reliably
+		nextTick(() => {
+			setTimeout(() => {
+				document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+			}, 100);
+		});
+
+		onUnmounted(() => {
+			window.removeEventListener("scroll", onScroll);
+			observer.disconnect();
+		});
+	});
+
+	const features = [
 		{
-			name: "description",
-			content:
-				"צור טפסים דינמיים ומקצועיים בדקות. גרור ושחרר, לוגיקה חכמה, עיצובים מותאמים ועוד.",
+			icon: "ph:hand-grabbing-fill",
+			title: "גרור ושחרר",
+			desc: "בנה טפסים בקלות עם ממשק אינטואיטיבי. פשוט גרור רכיבים למקום הרצוי.",
+			color: "text-blue-500",
+			bg: "bg-blue-500/10",
 		},
-	],
-	bodyAttrs: {
-		style: "background-color: #020617",
-	},
-});
-
-const scrolled = ref(false);
-const statsTriggered = ref(false);
-
-const counters = reactive({
-	users: 0,
-	forms: 0,
-	submissions: 0,
-	uptime: 0,
-});
-
-function animateCounter(
-	key: keyof typeof counters,
-	target: number,
-	duration: number,
-	decimals = 0,
-) {
-	const start = performance.now();
-	const tick = (now: number) => {
-		const t = Math.min((now - start) / duration, 1);
-		const eased = 1 - Math.pow(1 - t, 3);
-		counters[key] = Number((eased * target).toFixed(decimals));
-		if (t < 1) requestAnimationFrame(tick);
-	};
-	requestAnimationFrame(tick);
-}
-
-function triggerCounters() {
-	if (statsTriggered.value) return;
-	statsTriggered.value = true;
-	animateCounter("users", 12500, 2000);
-	animateCounter("forms", 48000, 2500);
-	animateCounter("submissions", 250000, 3000);
-	animateCounter("uptime", 99.9, 1500, 1);
-}
-
-function scrollTo(id: string) {
-	document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-}
-
-onMounted(() => {
-	const onScroll = () => {
-		scrolled.value = window.scrollY > 50;
-	};
-	window.addEventListener("scroll", onScroll, { passive: true });
-
-	const observer = new IntersectionObserver(
-		(entries) => {
-			entries.forEach((entry) => {
-				if (entry.isIntersecting) {
-					entry.target.classList.add("revealed");
-					if (entry.target.hasAttribute("data-stats")) triggerCounters();
-					observer.unobserve(entry.target);
-				}
-			});
+		{
+			icon: "ph:git-branch-fill",
+			title: "לוגיקה מותנית",
+			desc: "הצג או הסתר שדות אוטומטית לפי תשובות קודמות. טפסים חכמים באמת.",
+			color: "text-violet-500",
+			bg: "bg-violet-500/10",
 		},
-		{ threshold: 0, rootMargin: "0px 0px 0px 0px" },
-	);
-
-	// iOS Safari needs extra time after layout before IntersectionObserver works reliably
-	nextTick(() => {
-		setTimeout(() => {
-			document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
-		}, 100);
-	});
-
-	onUnmounted(() => {
-		window.removeEventListener("scroll", onScroll);
-		observer.disconnect();
-	});
-});
-
-const features = [
-	{
-		icon: "ph:hand-grabbing-fill",
-		title: "גרור ושחרר",
-		desc: "בנה טפסים בקלות עם ממשק אינטואיטיבי. פשוט גרור רכיבים למקום הרצוי.",
-		color: "text-blue-500",
-		bg: "bg-blue-500/10",
-	},
-	{
-		icon: "ph:git-branch-fill",
-		title: "לוגיקה מותנית",
-		desc: "הצג או הסתר שדות אוטומטית לפי תשובות קודמות. טפסים חכמים באמת.",
-		color: "text-violet-500",
-		bg: "bg-violet-500/10",
-	},
-	{
-		icon: "ph:palette-fill",
-		title: "ערכות עיצוב",
-		desc: "בחר מתוך ערכות נושא מעוצבות מראש או התאם צבעים וסגנונות.",
-		color: "text-pink-500",
-		bg: "bg-pink-500/10",
-	},
-	{
-		icon: "ph:share-network-fill",
-		title: "שיתוף בקליק",
-		desc: "שתף טפסים בקישור ישיר, QR קוד, או הטמע באתר שלך.",
-		color: "text-emerald-500",
-		bg: "bg-emerald-500/10",
-	},
-	{
-		icon: "ph:chart-bar-fill",
-		title: "מעקב תשובות",
-		desc: "צפה בתשובות בזמן אמת. סנן, מיין וייצא נתונים בקלות.",
-		color: "text-amber-500",
-		bg: "bg-amber-500/10",
-	},
-	{
-		icon: "ph:devices-fill",
-		title: "מותאם לכל מסך",
-		desc: "הטפסים שלך נראים מושלם בנייד, טאבלט ומחשב.",
-		color: "text-cyan-500",
-		bg: "bg-cyan-500/10",
-	},
-	{
-		icon: "ph:shield-check-fill",
-		title: "הגנה בסיסמה",
-		desc: "הגן על הטפסים שלך עם סיסמה או טוקן. שליטה מלאה בגישה.",
-		color: "text-slate-500",
-		bg: "bg-slate-500/10",
-	},
-	{
-		icon: "ph:file-pdf-fill",
-		title: "ייצוא ל-PDF",
-		desc: "ייצא תשובות ל-PDF מקצועי בלחיצת כפתור.",
-		color: "text-red-500",
-		bg: "bg-red-500/10",
-	},
-];
+		{
+			icon: "ph:palette-fill",
+			title: "ערכות עיצוב",
+			desc: "בחר מתוך ערכות נושא מעוצבות מראש או התאם צבעים וסגנונות.",
+			color: "text-pink-500",
+			bg: "bg-pink-500/10",
+		},
+		{
+			icon: "ph:share-network-fill",
+			title: "שיתוף בקליק",
+			desc: "שתף טפסים בקישור ישיר, QR קוד, או הטמע באתר שלך.",
+			color: "text-emerald-500",
+			bg: "bg-emerald-500/10",
+		},
+		{
+			icon: "ph:chart-bar-fill",
+			title: "מעקב תשובות",
+			desc: "צפה בתשובות בזמן אמת. סנן, מיין וייצא נתונים בקלות.",
+			color: "text-amber-500",
+			bg: "bg-amber-500/10",
+		},
+		{
+			icon: "ph:devices-fill",
+			title: "מותאם לכל מסך",
+			desc: "הטפסים שלך נראים מושלם בנייד, טאבלט ומחשב.",
+			color: "text-cyan-500",
+			bg: "bg-cyan-500/10",
+		},
+		{
+			icon: "ph:shield-check-fill",
+			title: "הגנה בסיסמה",
+			desc: "הגן על הטפסים שלך עם סיסמה או טוקן. שליטה מלאה בגישה.",
+			color: "text-slate-500",
+			bg: "bg-slate-500/10",
+		},
+		{
+			icon: "ph:file-pdf-fill",
+			title: "ייצוא ל-PDF",
+			desc: "ייצא תשובות ל-PDF מקצועי בלחיצת כפתור.",
+			color: "text-red-500",
+			bg: "bg-red-500/10",
+		},
+	];
 </script>
 
 <template>
@@ -155,8 +155,8 @@ const features = [
 		<ContentSectionUsageMetrics :counters="counters" />
 		<ContentSectionHomepageFeatures :features="features" />
 		<ContentSectionHowItWorks :scroll-to="scrollTo" />
-		<ContentSectionFormElements />
 		<ContentSectionHomepageCTA />
+		<ContentSectionFormElements />
 		<ContentSectionHomepageFooter />
 	</div>
 </template>
