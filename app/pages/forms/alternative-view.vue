@@ -166,12 +166,14 @@
 		<!-- Left Nav -->
 		<nav dir="rtl" class="flex w-48 shrink-0 flex-col bg-slate-900 px-3 py-4">
 			<div class="mb-6 flex items-center gap-2 px-2">
-				<div
-					class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white"
-				>
-					A
-				</div>
-				<span class="text-sm font-semibold text-white">Autodox</span>
+				<NuxtLink to="/" class="flex items-center gap-2">
+					<div
+						class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white"
+					>
+						A
+					</div>
+					<span class="text-sm font-semibold text-white">Autodox</span>
+				</NuxtLink>
 			</div>
 
 			<div class="flex flex-1 flex-col gap-1">
@@ -183,7 +185,7 @@
 					<span>טפסים</span>
 				</NuxtLink>
 				<NuxtLink
-					to="#"
+					to="/forms/submissions"
 					class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
 				>
 					<Icon name="heroicons:inbox-stack" class="h-5 w-5 shrink-0" />
@@ -228,12 +230,19 @@
 		/>
 
 		<!-- Main Content -->
-		<div dir="rtl" class="flex flex-1 flex-col overflow-hidden border-l border-gray-200 bg-gray-50">
+		<div
+			dir="rtl"
+			class="flex flex-1 flex-col overflow-hidden border-l border-gray-200 bg-gray-50"
+		>
 			<!-- Toolbar -->
-			<div class="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6 py-3">
+			<div
+				class="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6 py-3"
+			>
 				<div class="flex items-center gap-3">
 					<h1 class="text-base font-semibold text-gray-900">{{ currentFolderTitle }}</h1>
-					<span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
+					<span
+						class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500"
+					>
 						{{ filteredForms.length }}
 					</span>
 				</div>
