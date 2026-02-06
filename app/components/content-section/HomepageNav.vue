@@ -1,8 +1,8 @@
 <script setup lang="ts">
-defineProps<{
-	scrolled: boolean;
-	scrollTo: (id: string) => void;
-}>();
+	defineProps<{
+		scrolled: boolean;
+		scrollTo: (id: string) => void;
+	}>();
 </script>
 
 <template>
@@ -38,6 +38,12 @@ defineProps<{
 						class="cursor-pointer text-sm text-white/60 transition-colors hover:text-white"
 					>
 						איך זה עובד?
+					</button>
+					<button
+						@click="scrollTo('form-elements')"
+						class="cursor-pointer text-sm text-white/60 transition-colors hover:text-white"
+					>
+						20+ רכיבים לבניית טפסים
 					</button>
 					<NuxtLink
 						to="/login"
