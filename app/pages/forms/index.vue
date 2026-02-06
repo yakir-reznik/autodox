@@ -123,7 +123,7 @@
 			forms.value =
 				forms.value?.map((f) =>
 					f.id === changeStatusForm.value!.id ? { ...f, status } : f,
-				) ?? null;
+				);
 		} catch (error) {
 			console.error("Failed to change form status:", error);
 		}
