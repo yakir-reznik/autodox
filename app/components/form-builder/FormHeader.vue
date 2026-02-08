@@ -118,29 +118,40 @@
 
 				<div class="h-6 w-px bg-gray-300" />
 
+				<UiButton
+					variant="default"
+					:disabled="!isDirty && saveStatus !== 'error'"
+					:loading="saveStatus === 'saving'"
+					@click="$emit('save')"
+				>
+					<span>שמור טופס</span>
+					<Icon name="heroicons:check" />
+				</UiButton>
+
 				<UiButton variant="secondary" title="הגדרות טופס" @click="showSettingsModal = true">
 					<span>הגדרות טופס</span>
 					<Icon name="heroicons:cog-6-tooth" class="h-4 w-4" />
 				</UiButton>
 
 				<NuxtLink
+					:to="`/submissions/form/${formId}`"
+					title="View submissions for this form"
+				>
+					<UiButton variant="secondary">
+						<span>הצגת הגשות לטופס זה</span>
+						<Icon name="heroicons:list-bullet" class="h-4 w-4" />
+					</UiButton>
+				</NuxtLink>
+
+				<NuxtLink
 					:to="`/forms/upload?formId=${formId}`"
 					title="Upload JSON to replace form structure"
 				>
-					<UiButton variant="secondary" size="sm">
+					<UiButton variant="secondary">
 						<span>ייבוא JSON</span>
 						<Icon name="heroicons:arrow-up-tray" class="h-4 w-4" />
 					</UiButton>
 				</NuxtLink>
-
-				<BaseButton
-					variant="primary"
-					:disabled="!isDirty && saveStatus !== 'error'"
-					:loading="saveStatus === 'saving'"
-					@click="$emit('save')"
-				>
-					שמור
-				</BaseButton>
 			</div>
 		</div>
 	</header>

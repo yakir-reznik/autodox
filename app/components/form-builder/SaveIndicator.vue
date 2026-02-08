@@ -21,7 +21,7 @@
 	<div class="flex items-center gap-2 text-sm">
 		<!-- Idle: Show last saved time if available -->
 		<template v-if="status === 'idle' && formattedTime">
-			<span class="text-gray-400">Saved at {{ formattedTime }}</span>
+			<span class="text-gray-400">נשמר ב {{ formattedTime }}</span>
 		</template>
 
 		<!-- Pending: Show typing indicator -->
