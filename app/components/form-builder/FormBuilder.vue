@@ -181,7 +181,7 @@
 	const conditionModalElementId = ref<string | null>(null);
 	const conditionModalElement = computed(() =>
 		conditionModalElementId.value
-			? state.elements.find((el) => el.clientId === conditionModalElementId.value) ?? null
+			? (state.elements.find((el) => el.clientId === conditionModalElementId.value) ?? null)
 			: null,
 	);
 
@@ -211,7 +211,7 @@
 	<div v-if="isLoading" class="flex min-h-screen items-center justify-center bg-gray-100">
 		<div class="text-center">
 			<Icon name="svg-spinners:ring-resize" class="mx-auto h-8 w-8 text-blue-500" />
-			<p class="mt-4 text-gray-600">Loading form...</p>
+			<p class="mt-4 text-gray-600">טוען טופס...</p>
 		</div>
 	</div>
 
@@ -268,7 +268,11 @@
 			</aside>
 
 			<!-- Canvas (Center) -->
-			<main ref="canvasRef" class="flex-1 overflow-y-auto p-6" @click.self="handleCanvasClick">
+			<main
+				ref="canvasRef"
+				class="flex-1 overflow-y-auto p-6"
+				@click.self="handleCanvasClick"
+			>
 				<FormBuilderFormCanvas
 					:elements="rootElements"
 					:selected-id="state.selectedElementId"

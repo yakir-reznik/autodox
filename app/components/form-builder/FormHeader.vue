@@ -179,23 +179,19 @@
 
 				<div class="h-6 w-px bg-gray-300" />
 
-				<BaseButton
-					variant="secondary"
-					size="sm"
-					title="הגדרות טופס"
-					@click="showSettingsModal = true"
-				>
+				<UiButton variant="secondary" title="הגדרות טופס" @click="showSettingsModal = true">
+					<span>הגדרות טופס</span>
 					<Icon name="heroicons:cog-6-tooth" class="h-4 w-4" />
-				</BaseButton>
+				</UiButton>
 
 				<NuxtLink
 					:to="`/forms/upload?formId=${formId}`"
 					title="Upload JSON to replace form structure"
 				>
-					<BaseButton variant="secondary" size="sm">
+					<UiButton variant="secondary" size="sm">
+						<span>ייבוא JSON</span>
 						<Icon name="heroicons:arrow-up-tray" class="h-4 w-4" />
-						Import JSON
-					</BaseButton>
+					</UiButton>
 				</NuxtLink>
 
 				<BaseButton
