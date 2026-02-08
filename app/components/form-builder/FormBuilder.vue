@@ -231,8 +231,6 @@
 		<FormBuilderFormHeader
 			v-model:title="state.title"
 			v-model:description="state.description"
-			v-model:status="state.status"
-			v-model:theme="state.theme"
 			:save-status="status"
 			:last-saved-at="state.lastSavedAt"
 			:is-dirty="state.isDirty"
@@ -242,6 +240,8 @@
 			@save="forceSave"
 			@undo="undo"
 			@redo="redo"
+			@update:status="state.status = $event"
+			@update:theme="state.theme = $event"
 		/>
 
 		<!-- Main content -->

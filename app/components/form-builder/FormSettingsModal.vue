@@ -1,4 +1,7 @@
 <script setup lang="ts">
+	import type { FormStatus, FormTheme } from "~/types/form-builder";
+	import { getThemeOptionsForSelect } from "~/composables/useThemes";
+
 	interface Props {
 		modelValue: boolean;
 		formId: number;
@@ -8,6 +11,7 @@
 
 	const emit = defineEmits<{
 		"update:modelValue": [value: boolean];
+		saved: [payload: { status: FormStatus; theme: FormTheme }];
 	}>();
 
 	const isOpen = computed({
@@ -20,12 +24,22 @@
 	const isSaving = ref(false);
 	const error = ref<string | null>(null);
 
+	const status = ref<FormStatus>("draft");
+	const theme = ref<FormTheme>("default");
 	const passwordEnabled = ref(false);
 	const password = ref("");
 	const passwordError = ref<string | null>(null);
 	const allowPublicSubmissions = ref(true);
 	const webhookUrl = ref("");
 	const webhookIncludePdf = ref(false);
+
+	const statusOptions: { value: FormStatus; label: string }[] = [
+		{ value: "draft", label: "טיוטה" },
+		{ value: "published", label: "פורסם" },
+		{ value: "archived", label: "בארכיון" },
+	];
+
+	const themeOptions = getThemeOptionsForSelect();
 
 	// Fetch settings when modal opens
 	watch(
@@ -46,12 +60,16 @@
 			const data = await $fetch<{
 				id: number;
 				title: string;
+				status: FormStatus;
+				theme: FormTheme;
 				password: string | null;
 				allowPublicSubmissions: boolean;
 				webhookUrl: string | null;
 				webhookIncludePdf: boolean;
 			}>(`/api/forms/${props.formId}/settings`);
 
+			status.value = data.status ?? "draft";
+			theme.value = data.theme ?? "default";
 			passwordEnabled.value = !!data.password;
 			password.value = data.password ?? "";
 			allowPublicSubmissions.value = data.allowPublicSubmissions ?? true;
@@ -101,6 +119,8 @@
 			await $fetch(`/api/forms/${props.formId}`, {
 				method: "PATCH",
 				body: {
+					status: status.value,
+					theme: theme.value,
 					password: passwordEnabled.value ? password.value : null,
 					allowPublicSubmissions: allowPublicSubmissions.value,
 					webhookUrl: webhookUrl.value.trim() || null,
@@ -108,6 +128,7 @@
 				},
 			});
 
+			emit("saved", { status: status.value, theme: theme.value });
 			isOpen.value = false;
 		} catch (e: any) {
 			error.value = e.data?.message || "Failed to save settings";
@@ -135,6 +156,57 @@
 
 		<!-- Settings form -->
 		<div v-else class="space-y-6">
+			<!-- Status & Theme section -->
+			<div class="space-y-4">
+				<div>
+					<h3 class="text-sm font-medium text-gray-900">סטטוס וערכת נושא</h3>
+					<p class="text-sm text-gray-500 mt-1">הגדר את סטטוס הטופס ואת המראה שלו</p>
+				</div>
+
+				<div class="grid grid-cols-2 gap-4">
+					<div class="flex flex-col gap-1">
+						<label for="settings-status" class="text-xs font-medium text-gray-600">
+							סטטוס
+						</label>
+						<select
+							id="settings-status"
+							v-model="status"
+							class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+						>
+							<option
+								v-for="option in statusOptions"
+								:key="option.value"
+								:value="option.value"
+							>
+								{{ option.label }}
+							</option>
+						</select>
+					</div>
+
+					<div class="flex flex-col gap-1">
+						<label for="settings-theme" class="text-xs font-medium text-gray-600">
+							ערכת נושא
+						</label>
+						<select
+							id="settings-theme"
+							v-model="theme"
+							class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+						>
+							<option
+								v-for="option in themeOptions"
+								:key="option.value"
+								:value="option.value"
+							>
+								{{ option.label }}
+							</option>
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<!-- Divider -->
+			<div class="border-t border-gray-200"></div>
+
 			<!-- Form access section -->
 			<div class="space-y-4">
 				<div>

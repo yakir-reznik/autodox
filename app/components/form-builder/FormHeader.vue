@@ -1,12 +1,9 @@
 <script setup lang="ts">
 	import type { SaveStatus, FormStatus, FormTheme } from "~/types/form-builder";
-	import { getThemeOptionsForSelect } from "~/composables/useThemes";
 
 	interface Props {
 		title: string;
 		description: string;
-		status: FormStatus;
-		theme: FormTheme;
 		saveStatus: SaveStatus;
 		lastSavedAt: Date | null;
 		isDirty: boolean;
@@ -53,32 +50,14 @@
 		set: (value) => emit("update:description", value),
 	});
 
-	const statusOptions: { value: FormStatus; label: string }[] = [
-		{ value: "draft", label: "טיוטה" },
-		{ value: "published", label: "פורסם" },
-		{ value: "archived", label: "בארכיון" },
-	];
-
-	const themeOptions = getThemeOptionsForSelect();
-
-	function handleStatusChange(event: Event) {
-		const target = event.target as HTMLSelectElement;
-		emit("update:status", target.value as FormStatus);
-	}
-
-	function handleThemeChange(event: Event) {
-		const target = event.target as HTMLSelectElement;
-		emit("update:theme", target.value as FormTheme);
-	}
-
 	function goBack() {
 		router.push("/forms");
 	}
 
-	// Debug
-	watchEffect(() => {
-		console.log("FormHeader - isDirty:", props.isDirty, "saveStatus:", props.saveStatus);
-	});
+	function handleSettingsSaved(payload: { status: FormStatus; theme: FormTheme }) {
+		emit("update:status", payload.status);
+		emit("update:theme", payload.theme);
+	}
 </script>
 
 <template>
@@ -111,48 +90,8 @@
 				</div>
 			</div>
 
-			<!-- Status selector, theme selector, save status and button -->
+			<!-- Save status, undo/redo, and actions -->
 			<div class="flex items-center gap-4">
-				<div class="flex flex-col gap-1">
-					<label for="status-select" class="text-xs font-medium text-gray-600">
-						סטטוס
-					</label>
-					<select
-						id="status-select"
-						:value="status"
-						class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-						@change="handleStatusChange"
-					>
-						<option
-							v-for="option in statusOptions"
-							:key="option.value"
-							:value="option.value"
-						>
-							{{ option.label }}
-						</option>
-					</select>
-				</div>
-
-				<div class="flex flex-col gap-1">
-					<label for="theme-select" class="text-xs font-medium text-gray-600">
-						ערכת נושא
-					</label>
-					<select
-						id="theme-select"
-						:value="theme"
-						class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-						@change="handleThemeChange"
-					>
-						<option
-							v-for="option in themeOptions"
-							:key="option.value"
-							:value="option.value"
-						>
-							{{ option.label }}
-						</option>
-					</select>
-				</div>
-
 				<FormBuilderSaveIndicator :status="saveStatus" :last-saved-at="lastSavedAt" />
 
 				<!-- Undo/Redo buttons -->
@@ -207,5 +146,10 @@
 	</header>
 
 	<!-- Settings Modal -->
-	<FormBuilderFormSettingsModal v-if="formId" v-model="showSettingsModal" :form-id="formId" />
+	<FormBuilderFormSettingsModal
+		v-if="formId"
+		v-model="showSettingsModal"
+		:form-id="formId"
+		@saved="handleSettingsSaved"
+	/>
 </template>
