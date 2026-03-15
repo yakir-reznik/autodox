@@ -118,16 +118,22 @@ export default defineEventHandler(async (event) => {
 
 	// Update form metadata if provided
 	if (body.title) {
-		await db.update(formsTable).set({
-			title: body.title.trim(),
-			description: body.description?.trim() || null,
-		}).where(eq(formsTable.id, formId));
+		await db
+			.update(formsTable)
+			.set({
+				title: body.title.trim(),
+				description: body.description?.trim() || null,
+			})
+			.where(eq(formsTable.id, formId));
 	}
 
 	// Soft delete all existing elements
-	await db.update(formElementsTable).set({
-		isDeleted: true,
-	}).where(eq(formElementsTable.formId, formId));
+	await db
+		.update(formElementsTable)
+		.set({
+			isDeleted: true,
+		})
+		.where(eq(formElementsTable.formId, formId));
 
 	// Track name counts for generating unique names
 	const nameCounts: Record<string, number> = {};
@@ -175,11 +181,13 @@ export default defineEventHandler(async (event) => {
 
 		// Selection fields (dropdown, radio, checkboxes)
 		if (["dropdown", "radio", "checkboxes"].includes(type)) {
-			const options: SelectionOption[] = (el.options || ["Option 1", "Option 2"]).map((opt, i) => ({
-				id: `opt${i + 1}`,
-				label: opt,
-				value: opt.toLowerCase().replace(/\s+/g, "_"),
-			}));
+			const options: SelectionOption[] = (el.options || ["Option 1", "Option 2"]).map(
+				(opt, i) => ({
+					id: `opt${i + 1}`,
+					label: opt,
+					value: opt.toLowerCase().replace(/\s+/g, "_"),
+				}),
+			);
 
 			return {
 				label: el.label || getDefaultLabel(type),
@@ -203,7 +211,7 @@ export default defineEventHandler(async (event) => {
 		if (type === "signature") {
 			return {
 				label: el.label || "Signature",
-				helpText: el.helpText || "Draw your signature",
+				helpText: el.helpText || "נא לחתום במלבן מטה",
 				maxWidth: 400,
 				maxHeight: 200,
 				validation: { required: el.required ?? false },
@@ -286,7 +294,10 @@ export default defineEventHandler(async (event) => {
 	// Insert elements with positions
 	let position = 0;
 
-	async function insertElements(elements: UploadElement[], parentId: number | null = null): Promise<void> {
+	async function insertElements(
+		elements: UploadElement[],
+		parentId: number | null = null,
+	): Promise<void> {
 		for (const el of elements) {
 			position += 10;
 			const type = el.type as ElementType;
