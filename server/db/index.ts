@@ -7,13 +7,7 @@ export function getDb() {
 	if (!_db) {
 		const config = useRuntimeConfig();
 		_db = drizzle({
-			connection: {
-				host: "localhost",
-				port: 3306,
-				user: "root",
-				password: "e18e18",
-				database: "autodox",
-			},
+			connection: config.databaseUrl,
 			schema,
 			mode: "default",
 		});
