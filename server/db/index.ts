@@ -6,11 +6,19 @@ let _db: MySql2Database<typeof schema> | null = null;
 export function getDb() {
 	if (!_db) {
 		const config = useRuntimeConfig();
-		_db = drizzle(config.databaseUrl, {
+		_db = drizzle({
+			connection: {
+				host: "localhost",
+				port: 3306,
+				user: "root",
+				password: "e18e18",
+				database: "autodox",
+			},
 			schema,
-			mode: "default"
+			mode: "default",
 		});
 	}
+
 	return _db;
 }
 
@@ -18,5 +26,5 @@ export function getDb() {
 export const db = new Proxy({} as MySql2Database<typeof schema>, {
 	get(_, prop) {
 		return (getDb() as any)[prop];
-	}
+	},
 });

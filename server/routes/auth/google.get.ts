@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { usersTable } from "~~/server/db/schema";
 import { db } from "~~/server/db";
 
+
 export default defineOAuthGoogleEventHandler({
 	config: {
 		scope: ["email", "profile"],
@@ -27,12 +28,14 @@ export default defineOAuthGoogleEventHandler({
 		let dbUser = existingUsers[0];
 
 		if (!dbUser) {
-			// Create new user with googleId
+			// Create new user with googleId and API key
+			const apiKey = generateApiKey();
 			const result = await db.insert(usersTable).values({
 				email,
 				name,
 				role: "admin",
 				googleId: user.sub,
+				apiKey,
 			});
 
 			const newUsers = await db

@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { usersTable } from "~~/server/db/schema";
 import { db } from "~~/server/db";
-import { randomBytes } from "crypto";
+
 
 export default defineEventHandler(async (event) => {
 	const session = await getUserSession(event);
@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
 		throw createError({ statusCode: 401, message: "Authentication required" });
 	}
 
-	const newApiKey = randomBytes(32).toString("hex");
+	const newApiKey = generateApiKey();
 
 	await db
 		.update(usersTable)

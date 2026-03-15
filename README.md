@@ -4,6 +4,8 @@
 brew services start mysql
 ```
 
+> **Note:** MAMP is also running a MySQL server on port 3306. If you get MySQL connection errors, stop MAMP first (`/Applications/MAMP/bin/stop.sh` or via the MAMP app) to free up the port.
+
 ## How to connect to the mysql database via the terminal
 
 ```bash

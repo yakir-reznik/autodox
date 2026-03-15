@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	const { clear } = useUserSession();
+	const { clear, fetch: fetchSession } = useUserSession();
 	const router = useRouter();
 	const toasts = useToasts();
 
@@ -107,7 +107,7 @@
 		try {
 			await $fetch("/api/user/reroll-api-key", { method: "POST" });
 			showRerollModal.value = false;
-			await refresh();
+			await Promise.all([refresh(), fetchSession()]);
 			toasts.add({ title: "מפתח API חודש בהצלחה", theme: "success" });
 		} catch {
 			toasts.add({ title: "שגיאה בחידוש מפתח API", theme: "error" });

@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { usersTable } from "~~/server/db/schema";
 import { db } from "~~/server/db";
 
+
 export default defineEventHandler(async (event) => {
 	const body = await readBody(event);
 	const { name, email, password } = body;
@@ -37,6 +38,9 @@ export default defineEventHandler(async (event) => {
 	// Hash password
 	const hashedPassword = await hashPassword(password);
 
+	// Generate API key
+	const apiKey = generateApiKey();
+
 	// Create user
 	const [newUser] = await db
 		.insert(usersTable)
@@ -45,6 +49,7 @@ export default defineEventHandler(async (event) => {
 			email,
 			password: hashedPassword,
 			role: "admin",
+			apiKey,
 		})
 		.$returningId();
 
@@ -62,7 +67,7 @@ export default defineEventHandler(async (event) => {
 			email,
 			name,
 			role: "admin",
-			apiKey: "",
+			apiKey,
 		},
 	});
 

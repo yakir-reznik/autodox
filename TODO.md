@@ -1,9 +1,23 @@
 ## Bugs
 
 - [ ] Signature fields inside repeater don't export in pdf
+- [ ] When duplicating a required field it shows the duplicated field with a red asterisk but it is not required.
+- [ ] No selection visible on repeater fields in FormBuilder
+- [ ] Field name appears twice for repeater field in properties in FormBuilder
+- [ ] Dragging elements into repeater is kind of hard
+- [ ] What the hell happens when repeater field is marked is required?
+- [ ] "Allow other/another option" in checkbox list doesn't work - when adding new option auto check it
+- [ ] Cannot put links in paragraph element. The links appear on the fill page, but they are not clickable
+- [x] When creating a new user we need to generate an API key for them. after re-rolling key we need to hard reload or include new key in session data
 
 ## Features
 
+- [ ] Add link to print view on submission page (the view puppeteer uses)
+- [ ] On date fails, allow setting default value of relative dates such as: today yesterday last week next week etc.
+- [ ] Long checkbox list - allow setting to show in columns
+- [ ] Display field value somewhere else in the form, like firstName from the top of the form at the bottom of the form next to the signature field.
+- [ ] We need a phone number input field
+- [ ] Add defineable initial values for all field types
 - [ ] Generate a QR code for submission link (generic or with token)
 - [ ] Users can only see their own forms and submissions, Admins can see every users forms
 - [ ] Calculated fields, Auto-sum, scores, pricing, percentages
@@ -36,9 +50,5 @@
 - [] We want the exported pdf to look as close the the digital for as possible
 - [x] We want a feature where i can define forms that are password protected - meaning when a user tries to enter a submission link they need to enter a password. i want to be able to pass a password in the create-submission-link endpoint. if a form is not password protected and a password is passed - make the single submission password protected.
 - [x] Create a feature where an admin user can paste a json structure of the form structure and the form will be created from the json. Basically admin users will upload an actual pdf to chatgpt and ask it to generate json output of the form structure. I want the admins to upload that output to our system to quick create forms. In the screen where the admins will do this you need to also write the required json structure so users can copy-paste it to chatgpt.
-- [x] When i try to fill a form without a token it fails and shows error when trying to submit. I want to have a  
-       setting in the FormSettingsModal that we can define if a form is accessible to everyone or only users with a  
-       link with a token. come up with a good way to pharse this to the users. If its allowed to submit without a  
-       token - generate a unique token on submission, I also want to track these kind of submissions somehow in the  
-       database. and in the submissions list view @app/components/form-builder/FormSettingsModal.vue  
+- [x] When i try to fill a form without a token it fails and shows error when trying to submit. I want to have a setting in the FormSettingsModal that we can define if a form is accessible to everyone or only users with a a link with a token. come up with a good way to pharse this to the users. If its allowed to submit without a token - generate a unique token on submission, I also want to track these kind of submissions somehow in the database. and in the submissions list view @app/components/form-builder/FormSettingsModal.vue  
        @app/pages/submissions/ @server/api/submissions/ @app/pages/fill/

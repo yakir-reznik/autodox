@@ -11,7 +11,8 @@
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:sync": "drizzle-kit generate && drizzle-kit migrate",
-		"git:merge-dev": "git checkout master && git merge dev && git push && git checkout dev"
+		"git:merge-dev": "git checkout master && git merge dev && git push && git checkout dev",
+		"deploy:prod": "ssh admin@booking.botulina.co.il 'bash /var/www/autodox/scripts/deploy.sh'"
 	},
 	"dependencies": {
 		"@nuxt/fonts": "0.12.1",
