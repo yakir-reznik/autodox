@@ -18,8 +18,16 @@
 				pattern?: string;
 				rows?: number;
 				step?: number;
+				defaultValue?: string;
 			},
 	);
+
+	const isDateField = computed(() => ["date", "datetime"].includes(props.element.type));
+
+	const relativeDateOptions = [
+		{ value: "", label: "ללא" },
+		...Object.entries(relativeDateLabels).map(([value, label]) => ({ value, label })),
+	];
 </script>
 
 <template>
@@ -67,6 +75,20 @@
 				:model-value="config.step || 1"
 				@update:model-value="$emit('update:config', { step: Number($event) })"
 			/>
+		</div>
+
+		<!-- Relative date default (for date/datetime) -->
+		<div v-if="isDateField">
+			<label class="mb-1 block text-sm text-gray-600">ערך ברירת מחדל</label>
+			<select
+				:value="config.defaultValue || ''"
+				class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
+				@change="$emit('update:config', { defaultValue: ($event.target as HTMLSelectElement).value || undefined })"
+			>
+				<option v-for="opt in relativeDateOptions" :key="opt.value" :value="opt.value">
+					{{ opt.label }}
+				</option>
+			</select>
 		</div>
 	</div>
 </template>

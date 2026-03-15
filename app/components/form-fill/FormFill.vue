@@ -331,6 +331,27 @@
 		return isValid;
 	}
 
+	function validateSection(sectionClientId: string): boolean {
+		const children = getChildElements(sectionClientId);
+		let isValid = true;
+
+		for (const child of children) {
+			if (!isVisible(child.clientId)) continue;
+
+			if (isFieldElement(child.type)) {
+				if (!validateField(child.clientId)) {
+					isValid = false;
+				}
+			} else if (child.type === "repeater") {
+				if (!validateRepeater(child.clientId)) {
+					isValid = false;
+				}
+			}
+		}
+
+		return isValid;
+	}
+
 	// Validate all fields
 	function validateAll(): boolean {
 		let isValid = true;
@@ -351,6 +372,10 @@
 				}
 			} else if (element.type === "repeater") {
 				if (!validateRepeater(element.clientId)) {
+					isValid = false;
+				}
+			} else if (element.type === "section") {
+				if (!validateSection(element.clientId)) {
 					isValid = false;
 				}
 			}

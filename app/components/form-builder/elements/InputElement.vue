@@ -12,6 +12,7 @@ const config = computed(() => props.element.config as {
 	placeholder?: string;
 	helpText?: string;
 	pattern?: string;
+	defaultValue?: string;
 	validation?: { required?: boolean };
 });
 
@@ -55,6 +56,9 @@ const pattern = computed(() => {
 			disabled
 			class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500"
 		/>
+		<p v-if="config.defaultValue && ['date', 'datetime'].includes(element.type)" class="mt-1 text-xs text-blue-500">
+			ברירת מחדל: {{ relativeDateLabels[config.defaultValue as keyof typeof relativeDateLabels] || config.defaultValue }}
+		</p>
 		<p v-if="config.helpText" class="mt-1 text-xs text-gray-500">
 			{{ config.helpText }}
 		</p>

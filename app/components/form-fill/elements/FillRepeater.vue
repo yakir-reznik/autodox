@@ -19,6 +19,7 @@ interface Props {
 	error?: string;
 	formData: Record<string, any>;
 	errors: Record<string, string>;
+	readonly?: boolean;
 	getConditionRequired?: (clientId: string) => boolean;
 }
 
@@ -149,7 +150,7 @@ const itemStyle = computed(() => {
 						{{ config.itemName ? `${config.itemName} #${itemIndex + 1}` : `#${itemIndex + 1}` }}
 					</span>
 					<button
-						v-if="canRemove"
+						v-if="canRemove && !readonly"
 						type="button"
 						class="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
 						@click="removeItem(itemIndex)"
@@ -169,6 +170,7 @@ const itemStyle = computed(() => {
 						:error="getFieldError(itemIndex, child.clientId)"
 						:form-data="item"
 						:errors="errors"
+						:readonly="readonly"
 						:condition-required="getConditionRequired?.(child.clientId)"
 						:get-condition-required="getConditionRequired"
 						@update:model-value="updateItemField(itemIndex, child.clientId, $event)"
@@ -179,7 +181,7 @@ const itemStyle = computed(() => {
 
 		<!-- Add button -->
 		<button
-			v-if="canAdd"
+			v-if="canAdd && !readonly"
 			type="button"
 			class="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600"
 			@click="addItem"

@@ -1,7 +1,7 @@
 ## Bugs
 
-- [ ] Signature fields inside repeater don't export in pdf
 - [ ] Dragging elements into repeater is kind of hard
+- [x] Signature fields inside repeater don't export in pdf
 - [x] What the hell happens when repeater field is marked is required? - basically nothing - removed this prop from repeater fields
 - [x] Field name appears twice for repeater field in properties in FormBuilder
 - [x] "Allow other/another option" in checkbox list doesn't work - when adding new option auto check it
@@ -12,9 +12,9 @@
 
 ## Features
 
+- [x] Long checkbox list - allow setting to show in columns
+- [ ] Checkboxes list (SelectionElement) add feature where user can define min and max count of checkboxes form filler is allowed to select.
 - [ ] Add link to print view on submission page (the view puppeteer uses)
-- [ ] On date fails, allow setting default value of relative dates such as: today yesterday last week next week etc.
-- [ ] Long checkbox list - allow setting to show in columns
 - [ ] Display field value somewhere else in the form, like firstName from the top of the form at the bottom of the form next to the signature field.
 - [ ] We need a phone number input field
 - [ ] Add defineable initial values for all field types

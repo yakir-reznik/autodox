@@ -13,10 +13,16 @@ const config = computed(() => props.element.config as {
 	helpText?: string;
 	options?: SelectionOption[];
 	allowUserOption?: boolean;
+	columns?: { desktop?: number; tablet?: number; mobile?: number };
 	validation?: { required?: boolean };
 });
 
 const options = computed(() => config.value.options || []);
+
+const columnsStyle = computed(() => {
+	const d = config.value.columns?.desktop ?? 1;
+	return { 'grid-template-columns': `repeat(${d}, minmax(0, 1fr))` };
+});
 </script>
 
 <template>
@@ -42,7 +48,7 @@ const options = computed(() => config.value.options || []);
 
 		<!-- Radio buttons -->
 		<template v-else-if="element.type === 'radio'">
-			<div class="space-y-2">
+			<div class="grid gap-2" :style="columnsStyle">
 				<label
 					v-for="opt in options"
 					:key="opt.id"
@@ -77,7 +83,7 @@ const options = computed(() => config.value.options || []);
 
 		<!-- Multiple checkboxes -->
 		<template v-else-if="element.type === 'checkboxes'">
-			<div class="space-y-2">
+			<div class="grid gap-2" :style="columnsStyle">
 				<label
 					v-for="opt in options"
 					:key="opt.id"

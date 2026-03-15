@@ -21,8 +21,15 @@ const config = computed(() => props.element.config as {
 	helpText?: string;
 	options?: SelectionOption[];
 	allowUserOption?: boolean;
+	columns?: { desktop?: number; tablet?: number; mobile?: number };
 	validation?: { required?: boolean };
 });
+
+const columnsVars = computed(() => ({
+	'--cols-mobile': config.value.columns?.mobile ?? 1,
+	'--cols-tablet': config.value.columns?.tablet ?? 1,
+	'--cols-desktop': config.value.columns?.desktop ?? 1,
+}));
 
 const isRequired = computed(() => props.element.isRequired || config.value.validation?.required || props.conditionRequired);
 
@@ -123,7 +130,7 @@ function isChecked(optionValue: string): boolean {
 		</template>
 
 		<!-- Radio buttons -->
-		<div v-else-if="element.type === 'radio'" class="form-fill-radio-group">
+		<div v-else-if="element.type === 'radio'" class="form-fill-radio-group selection-columns" :style="columnsVars">
 			<label v-for="opt in config.options" :key="opt.id" class="form-fill-radio-option">
 				<input
 					type="radio"
@@ -171,7 +178,7 @@ function isChecked(optionValue: string): boolean {
 		</label>
 
 		<!-- Multiple checkboxes -->
-		<div v-else-if="element.type === 'checkboxes'" class="form-fill-checkbox-group">
+		<div v-else-if="element.type === 'checkboxes'" class="form-fill-checkbox-group selection-columns" :style="columnsVars">
 			<label v-for="opt in config.options" :key="opt.id" class="form-fill-checkbox-option">
 				<input
 					type="checkbox"
@@ -206,3 +213,25 @@ function isChecked(optionValue: string): boolean {
 		<p v-else-if="config.helpText" class="form-fill-help">{{ config.helpText }}</p>
 	</div>
 </template>
+
+<style scoped>
+.form-fill-radio-group.selection-columns,
+.form-fill-checkbox-group.selection-columns {
+	display: grid;
+	grid-template-columns: repeat(var(--cols-mobile, 1), minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+	.form-fill-radio-group.selection-columns,
+	.form-fill-checkbox-group.selection-columns {
+		grid-template-columns: repeat(var(--cols-tablet, 1), minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 1024px) {
+	.form-fill-radio-group.selection-columns,
+	.form-fill-checkbox-group.selection-columns {
+		grid-template-columns: repeat(var(--cols-desktop, 1), minmax(0, 1fr));
+	}
+}
+</style>
