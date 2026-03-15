@@ -73,7 +73,7 @@ log "✓ Build completed successfully"
 
 # 6. Restart PM2 app (with fallback for first deploy)
 log "Restarting application with PM2..."
-pm2 reload autodox --update-env || pm2 start ecosystem.config.cjs
+pm2 delete autodox 2>/dev/null; pm2 start ecosystem.config.cjs
 pm2 save
 log "✓ Application restarted"
 
