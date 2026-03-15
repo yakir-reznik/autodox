@@ -57,7 +57,7 @@ log "✓ Code updated successfully"
 
 # 3. Install dependencies (production only)
 log "Installing dependencies with npm..."
-npm install --omit=dev || error_exit "Failed to install dependencies"
+npm install || error_exit "Failed to install dependencies"
 log "✓ Dependencies installed"
 
 # 4. Run database migrations
