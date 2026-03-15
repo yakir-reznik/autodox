@@ -17,6 +17,7 @@
 	interface Props {
 		element: BuilderElement;
 		selected: boolean;
+		selectedId: string | null;
 		getChildren: (parentId: string) => BuilderElement[];
 	}
 
@@ -202,7 +203,8 @@
 					<template #item="{ element: child }">
 						<ElementWrapper
 							:element="child"
-							:selected="false"
+							:selected="child.clientId === selectedId"
+							:selected-id="selectedId"
 							:get-children="getChildren"
 							@select="(clientId) => $emit('select', clientId)"
 							@delete="(clientId) => $emit('delete', clientId)"

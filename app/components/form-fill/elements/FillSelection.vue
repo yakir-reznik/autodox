@@ -20,10 +20,45 @@ const config = computed(() => props.element.config as {
 	placeholder?: string;
 	helpText?: string;
 	options?: SelectionOption[];
+	allowUserOption?: boolean;
 	validation?: { required?: boolean };
 });
 
 const isRequired = computed(() => props.element.isRequired || config.value.validation?.required || props.conditionRequired);
+
+const OTHER_PREFIX = "__other__:";
+
+const isOtherSelected = computed(() => {
+	if (props.element.type === "checkboxes") {
+		return Array.isArray(props.modelValue) && props.modelValue.some(v => v.startsWith(OTHER_PREFIX));
+	}
+	return typeof props.modelValue === "string" && props.modelValue.startsWith(OTHER_PREFIX);
+});
+
+const otherText = computed(() => {
+	if (props.element.type === "checkboxes") {
+		if (!Array.isArray(props.modelValue)) return "";
+		const entry = props.modelValue.find(v => v.startsWith(OTHER_PREFIX));
+		return entry ? entry.slice(OTHER_PREFIX.length) : "";
+	}
+	return typeof props.modelValue === "string" && props.modelValue.startsWith(OTHER_PREFIX)
+		? props.modelValue.slice(OTHER_PREFIX.length)
+		: "";
+});
+
+function selectOther() {
+	emit("update:modelValue", OTHER_PREFIX);
+}
+
+function updateOtherText(text: string) {
+	if (props.element.type === "checkboxes") {
+		const current = Array.isArray(props.modelValue) ? props.modelValue.filter(v => !v.startsWith(OTHER_PREFIX)) : [];
+		current.push(OTHER_PREFIX + text);
+		emit("update:modelValue", current);
+	} else {
+		emit("update:modelValue", OTHER_PREFIX + text);
+	}
+}
 
 // Handle checkbox group changes
 function handleCheckboxChange(optionValue: string, checked: boolean) {
@@ -37,6 +72,14 @@ function handleCheckboxChange(optionValue: string, checked: boolean) {
 		if (index > -1) {
 			current.splice(index, 1);
 		}
+	}
+	emit("update:modelValue", current);
+}
+
+function handleOtherCheckbox(checked: boolean) {
+	const current = Array.isArray(props.modelValue) ? props.modelValue.filter(v => !v.startsWith(OTHER_PREFIX)) : [];
+	if (checked) {
+		current.push(OTHER_PREFIX);
 	}
 	emit("update:modelValue", current);
 }
@@ -55,18 +98,29 @@ function isChecked(optionValue: string): boolean {
 		</label>
 
 		<!-- Dropdown -->
-		<select
-			v-if="element.type === 'dropdown'"
-			:value="modelValue"
-			class="form-fill-select"
-			@change="emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
-			@blur="emit('blur')"
-		>
-			<option value="">{{ config.placeholder || 'Select...' }}</option>
-			<option v-for="opt in config.options" :key="opt.id" :value="opt.value">
-				{{ opt.label }}
-			</option>
-		</select>
+		<template v-if="element.type === 'dropdown'">
+			<select
+				:value="isOtherSelected ? '__other__' : modelValue"
+				class="form-fill-select"
+				@change="($event.target as HTMLSelectElement).value === '__other__' ? selectOther() : emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
+				@blur="emit('blur')"
+			>
+				<option value="">{{ config.placeholder || 'Select...' }}</option>
+				<option v-for="opt in config.options" :key="opt.id" :value="opt.value">
+					{{ opt.label }}
+				</option>
+				<option v-if="config.allowUserOption" value="__other__">אחר</option>
+			</select>
+			<input
+				v-if="config.allowUserOption && isOtherSelected"
+				type="text"
+				:value="otherText"
+				class="form-fill-input mt-2"
+				placeholder="פרט..."
+				@input="updateOtherText(($event.target as HTMLInputElement).value)"
+				@blur="emit('blur')"
+			/>
+		</template>
 
 		<!-- Radio buttons -->
 		<div v-else-if="element.type === 'radio'" class="form-fill-radio-group">
@@ -81,6 +135,25 @@ function isChecked(optionValue: string): boolean {
 				/>
 				<span>{{ opt.label }}</span>
 			</label>
+			<label v-if="config.allowUserOption" class="form-fill-radio-option">
+				<input
+					type="radio"
+					:name="element.clientId"
+					value="__other__"
+					:checked="isOtherSelected"
+					@change="selectOther()"
+				/>
+				<span>אחר</span>
+			</label>
+			<input
+				v-if="config.allowUserOption && isOtherSelected"
+				type="text"
+				:value="otherText"
+				class="form-fill-input mt-2"
+				placeholder="פרט..."
+				@input="updateOtherText(($event.target as HTMLInputElement).value)"
+				@blur="emit('blur')"
+			/>
 		</div>
 
 		<!-- Single checkbox -->
@@ -109,6 +182,24 @@ function isChecked(optionValue: string): boolean {
 				/>
 				<span>{{ opt.label }}</span>
 			</label>
+			<label v-if="config.allowUserOption" class="form-fill-checkbox-option">
+				<input
+					type="checkbox"
+					:checked="isOtherSelected"
+					@change="handleOtherCheckbox(($event.target as HTMLInputElement).checked)"
+					@blur="emit('blur')"
+				/>
+				<span>אחר</span>
+			</label>
+			<input
+				v-if="config.allowUserOption && isOtherSelected"
+				type="text"
+				:value="otherText"
+				class="form-fill-input mt-2"
+				placeholder="פרט..."
+				@input="updateOtherText(($event.target as HTMLInputElement).value)"
+				@blur="emit('blur')"
+			/>
 		</div>
 
 		<p v-if="error" class="form-fill-error">{{ error }}</p>

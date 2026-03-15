@@ -85,6 +85,7 @@
 				<FormBuilderElementsElementWrapper
 					:element="element"
 					:selected="element.clientId === selectedId"
+					:selected-id="selectedId"
 					:get-children="getChildren"
 					@select="(clientId) => $emit('select', clientId || element.clientId)"
 					@delete="(clientId) => $emit('delete', clientId || element.clientId)"

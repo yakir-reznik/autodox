@@ -240,7 +240,7 @@ export function useFormBuilder() {
 			parentId: element.parentId,
 			name: elementName,
 			config: JSON.parse(JSON.stringify(element.config)),
-			isRequired: false,
+			isRequired: element.isRequired,
 			conditions: element.conditions
 				? JSON.parse(JSON.stringify(element.conditions))
 				: null,

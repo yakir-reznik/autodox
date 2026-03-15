@@ -27,7 +27,5 @@ const alignClass = computed(() => {
 </script>
 
 <template>
-	<p class="text-gray-600" :class="alignClass">
-		{{ config.text || 'Enter your text here...' }}
-	</p>
+	<p class="text-gray-600" :class="alignClass" v-html="linkifyText(config.text || 'Enter your text here...')" />
 </template>

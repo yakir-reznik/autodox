@@ -1,35 +1,35 @@
 <script setup lang="ts">
-import type { BuilderElement } from "~/types/form-builder";
+	import type { BuilderElement } from "~/types/form-builder";
 
-interface Props {
-	element: BuilderElement;
-}
-
-const props = defineProps<Props>();
-
-const config = computed(() => props.element.config as {
-	collapsible?: boolean;
-	defaultCollapsed?: boolean;
-	bordered?: boolean;
-	backgroundColor?: string;
-});
-
-const isCollapsed = ref(config.value.defaultCollapsed || false);
-
-function toggleCollapse() {
-	if (config.value.collapsible) {
-		isCollapsed.value = !isCollapsed.value;
+	interface Props {
+		element: BuilderElement;
 	}
-}
 
-// Note: backgroundColor is applied by ElementWrapper for section elements
+	const props = defineProps<Props>();
+
+	const config = computed(
+		() =>
+			props.element.config as {
+				collapsible?: boolean;
+				defaultCollapsed?: boolean;
+				bordered?: boolean;
+				backgroundColor?: string;
+			},
+	);
+
+	const isCollapsed = ref(config.value.defaultCollapsed || false);
+
+	function toggleCollapse() {
+		if (config.value.collapsible) {
+			isCollapsed.value = !isCollapsed.value;
+		}
+	}
+
+	// Note: backgroundColor is applied by ElementWrapper for section elements
 </script>
 
 <template>
-	<div
-		class="rounded-lg"
-		:class="{ 'border border-gray-200': config.bordered }"
-	>
+	<div class="rounded-lg">
 		<!-- Collapse toggle -->
 		<div
 			v-if="config.collapsible"
@@ -46,7 +46,7 @@ function toggleCollapse() {
 		</div>
 
 		<!-- Section content placeholder -->
-		<div v-show="!isCollapsed" class="px-4 pb-4">
+		<div v-show="!isCollapsed" class="px-4">
 			<slot />
 		</div>
 	</div>

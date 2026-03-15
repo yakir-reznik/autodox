@@ -16,7 +16,7 @@
 			props.element.config as {
 				placeholder?: string;
 				options?: SelectionOption[];
-				allowOther?: boolean;
+				allowUserOption?: boolean;
 			},
 	);
 
@@ -46,8 +46,8 @@
 
 		<!-- Allow other -->
 		<BaseToggle
-			:model-value="config.allowOther || false"
-			@update:model-value="$emit('update:config', { allowOther: $event })"
+			:model-value="config.allowUserOption || false"
+			@update:model-value="$emit('update:config', { allowUserOption: $event })"
 		>
 			Allow "Other" option
 		</BaseToggle>

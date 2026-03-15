@@ -12,6 +12,7 @@ const config = computed(() => props.element.config as {
 	placeholder?: string;
 	helpText?: string;
 	options?: SelectionOption[];
+	allowUserOption?: boolean;
 	validation?: { required?: boolean };
 });
 
@@ -35,6 +36,7 @@ const options = computed(() => config.value.options || []);
 				<option v-for="opt in options" :key="opt.id" :value="opt.value">
 					{{ opt.label }}
 				</option>
+				<option v-if="config.allowUserOption" value="__other__">אחר</option>
 			</select>
 		</template>
 
@@ -53,6 +55,10 @@ const options = computed(() => config.value.options || []);
 						class="h-4 w-4 border-gray-300 text-blue-600"
 					/>
 					<span class="text-sm text-gray-600">{{ opt.label }}</span>
+				</label>
+				<label v-if="config.allowUserOption" class="flex items-center gap-2">
+					<input type="radio" :name="element.clientId" disabled class="h-4 w-4 border-gray-300 text-blue-600" />
+					<span class="text-sm text-gray-600">אחר</span>
 				</label>
 			</div>
 		</template>
@@ -83,6 +89,10 @@ const options = computed(() => config.value.options || []);
 						class="h-4 w-4 rounded border-gray-300 text-blue-600"
 					/>
 					<span class="text-sm text-gray-600">{{ opt.label }}</span>
+				</label>
+				<label v-if="config.allowUserOption" class="flex items-center gap-2">
+					<input type="checkbox" disabled class="h-4 w-4 rounded border-gray-300 text-blue-600" />
+					<span class="text-sm text-gray-600">אחר</span>
 				</label>
 			</div>
 		</template>

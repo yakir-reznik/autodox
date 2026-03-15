@@ -20,7 +20,6 @@
 
 	const emit = defineEmits<{
 		"update:config": [config: Partial<RepeaterConfig>];
-		"update:name": [name: string];
 	}>();
 
 	const config = computed(() => props.element.config as RepeaterConfig);
@@ -55,27 +54,6 @@
 <template>
 	<div class="space-y-4">
 		<h3 class="text-sm font-medium text-gray-700">הגדרות חזרה</h3>
-
-		<!-- Field name -->
-		<div>
-			<label class="mb-1 block text-sm text-gray-600">שם שדה</label>
-			<BaseInput
-				:model-value="element.name || ''"
-				placeholder="e.g., contacts"
-				@update:model-value="emit('update:name', String($event))"
-			/>
-			<p class="mt-1 text-xs text-gray-500">שם זה ישמש לזיהוי הנתונים בהגשות</p>
-		</div>
-
-		<!-- Label -->
-		<div>
-			<label class="mb-1 block text-sm text-gray-600">תווית</label>
-			<BaseInput
-				:model-value="config.label || ''"
-				placeholder="שדה חזרה"
-				@update:model-value="emit('update:config', { label: String($event) })"
-			/>
-		</div>
 
 		<!-- Item name -->
 		<div>

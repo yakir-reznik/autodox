@@ -18,7 +18,5 @@ const alignmentStyle = computed(() => ({
 </script>
 
 <template>
-	<p class="form-fill-paragraph" :style="alignmentStyle">
-		{{ config.text }}
-	</p>
+	<p class="form-fill-paragraph" :style="alignmentStyle" v-html="linkifyText(config.text || '')" />
 </template>

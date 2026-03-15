@@ -1,13 +1,13 @@
 ## Bugs
 
 - [ ] Signature fields inside repeater don't export in pdf
-- [ ] When duplicating a required field it shows the duplicated field with a red asterisk but it is not required.
-- [ ] No selection visible on repeater fields in FormBuilder
-- [ ] Field name appears twice for repeater field in properties in FormBuilder
 - [ ] Dragging elements into repeater is kind of hard
-- [ ] What the hell happens when repeater field is marked is required?
-- [ ] "Allow other/another option" in checkbox list doesn't work - when adding new option auto check it
-- [ ] Cannot put links in paragraph element. The links appear on the fill page, but they are not clickable
+- [x] What the hell happens when repeater field is marked is required? - basically nothing - removed this prop from repeater fields
+- [x] Field name appears twice for repeater field in properties in FormBuilder
+- [x] "Allow other/another option" in checkbox list doesn't work - when adding new option auto check it
+- [x] Cannot put links in paragraph element. The links appear on the fill page, but they are not clickable
+- [x] When duplicating a required field it shows the duplicated field with a red asterisk but it is not required.
+- [x] No selection visible on repeater fields in FormBuilder
 - [x] When creating a new user we need to generate an API key for them. after re-rolling key we need to hard reload or include new key in session data
 
 ## Features
