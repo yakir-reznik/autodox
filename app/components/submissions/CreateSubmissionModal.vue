@@ -112,8 +112,22 @@
 			);
 
 			for (const field of fields.value) {
+				const dv = (field.config as any)?.defaultValue;
 				if (field.type === "checkboxes") {
-					prefillData.value[field.name!] = [];
+					if (dv) {
+						try { prefillData.value[field.name!] = JSON.parse(dv); } catch { prefillData.value[field.name!] = []; }
+					} else {
+						prefillData.value[field.name!] = [];
+					}
+				} else if (field.type === "checkbox") {
+					if (dv === true) prefillData.value[field.name!] = true;
+				} else if (["date", "datetime", "time"].includes(field.type) && dv) {
+					const resolved = resolveDateTimeDefault(dv, field.type as "date" | "datetime" | "time");
+					if (resolved) prefillData.value[field.name!] = resolved;
+				} else if (field.type === "number" && dv) {
+					prefillData.value[field.name!] = Number(dv);
+				} else if (dv) {
+					prefillData.value[field.name!] = dv;
 				}
 			}
 
