@@ -31,6 +31,8 @@ const inputType = computed(() => {
 			return "email";
 		case "number":
 			return "number";
+		case "phone":
+			return "tel";
 		case "date":
 			return "date";
 		case "time":
@@ -44,10 +46,38 @@ const inputType = computed(() => {
 
 const isRequired = computed(() => props.element.isRequired || config.value.validation?.required || props.conditionRequired);
 
+function sanitizePhone(raw: string): string {
+	let result = "";
+	for (let i = 0; i < raw.length; i++) {
+		const ch = raw[i]!;
+		if (ch >= "0" && ch <= "9") {
+			result += ch;
+		} else if (ch === "+" && result === "") {
+			result += ch;
+		}
+		// spaces, dashes, dots, and other chars are silently ignored
+	}
+	return result;
+}
+
 function handleInput(event: Event) {
 	const target = event.target as HTMLInputElement;
+	if (props.element.type === "phone") {
+		const sanitized = sanitizePhone(target.value);
+		target.value = sanitized;
+		emit("update:modelValue", sanitized);
+		return;
+	}
 	const value = props.element.type === "number" ? parseFloat(target.value) || 0 : target.value;
 	emit("update:modelValue", value);
+}
+
+function handlePhoneBlur(event: Event) {
+	const target = event.target as HTMLInputElement;
+	const sanitized = sanitizePhone(target.value);
+	target.value = sanitized;
+	emit("update:modelValue", sanitized);
+	emit("blur");
 }
 </script>
 
@@ -62,9 +92,10 @@ function handleInput(event: Event) {
 			:value="modelValue"
 			:placeholder="config.placeholder"
 			:step="config.step"
+			:dir="element.type === 'phone' ? 'ltr' : undefined"
 			class="form-fill-input"
 			@input="handleInput"
-			@blur="emit('blur')"
+			@blur="element.type === 'phone' ? handlePhoneBlur($event) : emit('blur')"
 		/>
 		<p v-if="error" class="form-fill-error">{{ error }}</p>
 		<p v-else-if="config.helpText" class="form-fill-help">{{ config.helpText }}</p>

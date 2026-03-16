@@ -12,9 +12,9 @@
 
 ## Features
 
-- [ ] Add defineable initial values for all field types
-- [ ] We need a phone number input field
-- [ ] Add link to print view on submission page (the view puppeteer uses)
+- [x] Add defineable initial values for all field types
+- [x] We need a phone number input field
+- [x] Add link to print view on submission page (the view puppeteer uses)
 - [ ] Checkboxes list (SelectionElement) add feature where user can define min and max count of checkboxes form filler is allowed to select.
 - [ ] Display field value somewhere else in the form, like firstName from the top of the form at the bottom of the form next to the signature field.
 - [x] Long checkbox list - allow setting to show in columns

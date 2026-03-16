@@ -21,6 +21,7 @@ const elementTypeName = computed(() => {
 		text: "Text Field",
 		email: "Email Field",
 		number: "Number Field",
+		phone: "Phone Field",
 		textarea: "Text Area",
 		date: "Date Picker",
 		time: "Time Picker",
@@ -91,7 +92,7 @@ function updateRequired(isRequired: boolean) {
 
 			<!-- Input-specific properties -->
 			<FormBuilderPropertiesInputProperties
-				v-if="['text', 'email', 'number', 'textarea', 'date', 'time', 'datetime'].includes(element.type)"
+				v-if="['text', 'email', 'number', 'phone', 'textarea', 'date', 'time', 'datetime'].includes(element.type)"
 				:element="element"
 				@update:config="updateConfig"
 			/>

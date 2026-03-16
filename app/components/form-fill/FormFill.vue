@@ -200,7 +200,7 @@
 					const arr = JSON.parse(dv) as string[];
 					if (arr.length) formData[element.clientId] = arr;
 				} catch {}
-			} else if (["dropdown", "radio", "text", "email", "textarea"].includes(type)) {
+			} else if (["dropdown", "radio", "text", "email", "phone", "textarea"].includes(type)) {
 				formData[element.clientId] = dv;
 			}
 		}

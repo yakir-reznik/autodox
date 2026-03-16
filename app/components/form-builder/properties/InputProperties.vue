@@ -155,8 +155,8 @@
 			/>
 		</div>
 
-		<!-- Default value for text/email -->
-		<div v-if="['text', 'email'].includes(element.type)">
+		<!-- Default value for text/email/phone -->
+		<div v-if="['text', 'email', 'phone'].includes(element.type)">
 			<label class="mb-1 block text-sm text-gray-600">ערך ברירת מחדל</label>
 			<BaseInput
 				:model-value="config.defaultValue || ''"

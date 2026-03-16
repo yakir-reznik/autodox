@@ -319,6 +319,19 @@
 										Details
 									</UiButton>
 								</NuxtLink>
+								<NuxtLink
+									:to="`/print/${submission.token}`"
+									target="_blank"
+								>
+									<BaseButton
+										variant="secondary"
+										size="sm"
+										title="תצוגת הדפסה"
+									>
+										<Icon name="heroicons:printer" class="h-4 w-4" />
+										תצוגת הדפסה
+									</BaseButton>
+								</NuxtLink>
 								<BaseButton
 									variant="secondary"
 									size="sm"

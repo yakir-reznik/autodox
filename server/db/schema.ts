@@ -50,6 +50,7 @@ export const elementTypeEnum = [
 	"text",
 	"email",
 	"number",
+	"phone",
 	"textarea",
 	"date",
 	"time",

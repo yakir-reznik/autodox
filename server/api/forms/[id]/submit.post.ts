@@ -111,6 +111,7 @@ export default defineEventHandler(async (event) => {
 		expiresAt: now,
 		status: "locked",
 		submissionData,
+		createdAt: now,
 		submittedAt: now,
 		lockedAt: now,
 		webhookUrl: webhookUrl as string | null,

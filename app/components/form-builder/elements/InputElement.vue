@@ -22,6 +22,8 @@ const inputType = computed(() => {
 			return "email";
 		case "number":
 			return "number";
+		case "phone":
+			return "tel";
 		case "date":
 			return "date";
 		case "time":
@@ -87,6 +89,7 @@ const defaultValueHint = computed(() => {
 			:type="inputType"
 			:placeholder="config.placeholder"
 			:pattern="pattern"
+			:dir="element.type === 'phone' ? 'ltr' : undefined"
 			disabled
 			class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500"
 		/>

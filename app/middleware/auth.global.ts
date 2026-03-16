@@ -24,19 +24,16 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 		return;
 	}
 
-	// Puppeteer routes are accessible with valid secret header (during SSR)
-	// On client-side (after hydration), allow if we're on a puppeteer route since SSR already validated
+	// Puppeteer routes: allow with valid secret header (server-side only)
+	// Browser users fall through to normal auth checks (must be logged-in admin)
 	if (isPuppeteerPageRoute(to.path)) {
 		const event = useRequestEvent();
-		// Client-side: no request event, but if we got here the server already validated during SSR
-		if (!event) {
-			return;
-		}
-		// Server-side: validate the puppeteer secret header
-		const puppeteerSecret = event.node?.req?.headers?.["x-puppeteer-secret"];
-		const expectedSecret = process.env.PUPPETEER_SECRET;
-		if (puppeteerSecret && expectedSecret && puppeteerSecret === expectedSecret) {
-			return;
+		if (event) {
+			const puppeteerSecret = event.node?.req?.headers?.["x-puppeteer-secret"];
+			const expectedSecret = process.env.PUPPETEER_SECRET;
+			if (puppeteerSecret && expectedSecret && puppeteerSecret === expectedSecret) {
+				return;
+			}
 		}
 	}
 

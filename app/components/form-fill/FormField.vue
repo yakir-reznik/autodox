@@ -41,6 +41,7 @@
 			case "text":
 			case "email":
 			case "number":
+			case "phone":
 			case "date":
 			case "time":
 			case "datetime":

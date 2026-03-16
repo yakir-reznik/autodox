@@ -30,6 +30,13 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 				validation: { required: false },
 				step: 1,
 			};
+		case "phone":
+			return {
+				label: "טלפון",
+				placeholder: "0500000000",
+				helpText: "",
+				validation: { required: false },
+			};
 		case "textarea":
 			return {
 				label: "אזור טקסט",
@@ -196,6 +203,12 @@ export function usePaletteElements(): PaletteElement[] {
 			category: "input",
 		},
 		{
+			type: "phone",
+			label: "טלפון",
+			icon: "heroicons:phone",
+			category: "input",
+		},
+		{
 			type: "textarea",
 			label: "אזור טקסט",
 			icon: "heroicons:document-text",
@@ -336,6 +349,7 @@ export function getElementComponent(type: ElementType): string | undefined {
 		text: "InputElement",
 		email: "InputElement",
 		number: "InputElement",
+		phone: "InputElement",
 		date: "InputElement",
 		time: "InputElement",
 		datetime: "InputElement",
@@ -366,6 +380,7 @@ export function isFieldElement(type: ElementType): boolean {
 		"text",
 		"email",
 		"number",
+		"phone",
 		"textarea",
 		"date",
 		"time",
@@ -396,6 +411,7 @@ export function isConditionSource(type: ElementType): boolean {
 		"text",
 		"email",
 		"number",
+		"phone",
 		"textarea",
 		"date",
 		"time",
