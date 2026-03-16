@@ -113,6 +113,7 @@ export default defineEventHandler(async (event) => {
 			createdByUserId: user.id,
 			expiresAt,
 			status: "pending",
+			createdAt: new Date(),
 			webhookUrl,
 			webhookIncludePdf: body?.webhook_include_pdf ?? null,
 			password: body?.password ?? null,
