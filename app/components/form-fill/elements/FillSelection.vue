@@ -22,8 +22,10 @@ const config = computed(() => props.element.config as {
 	options?: SelectionOption[];
 	allowUserOption?: boolean;
 	columns?: { desktop?: number; tablet?: number; mobile?: number };
+	defaultValue?: string | boolean;
 	validation?: { required?: boolean };
 });
+
 
 const columnsVars = computed(() => ({
 	'--cols-mobile': config.value.columns?.mobile ?? 1,

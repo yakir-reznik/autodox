@@ -119,12 +119,13 @@
 							return transformedItem;
 						});
 						formData[element.clientId] = transformedItems;
-					} else {
+					} else if (value !== null && value !== undefined && value !== "" && !(Array.isArray(value) && !value.length)) {
 						formData[element.clientId] = value;
 					}
 				}
 			});
 		}
+
 	});
 
 	// Check if form is published (only check if we have the full form response)
@@ -178,6 +179,36 @@
 			})
 			.sort((a, b) => a.position - b.position);
 	});
+
+	// Apply default values for elements that don't have prefill data
+	function applyDefaults() {
+		for (const element of allElements.value) {
+			if (formData[element.clientId] !== undefined) continue;
+			const dv = (element.config as any)?.defaultValue;
+			if (dv === undefined || dv === null || dv === "") continue;
+
+			const type = element.type;
+			if (["date", "datetime", "time"].includes(type)) {
+				const resolved = resolveDateTimeDefault(dv, type as "date" | "datetime" | "time");
+				if (resolved) formData[element.clientId] = resolved;
+			} else if (type === "number") {
+				formData[element.clientId] = Number(dv);
+			} else if (type === "checkbox") {
+				if (dv === true) formData[element.clientId] = true;
+			} else if (type === "checkboxes") {
+				try {
+					const arr = JSON.parse(dv) as string[];
+					if (arr.length) formData[element.clientId] = arr;
+				} catch {}
+			} else if (["dropdown", "radio", "text", "email", "textarea"].includes(type)) {
+				formData[element.clientId] = dv;
+			}
+		}
+	}
+
+	watch(allElements, (elements) => {
+		if (elements.length) applyDefaults();
+	}, { immediate: true });
 
 	// Condition evaluator
 	const { isVisible, isRequiredByCondition } = useConditionEvaluator(allElements, formData);

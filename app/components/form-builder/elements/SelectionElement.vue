@@ -14,10 +14,34 @@ const config = computed(() => props.element.config as {
 	options?: SelectionOption[];
 	allowUserOption?: boolean;
 	columns?: { desktop?: number; tablet?: number; mobile?: number };
+	defaultValue?: string | boolean;
 	validation?: { required?: boolean };
 });
 
 const options = computed(() => config.value.options || []);
+
+const defaultCheckedValues = computed(() => {
+	const dv = config.value.defaultValue;
+	if (!dv || typeof dv === "boolean") return new Set<string>();
+	if (props.element.type === "checkboxes") {
+		try { return new Set(JSON.parse(dv as string) as string[]); } catch { return new Set<string>(); }
+	}
+	return new Set([dv as string]);
+});
+
+const defaultValueHint = computed(() => {
+	const dv = config.value.defaultValue;
+	if (!dv) return null;
+	if (typeof dv === "boolean") return dv ? "מסומן" : null;
+	if (props.element.type === "checkboxes") {
+		try {
+			const arr = JSON.parse(dv as string) as string[];
+			const labels = arr.map(v => options.value.find(o => o.value === v)?.label || v);
+			return labels.join(", ");
+		} catch { return null; }
+	}
+	return options.value.find(o => o.value === dv)?.label || dv;
+});
 
 const columnsStyle = computed(() => {
 	const d = config.value.columns?.desktop ?? 1;
@@ -58,6 +82,7 @@ const columnsStyle = computed(() => {
 						type="radio"
 						:name="element.clientId"
 						disabled
+						:checked="defaultCheckedValues.has(opt.value)"
 						class="h-4 w-4 border-gray-300 text-blue-600"
 					/>
 					<span class="text-sm text-gray-600">{{ opt.label }}</span>
@@ -75,6 +100,7 @@ const columnsStyle = computed(() => {
 				<input
 					type="checkbox"
 					disabled
+					:checked="config.defaultValue === true"
 					class="h-4 w-4 rounded border-gray-300 text-blue-600"
 				/>
 				<span class="text-sm text-gray-600">{{ config.label }}</span>
@@ -92,6 +118,7 @@ const columnsStyle = computed(() => {
 					<input
 						type="checkbox"
 						disabled
+						:checked="defaultCheckedValues.has(opt.value)"
 						class="h-4 w-4 rounded border-gray-300 text-blue-600"
 					/>
 					<span class="text-sm text-gray-600">{{ opt.label }}</span>
@@ -103,6 +130,9 @@ const columnsStyle = computed(() => {
 			</div>
 		</template>
 
+		<p v-if="defaultValueHint" class="mt-1 text-xs text-blue-500">
+			ברירת מחדל: {{ defaultValueHint }}
+		</p>
 		<p v-if="config.helpText" class="mt-1 text-xs text-gray-500">
 			{{ config.helpText }}
 		</p>

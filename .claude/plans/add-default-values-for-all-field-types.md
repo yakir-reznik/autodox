@@ -22,7 +22,7 @@ Pre-fill data must always override default values. The current pattern (`if (pro
 
 ## Steps
 
-### Step 1: Extend `useRelativeDate.ts` with relative time + combined resolver
+### Step 1: Extend `useRelativeDate.ts` with relative time + combined resolver ✅
 
 **File:** `app/composables/useRelativeDate.ts`
 
@@ -36,7 +36,7 @@ Pre-fill data must always override default values. The current pattern (`if (pro
   - `time`: resolve relative time key or return `HH:MM` as-is
   - `datetime`: parse JSON `{date, time}`, resolve each part independently, combine as `YYYY-MM-DDTHH:MM`. Fallback: treat plain string as legacy relative date key with time 00:00
 
-### Step 2: Add default value UI for simple inputs (text, email, number, time, textarea)
+### Step 2: Add default value UI for simple inputs (text, email, number, time, textarea) ✅
 
 **File:** `app/components/form-builder/properties/InputProperties.vue`
 
@@ -46,7 +46,7 @@ Pre-fill data must always override default values. The current pattern (`if (pro
 - Add default value input for `textarea`: `<BaseInput>` or small textarea
 - Place after existing field-specific settings, before the date default section
 
-### Step 3: Enhance date/datetime default UI with manual picker + time combinations
+### Step 3: Enhance date/datetime default UI with manual picker + time combinations ✅
 
 **File:** `app/components/form-builder/properties/InputProperties.vue`
 
@@ -58,7 +58,7 @@ Pre-fill data must always override default values. The current pattern (`if (pro
   - Time part: three modes — "ללא" (none/00:00), "שעה יחסית" (relative time dropdown), "שעה ספציפית" (manual `<input type="time">`)
   - Store combined as `JSON.stringify({ date, time })`, parse on load with legacy fallback
 
-### Step 4: Add default value UI for selection fields
+### Step 4: Add default value UI for selection fields ✅
 
 **File:** `app/components/form-builder/properties/SelectionProperties.vue`
 
@@ -67,7 +67,7 @@ Pre-fill data must always override default values. The current pattern (`if (pro
 - **Single checkbox**: add `<BaseToggle>` labeled "מסומן כברירת מחדל"
 - When options are modified/removed, validate `defaultValue` still references valid options — clear if invalid
 
-### Step 5: Apply defaults on mount in FillInput (all input types)
+### Step 5: Apply defaults on mount in FillInput (all input types) ✅
 
 **File:** `app/components/form-fill/elements/FillInput.vue`
 
@@ -78,14 +78,14 @@ Replace the current `onMounted` (lines 28-37) to handle all input types:
 - `text/email`: emit `defaultValue` as-is
 - Keep `if (props.modelValue || !config.value.defaultValue) return` guard for pre-fill override
 
-### Step 6: Apply defaults on mount in FillTextarea
+### Step 6: Apply defaults on mount in FillTextarea ✅
 
 **File:** `app/components/form-fill/elements/FillTextarea.vue`
 
 - Add `defaultValue` to config type
 - Add `onMounted` with same pattern: check modelValue first, then emit defaultValue
 
-### Step 7: Apply defaults on mount in FillSelection
+### Step 7: Apply defaults on mount in FillSelection ✅
 
 **File:** `app/components/form-fill/elements/FillSelection.vue`
 
@@ -96,7 +96,7 @@ Replace the current `onMounted` (lines 28-37) to handle all input types:
   - `dropdown/radio`: emit value string
 - Guard: check `modelValue` is not already set (handle boolean/array/string cases)
 
-### Step 8: Show default value hints in builder preview
+### Step 8: Show default value hints in builder preview ✅
 
 **Files:**
 

@@ -41,6 +41,40 @@ const pattern = computed(() => {
 	}
 	return config.value.pattern;
 });
+
+const defaultValueHint = computed(() => {
+	const dv = config.value.defaultValue;
+	if (!dv) return null;
+
+	const type = props.element.type;
+
+	if (type === "date") {
+		return relativeDateLabels[dv as keyof typeof relativeDateLabels] || dv;
+	}
+
+	if (type === "time") {
+		return relativeTimeLabels[dv as keyof typeof relativeTimeLabels] || dv;
+	}
+
+	if (type === "datetime") {
+		try {
+			const parsed = JSON.parse(dv);
+			if (parsed && typeof parsed === "object" && "date" in parsed) {
+				const dateLabel = relativeDateLabels[parsed.date as keyof typeof relativeDateLabels] || parsed.date;
+				const timeLabel = parsed.time
+					? (relativeTimeLabels[parsed.time as keyof typeof relativeTimeLabels] || parsed.time)
+					: null;
+				return timeLabel ? `${dateLabel}, ${timeLabel}` : dateLabel;
+			}
+		} catch {}
+		// Legacy relative date key
+		return relativeDateLabels[dv as keyof typeof relativeDateLabels] || dv;
+	}
+
+	// text/email/number — show truncated literal
+	const str = String(dv);
+	return str.length > 30 ? str.slice(0, 30) + "..." : str;
+});
 </script>
 
 <template>
@@ -56,8 +90,8 @@ const pattern = computed(() => {
 			disabled
 			class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500"
 		/>
-		<p v-if="config.defaultValue && ['date', 'datetime'].includes(element.type)" class="mt-1 text-xs text-blue-500">
-			ברירת מחדל: {{ relativeDateLabels[config.defaultValue as keyof typeof relativeDateLabels] || config.defaultValue }}
+		<p v-if="defaultValueHint" class="mt-1 text-xs text-blue-500">
+			ברירת מחדל: {{ defaultValueHint }}
 		</p>
 		<p v-if="config.helpText" class="mt-1 text-xs text-gray-500">
 			{{ config.helpText }}

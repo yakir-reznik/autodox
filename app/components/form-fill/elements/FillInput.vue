@@ -24,17 +24,6 @@ const config = computed(() => props.element.config as {
 	validation?: { required?: boolean };
 });
 
-// Apply relative date default on mount if no value is set
-onMounted(() => {
-	if (props.modelValue || !config.value.defaultValue) return;
-	if (!["date", "datetime"].includes(props.element.type)) return;
-
-	const dateType = props.element.type === "datetime" ? "datetime" : "date";
-	const resolved = resolveRelativeDateString(config.value.defaultValue, dateType);
-	if (resolved) {
-		emit("update:modelValue", resolved);
-	}
-});
 
 const inputType = computed(() => {
 	switch (props.element.type) {

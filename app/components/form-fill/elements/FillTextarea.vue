@@ -20,6 +20,7 @@ const config = computed(() => props.element.config as {
 	placeholder?: string;
 	helpText?: string;
 	rows?: number;
+	defaultValue?: string;
 	validation?: { required?: boolean };
 });
 
