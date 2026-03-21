@@ -1,5 +1,4 @@
 <script setup lang="ts">
-	import FormPrint from "~/components/form-print/FormPrint.vue";
 	import type { BuilderElement } from "~/types/form-builder";
 	import type { SubmissionTimelineEvent } from "~/types/submission-timeline";
 	import { getThemeDefinition } from "~/composables/useThemes";
