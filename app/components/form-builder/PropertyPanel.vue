@@ -108,6 +108,7 @@ function updateRequired(isRequired: boolean) {
 			<FormBuilderPropertiesLayoutProperties
 				v-if="!isFieldElement(element.type) && element.type !== 'repeater'"
 				:element="element"
+				:all-elements="allElements"
 				@update:config="updateConfig"
 			/>
 

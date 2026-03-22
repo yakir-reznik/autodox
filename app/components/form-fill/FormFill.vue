@@ -180,6 +180,8 @@
 			.sort((a, b) => a.position - b.position);
 	});
 
+	provide("formElements", allElements);
+
 	// Apply default values for elements that don't have prefill data
 	function applyDefaults() {
 		for (const element of allElements.value) {

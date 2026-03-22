@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import type { BuilderElement } from "~/types/form-builder";
+import { interpolateFieldValues } from "~/utils/interpolate";
 
 interface Props {
 	element: BuilderElement;
+	formData: Record<string, any>;
 }
 
 const props = defineProps<Props>();
+
+const allElements = inject<ComputedRef<BuilderElement[]>>("formElements");
 
 const config = computed(() => props.element.config as {
 	text?: string;
@@ -33,6 +37,12 @@ const headingClass = computed(() => {
 const alignmentStyle = computed(() => ({
 	textAlign: config.value.align || "right",
 }));
+
+const resolvedHtml = computed(() => {
+	const text = config.value.text || "";
+	const interpolated = interpolateFieldValues(text, allElements?.value ?? [], props.formData);
+	return linkifyText(interpolated);
+});
 </script>
 
 <template>
@@ -40,7 +50,6 @@ const alignmentStyle = computed(() => ({
 		:is="headingLevel"
 		:class="headingClass"
 		:style="alignmentStyle"
-	>
-		{{ config.text }}
-	</component>
+		v-html="resolvedHtml"
+	/>
 </template>

@@ -27,6 +27,8 @@
 		);
 	});
 
+	provide("formElements", computed(() => props.elements));
+
 	// Get root elements (no parent)
 	const rootElements = computed(() => {
 		return props.elements.filter((el) => !el.parentId);

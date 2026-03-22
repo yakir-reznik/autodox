@@ -3,6 +3,7 @@
 
 	interface Props {
 		element: BuilderElement;
+		allElements: BuilderElement[];
 	}
 
 	const props = defineProps<Props>();
@@ -12,6 +13,32 @@
 	}>();
 
 	const config = computed(() => props.element.config as Record<string, any>);
+
+	const isTextElement = computed(() =>
+		["heading_h1", "heading_h2", "heading_h3", "paragraph"].includes(props.element.type),
+	);
+
+	// Interpolation field picker
+	const showFieldPicker = ref(false);
+	const textareaRef = ref<InstanceType<typeof BaseTextarea> | null>(null);
+	const lastCursorPosition = ref<number | null>(null);
+
+	function saveCursorPosition() {
+		const textarea = textareaRef.value?.$el?.querySelector("textarea") as HTMLTextAreaElement | null;
+		if (textarea) {
+			lastCursorPosition.value = textarea.selectionStart;
+		}
+	}
+
+	function insertField(fieldName: string) {
+		const token = `{{${fieldName}}}`;
+		const currentText = config.value.text || "";
+		const pos = lastCursorPosition.value ?? currentText.length;
+
+		const newText = currentText.slice(0, pos) + token + currentText.slice(pos);
+		emit("update:config", { text: newText });
+		showFieldPicker.value = false;
+	}
 
 	const alignOptions = [
 		{ label: "Left", value: "left" },
@@ -88,12 +115,32 @@
 		<h3 class="text-sm font-medium text-gray-700">Settings</h3>
 
 		<!-- Heading / Paragraph text -->
-		<div v-if="['heading_h1', 'heading_h2', 'heading_h3', 'paragraph'].includes(element.type)">
-			<label class="mb-1 block text-sm text-gray-600">Text</label>
+		<div v-if="isTextElement" class="relative">
+			<div class="mb-1 flex items-center justify-between">
+				<label class="text-sm text-gray-600">Text</label>
+				<button
+					type="button"
+					class="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700"
+					@click="showFieldPicker = !showFieldPicker"
+				>
+					<Icon name="heroicons:code-bracket" class="h-3.5 w-3.5" />
+					הוסף שדה
+				</button>
+			</div>
 			<BaseTextarea
+				ref="textareaRef"
 				:model-value="config.text || ''"
 				:rows="element.type === 'paragraph' ? 4 : 2"
 				@update:model-value="$emit('update:config', { text: $event })"
+				@click="saveCursorPosition"
+				@keyup="saveCursorPosition"
+			/>
+			<p class="mt-1 text-xs text-gray-500" v-text="'ניתן להוסיף ערך של שדה אחר באמצעות {{שם_שדה}}'" />
+			<FormBuilderPropertiesInterpolationFieldPicker
+				v-if="showFieldPicker"
+				:elements="allElements"
+				@select="insertField"
+				@close="showFieldPicker = false"
 			/>
 		</div>
 
