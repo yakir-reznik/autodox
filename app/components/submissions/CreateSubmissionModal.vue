@@ -57,6 +57,7 @@
 		"text",
 		"email",
 		"number",
+		"phone",
 		"textarea",
 		"date",
 		"time",
@@ -149,10 +150,11 @@
 
 	function getInputType(
 		type: ElementType,
-	): "text" | "email" | "number" | "date" | "time" | "datetime-local" {
+	): "text" | "email" | "number" | "tel" | "date" | "time" | "datetime-local" {
 		if (type === "datetime") return "datetime-local";
 		if (type === "email") return "email";
 		if (type === "number") return "number";
+		if (type === "phone") return "tel";
 		if (type === "date") return "date";
 		if (type === "time") return "time";
 		return "text";
@@ -251,6 +253,7 @@
 										'text',
 										'email',
 										'number',
+										'phone',
 										'textarea',
 										'date',
 										'time',
