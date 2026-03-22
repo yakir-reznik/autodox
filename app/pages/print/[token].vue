@@ -1,7 +1,6 @@
 <script setup lang="ts">
 	import type { BuilderElement } from "~/types/form-builder";
 	import type { SubmissionTimelineEvent } from "~/types/submission-timeline";
-	import { getThemeDefinition } from "~/composables/useThemes";
 
 	const route = useRoute();
 	const token = computed(() => String(route.params.token));
@@ -129,19 +128,13 @@
 		return result;
 	});
 
-	// Compute theme CSS file path
-	const themeCssPath = computed(() => {
-		const themeId = form.theme || "default";
-		return getThemeDefinition(themeId).cssFile;
-	});
-
-	// Dynamically inject theme CSS
+	// Theme CSS loads via server redirect — same as fill view
 	useHead(() => ({
 		title: `${form.title} - Print View`,
 		link: [
 			{
 				rel: "stylesheet",
-				href: themeCssPath.value,
+				href: `/api/forms/${form.id}/theme.css`,
 			},
 		],
 	}));
