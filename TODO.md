@@ -12,12 +12,14 @@
 
 ## Features
 
+- [ ] Update json upload schema with new elements recently added
+- [ ] Add "autocomplete" property to soem fields that it makes sense like "input" / "phone" / "email". also add it to the propmt for gpt schema. @pages/forms/upload?formId=7
 - [x] Add defineable initial values for all field types
 - [x] We need a phone number input field
 - [x] Add link to print view on submission page (the view puppeteer uses)
-- [ ] Checkboxes list (SelectionElement) add feature where user can define min and max count of checkboxes form filler is allowed to select.
-- [ ] Display field value somewhere else in the form, like firstName from the top of the form at the bottom of the form next to the signature field.
+- [x] Display field value somewhere else in the form, like firstName from the top of the form at the bottom of the form next to the signature field.
 - [x] Long checkbox list - allow setting to show in columns
+- [ ] Checkboxes list (SelectionElement) add feature where user can define min and max count of checkboxes form filler is allowed to select.
 - [ ] radio cards - new field type
 - [ ] Generate a QR code for submission link (generic or with token)
 - [ ] Users can only see their own forms and submissions, Admins can see every users forms
