@@ -28,6 +28,7 @@
 	});
 
 	provide("formElements", computed(() => props.elements));
+	provide("rootFormData", props.values);
 
 	// Get root elements (no parent)
 	const rootElements = computed(() => {

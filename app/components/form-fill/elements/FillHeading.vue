@@ -10,23 +10,11 @@ interface Props {
 const props = defineProps<Props>();
 
 const allElements = inject<ComputedRef<BuilderElement[]>>("formElements");
+const rootFormData = inject<Record<string, any>>("rootFormData", {});
 
 const config = computed(() => props.element.config as {
 	text?: string;
 	align?: "left" | "center" | "right";
-});
-
-const headingLevel = computed(() => {
-	switch (props.element.type) {
-		case "heading_h1":
-			return "h1";
-		case "heading_h2":
-			return "h2";
-		case "heading_h3":
-			return "h3";
-		default:
-			return "h2";
-	}
 });
 
 const headingClass = computed(() => {
@@ -40,16 +28,13 @@ const alignmentStyle = computed(() => ({
 
 const resolvedHtml = computed(() => {
 	const text = config.value.text || "";
-	const interpolated = interpolateFieldValues(text, allElements?.value ?? [], props.formData);
+	const interpolated = interpolateFieldValues(text, allElements?.value ?? [], rootFormData);
 	return linkifyText(interpolated);
 });
 </script>
 
 <template>
-	<component
-		:is="headingLevel"
-		:class="headingClass"
-		:style="alignmentStyle"
-		v-html="resolvedHtml"
-	/>
+	<h1 v-if="element.type === 'heading_h1'" :class="headingClass" :style="alignmentStyle" v-html="resolvedHtml" />
+	<h2 v-else-if="element.type === 'heading_h2'" :class="headingClass" :style="alignmentStyle" v-html="resolvedHtml" />
+	<h3 v-else :class="headingClass" :style="alignmentStyle" v-html="resolvedHtml" />
 </template>

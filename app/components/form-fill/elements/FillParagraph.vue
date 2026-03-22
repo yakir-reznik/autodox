@@ -10,6 +10,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const allElements = inject<ComputedRef<BuilderElement[]>>("formElements");
+const rootFormData = inject<Record<string, any>>("rootFormData", {});
 
 const config = computed(() => props.element.config as {
 	text?: string;
@@ -22,7 +23,7 @@ const alignmentStyle = computed(() => ({
 
 const resolvedHtml = computed(() => {
 	const text = config.value.text || "";
-	const interpolated = interpolateFieldValues(text, allElements?.value ?? [], props.formData);
+	const interpolated = interpolateFieldValues(text, allElements?.value ?? [], rootFormData);
 	return linkifyText(interpolated);
 });
 </script>

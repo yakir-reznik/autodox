@@ -181,6 +181,7 @@
 	});
 
 	provide("formElements", allElements);
+	provide("rootFormData", formData);
 
 	// Apply default values for elements that don't have prefill data
 	function applyDefaults() {
