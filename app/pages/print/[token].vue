@@ -155,6 +155,7 @@
 	.print-page-wrapper {
 		min-height: 100vh;
 		background: rgb(var(--fill-bg-page, 249 250 251));
+		padding: 2rem;
 	}
 
 	/* Print-specific styles */

@@ -1,82 +1,5 @@
-<script setup lang="ts">
-	import type { SubmissionTimelineEvent } from "~/types/submission-timeline";
-
-	type Props = {
-		submissionTimeline: SubmissionTimelineEvent[];
-	};
-
-	const props = defineProps<Props>();
-
-	const eventSetup: Record<string, { label: string; icon: string; themeClasses: string }> = {
-		created: {
-			label: "נוצר",
-			icon: "heroicons:document-plus-solid",
-			themeClasses: "bg-purple-100 text-purple-600",
-		},
-		started: {
-			label: "המשתמש התחיל למלא",
-			icon: "heroicons:pencil-solid",
-			themeClasses: "bg-green-100 text-green-600",
-		},
-		submitted: {
-			label: "הוגש",
-			icon: "heroicons:check-circle-solid",
-			themeClasses: "bg-sky-100 text-sky-600",
-		},
-		locked: {
-			label: "ננעל",
-			icon: "heroicons:lock-closed-solid",
-			themeClasses: "bg-amber-100 text-amber-600",
-		},
-		expires: {
-			label: "יפוג",
-			icon: "heroicons:clock-solid",
-			themeClasses: "bg-orange-100 text-orange-600",
-		},
-		"webhook-delivered": {
-			label: "משלוח Webhook",
-			icon: "heroicons:check-circle-solid",
-			themeClasses: "bg-emerald-100 text-emerald-600",
-		},
-		"webhook-failed": {
-			label: "משלוח Webhook",
-			icon: "heroicons:x-circle-solid",
-			themeClasses: "bg-red-100 text-red-600",
-		},
-		"webhook-pending": {
-			label: "משלוח Webhook",
-			icon: "heroicons:clock-solid",
-			themeClasses: "bg-yellow-100 text-yellow-600",
-		},
-	};
-
-	function getEventKey(event: SubmissionTimelineEvent): string {
-		if (event.type === "lifecycle") return event.event;
-		if (event.type === "webhook") return `webhook-${event.status}`;
-		return "";
-	}
-
-	function formatTimestamp(date: Date): string {
-		return new Date(date).toLocaleString("he-IL", {
-			year: "numeric",
-			month: "2-digit",
-			day: "2-digit",
-			hour: "2-digit",
-			minute: "2-digit",
-			second: "2-digit",
-		});
-	}
-
-	const timelineEvents = computed(() => {
-		return [...props.submissionTimeline]
-			.filter((e) => e.type !== "entrance")
-			.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-	});
-
-</script>
-
 <template>
-	<div class="mt-12 pt-8 border-t-2 border-[rgb(var(--fill-border))]">
+	<div class="mt-12 pt-8 border-t-1 border-[rgb(var(--fill-border))]">
 		<!-- Timeline Section -->
 		<h2 class="text-2xl font-bold text-[rgb(var(--fill-text-primary))] mb-6">
 			ציר זמן של ההגשה
@@ -164,6 +87,81 @@
 				</div>
 			</div>
 		</div>
-
 	</div>
 </template>
+
+<script setup lang="ts">
+	import type { SubmissionTimelineEvent } from "~/types/submission-timeline";
+
+	type Props = {
+		submissionTimeline: SubmissionTimelineEvent[];
+	};
+
+	const props = defineProps<Props>();
+
+	const eventSetup: Record<string, { label: string; icon: string; themeClasses: string }> = {
+		created: {
+			label: "נוצר",
+			icon: "heroicons:document-plus-solid",
+			themeClasses: "bg-purple-100 text-purple-600",
+		},
+		started: {
+			label: "המשתמש התחיל למלא",
+			icon: "heroicons:pencil-solid",
+			themeClasses: "bg-green-100 text-green-600",
+		},
+		submitted: {
+			label: "הוגש",
+			icon: "heroicons:check-circle-solid",
+			themeClasses: "bg-sky-100 text-sky-600",
+		},
+		locked: {
+			label: "ננעל",
+			icon: "heroicons:lock-closed-solid",
+			themeClasses: "bg-amber-100 text-amber-600",
+		},
+		expires: {
+			label: "יפוג",
+			icon: "heroicons:clock-solid",
+			themeClasses: "bg-orange-100 text-orange-600",
+		},
+		"webhook-delivered": {
+			label: "משלוח Webhook",
+			icon: "heroicons:check-circle-solid",
+			themeClasses: "bg-emerald-100 text-emerald-600",
+		},
+		"webhook-failed": {
+			label: "משלוח Webhook",
+			icon: "heroicons:x-circle-solid",
+			themeClasses: "bg-red-100 text-red-600",
+		},
+		"webhook-pending": {
+			label: "משלוח Webhook",
+			icon: "heroicons:clock-solid",
+			themeClasses: "bg-yellow-100 text-yellow-600",
+		},
+	};
+
+	function getEventKey(event: SubmissionTimelineEvent): string {
+		if (event.type === "lifecycle") return event.event;
+		if (event.type === "webhook") return `webhook-${event.status}`;
+		return "";
+	}
+
+	function formatTimestamp(date: Date): string {
+		return new Date(date).toLocaleString("he-IL", {
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+			hour: "2-digit",
+			minute: "2-digit",
+			second: "2-digit",
+		});
+	}
+
+	const timelineEvents = computed(() => {
+		return [...props.submissionTimeline]
+			.filter((e) => e.type !== "entrance")
+			.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+	});
+</script>

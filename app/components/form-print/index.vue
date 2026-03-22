@@ -1,6 +1,9 @@
 <script setup lang="ts">
 	import type { BuilderElement } from "~/types/form-builder";
-	import type { SubmissionTimelineEvent, SubmissionEntranceEvent } from "~/types/submission-timeline";
+	import type {
+		SubmissionTimelineEvent,
+		SubmissionEntranceEvent,
+	} from "~/types/submission-timeline";
 	import FormField from "~/components/form-fill/FormField.vue";
 
 	type FormMetadata = {
@@ -73,7 +76,7 @@
 	/* Container matches form-fill-card layout */
 	.form-print-container {
 		max-width: 800px;
-		margin: 2rem auto;
+		margin: 0 auto;
 		padding: 2rem;
 		background: rgb(var(--fill-bg-card));
 		border-radius: 0.5rem;
