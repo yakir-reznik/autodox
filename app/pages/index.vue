@@ -161,7 +161,7 @@
 	</div>
 </template>
 
-<style>
+<style scoped>
 	* {
 		font-family: "Rubik", sans-serif;
 	}
