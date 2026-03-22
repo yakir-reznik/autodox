@@ -24,17 +24,32 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 		return;
 	}
 
-	// Puppeteer routes: allow with valid secret header (server-side only)
-	// Browser users fall through to normal auth checks (must be logged-in admin)
+	// Puppeteer print routes: allow for puppeteer (secret header) or logged-in admins
 	if (isPuppeteerPageRoute(to.path)) {
+		// useState carries SSR auth result to client hydration (prevents redirect after SSR validated)
+		const puppeteerAuthed = useState("puppeteer-authed", () => false);
 		const event = useRequestEvent();
 		if (event) {
+			// SSR: check puppeteer secret header
 			const puppeteerSecret = event.node?.req?.headers?.["x-puppeteer-secret"];
 			const expectedSecret = process.env.PUPPETEER_SECRET;
 			if (puppeteerSecret && expectedSecret && puppeteerSecret === expectedSecret) {
+				puppeteerAuthed.value = true;
 				return;
 			}
+		} else if (puppeteerAuthed.value) {
+			// Client-side hydration: SSR already validated the puppeteer secret
+			return;
 		}
+		// Allow logged-in admins (works on both SSR and client)
+		if (loggedIn.value && user.value?.role === "admin") {
+			return;
+		}
+		// Not authenticated — redirect to login
+		if (!loggedIn.value) {
+			return navigateTo("/login");
+		}
+		return navigateTo("/");
 	}
 
 	// Check if current route is public

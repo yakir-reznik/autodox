@@ -18,11 +18,8 @@ export default defineEventHandler((event) => {
 	}
 
 	const puppeteerSecret = getHeader(event, "X-Puppeteer-Secret");
-	console.log("[Puppeteer Middleware] Secret received:", !!puppeteerSecret);
-	console.log("[Puppeteer Middleware] Secret valid:", isValidPuppeteerSecret(puppeteerSecret));
 
 	if (isValidPuppeteerSecret(puppeteerSecret)) {
 		event.context.puppeteerAuthenticated = true;
-		console.log("[Puppeteer Middleware] Authenticated!");
 	}
 });
