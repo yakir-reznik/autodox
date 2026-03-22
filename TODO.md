@@ -12,6 +12,7 @@
 
 ## Features
 
+- [ ] Button to view / copy typescript type (schema) of form submission result (based on fields from formbuilder)
 - [ ] Update json upload schema with new elements recently added
 - [ ] Add "autocomplete" property to soem fields that it makes sense like "input" / "phone" / "email". also add it to the propmt for gpt schema. @pages/forms/upload?formId=7
 - [x] Add defineable initial values for all field types
