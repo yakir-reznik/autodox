@@ -144,6 +144,16 @@
 				</NuxtLink>
 
 				<NuxtLink
+					:to="`/forms/${formId}/submission-data-structure`"
+					title="הצג מבנה נתונים"
+				>
+					<UiButton variant="secondary">
+						<span>מבנה נתונים</span>
+						<Icon name="heroicons:code-bracket" class="h-4 w-4" />
+					</UiButton>
+				</NuxtLink>
+
+				<NuxtLink
 					:to="`/forms/upload?formId=${formId}`"
 					title="Upload JSON to replace form structure"
 				>

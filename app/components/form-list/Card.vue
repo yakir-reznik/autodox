@@ -74,6 +74,12 @@
 						<Icon name="heroicons:arrow-path" class="h-4 w-4" />
 						שינוי סטטוס
 					</UiDropdownMenuItem class="px-4">
+					<NuxtLink :to="`/forms/${form.id}/submission-data-structure`">
+						<UiDropdownMenuItem class="px-4">
+							<Icon name="heroicons:code-bracket" class="h-4 w-4" />
+							הצג מבנה נתונים
+						</UiDropdownMenuItem>
+					</NuxtLink>
 					<UiDropdownMenuSeparator />
 					<UiDropdownMenuItem class="px-4" variant="destructive" @select="emit('deleteForm', form)">
 						<Icon name="heroicons:trash" class="h-4 w-4" />

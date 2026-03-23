@@ -121,6 +121,12 @@
 						עריכת טופס
 					</BaseButton>
 				</NuxtLink>
+				<NuxtLink :to="`/forms/${formId}/submission-data-structure`">
+					<BaseButton variant="secondary">
+						<Icon name="heroicons:code-bracket" class="h-4 w-4" />
+						מבנה נתונים
+					</BaseButton>
+				</NuxtLink>
 				<BaseButton
 					variant="primary"
 					@click="showCreateModal = true"
