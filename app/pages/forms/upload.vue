@@ -22,11 +22,14 @@
   "description": "User registration form",
   "elements": [
     { "type": "heading_h1", "text": "Registration" },
-    { "type": "text", "label": "Full Name", "required": true, "placeholder": "Enter your name" },
-    { "type": "email", "label": "Email Address", "required": true },
-    { "type": "dropdown", "label": "Country", "options": ["Israel", "USA", "UK", "Other"] },
+    { "type": "text", "label": "Full Name", "required": true, "placeholder": "Enter your name", "autocomplete": "name" },
+    { "type": "email", "label": "Email Address", "required": true, "autocomplete": "email" },
+    { "type": "phone", "label": "Phone Number", "required": true, "placeholder": "050-0000000" },
+    { "type": "number", "label": "Age", "required": true, "step": 1 },
+    { "type": "dropdown", "label": "Country", "options": ["Israel", "USA", "UK", "Other"], "defaultValue": "Israel" },
     { "type": "radio", "label": "Gender", "options": ["Male", "Female", "Other"] },
-    { "type": "textarea", "label": "Comments", "helpText": "Any additional information" },
+    { "type": "textarea", "label": "Comments", "helpText": "Any additional information", "rows": 4 },
+    { "type": "checkboxes", "label": "Interests", "options": ["Sports", "Music", "Tech"], "allowOther": true },
     { "type": "checkbox", "label": "I agree to the terms and conditions", "required": true },
     { "type": "signature", "label": "Signature", "required": true }
   ]
@@ -46,16 +49,17 @@ Please analyze the attached PDF and generate a JSON structure following this exa
 
 === ALL SUPPORTED ELEMENT TYPES ===
 
-INPUT FIELDS (use "label", "placeholder", "helpText", "required"):
+INPUT FIELDS (use "label", "placeholder", "helpText", "required", "defaultValue", "autocomplete"):
 - "text" - Single line text input (names, addresses, etc.)
 - "email" - Email address input
-- "number" - Numeric input (age, quantity, etc.)
-- "textarea" - Multi-line text input (comments, descriptions)
+- "number" - Numeric input (age, quantity, etc.) - also supports "step"
+- "phone" - Phone number input
+- "textarea" - Multi-line text input (comments, descriptions) - also supports "rows"
 - "date" - Date picker (YYYY-MM-DD)
 - "time" - Time picker (HH:MM)
 - "datetime" - Date and time combined picker
 
-SELECTION FIELDS (use "label", "options", "required"):
+SELECTION FIELDS (use "label", "options", "required", "defaultValue", "allowOther"):
 - "dropdown" - Dropdown/select list (single choice from list)
 - "radio" - Radio buttons (single choice, all options visible)
 - "checkbox" - Single checkbox (yes/no, agree/disagree)
@@ -63,6 +67,7 @@ SELECTION FIELDS (use "label", "options", "required"):
 
 SPECIAL FIELDS:
 - "signature" - Digital signature pad (use "label", "required")
+- "repeater" - Repeating group of fields (use "label", "children" array, "minItems", "maxItems", "addButtonText")
 
 LAYOUT ELEMENTS:
 - "heading_h1" - Large heading (use "text" property)
@@ -77,14 +82,20 @@ LAYOUT ELEMENTS:
 
 === ELEMENT PROPERTIES BY TYPE ===
 
-For text, email, number, date, time, datetime:
-{ "type": "text", "label": "Field Label", "placeholder": "Hint text", "helpText": "Additional info", "required": true }
+For text, email, date, time, datetime:
+{ "type": "text", "label": "Field Label", "placeholder": "Hint text", "helpText": "Additional info", "required": true, "defaultValue": "Default text", "autocomplete": "name" }
+
+For number:
+{ "type": "number", "label": "Age", "placeholder": "Enter age", "required": true, "step": 1, "defaultValue": 0 }
+
+For phone:
+{ "type": "phone", "label": "Phone Number", "placeholder": "050-0000000", "required": true, "autocomplete": "tel" }
 
 For textarea:
-{ "type": "textarea", "label": "Comments", "placeholder": "Enter details...", "required": false }
+{ "type": "textarea", "label": "Comments", "placeholder": "Enter details...", "required": false, "rows": 4 }
 
 For dropdown:
-{ "type": "dropdown", "label": "Select Country", "options": ["Israel", "USA", "UK", "Other"], "required": true }
+{ "type": "dropdown", "label": "Select Country", "options": ["Israel", "USA", "UK", "Other"], "required": true, "defaultValue": "Israel" }
 
 For radio:
 { "type": "radio", "label": "Gender", "options": ["Male", "Female", "Other"], "required": true }
@@ -93,7 +104,7 @@ For checkbox (single yes/no):
 { "type": "checkbox", "label": "I agree to the terms and conditions", "required": true }
 
 For checkboxes (multiple selection):
-{ "type": "checkboxes", "label": "Select Services", "options": ["Service A", "Service B", "Service C"], "required": false }
+{ "type": "checkboxes", "label": "Select Services", "options": ["Service A", "Service B", "Service C"], "required": false, "allowOther": true }
 
 For signature:
 { "type": "signature", "label": "Your Signature", "required": true }
@@ -118,6 +129,12 @@ For section (grouping):
   { "type": "text", "label": "Last Name", "required": true }
 ]}
 
+For repeater (repeating group):
+{ "type": "repeater", "label": "Family Members", "minItems": 1, "maxItems": 5, "addButtonText": "Add Member", "children": [
+  { "type": "text", "label": "Name", "required": true },
+  { "type": "number", "label": "Age", "required": true }
+]}
+
 === IMPORTANT RULES ===
 
 1. Output ONLY valid JSON - no explanations, no markdown code blocks
@@ -128,7 +145,11 @@ For section (grouping):
 6. Use descriptive labels that match the PDF text
 7. Use headings to separate form sections
 8. Use dividers or spacers for visual separation where appropriate
-9. Group related fields in sections when the PDF has clear groupings`;
+9. Group related fields in sections when the PDF has clear groupings
+10. Use "defaultValue" when a field has a pre-filled or default value in the PDF
+11. Use "autocomplete" for fields that benefit from browser autofill (e.g., "name", "email", "tel", "address-line1")
+12. Use "allowOther": true on checkboxes/radio/dropdown when the PDF has an "Other" option with a write-in field
+13. Use "repeater" for sections where users can add multiple entries (e.g., list of family members, work history)`;
 
 	const copied = ref<string | null>(null);
 
@@ -267,65 +288,8 @@ For section (grouping):
 						<p class="mb-3 text-sm text-gray-600">
 							Here's an example of a valid JSON structure:
 						</p>
-						<div class="max-h-80 overflow-y-auto rounded-lg bg-gray-50 p-4">
-							<pre dir="ltr" class="whitespace-pre-wrap text-xs text-gray-700">{{
-								exampleJson
-							}}</pre>
-						</div>
-					</div>
-
-					<!-- Supported Types Card -->
-					<div class="rounded-lg bg-white p-6 shadow">
-						<h2 class="mb-4 text-lg font-semibold text-gray-900">
-							Supported Element Types
-						</h2>
-						<div class="grid grid-cols-2 gap-4 text-sm">
-							<div>
-								<h3 class="mb-2 font-medium text-gray-700">Input Fields</h3>
-								<ul class="list-inside list-disc space-y-1 text-gray-600">
-									<li><code class="rounded bg-gray-100 px-1">text</code></li>
-									<li><code class="rounded bg-gray-100 px-1">email</code></li>
-									<li><code class="rounded bg-gray-100 px-1">number</code></li>
-									<li><code class="rounded bg-gray-100 px-1">textarea</code></li>
-									<li><code class="rounded bg-gray-100 px-1">date</code></li>
-									<li><code class="rounded bg-gray-100 px-1">time</code></li>
-									<li><code class="rounded bg-gray-100 px-1">datetime</code></li>
-								</ul>
-							</div>
-							<div>
-								<h3 class="mb-2 font-medium text-gray-700">Selection Fields</h3>
-								<ul class="list-inside list-disc space-y-1 text-gray-600">
-									<li><code class="rounded bg-gray-100 px-1">dropdown</code></li>
-									<li><code class="rounded bg-gray-100 px-1">radio</code></li>
-									<li><code class="rounded bg-gray-100 px-1">checkbox</code></li>
-									<li>
-										<code class="rounded bg-gray-100 px-1">checkboxes</code>
-									</li>
-								</ul>
-							</div>
-							<div>
-								<h3 class="mb-2 font-medium text-gray-700">Special</h3>
-								<ul class="list-inside list-disc space-y-1 text-gray-600">
-									<li><code class="rounded bg-gray-100 px-1">signature</code></li>
-								</ul>
-							</div>
-							<div>
-								<h3 class="mb-2 font-medium text-gray-700">Layout</h3>
-								<ul class="list-inside list-disc space-y-1 text-gray-600">
-									<li>
-										<code class="rounded bg-gray-100 px-1">heading_h1</code>
-									</li>
-									<li>
-										<code class="rounded bg-gray-100 px-1">heading_h2</code>
-									</li>
-									<li>
-										<code class="rounded bg-gray-100 px-1">heading_h3</code>
-									</li>
-									<li><code class="rounded bg-gray-100 px-1">paragraph</code></li>
-									<li><code class="rounded bg-gray-100 px-1">divider</code></li>
-									<li><code class="rounded bg-gray-100 px-1">spacer</code></li>
-								</ul>
-							</div>
+						<div dir="ltr" class="max-h-80 overflow-y-auto rounded-lg bg-gray-50 p-4 text-sm [&_.shiki]:bg-transparent!">
+							<Shiki lang="json" :code="exampleJson" />
 						</div>
 					</div>
 				</div>
