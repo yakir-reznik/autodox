@@ -21,6 +21,7 @@ const config = computed(() => props.element.config as {
 	helpText?: string;
 	step?: number;
 	defaultValue?: string;
+	autocomplete?: string;
 	validation?: { required?: boolean };
 });
 
@@ -92,6 +93,7 @@ function handlePhoneBlur(event: Event) {
 			:value="modelValue"
 			:placeholder="config.placeholder"
 			:step="config.step"
+			:autocomplete="config.autocomplete || 'off'"
 			:dir="element.type === 'phone' ? 'ltr' : undefined"
 			class="form-fill-input"
 			@input="handleInput"

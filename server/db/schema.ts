@@ -133,6 +133,7 @@ type BaseElementConfig = {
 	placeholder?: string; // for input fields
 	helpText?: string; // helper text below field
 	defaultValue?: string | number | boolean;
+	autocomplete?: string;
 };
 
 // Field-specific configurations

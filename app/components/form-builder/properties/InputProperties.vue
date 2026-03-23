@@ -19,6 +19,7 @@
 				rows?: number;
 				step?: number;
 				defaultValue?: string;
+				autocomplete?: string;
 			},
 	);
 
@@ -119,6 +120,15 @@
 				:model-value="config.placeholder || ''"
 				placeholder="Placeholder text..."
 				@update:model-value="$emit('update:config', { placeholder: $event })"
+			/>
+		</div>
+
+		<!-- Autocomplete -->
+		<div>
+			<label class="mb-1 block text-sm text-gray-600">סוג שדה להשלמה אוטומטית (autocomplete)</label>
+			<FormBuilderPropertiesAutocompleteProperty
+				:model-value="config.autocomplete"
+				@update:model-value="$emit('update:config', { autocomplete: $event })"
 			/>
 		</div>
 

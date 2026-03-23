@@ -21,6 +21,7 @@ const config = computed(() => props.element.config as {
 	helpText?: string;
 	rows?: number;
 	defaultValue?: string;
+	autocomplete?: string;
 	validation?: { required?: boolean };
 });
 
@@ -42,6 +43,7 @@ function handleInput(event: Event) {
 			:value="modelValue"
 			:placeholder="config.placeholder"
 			:rows="config.rows || 4"
+			:autocomplete="config.autocomplete || 'off'"
 			class="form-fill-textarea"
 			@input="handleInput"
 			@blur="emit('blur')"
