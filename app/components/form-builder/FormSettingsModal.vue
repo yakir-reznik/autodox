@@ -25,7 +25,7 @@
 	const error = ref<string | null>(null);
 
 	const status = ref<FormStatus>("draft");
-	const theme = ref<FormTheme>("default");
+	const theme = ref<FormTheme>("ocean");
 	const passwordEnabled = ref(false);
 	const password = ref("");
 	const passwordError = ref<string | null>(null);

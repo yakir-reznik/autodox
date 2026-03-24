@@ -9,12 +9,6 @@ export interface ThemeDefinition {
 
 export const THEME_DEFINITIONS: ThemeDefinition[] = [
 	{
-		id: "default",
-		label: "ברירת מחדל",
-		description: "עיצוב קלאסי ונקי",
-		cssFile: "/assets/css/themes/variables.css",
-	},
-	{
 		id: "dark",
 		label: "כהה",
 		description: "עיצוב כהה לנוחות העיניים",
@@ -41,7 +35,7 @@ export const THEME_DEFINITIONS: ThemeDefinition[] = [
 ];
 
 export function getThemeDefinition(themeId: FormTheme): ThemeDefinition {
-	return THEME_DEFINITIONS.find((t) => t.id === themeId) ?? THEME_DEFINITIONS[0]!;
+	return THEME_DEFINITIONS.find((t) => t.id === themeId) ?? THEME_DEFINITIONS.find((t) => t.id === "ocean")!;
 }
 
 export function getThemeOptionsForSelect() {
