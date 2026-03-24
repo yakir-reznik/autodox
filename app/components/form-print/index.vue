@@ -46,15 +46,15 @@
 <template>
 	<div class="form-print-container">
 		<!-- Header -->
-		<header class="form-fill-header">
-			<h1 class="form-fill-title">{{ form.title }}</h1>
-			<p v-if="form.description" class="form-fill-description">
+		<header class="form-fill-header mb-8 text-center">
+			<h1 class="form-fill-title text-2xl font-semibold text-foreground mb-2">{{ form.title }}</h1>
+			<p v-if="form.description" class="form-fill-description text-base text-muted-foreground">
 				{{ form.description }}
 			</p>
 		</header>
 
 		<!-- Form Elements (Read-only) -->
-		<div class="form-fill-elements">
+		<div class="form-fill-elements flex flex-col gap-6">
 			<FormField
 				v-for="element in rootElements"
 				:key="element.clientId"
@@ -81,7 +81,7 @@
 		max-width: 800px;
 		margin: 0 auto;
 		padding: 2rem;
-		background: rgb(var(--fill-bg-card));
+		background: var(--card);
 		border-radius: 0.5rem;
 		box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
 	}

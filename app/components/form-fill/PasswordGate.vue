@@ -49,27 +49,27 @@ async function handleSubmit() {
 </script>
 
 <template>
-	<div class="grid min-h-screen place-items-center form-fill-container">
-		<div class="form-fill-card w-full max-w-md p-8">
+	<div class="grid min-h-screen place-items-center form-fill-container min-h-screen bg-background font-sans p-6">
+		<div class="form-fill-card max-w-md w-full mx-auto bg-card rounded-lg shadow-md p-8">
 			<!-- Lock icon -->
 			<div class="mb-6 text-center">
-				<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-					<Icon name="heroicons:lock-closed" class="h-8 w-8 text-blue-600" />
+				<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+					<Icon name="heroicons:lock-closed" class="h-8 w-8 text-primary" />
 				</div>
 			</div>
 
 			<!-- Title -->
-			<h1 class="form-fill-title mb-2 text-center text-xl">
+			<h1 class="form-fill-title text-xl font-semibold text-foreground mb-2 text-center">
 				{{ formTitle }}
 			</h1>
-			<p class="form-fill-description mb-6 text-center">
+			<p class="form-fill-description text-base text-muted-foreground mb-6 text-center">
 				טופס זה מוגן בסיסמה
 			</p>
 
 			<!-- Password form -->
 			<form @submit.prevent="handleSubmit" class="space-y-4">
 				<div>
-					<label for="password" class="mb-1 block text-sm font-medium" style="color: rgb(var(--fill-text-primary))">
+					<label for="password" class="form-fill-label block text-sm font-medium text-foreground mb-1">
 						סיסמה
 					</label>
 					<input
@@ -77,18 +77,18 @@ async function handleSubmit() {
 						v-model="password"
 						type="password"
 						placeholder="הזן סיסמה"
-						class="w-full rounded-lg border px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-						:class="error ? 'border-red-500' : 'border-gray-300'"
+						class="form-fill-input w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10 placeholder:text-muted-foreground"
+						:class="{ 'border-destructive': error }"
 						autocomplete="off"
 					/>
-					<p v-if="error" class="mt-1 text-sm text-red-500">
+					<p v-if="error" class="form-fill-error text-sm text-destructive mt-1">
 						{{ error }}
 					</p>
 				</div>
 
 				<button
 					type="submit"
-					class="form-fill-submit w-full"
+					class="form-fill-submit w-full bg-primary text-primary-foreground text-base font-medium py-2 px-6 rounded-md border-none cursor-pointer hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 					:disabled="isVerifying"
 				>
 					<template v-if="isVerifying">

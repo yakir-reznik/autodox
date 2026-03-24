@@ -56,23 +56,23 @@ function updateChildData(clientId: string, value: any) {
 </script>
 
 <template>
-	<div :class="sectionClass" :style="sectionStyle">
+	<div :class="sectionClass" class="bg-accent rounded-md p-4" :style="sectionStyle">
 		<!-- Collapse toggle -->
 		<div
 			v-if="config.collapsible"
-			class="form-fill-section-header form-fill-section-toggle"
+			class="form-fill-section-header form-fill-section-toggle cursor-pointer"
 			@click="toggleCollapse"
 		>
 			<div class="flex items-center justify-end">
 				<Icon
 					:name="isCollapsed ? 'heroicons:chevron-down' : 'heroicons:chevron-up'"
-					class="h-5 w-5 text-gray-500"
+					class="h-5 w-5 text-muted-foreground"
 				/>
 			</div>
 		</div>
 
 		<!-- Section content -->
-		<div v-show="!isCollapsed" class="form-fill-section-content">
+		<div v-show="!isCollapsed" class="form-fill-section-content flex flex-col gap-6">
 			<FormFillFormField
 				v-for="child in children"
 				:key="child.clientId"

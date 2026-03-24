@@ -17,9 +17,18 @@ const config = computed(() => props.element.config as {
 	align?: "left" | "center" | "right";
 });
 
+const sizeClass = computed(() => {
+	switch (props.element.type) {
+		case "heading_h1": return "text-3xl";
+		case "heading_h2": return "text-2xl";
+		case "heading_h3": return "text-xl";
+		default: return "text-xl";
+	}
+});
+
 const headingClass = computed(() => {
 	const level = props.element.type.replace("heading_", "");
-	return `form-fill-heading ${level}`;
+	return `form-fill-heading ${level} ${sizeClass.value} font-semibold text-foreground`;
 });
 
 const alignmentStyle = computed(() => ({

@@ -36,7 +36,7 @@ const isVideo = computed(() => props.element.type === "video");
 			<video
 				:src="config.url"
 				:style="mediaStyle"
-				class="form-fill-media"
+				class="form-fill-media max-w-full rounded-md"
 				controls
 			/>
 		</template>
@@ -47,17 +47,17 @@ const isVideo = computed(() => props.element.type === "video");
 				:src="config.url"
 				:alt="config.alt || ''"
 				:style="mediaStyle"
-				class="form-fill-media"
+				class="form-fill-media max-w-full rounded-md"
 			/>
 		</template>
 
-		<p v-if="config.caption" class="form-fill-media-caption">
+		<p v-if="config.caption" class="form-fill-media-caption text-sm text-muted-foreground mt-1 text-center">
 			{{ config.caption }}
 		</p>
 	</div>
 
 	<!-- Empty state -->
-	<div v-else class="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center text-gray-400">
+	<div v-else class="rounded-lg border-2 border-dashed border-input p-8 text-center text-muted-foreground">
 		<Icon :name="isVideo ? 'heroicons:video-camera' : 'heroicons:photo'" class="mx-auto h-8 w-8" />
 		<p class="mt-2 text-sm">No {{ isVideo ? 'video' : 'image' }} set</p>
 	</div>

@@ -35,20 +35,21 @@ function handleInput(event: Event) {
 
 <template>
 	<div>
-		<label v-if="config.label" class="form-fill-label">
+		<label v-if="config.label" class="form-fill-label block text-sm font-medium text-foreground mb-1">
 			{{ config.label }}
-			<span v-if="isRequired" class="form-fill-required">*</span>
+			<span v-if="isRequired" class="form-fill-required text-destructive ms-0.5">*</span>
 		</label>
 		<textarea
 			:value="modelValue"
 			:placeholder="config.placeholder"
 			:rows="config.rows || 4"
 			:autocomplete="config.autocomplete || 'off'"
-			class="form-fill-textarea"
+			class="form-fill-textarea w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground resize-y min-h-[100px] transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10 placeholder:text-muted-foreground"
+			:class="{ 'border-destructive': error }"
 			@input="handleInput"
 			@blur="emit('blur')"
 		/>
-		<p v-if="error" class="form-fill-error">{{ error }}</p>
-		<p v-else-if="config.helpText" class="form-fill-help">{{ config.helpText }}</p>
+		<p v-if="error" class="form-fill-error text-sm text-destructive mt-1">{{ error }}</p>
+		<p v-else-if="config.helpText" class="form-fill-help text-sm text-muted-foreground mt-1">{{ config.helpText }}</p>
 	</div>
 </template>

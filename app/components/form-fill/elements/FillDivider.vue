@@ -12,9 +12,17 @@ const config = computed(() => props.element.config as {
 	color?: string;
 });
 
+const borderStyleClass = computed(() => {
+	switch (config.value.style) {
+		case "dashed": return "border-dashed";
+		case "dotted": return "border-dotted";
+		default: return "border-solid";
+	}
+});
+
 const dividerClass = computed(() => {
 	const style = config.value.style || "solid";
-	return `form-fill-divider ${style}`;
+	return `form-fill-divider ${style} border-none border-t border-border my-4 ${borderStyleClass.value}`;
 });
 
 const dividerStyle = computed(() => {

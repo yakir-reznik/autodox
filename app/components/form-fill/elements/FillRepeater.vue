@@ -115,24 +115,17 @@ const containerClass = computed(() => {
 	}
 	return classes.join(" ");
 });
-
-const itemStyle = computed(() => {
-	if (config.value.backgroundColor) {
-		return { backgroundColor: config.value.backgroundColor };
-	}
-	return { backgroundColor: "#f9fafb" };
-});
 </script>
 
 <template>
 	<div :class="containerClass">
 		<!-- Label -->
-		<label v-if="config.label" class="form-fill-label mb-2 block">
+		<label v-if="config.label" class="form-fill-label block text-sm font-medium text-foreground mb-2">
 			{{ config.label }}
 		</label>
 
 		<!-- Help text -->
-		<p v-if="config.helpText" class="form-fill-help mb-3">
+		<p v-if="config.helpText" class="form-fill-help text-sm text-muted-foreground mb-3">
 			{{ config.helpText }}
 		</p>
 
@@ -141,18 +134,17 @@ const itemStyle = computed(() => {
 			<div
 				v-for="(item, itemIndex) in items"
 				:key="itemIndex"
-				class="relative rounded-lg border border-gray-200 p-4"
-				:style="itemStyle"
+				class="form-fill-repeater-item relative rounded-md border border-input p-4 bg-accent"
 			>
 				<!-- Item header with index and remove button -->
-				<div class="mb-3 flex items-center justify-between">
-					<span class="text-sm font-medium text-gray-600">
+				<div class="form-fill-repeater-header flex items-center justify-between mb-3">
+					<span class="form-fill-repeater-index text-sm font-medium text-muted-foreground">
 						{{ config.itemName ? `${config.itemName} #${itemIndex + 1}` : `#${itemIndex + 1}` }}
 					</span>
 					<button
 						v-if="canRemove && !readonly"
 						type="button"
-						class="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
+						class="form-fill-repeater-remove rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
 						@click="removeItem(itemIndex)"
 					>
 						<Icon name="heroicons:trash" class="h-4 w-4" />
@@ -183,7 +175,7 @@ const itemStyle = computed(() => {
 		<button
 			v-if="canAdd && !readonly"
 			type="button"
-			class="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600"
+			class="form-fill-repeater-add mt-4 flex w-full items-center justify-center gap-2 rounded-md border-2 border-dashed border-input py-3 px-4 text-sm text-muted-foreground transition-colors hover:border-ring hover:bg-ring/5 hover:text-ring"
 			@click="addItem"
 		>
 			<Icon name="heroicons:plus" class="h-4 w-4" />
@@ -191,6 +183,6 @@ const itemStyle = computed(() => {
 		</button>
 
 		<!-- Error message -->
-		<p v-if="error" class="form-fill-error mt-2">{{ error }}</p>
+		<p v-if="error" class="form-fill-error text-sm text-destructive mt-2">{{ error }}</p>
 	</div>
 </template>

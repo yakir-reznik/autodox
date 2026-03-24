@@ -134,6 +134,10 @@
 		link: [
 			{
 				rel: "stylesheet",
+				href: "/assets/css/themes/form-fill-base.css",
+			},
+			{
+				rel: "stylesheet",
 				href: `/api/forms/${form.id}/theme.css`,
 			},
 		],
@@ -154,7 +158,7 @@
 <style scoped>
 	.print-page-wrapper {
 		min-height: 100vh;
-		background: rgb(var(--fill-bg-page, 249 250 251));
+		background: var(--background);
 		padding: 2rem;
 	}
 

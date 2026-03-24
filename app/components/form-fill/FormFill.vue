@@ -544,20 +544,20 @@
 </script>
 
 <template>
-	<div class="form-fill-container">
+	<div class="form-fill-container min-h-screen bg-background font-sans p-6">
 		<!-- Loading state -->
 		<div v-if="pending" class="grid place-items-center min-h-screen">
-			<div class="form-fill-loading">
-				<Icon name="svg-spinners:ring-resize" class="h-8 w-8 form-fill-text-primary" />
+			<div class="form-fill-loading flex items-center justify-center min-h-[200px]">
+				<Icon name="svg-spinners:ring-resize" class="h-8 w-8 text-foreground" />
 			</div>
 		</div>
 
 		<!-- Error state (not found) -->
 		<div v-else-if="error" class="grid place-items-center min-h-screen">
-			<div class="form-fill-error-state form-fill-card">
-				<Icon name="heroicons:exclamation-circle" class="mx-auto h-12 w-12 text-red-500" />
-				<h2 class="form-fill-error-title">הטופס לא נמצא</h2>
-				<p class="form-fill-error-message">הטופס שאתה מחפש אינו קיים או הוסר.</p>
+			<div class="form-fill-error-state form-fill-card max-w-[640px] mx-auto bg-card rounded-lg shadow-md p-8 text-center">
+				<Icon name="heroicons:exclamation-circle" class="mx-auto h-12 w-12 text-destructive" />
+				<h2 class="form-fill-error-title text-xl font-semibold text-destructive mb-2">הטופס לא נמצא</h2>
+				<p class="form-fill-error-message text-base text-muted-foreground">הטופס שאתה מחפש אינו קיים או הוסר.</p>
 			</div>
 		</div>
 
@@ -579,10 +579,10 @@
 
 		<!-- Already locked error -->
 		<div v-else-if="isAlreadyLocked" class="grid place-items-center min-h-screen">
-			<div class="form-fill-error-state form-fill-card">
-				<Icon name="heroicons:lock-closed" class="mx-auto h-12 w-12 text-red-500" />
-				<h2 class="form-fill-error-title">הטופס כבר נשלח</h2>
-				<p class="form-fill-error-message">
+			<div class="form-fill-error-state form-fill-card max-w-[640px] mx-auto bg-card rounded-lg shadow-md p-8 text-center">
+				<Icon name="heroicons:lock-closed" class="mx-auto h-12 w-12 text-destructive" />
+				<h2 class="form-fill-error-title text-xl font-semibold text-destructive mb-2">הטופס כבר נשלח</h2>
+				<p class="form-fill-error-message text-base text-muted-foreground">
 					טופס זה כבר נשלח וננעל. לא ניתן לבצע שינויים נוספים.
 				</p>
 			</div>
@@ -590,44 +590,44 @@
 
 		<!-- Not published error -->
 		<div v-else-if="!isPublished" class="grid place-items-center min-h-screen">
-			<div class="form-fill-error-state form-fill-card">
-				<Icon name="heroicons:lock-closed" class="mx-auto h-12 w-12 text-gray-400" />
-				<h2 class="form-fill-error-title" style="color: rgb(var(--fill-text-primary))">
+			<div class="form-fill-error-state form-fill-card max-w-[640px] mx-auto bg-card rounded-lg shadow-md p-8 text-center">
+				<Icon name="heroicons:lock-closed" class="mx-auto h-12 w-12 text-muted-foreground" />
+				<h2 class="form-fill-error-title text-xl font-semibold text-foreground mb-2">
 					הטופס אינו זמין
 				</h2>
-				<p class="form-fill-error-message">טופס זה אינו מקבל הגשות כרגע.</p>
+				<p class="form-fill-error-message text-base text-muted-foreground">טופס זה אינו מקבל הגשות כרגע.</p>
 			</div>
 		</div>
 
 		<!-- Success state -->
 		<div v-else-if="isSubmitted" class="place-items-center grid min-h-screen">
-			<div class="form-fill-success form-fill-card">
-				<Icon name="heroicons:check-circle" class="form-fill-success-icon" />
-				<h2 class="form-fill-success-title">תודה רבה!</h2>
-				<p class="form-fill-success-message">הטופס שלך התקבל בהצלחה.</p>
+			<div class="form-fill-success form-fill-card max-w-[640px] mx-auto bg-card rounded-lg shadow-md p-8 text-center">
+				<Icon name="heroicons:check-circle" class="form-fill-success-icon h-16 w-16 mx-auto mb-4 text-green-500" />
+				<h2 class="form-fill-success-title text-xl font-semibold text-foreground mb-2">תודה רבה!</h2>
+				<p class="form-fill-success-message text-base text-muted-foreground">הטופס שלך התקבל בהצלחה.</p>
 			</div>
 		</div>
 
 		<!-- Form -->
-		<form v-else class="form-fill-card" @submit.prevent="handleSubmit">
+		<form v-else class="form-fill-card max-w-[640px] mx-auto bg-card rounded-lg shadow-md p-8" @submit.prevent="handleSubmit">
 			<!-- Navigation -->
 			<div class="text-center mb-8 my-4">
-				<NuxtLink to="/" class="form-fill-back-link form-fill-button rounded px-4 py-2">
+				<NuxtLink to="/" class="form-fill-back-link form-fill-button bg-primary text-primary-foreground rounded-md px-4 py-2 hover:bg-primary/90 transition-colors">
 					<Icon name="heroicons:arrow-left" class="inline h-4 w-4 mr-1" />
 					לעמוד הבית
 				</NuxtLink>
 			</div>
 
 			<!-- Header -->
-			<header class="form-fill-header">
-				<h1 class="form-fill-title">{{ form?.title }}</h1>
-				<p v-if="form && 'description' in form && form.description" class="form-fill-description">
+			<header class="form-fill-header mb-8 text-center">
+				<h1 class="form-fill-title text-2xl font-semibold text-foreground mb-2">{{ form?.title }}</h1>
+				<p v-if="form && 'description' in form && form.description" class="form-fill-description text-base text-muted-foreground">
 					{{ form.description }}
 				</p>
 			</header>
 
 			<!-- Elements -->
-			<div class="form-fill-elements">
+			<div class="form-fill-elements flex flex-col gap-6">
 				<FormField
 					v-for="element in visibleRootElements"
 					:key="element.clientId"
@@ -645,17 +645,17 @@
 			</div>
 
 			<!-- Error Summary -->
-			<div v-if="errorSummaries.length > 0" class="form-fill-error-summary">
-				<div class="form-fill-error-summary-header">
+			<div v-if="errorSummaries.length > 0" class="form-fill-error-summary bg-destructive/10 border border-destructive/30 rounded-md p-4 mb-6">
+				<div class="form-fill-error-summary-header flex items-center gap-2 text-destructive font-semibold mb-2">
 					<Icon name="heroicons:exclamation-triangle" class="h-5 w-5" />
 					<span>יש לתקן את השגיאות הבאות:</span>
 				</div>
-				<ul class="form-fill-error-summary-list">
-					<li v-for="err in errorSummaries" :key="err.errorKey">
-						<span><strong>{{ err.label }}:</strong> {{ err.message }}</span>
+				<ul class="form-fill-error-summary-list list-disc ps-6 text-foreground text-sm flex flex-col gap-1">
+					<li v-for="err in errorSummaries" :key="err.errorKey" class="flex items-center gap-2 flex-wrap">
+						<span><strong class="text-destructive">{{ err.label }}:</strong> {{ err.message }}</span>
 						<button
 							type="button"
-							class="form-fill-error-summary-link"
+							class="form-fill-error-summary-link text-xs text-primary underline hover:text-primary/80 cursor-pointer whitespace-nowrap"
 							@click="scrollToError(err.errorKey)"
 						>
 							צפה בשדה
@@ -665,8 +665,8 @@
 			</div>
 
 			<!-- Footer -->
-			<footer class="form-fill-footer">
-				<button type="submit" class="form-fill-submit" :disabled="isSubmitting">
+			<footer class="form-fill-footer mt-8">
+				<button type="submit" class="form-fill-submit w-full bg-primary text-primary-foreground text-base font-medium py-2 px-6 rounded-md border-none cursor-pointer hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :disabled="isSubmitting">
 					<template v-if="isSubmitting">
 						<Icon name="svg-spinners:ring-resize" class="inline h-4 w-4" />
 						שולח...

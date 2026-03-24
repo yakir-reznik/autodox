@@ -131,32 +131,32 @@
 
 <template>
 	<div>
-		<label v-if="config.label" class="form-fill-label">
+		<label v-if="config.label" class="form-fill-label block text-sm font-medium text-foreground mb-1">
 			{{ config.label }}
-			<span v-if="isRequired" class="form-fill-required">*</span>
+			<span v-if="isRequired" class="form-fill-required text-destructive ms-0.5">*</span>
 		</label>
 
 		<!-- Readonly mode: display signature as image -->
 		<div
 			v-if="readonly && modelValue"
-			class="form-fill-signature-readonly"
+			class="form-fill-signature-readonly border border-input rounded-md p-2 bg-card"
 			:style="{ maxWidth: `${canvasWidth}px` }"
 		>
 			<img
 				:src="modelValue"
 				:alt="config.label || 'חתימה'"
-				class="form-fill-signature-image"
+				class="form-fill-signature-image block max-w-full h-auto"
 			/>
 		</div>
 
 		<!-- Edit mode: canvas for drawing -->
 		<template v-else>
-			<p v-if="config.helpText" class="form-fill-help">{{ config.helpText }}</p>
+			<p v-if="config.helpText" class="form-fill-help text-sm text-muted-foreground mt-1">{{ config.helpText }}</p>
 			<canvas
 				ref="canvasRef"
 				:width="canvasWidth"
 				:height="canvasHeight"
-				class="form-fill-signature-canvas"
+				class="form-fill-signature-canvas border border-input rounded-md bg-card cursor-crosshair"
 				@mousedown="startDrawing"
 				@mousemove="draw"
 				@mouseup="stopDrawing"
@@ -166,10 +166,10 @@
 				@touchend="stopDrawing"
 			/>
 
-			<div class="form-fill-signature-actions">
+			<div class="form-fill-signature-actions flex gap-2 mt-2">
 				<button
 					type="button"
-					class="text-sm text-gray-600 hover:text-gray-800"
+					class="text-sm text-muted-foreground hover:text-foreground"
 					@click="clearSignature"
 				>
 					איפוס חתימה
@@ -177,21 +177,7 @@
 			</div>
 		</template>
 
-		<p v-if="error" class="form-fill-error">{{ error }}</p>
+		<p v-if="error" class="form-fill-error text-sm text-destructive mt-1">{{ error }}</p>
 	</div>
 </template>
 
-<style scoped>
-	.form-fill-signature-readonly {
-		border: 1px solid rgb(var(--fill-border));
-		border-radius: 0.375rem;
-		padding: 0.5rem;
-		background: rgb(var(--fill-bg-input));
-	}
-
-	.form-fill-signature-image {
-		display: block;
-		max-width: 100%;
-		height: auto;
-	}
-</style>

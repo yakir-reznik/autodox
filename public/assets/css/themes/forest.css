@@ -1,23 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
 
 :root {
-	/* Forest theme - Green/Earth tones */
-	--color-primary-50: 240 253 244;
-	--color-primary-100: 220 252 231;
-	--color-primary-500: 34 197 94;
-	--color-primary-600: 22 163 74;
-	--color-primary-700: 21 128 61;
-
-	/* Backgrounds */
-	--fill-bg: 254 252 232; /* warm cream */
-	--fill-card-bg: 255 255 255;
-	--fill-section-bg: 240 253 244;
-
-	/* Accent colors */
-	--fill-input-border-focus: 34 197 94;
-	--fill-button-primary-bg: 22 163 74;
-	--fill-button-primary-hover: 21 128 61;
-
-	/* Typography */
-	--fill-font-family: 'Rubik', sans-serif;
+	--background: oklch(0.97 0.02 100);
+	--foreground: oklch(0.2 0.03 150);
+	--card: oklch(1 0 0);
+	--card-foreground: oklch(0.2 0.03 150);
+	--primary: oklch(0.55 0.17 150);
+	--primary-foreground: oklch(1 0 0);
+	--secondary: oklch(0.96 0.015 150);
+	--secondary-foreground: oklch(0.2 0.03 150);
+	--muted: oklch(0.96 0.015 150);
+	--muted-foreground: oklch(0.5 0.02 150);
+	--accent: oklch(0.96 0.03 150);
+	--accent-foreground: oklch(0.3 0.03 150);
+	--destructive: oklch(0.637 0.237 25.3);
+	--destructive-foreground: oklch(1 0 0);
+	--border: oklch(0.88 0.02 150);
+	--input: oklch(0.88 0.02 150);
+	--ring: oklch(0.6 0.17 150);
+	--radius: 0.5rem;
+	--font-sans: 'Rubik', sans-serif;
+	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
 }

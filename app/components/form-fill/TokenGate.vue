@@ -8,8 +8,8 @@ defineProps<Props>();
 </script>
 
 <template>
-	<div class="grid min-h-screen place-items-center form-fill-container">
-		<div class="form-fill-card w-full max-w-md p-8">
+	<div class="grid min-h-screen place-items-center form-fill-container min-h-screen bg-background font-sans p-6">
+		<div class="form-fill-card max-w-md w-full mx-auto bg-card rounded-lg shadow-md p-8">
 			<!-- Lock icon -->
 			<div class="mb-6 text-center">
 				<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
@@ -18,10 +18,10 @@ defineProps<Props>();
 			</div>
 
 			<!-- Title -->
-			<h1 class="form-fill-title mb-2 text-center text-xl">
+			<h1 class="form-fill-title text-xl font-semibold text-foreground mb-2 text-center">
 				{{ formTitle }}
 			</h1>
-			<p v-if="formDescription" class="form-fill-description mb-4 text-center">
+			<p v-if="formDescription" class="form-fill-description text-base text-muted-foreground mb-4 text-center">
 				{{ formDescription }}
 			</p>
 

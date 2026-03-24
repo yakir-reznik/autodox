@@ -39,7 +39,7 @@ Current `--fill-*` → shadcn variable → Tailwind class:
 
 ## Steps
 
-### Step 1: Convert ocean theme to use shadcn variable names
+### Step 1: Convert ocean theme to use shadcn variable names ✅
 
 Update only `ocean.css` for now. Other themes will be converted later if this works well.
 
@@ -73,7 +73,7 @@ Override `:root` with:
 
 Convert current RGB values to oklch format to match the existing Tailwind setup. Other theme files (`dark.css`, `forest.css`, `unicorn.css`, `variables.css`) will be converted in a follow-up after validating the ocean theme.
 
-### Step 2: Refactor `main.css` — strip styling from `.form-fill-*` classes, keep only browser overrides
+### Step 2: Refactor `main.css` — strip styling from `.form-fill-*` classes, keep only browser overrides ✅
 
 Remove the styling rules from `.form-fill-*` classes (make them empty or remove their property declarations) but **keep the class names defined** so they remain as hooks. Keep only:
 
@@ -87,7 +87,7 @@ Remove the styling rules from `.form-fill-*` classes (make them empty or remove 
 
 These are browser-level overrides that Tailwind can't handle. Update their variable references from `--fill-*` to shadcn names.
 
-### Step 3: Refactor `FormFill.vue` — add Tailwind classes alongside existing ones
+### Step 3: Refactor `FormFill.vue` — add Tailwind classes alongside existing ones ✅
 
 Add Tailwind utility classes to components. **Keep the `.form-fill-*` class names** — we may need them later. The Tailwind classes provide the styling, the `.form-fill-*` classes stay as hooks:
 
@@ -102,11 +102,11 @@ Add Tailwind utility classes to components. **Keep the `.form-fill-*` class name
 - Success/error/loading states — same pattern with Tailwind classes
 - Error summary — `bg-destructive/10 border border-destructive/30 rounded-md p-4`
 
-### Step 4: Refactor `FormField.vue` — Tailwind wrapper
+### Step 4: Refactor `FormField.vue` — Tailwind wrapper ✅
 
 Add Tailwind classes alongside existing `.form-fill-field`: `flex flex-col` + keep `.form-fill-field` and `.has-error` class names as hooks
 
-### Step 5: Refactor key element components (pilot)
+### Step 5: Refactor key element components (pilot) ✅
 
 Add Tailwind utility classes **alongside** existing `.form-fill-*` class names (keep them as hooks). Only do these 3 to validate the approach:
 
@@ -136,11 +136,11 @@ Add Tailwind utility classes **alongside** existing `.form-fill-*` class names (
 - Add button: `.form-fill-repeater-add` + `mt-4 flex w-full items-center justify-center gap-2 rounded-md border-2 border-dashed border-input py-3 px-4 text-sm text-muted-foreground transition-colors hover:border-ring hover:bg-ring/5 hover:text-ring`
 - Remove `itemStyle` computed (hardcoded `#f9fafb`)
 
-### Step 6: Refactor `PasswordGate.vue` and `TokenGate.vue`
+### Step 6: Refactor `PasswordGate.vue` and `TokenGate.vue` ✅
 
 Add Tailwind utility classes **alongside** existing `.form-fill-*` class names (keep them as hooks).
 
-### Step 7: Verify print view compatibility
+### Step 7: Verify print view compatibility ✅
 
 Check `app/components/form-print/` — if it uses `.form-fill-*` classes, add Tailwind classes alongside them (keep `.form-fill-*` as hooks).
 
@@ -158,8 +158,8 @@ Run `pnpm dev` and verify the ocean theme renders correctly:
 
 Once the ocean theme is verified, complete the refactor:
 
-- **Remaining element components:** `FillTextarea.vue`, `FillSignature.vue`, `FillSection.vue`, `FillHeading.vue`, `FillParagraph.vue`, `FillDivider.vue`, `FillMedia.vue`, `FillSpacer.vue`
-- **Remaining theme files:** Convert `dark.css`, `forest.css`, `unicorn.css`, `variables.css` to shadcn variable names (use ocean.css as reference)
+- **Remaining element components:** `FillTextarea.vue`, `FillSignature.vue`, `FillSection.vue`, `FillHeading.vue`, `FillParagraph.vue`, `FillDivider.vue`, `FillMedia.vue`, `FillSpacer.vue` ✅
+- **Remaining theme files:** Convert `dark.css`, `forest.css`, `unicorn.css`, `variables.css` to shadcn variable names (use ocean.css as reference) ✅
 
 ## Critical Files
 

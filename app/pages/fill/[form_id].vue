@@ -22,6 +22,10 @@
 		link: [
 			{
 				rel: "stylesheet",
+				href: "/assets/css/themes/form-fill-base.css",
+			},
+			{
+				rel: "stylesheet",
 				href: `/api/forms/${formId.value}/theme.css`,
 			},
 		],

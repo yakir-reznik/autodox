@@ -101,16 +101,17 @@ function isChecked(optionValue: string): boolean {
 <template>
 	<div>
 		<!-- Label (not for single checkbox) -->
-		<label v-if="config.label && element.type !== 'checkbox'" class="form-fill-label">
+		<label v-if="config.label && element.type !== 'checkbox'" class="form-fill-label block text-sm font-medium text-foreground mb-1">
 			{{ config.label }}
-			<span v-if="isRequired" class="form-fill-required">*</span>
+			<span v-if="isRequired" class="form-fill-required text-destructive ms-0.5">*</span>
 		</label>
 
 		<!-- Dropdown -->
 		<template v-if="element.type === 'dropdown'">
 			<select
 				:value="isOtherSelected ? '__other__' : modelValue"
-				class="form-fill-select"
+				class="form-fill-select w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground cursor-pointer transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10"
+				:class="{ 'border-destructive': error }"
 				@change="($event.target as HTMLSelectElement).value === '__other__' ? selectOther() : emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
 				@blur="emit('blur')"
 			>
@@ -124,7 +125,7 @@ function isChecked(optionValue: string): boolean {
 				v-if="config.allowUserOption && isOtherSelected"
 				type="text"
 				:value="otherText"
-				class="form-fill-input mt-2"
+				class="form-fill-input w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10 placeholder:text-muted-foreground mt-2"
 				placeholder="פרט..."
 				@input="updateOtherText(($event.target as HTMLInputElement).value)"
 				@blur="emit('blur')"
@@ -132,33 +133,35 @@ function isChecked(optionValue: string): boolean {
 		</template>
 
 		<!-- Radio buttons -->
-		<div v-else-if="element.type === 'radio'" class="form-fill-radio-group selection-columns" :style="columnsVars">
-			<label v-for="opt in config.options" :key="opt.id" class="form-fill-radio-option">
+		<div v-else-if="element.type === 'radio'" class="form-fill-radio-group selection-columns flex flex-col gap-2" :style="columnsVars">
+			<label v-for="opt in config.options" :key="opt.id" class="form-fill-radio-option flex items-center gap-2 cursor-pointer">
 				<input
 					type="radio"
 					:name="element.clientId"
 					:value="opt.value"
 					:checked="modelValue === opt.value"
+					class="h-4 w-4 accent-primary"
 					@change="emit('update:modelValue', opt.value)"
 					@blur="emit('blur')"
 				/>
-				<span>{{ opt.label }}</span>
+				<span class="text-base text-foreground">{{ opt.label }}</span>
 			</label>
-			<label v-if="config.allowUserOption" class="form-fill-radio-option">
+			<label v-if="config.allowUserOption" class="form-fill-radio-option flex items-center gap-2 cursor-pointer">
 				<input
 					type="radio"
 					:name="element.clientId"
 					value="__other__"
 					:checked="isOtherSelected"
+					class="h-4 w-4 accent-primary"
 					@change="selectOther()"
 				/>
-				<span>אחר</span>
+				<span class="text-base text-foreground">אחר</span>
 			</label>
 			<input
 				v-if="config.allowUserOption && isOtherSelected"
 				type="text"
 				:value="otherText"
-				class="form-fill-input mt-2"
+				class="form-fill-input w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10 placeholder:text-muted-foreground mt-2"
 				placeholder="פרט..."
 				@input="updateOtherText(($event.target as HTMLInputElement).value)"
 				@blur="emit('blur')"
@@ -166,53 +169,56 @@ function isChecked(optionValue: string): boolean {
 		</div>
 
 		<!-- Single checkbox -->
-		<label v-else-if="element.type === 'checkbox'" class="form-fill-checkbox">
+		<label v-else-if="element.type === 'checkbox'" class="form-fill-checkbox flex items-center gap-2 cursor-pointer">
 			<input
 				type="checkbox"
 				:checked="!!modelValue"
+				class="h-4 w-4 accent-primary"
 				@change="emit('update:modelValue', ($event.target as HTMLInputElement).checked)"
 				@blur="emit('blur')"
 			/>
-			<span>
+			<span class="text-base text-foreground">
 				{{ config.label }}
-				<span v-if="isRequired" class="form-fill-required">*</span>
+				<span v-if="isRequired" class="form-fill-required text-destructive ms-0.5">*</span>
 			</span>
 		</label>
 
 		<!-- Multiple checkboxes -->
-		<div v-else-if="element.type === 'checkboxes'" class="form-fill-checkbox-group selection-columns" :style="columnsVars">
-			<label v-for="opt in config.options" :key="opt.id" class="form-fill-checkbox-option">
+		<div v-else-if="element.type === 'checkboxes'" class="form-fill-checkbox-group selection-columns flex flex-col gap-2" :style="columnsVars">
+			<label v-for="opt in config.options" :key="opt.id" class="form-fill-checkbox-option flex items-center gap-2 cursor-pointer">
 				<input
 					type="checkbox"
 					:value="opt.value"
 					:checked="isChecked(opt.value)"
+					class="h-4 w-4 accent-primary"
 					@change="handleCheckboxChange(opt.value, ($event.target as HTMLInputElement).checked)"
 					@blur="emit('blur')"
 				/>
-				<span>{{ opt.label }}</span>
+				<span class="text-base text-foreground">{{ opt.label }}</span>
 			</label>
-			<label v-if="config.allowUserOption" class="form-fill-checkbox-option">
+			<label v-if="config.allowUserOption" class="form-fill-checkbox-option flex items-center gap-2 cursor-pointer">
 				<input
 					type="checkbox"
 					:checked="isOtherSelected"
+					class="h-4 w-4 accent-primary"
 					@change="handleOtherCheckbox(($event.target as HTMLInputElement).checked)"
 					@blur="emit('blur')"
 				/>
-				<span>אחר</span>
+				<span class="text-base text-foreground">אחר</span>
 			</label>
 			<input
 				v-if="config.allowUserOption && isOtherSelected"
 				type="text"
 				:value="otherText"
-				class="form-fill-input mt-2"
+				class="form-fill-input w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10 placeholder:text-muted-foreground mt-2"
 				placeholder="פרט..."
 				@input="updateOtherText(($event.target as HTMLInputElement).value)"
 				@blur="emit('blur')"
 			/>
 		</div>
 
-		<p v-if="error" class="form-fill-error">{{ error }}</p>
-		<p v-else-if="config.helpText" class="form-fill-help">{{ config.helpText }}</p>
+		<p v-if="error" class="form-fill-error text-sm text-destructive mt-1">{{ error }}</p>
+		<p v-else-if="config.helpText" class="form-fill-help text-sm text-muted-foreground mt-1">{{ config.helpText }}</p>
 	</div>
 </template>
 

@@ -29,5 +29,5 @@ const resolvedHtml = computed(() => {
 </script>
 
 <template>
-	<p class="form-fill-paragraph" :style="alignmentStyle" v-html="resolvedHtml" />
+	<p class="form-fill-paragraph text-base text-muted-foreground leading-relaxed" :style="alignmentStyle" v-html="resolvedHtml" />
 </template>
