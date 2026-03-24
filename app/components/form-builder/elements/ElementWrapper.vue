@@ -107,7 +107,7 @@
 	const containerBackgroundColor = computed(() => {
 		if (isContainer.value) {
 			const config = props.element.config as { backgroundColor?: string };
-			return config.backgroundColor || "#fff";
+			return config.backgroundColor || undefined;
 		}
 		return undefined;
 	});

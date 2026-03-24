@@ -307,11 +307,17 @@
 				</BaseToggle>
 			</div>
 
-			<div>
-				<label class="mb-1 block text-sm text-gray-600">Background Color</label>
+			<BaseToggle
+				:model-value="!!config.backgroundColor"
+				@update:model-value="$emit('update:config', { backgroundColor: $event ? '#f9fafb' : '' })"
+			>
+				Custom background color
+			</BaseToggle>
+
+			<div v-if="config.backgroundColor">
 				<input
 					type="color"
-					:value="config.backgroundColor || '#f9fafb'"
+					:value="config.backgroundColor"
 					class="h-8 w-full cursor-pointer rounded border border-gray-300"
 					@input="
 						$emit('update:config', {
