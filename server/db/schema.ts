@@ -41,7 +41,7 @@ export const formStatusEnum = ["draft", "published", "archived"] as const;
 export type FormStatus = (typeof formStatusEnum)[number];
 
 // Form theme enum
-export const formThemeEnum = ["default", "dark", "ocean", "forest", "unicorn"] as const;
+export const formThemeEnum = ["default", "dark", "ocean", "forest", "unicorn", "orange"] as const;
 export type FormTheme = (typeof formThemeEnum)[number];
 
 // Element type enum - covers all field types and layout elements

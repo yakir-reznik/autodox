@@ -32,6 +32,12 @@ export const THEME_DEFINITIONS: ThemeDefinition[] = [
 		description: "ורוד עז וקסום עם צללים",
 		cssFile: "/assets/css/themes/unicorn.css",
 	},
+	{
+		id: "orange",
+		label: "תפוז",
+		description: "גוונים כתומים עם פונט מונו",
+		cssFile: "/assets/css/themes/orange.css",
+	},
 ];
 
 export function getThemeDefinition(themeId: FormTheme): ThemeDefinition {

@@ -1,0 +1,1 @@
+ALTER TABLE `forms_table` MODIFY COLUMN `theme` enum('default','dark','ocean','forest','unicorn','orange') NOT NULL DEFAULT 'default';
