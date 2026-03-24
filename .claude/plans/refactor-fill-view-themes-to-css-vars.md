@@ -6,6 +6,8 @@ Form-fill components currently use custom `.form-fill-*` CSS classes defined in 
 
 **Goal:** Use Tailwind classes directly in form-fill components, and have theme files override the standard shadcn CSS variables. This eliminates `main.css` almost entirely and makes themes just a set of variable overrides.
 
+**Constraint:** Use shadcn-compatible variable names and Tailwind class patterns (e.g., `bg-primary`, `text-destructive`, `border-input`, `rounded-md`) so that form-fill components can later be swapped to shadcn components with minimal friction.
+
 ## Variable Mapping
 
 Current `--fill-*` → shadcn variable → Tailwind class:
