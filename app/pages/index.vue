@@ -145,6 +145,34 @@
 			color: "text-red-500",
 			bg: "bg-red-500/10",
 		},
+		{
+			icon: "ph:webhooks-logo-fill",
+			title: "Webhooks ואינטגרציות",
+			desc: "חבר את הטפסים שלך לשירותים חיצוניים. שלח נתונים אוטומטית עם ניסיונות חוזרים.",
+			color: "text-orange-500",
+			bg: "bg-orange-500/10",
+		},
+		{
+			icon: "ph:upload-fill",
+			title: "העלאת קבצים",
+			desc: "אפשר למשתמשים להעלות קבצים, תמונות ומסמכים ישירות דרך הטופס.",
+			color: "text-teal-500",
+			bg: "bg-teal-500/10",
+		},
+		{
+			icon: "ph:floppy-disk-fill",
+			title: "שמירה אוטומטית",
+			desc: "הטפסים נשמרים אוטומטית תוך כדי עריכה. אף שינוי לא הולך לאיבוד.",
+			color: "text-lime-500",
+			bg: "bg-lime-500/10",
+		},
+		{
+			icon: "ph:file-arrow-up-fill",
+			title: "ייבוא וייצוא JSON",
+			desc: "ייבא וייצא טפסים בפורמט JSON. העבר טפסים בין חשבונות בקלות.",
+			color: "text-indigo-500",
+			bg: "bg-indigo-500/10",
+		},
 	];
 </script>
 
@@ -157,6 +185,7 @@
 		<ContentSectionHowItWorks :scroll-to="scrollTo" />
 		<ContentSectionHomepageCTA />
 		<ContentSectionFormElements />
+		<ContentSectionContactUs />
 		<ContentSectionHomepageFooter />
 	</div>
 </template>
@@ -412,6 +441,18 @@
 	}
 	.stagger.revealed > *:nth-child(8) {
 		transition-delay: 420ms;
+	}
+	.stagger.revealed > *:nth-child(9) {
+		transition-delay: 480ms;
+	}
+	.stagger.revealed > *:nth-child(10) {
+		transition-delay: 540ms;
+	}
+	.stagger.revealed > *:nth-child(11) {
+		transition-delay: 600ms;
+	}
+	.stagger.revealed > *:nth-child(12) {
+		transition-delay: 660ms;
 	}
 
 	/* ---- Scroll indicator ---- */

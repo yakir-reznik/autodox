@@ -38,8 +38,9 @@
 			color: "blue",
 			elements: [
 				{ icon: "heroicons:pencil", label: "טקסט" },
-				{ icon: "heroicons:envelope", label: "אימייל" },
 				{ icon: "heroicons:document-text", label: "אזור טקסט" },
+				{ icon: "heroicons:phone", label: "טלפון" },
+				{ icon: "heroicons:envelope", label: "אימייל" },
 				{ icon: "heroicons:hashtag", label: "מספר" },
 				{ icon: "heroicons:calendar", label: "תאריך" },
 				{ icon: "heroicons:clock", label: "שעה" },

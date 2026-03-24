@@ -45,6 +45,12 @@
 					>
 						20+ רכיבים לבניית טפסים
 					</button>
+					<button
+						@click="scrollTo('contact')"
+						class="cursor-pointer text-sm text-white/60 transition-colors hover:text-white"
+					>
+						צור קשר
+					</button>
 					<NuxtLink
 						to="/login"
 						class="text-sm text-white/60 transition-colors hover:text-white"
