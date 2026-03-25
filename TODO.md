@@ -12,6 +12,7 @@
 
 ## Features
 
+- [ ] Allow saving without submitting. Also allow saving while form is only partially filled. Max 1 save per user per form and it should expire after 30 days. new save overwrites last one.
 - [x] Update json upload schema with new elements recently added
 - [x] Button to view / copy typescript type (schema) of form submission result (based on fields from formbuilder)
 - [x] Add "autocomplete" property to some fields that it makes sense like "input" / "phone" / "email". also add it to the propmt for gpt schema. @pages/forms/upload?formId=7
