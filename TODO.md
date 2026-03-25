@@ -12,6 +12,8 @@
 
 ## Features
 
+- [ ] I tried submitting a form with a fake webook. i see "attempt 2" failed. can't see attempt #1
+- [ ] In submission-detail view - add a button to resend the webhook.
 - [ ] Allow saving without submitting. Also allow saving while form is only partially filled. Max 1 save per user per form and it should expire after 30 days. new save overwrites last one.
 - [x] Update json upload schema with new elements recently added
 - [x] Button to view / copy typescript type (schema) of form submission result (based on fields from formbuilder)
