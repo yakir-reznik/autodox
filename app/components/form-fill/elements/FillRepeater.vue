@@ -135,6 +135,7 @@ const containerClass = computed(() => {
 				v-for="(item, itemIndex) in items"
 				:key="itemIndex"
 				class="form-fill-repeater-item relative rounded-md border border-input p-4 bg-accent"
+				:class="{ '!border-destructive': error }"
 			>
 				<!-- Item header with index and remove button -->
 				<div class="form-fill-repeater-header flex items-center justify-between mb-3">

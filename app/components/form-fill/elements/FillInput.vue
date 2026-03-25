@@ -15,6 +15,8 @@ const emit = defineEmits<{
 	blur: [];
 }>();
 
+const inputId = useId();
+
 const config = computed(() => props.element.config as {
 	label?: string;
 	placeholder?: string;
@@ -84,11 +86,12 @@ function handlePhoneBlur(event: Event) {
 
 <template>
 	<div>
-		<label v-if="config.label" class="form-fill-label block text-sm font-medium text-foreground mb-1">
+		<label v-if="config.label" :for="inputId" class="form-fill-label block text-sm font-medium text-foreground mb-1">
 			{{ config.label }}
 			<span v-if="isRequired" class="form-fill-required text-destructive ms-0.5">*</span>
 		</label>
 		<input
+			:id="inputId"
 			:type="inputType"
 			:value="modelValue"
 			:placeholder="config.placeholder"
@@ -96,7 +99,7 @@ function handlePhoneBlur(event: Event) {
 			:autocomplete="config.autocomplete || 'off'"
 			:dir="element.type === 'phone' ? 'ltr' : undefined"
 			class="form-fill-input w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10 placeholder:text-muted-foreground"
-			:class="{ 'border-destructive': error }"
+			:class="{ '!border-destructive': error }"
 			@input="handleInput"
 			@blur="element.type === 'phone' ? handlePhoneBlur($event) : emit('blur')"
 		/>

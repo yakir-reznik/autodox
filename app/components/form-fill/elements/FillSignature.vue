@@ -157,6 +157,7 @@
 				:width="canvasWidth"
 				:height="canvasHeight"
 				class="form-fill-signature-canvas border border-input rounded-md bg-card cursor-crosshair"
+				:class="{ '!border-destructive': error }"
 				@mousedown="startDrawing"
 				@mousemove="draw"
 				@mouseup="stopDrawing"

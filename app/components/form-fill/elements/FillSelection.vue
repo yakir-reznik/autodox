@@ -15,6 +15,8 @@ const emit = defineEmits<{
 	blur: [];
 }>();
 
+const inputId = useId();
+
 const config = computed(() => props.element.config as {
 	label?: string;
 	placeholder?: string;
@@ -101,7 +103,7 @@ function isChecked(optionValue: string): boolean {
 <template>
 	<div>
 		<!-- Label (not for single checkbox) -->
-		<label v-if="config.label && element.type !== 'checkbox'" class="form-fill-label block text-sm font-medium text-foreground mb-1">
+		<label v-if="config.label && element.type !== 'checkbox'" :for="element.type === 'dropdown' ? inputId : undefined" class="form-fill-label block text-sm font-medium text-foreground mb-1">
 			{{ config.label }}
 			<span v-if="isRequired" class="form-fill-required text-destructive ms-0.5">*</span>
 		</label>
@@ -109,9 +111,10 @@ function isChecked(optionValue: string): boolean {
 		<!-- Dropdown -->
 		<template v-if="element.type === 'dropdown'">
 			<select
+				:id="inputId"
 				:value="isOtherSelected ? '__other__' : modelValue"
 				class="form-fill-select w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground cursor-pointer transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10"
-				:class="{ 'border-destructive': error }"
+				:class="{ '!border-destructive': error }"
 				@change="($event.target as HTMLSelectElement).value === '__other__' ? selectOther() : emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
 				@blur="emit('blur')"
 			>
@@ -133,7 +136,7 @@ function isChecked(optionValue: string): boolean {
 		</template>
 
 		<!-- Radio buttons -->
-		<div v-else-if="element.type === 'radio'" class="form-fill-radio-group selection-columns flex flex-col gap-2" :style="columnsVars">
+		<div v-else-if="element.type === 'radio'" class="form-fill-radio-group selection-columns flex flex-col gap-2" :class="{ 'ring-1 ring-destructive rounded-md p-2': error }" :style="columnsVars">
 			<label v-for="opt in config.options" :key="opt.id" class="form-fill-radio-option flex items-center gap-2 cursor-pointer">
 				<input
 					type="radio"
@@ -169,7 +172,7 @@ function isChecked(optionValue: string): boolean {
 		</div>
 
 		<!-- Single checkbox -->
-		<label v-else-if="element.type === 'checkbox'" class="form-fill-checkbox flex items-center gap-2 cursor-pointer">
+		<label v-else-if="element.type === 'checkbox'" class="form-fill-checkbox flex items-center gap-2 cursor-pointer" :class="{ 'ring-1 ring-destructive rounded-md p-2': error }">
 			<input
 				type="checkbox"
 				:checked="!!modelValue"
@@ -184,7 +187,7 @@ function isChecked(optionValue: string): boolean {
 		</label>
 
 		<!-- Multiple checkboxes -->
-		<div v-else-if="element.type === 'checkboxes'" class="form-fill-checkbox-group selection-columns flex flex-col gap-2" :style="columnsVars">
+		<div v-else-if="element.type === 'checkboxes'" class="form-fill-checkbox-group selection-columns flex flex-col gap-2" :class="{ 'ring-1 ring-destructive rounded-md p-2': error }" :style="columnsVars">
 			<label v-for="opt in config.options" :key="opt.id" class="form-fill-checkbox-option flex items-center gap-2 cursor-pointer">
 				<input
 					type="checkbox"
