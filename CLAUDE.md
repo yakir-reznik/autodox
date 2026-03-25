@@ -4,7 +4,7 @@ Autodox is a **Nuxt 4** form builder for creating and filling dynamic forms (Vue
 
 ## Key Facts
 
-- **Use tabs** use tabs over spaces when writing code
+- **Use tabs** use tabs over spaces for indentation when writing code
 - **Hebrew RTL**: All UI text is in Hebrew. The app uses `dir="rtl"` and `lang="he"`.
 - **SSR disabled**: Client-side only rendering.
 - **Type safety**: Shared types between client and server in `app/types/form-builder.ts`.
