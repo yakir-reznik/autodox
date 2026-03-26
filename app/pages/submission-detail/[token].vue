@@ -112,12 +112,6 @@
 		});
 	}
 
-	function copyToClipboard(text: string, label: string = "Text") {
-		navigator.clipboard.writeText(text).then(() => {
-			console.log(`${label} copied to clipboard`);
-		});
-	}
-
 	const isDownloading = ref(false);
 	const isSubmissionDataExpanded = ref(false);
 
@@ -383,19 +377,7 @@
 							<Icon :name="isSubmissionDataExpanded ? 'heroicons:chevron-up' : 'heroicons:chevron-down'" class="h-4 w-4" />
 							{{ isSubmissionDataExpanded ? "הצג פחות" : `הצג עוד (${submissionDataLines.length - 10} שורות נוספות)` }}
 						</BaseButton>
-						<BaseButton
-							variant="secondary"
-							size="sm"
-							@click="
-								copyToClipboard(
-									JSON.stringify(submission.submissionData, null, 2),
-									'Submission data',
-								)
-							"
-						>
-							<Icon name="heroicons:clipboard-document" class="h-4 w-4" />
-							Copy JSON
-						</BaseButton>
+						<BaseCopyButton :text="JSON.stringify(submission.submissionData, null, 2)" />
 					</div>
 				</div>
 
@@ -411,19 +393,7 @@
 						}}</pre>
 					</div>
 					<div class="mt-4 flex gap-2">
-						<BaseButton
-							variant="secondary"
-							size="sm"
-							@click="
-								copyToClipboard(
-									JSON.stringify(submission.prefillData, null, 2),
-									'Prefill data',
-								)
-							"
-						>
-							<Icon name="heroicons:clipboard-document" class="h-4 w-4" />
-							Copy JSON
-						</BaseButton>
+						<BaseCopyButton :text="JSON.stringify(submission.prefillData, null, 2)" />
 					</div>
 				</div>
 
@@ -439,19 +409,7 @@
 						}}</pre>
 					</div>
 					<div class="mt-4 flex gap-2">
-						<BaseButton
-							variant="secondary"
-							size="sm"
-							@click="
-								copyToClipboard(
-									JSON.stringify(submission.additionalData, null, 2),
-									'Additional data',
-								)
-							"
-						>
-							<Icon name="heroicons:clipboard-document" class="h-4 w-4" />
-							Copy JSON
-						</BaseButton>
+						<BaseCopyButton :text="JSON.stringify(submission.additionalData, null, 2)" />
 					</div>
 				</div>
 
