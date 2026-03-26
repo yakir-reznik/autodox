@@ -96,12 +96,6 @@
 		}
 	}
 
-	async function copyApiKey() {
-		if (!profile.value?.apiKey) return;
-		await navigator.clipboard.writeText(profile.value.apiKey);
-		toasts.add({ title: "מפתח API הועתק", theme: "success" });
-	}
-
 	async function rerollApiKey() {
 		rerolling.value = true;
 		try {
@@ -320,9 +314,7 @@
 										class="size-4"
 									/>
 								</UiButton>
-								<UiButton variant="ghost" size="icon-sm" @click="copyApiKey">
-									<Icon name="heroicons:clipboard-document" class="size-4" />
-								</UiButton>
+								<BaseCopyButton :text="profile.apiKey ?? ''" />
 							</div>
 						</div>
 					</UiCardContent>

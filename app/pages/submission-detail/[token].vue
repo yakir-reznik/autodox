@@ -114,6 +114,13 @@
 
 	const isDownloading = ref(false);
 	const isSubmissionDataExpanded = ref(false);
+	const isPrefillDataExpanded = ref(false);
+	const isEntrancesExpanded = ref(false);
+
+	const ENTRANCES_LIMIT = 5;
+	const visibleEntrances = computed(() =>
+		isEntrancesExpanded.value ? entrances.value : entrances.value.slice(0, ENTRANCES_LIMIT),
+	);
 
 	const submissionDataLines = computed(() => {
 		if (!submission.value?.submissionData) return [];
@@ -123,6 +130,17 @@
 	const visibleSubmissionData = computed(() => {
 		const lines = submissionDataLines.value;
 		if (isSubmissionDataExpanded.value || lines.length <= 10) return lines.join("\n");
+		return lines.slice(0, 10).join("\n");
+	});
+
+	const prefillDataLines = computed(() => {
+		if (!submission.value?.prefillData) return [];
+		return JSON.stringify(submission.value.prefillData, null, 2).split("\n");
+	});
+
+	const visiblePrefillData = computed(() => {
+		const lines = prefillDataLines.value;
+		if (isPrefillDataExpanded.value || lines.length <= 10) return lines.join("\n");
 		return lines.slice(0, 10).join("\n");
 	});
 
@@ -359,42 +377,51 @@
 				</div>
 
 				<!-- Submission Data -->
-				<div v-if="submission.submissionData" class="mb-8 rounded-lg bg-white p-6 shadow">
-					<h2 class="mb-4 text-lg font-medium text-gray-900">Submitted Data</h2>
-					<div
-						dir="ltr"
-						class="overflow-x-auto rounded-lg bg-gray-50 p-4 font-mono text-sm"
+				<div v-if="submission.submissionData" class="mb-8 overflow-hidden rounded-lg bg-white shadow">
+					<div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3">
+						<h2 class="text-lg font-medium text-gray-900">Submitted Data</h2>
+						<BaseCopyButton :text="JSON.stringify(submission.submissionData, null, 2)" variant="ghost" />
+					</div>
+					<div class="relative">
+						<div dir="ltr" class="overflow-x-auto p-4 font-mono text-sm">
+							<pre class="whitespace-pre-wrap wrap-break-word text-gray-800">{{ visibleSubmissionData }}</pre>
+						</div>
+						<div
+							v-if="submissionDataLines.length > 10 && !isSubmissionDataExpanded"
+							class="pointer-events-none absolute bottom-0 left-0 right-0 h-20 bg-linear-to-t from-white to-transparent"
+						/>
+					</div>
+					<button
+						v-if="submissionDataLines.length > 10"
+						class="w-full cursor-pointer border-t border-gray-100 py-2.5 text-center text-sm text-blue-600 transition hover:bg-gray-50"
+						@click="isSubmissionDataExpanded = !isSubmissionDataExpanded"
 					>
-						<pre class="whitespace-pre-wrap wrap-break-word text-gray-800">{{ visibleSubmissionData }}</pre>
-					</div>
-					<div class="mt-4 flex gap-2">
-						<BaseButton
-							v-if="submissionDataLines.length > 10"
-							variant="secondary"
-							size="sm"
-							@click="isSubmissionDataExpanded = !isSubmissionDataExpanded"
-						>
-							<Icon :name="isSubmissionDataExpanded ? 'heroicons:chevron-up' : 'heroicons:chevron-down'" class="h-4 w-4" />
-							{{ isSubmissionDataExpanded ? "הצג פחות" : `הצג עוד (${submissionDataLines.length - 10} שורות נוספות)` }}
-						</BaseButton>
-						<BaseCopyButton :text="JSON.stringify(submission.submissionData, null, 2)" />
-					</div>
+						{{ isSubmissionDataExpanded ? "הצג פחות" : `הצג עוד (${submissionDataLines.length - 10} שורות נוספות)` }}
+					</button>
 				</div>
 
 				<!-- Prefill Data -->
-				<div v-if="submission.prefillData" class="mb-8 rounded-lg bg-white p-6 shadow">
-					<h2 class="mb-4 text-lg font-medium text-gray-900">Prefill Data</h2>
-					<div
-						dir="ltr"
-						class="overflow-x-auto rounded-lg bg-gray-50 p-4 font-mono text-sm"
+				<div v-if="submission.prefillData" class="mb-8 overflow-hidden rounded-lg bg-white shadow">
+					<div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3">
+						<h2 class="text-lg font-medium text-gray-900">Prefill Data</h2>
+						<BaseCopyButton :text="JSON.stringify(submission.prefillData, null, 2)" variant="ghost" />
+					</div>
+					<div class="relative">
+						<div dir="ltr" class="overflow-x-auto p-4 font-mono text-sm">
+							<pre class="whitespace-pre-wrap wrap-break-word text-gray-800">{{ visiblePrefillData }}</pre>
+						</div>
+						<div
+							v-if="prefillDataLines.length > 10 && !isPrefillDataExpanded"
+							class="pointer-events-none absolute bottom-0 left-0 right-0 h-20 bg-linear-to-t from-white to-transparent"
+						/>
+					</div>
+					<button
+						v-if="prefillDataLines.length > 10"
+						class="w-full cursor-pointer border-t border-gray-100 py-2.5 text-center text-sm text-blue-600 transition hover:bg-gray-50"
+						@click="isPrefillDataExpanded = !isPrefillDataExpanded"
 					>
-						<pre class="whitespace-pre-wrap wrap-break-word text-gray-800">{{
-							JSON.stringify(submission.prefillData, null, 2)
-						}}</pre>
-					</div>
-					<div class="mt-4 flex gap-2">
-						<BaseCopyButton :text="JSON.stringify(submission.prefillData, null, 2)" />
-					</div>
+						{{ isPrefillDataExpanded ? "הצג פחות" : `הצג עוד (${prefillDataLines.length - 10} שורות נוספות)` }}
+					</button>
 				</div>
 
 				<!-- Additional Data -->
@@ -414,12 +441,15 @@
 				</div>
 
 				<!-- Form Entrances -->
-				<div v-if="entrances.length > 0" class="mb-8 rounded-lg bg-white p-6 shadow">
-					<h2 class="mb-4 text-lg font-medium text-gray-900">
-						Form Entrances ({{ entrances.length }})
-					</h2>
-					<div class="overflow-x-auto">
-						<table class="w-full">
+				<div v-if="entrances.length > 0" class="mb-8 overflow-hidden rounded-lg bg-white shadow">
+					<div class="border-b border-gray-200 bg-gray-50 px-6 py-3">
+						<h2 class="text-lg font-medium text-gray-900">
+							Form Entrances ({{ entrances.length }})
+						</h2>
+					</div>
+					<div class="relative">
+						<div class="overflow-x-auto">
+							<table class="w-full">
 							<thead class="border-b border-gray-200 bg-gray-50">
 								<tr>
 									<th
@@ -466,7 +496,7 @@
 							</thead>
 							<tbody class="divide-y divide-gray-200">
 								<tr
-									v-for="(entrance, index) in entrances"
+									v-for="(entrance, index) in visibleEntrances"
 									:key="entrance.id"
 									class="hover:bg-gray-50"
 								>
@@ -516,7 +546,19 @@
 								</tr>
 							</tbody>
 						</table>
+						</div>
+						<div
+							v-if="entrances.length > ENTRANCES_LIMIT && !isEntrancesExpanded"
+							class="pointer-events-none absolute bottom-0 left-0 right-0 h-20 bg-linear-to-t from-white to-transparent"
+						/>
 					</div>
+					<button
+						v-if="entrances.length > ENTRANCES_LIMIT"
+						class="w-full cursor-pointer border-t border-gray-100 py-2.5 text-center text-sm text-blue-600 transition hover:bg-gray-50"
+						@click="isEntrancesExpanded = !isEntrancesExpanded"
+					>
+						{{ isEntrancesExpanded ? "הצג פחות" : `הצג עוד (${entrances.length - ENTRANCES_LIMIT} כניסות נוספות)` }}
+					</button>
 				</div>
 
 				<!-- Webhook Deliveries -->
