@@ -12,9 +12,10 @@
 
 ## Features
 
+- [ ] Use the new BaseCopyButton instead of other copy buttons across the app
 - [ ] I tried submitting a form with a fake webook. i see "attempt 2" failed. can't see attempt #1
 - [ ] In submission-detail view - add a button to resend the webhook.
-- [ ] Allow saving without submitting. Also allow saving while form is only partially filled. Max 1 save per user per form and it should expire after 30 days. new save overwrites last one.
+- [ ] Allow saving without submitting. Also allow saving while form is only partially filled. Max 1 save per user per form and it should expire after 30 days. new save overwrites last one. (Plan file ready - save-submission-drafts.md)
 - [x] Update json upload schema with new elements recently added
 - [x] Button to view / copy typescript type (schema) of form submission result (based on fields from formbuilder)
 - [x] Add "autocomplete" property to some fields that it makes sense like "input" / "phone" / "email". also add it to the propmt for gpt schema. @pages/forms/upload?formId=7

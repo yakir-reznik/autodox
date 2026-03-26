@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	import { Copy, Check, ArrowRight } from "lucide-vue-next";
+	import { ArrowRight } from "lucide-vue-next";
 	import type { FormWithElements } from "~/types/form-builder";
 	import type { ElementType } from "~~/server/db/schema";
 
@@ -208,20 +208,7 @@
 			: jsonLines.value.slice(0, COLLAPSED_LINES).join("\n"),
 	);
 
-	const copiedTs = ref(false);
-	const copiedJson = ref(false);
 
-	async function copyTs() {
-		await navigator.clipboard.writeText(tsCode.value);
-		copiedTs.value = true;
-		setTimeout(() => (copiedTs.value = false), 2000);
-	}
-
-	async function copyJson() {
-		await navigator.clipboard.writeText(jsonSchemaCode.value);
-		copiedJson.value = true;
-		setTimeout(() => (copiedJson.value = false), 2000);
-	}
 </script>
 
 <template>
@@ -256,13 +243,9 @@
 						class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3"
 					>
 						<span class="text-sm font-medium text-gray-600">TypeScript</span>
-						<button
-							class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition hover:bg-gray-200"
-							@click="copyTs"
-						>
-							<component :is="copiedTs ? Check : Copy" class="h-4 w-4" />
-							{{ copiedTs ? "הועתק!" : "העתקה" }}
-						</button>
+						<BaseCopyButton :text="tsCode" variant="ghost">
+							העתקה
+						</BaseCopyButton>
 					</div>
 					<div class="relative">
 						<div dir="ltr" class="overflow-x-auto text-left text-sm">
@@ -303,13 +286,9 @@
 						class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3"
 					>
 						<span class="text-sm font-medium text-gray-600">JSON Schema</span>
-						<button
-							class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition hover:bg-gray-200"
-							@click="copyJson"
-						>
-							<component :is="copiedJson ? Check : Copy" class="h-4 w-4" />
-							{{ copiedJson ? "הועתק!" : "העתקה" }}
-						</button>
+						<BaseCopyButton :text="jsonSchemaCode" variant="ghost">
+							העתקה
+						</BaseCopyButton>
 					</div>
 					<div class="relative">
 						<div dir="ltr" class="overflow-x-auto text-left text-sm">

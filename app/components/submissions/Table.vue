@@ -82,32 +82,9 @@
 		selectedSubmission.value = null;
 	}
 
-	function copyJsonToClipboard() {
-		if (selectedSubmission.value?.submissionData) {
-			const jsonString = JSON.stringify(selectedSubmission.value.submissionData, null, 2);
-			navigator.clipboard.writeText(jsonString).then(() => {
-				toasts.add({
-					title: "המידע הועתק ללוח",
-					theme: "success",
-					duration: 3000,
-				});
-			});
-		}
-	}
-
 	function openFillUrl(formId: number, token: string) {
 		const fillUrl = `${window.location.origin}/fill/${formId}?token=${token}`;
 		window.open(fillUrl, "_blank");
-	}
-
-	function copyTokenToClipboard(token: string) {
-		navigator.clipboard.writeText(token).then(() => {
-			toasts.add({
-				title: "הטוקן הועתק ללוח",
-				theme: "success",
-				duration: 3000,
-			});
-		});
 	}
 
 	function downloadPDF(token: string) {
@@ -373,19 +350,13 @@
 							</div>
 						</td>
 						<td class="px-6 py-4 text-sm whitespace-nowrap">
-							<UiButton
-								@click="copyTokenToClipboard(submission.token)"
-								class="flex items-center gap-2 rounded bg-gray-100 px-2 py-1 hover:bg-gray-200 transition-colors cursor-pointer"
+							<BaseCopyButton
+								:text="submission.token"
+								variant="ghost"
 								:title="`Copy token: ${submission.token}`"
 							>
-								<code class="font-mono text-xs text-gray-700 ltr">
-									{{ submission.token.substring(0, 5) }}...
-								</code>
-								<Icon
-									name="heroicons:clipboard-document"
-									class="h-4 w-4 text-gray-500"
-								/>
-							</UiButton>
+								<code class="font-mono text-xs text-gray-700 ltr">{{ submission.token.substring(0, 5) }}...</code>
+							</BaseCopyButton>
 						</td>
 					</tr>
 				</tbody>
@@ -468,10 +439,13 @@
 			</div>
 
 			<div class="flex gap-3 border-t border-gray-200 px-6 py-4">
-				<BaseButton variant="primary" @click="copyJsonToClipboard">
-					<Icon name="heroicons:clipboard-document" class="h-4 w-4" />
+				<BaseCopyButton
+					variant="primary"
+					:text="JSON.stringify(selectedSubmission.submissionData, null, 2)"
+				>
 					Copy JSON
-				</BaseButton>
+					<template #copied>Copied!</template>
+				</BaseCopyButton>
 				<BaseButton variant="secondary" @click="closeJsonModal"> Close </BaseButton>
 			</div>
 		</div>

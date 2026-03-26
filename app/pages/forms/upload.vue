@@ -151,16 +151,6 @@ For repeater (repeating group):
 12. Use "allowOther": true on checkboxes/radio/dropdown when the PDF has an "Other" option with a write-in field
 13. Use "repeater" for sections where users can add multiple entries (e.g., list of family members, work history)`;
 
-	const copied = ref<string | null>(null);
-
-	async function copyToClipboard(text: string, key: string) {
-		await navigator.clipboard.writeText(text);
-		copied.value = key;
-		setTimeout(() => {
-			copied.value = null;
-		}, 2000);
-	}
-
 	async function handleUpload() {
 		error.value = "";
 		loading.value = true;
@@ -239,21 +229,10 @@ For repeater (repeating group):
 					<div class="rounded-lg bg-white p-6 shadow">
 						<div class="mb-4 flex items-center justify-between">
 							<h2 class="text-lg font-semibold text-gray-900">ChatGPT Prompt</h2>
-							<BaseButton
-								variant="secondary"
-								size="sm"
-								@click="copyToClipboard(chatgptPrompt, 'prompt')"
-							>
-								<Icon
-									:name="
-										copied === 'prompt'
-											? 'heroicons:check'
-											: 'heroicons:clipboard'
-									"
-									class="h-4 w-4"
-								/>
-								{{ copied === "prompt" ? "Copied!" : "Copy" }}
-							</BaseButton>
+							<BaseCopyButton :text="chatgptPrompt">
+								Copy
+								<template #copied>Copied!</template>
+							</BaseCopyButton>
 						</div>
 						<p class="mb-3 text-sm text-gray-600">
 							Copy this prompt and paste it to ChatGPT along with your PDF file:
@@ -269,21 +248,10 @@ For repeater (repeating group):
 					<div class="rounded-lg bg-white p-6 shadow">
 						<div class="mb-4 flex items-center justify-between">
 							<h2 class="text-lg font-semibold text-gray-900">Example JSON</h2>
-							<BaseButton
-								variant="secondary"
-								size="sm"
-								@click="copyToClipboard(exampleJson, 'example')"
-							>
-								<Icon
-									:name="
-										copied === 'example'
-											? 'heroicons:check'
-											: 'heroicons:clipboard'
-									"
-									class="h-4 w-4"
-								/>
-								{{ copied === "example" ? "Copied!" : "Copy" }}
-							</BaseButton>
+							<BaseCopyButton :text="exampleJson">
+								Copy
+								<template #copied>Copied!</template>
+							</BaseCopyButton>
 						</div>
 						<p class="mb-3 text-sm text-gray-600">
 							Here's an example of a valid JSON structure:

@@ -1,6 +1,6 @@
 import { db } from "~~/server/db";
 import { webhookDeliveriesTable } from "~~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { H3Error, createError, getRouterParam, getQuery, getHeader } from "h3";
 import {
 	getSubmissionDataByToken,
@@ -64,6 +64,7 @@ export default defineEventHandler(async (event) => {
 				status: string;
 				httpStatusCode: number | null;
 				errorMessage: string | null;
+				responseBody: string | null;
 				retryCount: number;
 				deliveredAt: Date | null;
 				createdAt: Date;
@@ -102,13 +103,14 @@ export default defineEventHandler(async (event) => {
 					status: webhookDeliveriesTable.status,
 					httpStatusCode: webhookDeliveriesTable.httpStatusCode,
 					errorMessage: webhookDeliveriesTable.errorMessage,
+					responseBody: webhookDeliveriesTable.responseBody,
 					retryCount: webhookDeliveriesTable.retryCount,
 					deliveredAt: webhookDeliveriesTable.deliveredAt,
 					createdAt: webhookDeliveriesTable.createdAt,
 				})
 				.from(webhookDeliveriesTable)
 				.where(eq(webhookDeliveriesTable.submissionId, submission.id))
-				.orderBy(webhookDeliveriesTable.createdAt);
+				.orderBy(desc(webhookDeliveriesTable.createdAt));
 
 			response.webhookDeliveries = webhookDeliveries;
 		}
