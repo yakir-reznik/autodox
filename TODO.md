@@ -12,7 +12,10 @@
 
 ## Features
 
+- [ ] Add feature to add name to a submission and show it in the table view and submission detail view
+- [ ] Add "submission created" message in create new submission modal and add buttons: view submission (open in new tab), copy link, view all form submissions
 - [ ] Allow saving without submitting. Also allow saving while form is only partially filled. Max 1 save per user per form and it should expire after 30 days. new save overwrites last one. (Plan file ready - save-submission-drafts.md)
+- [ ] Help text appears beneath radio buttons it needs to be between the title and the radio buttons
 - [x] In submission-detail view - add a button to resend the webhook.
 - [x] Use the new BaseCopyButton instead of other copy buttons across the app
 - [x] Update json upload schema with new elements recently added
