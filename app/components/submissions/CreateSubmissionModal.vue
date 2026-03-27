@@ -32,6 +32,7 @@
 	const isLoading = ref(true);
 	const isSubmitting = ref(false);
 	const error = ref<string | null>(null);
+	const showPrefill = ref(false);
 	const showOverrides = ref(false);
 
 	const submissionName = ref("");
@@ -90,6 +91,7 @@
 		webhookUrlValue.value = "";
 		overrideWebhookPdf.value = false;
 		webhookPdfValue.value = false;
+		showPrefill.value = false;
 		showOverrides.value = false;
 		error.value = null;
 	}
@@ -250,13 +252,21 @@
 				</div>
 
 				<!-- Prefill section -->
-				<div v-if="fields.length" class="space-y-4">
-					<div>
-						<h3 class="text-lg font-medium text-gray-900">מילוי מוקדם</h3>
-						<p class="text-sm text-gray-500 mt-1">הזן ערכים שימולאו מראש בטופס</p>
-					</div>
+				<div v-if="fields.length" class="space-y-3">
+					<button
+						type="button"
+						class="flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700"
+						@click="showPrefill = !showPrefill"
+					>
+						<Icon
+							name="heroicons:chevron-left"
+							class="h-4 w-4 transition-transform"
+							:class="{ '-rotate-90': showPrefill }"
+						/>
+						מילוי מוקדם
+					</button>
 
-					<div class="space-y-4">
+					<div v-if="showPrefill" class="space-y-4 pr-6">
 						<div v-for="field in fields" :key="field.id" class="space-y-1">
 							<label class="block text-sm font-medium text-gray-700">
 								{{ (field.config as any).label || field.name }}
@@ -344,10 +354,6 @@
 							</div>
 						</div>
 					</div>
-				</div>
-
-				<div v-else class="py-2 text-sm text-gray-500 text-center">
-					לטופס זה אין שדות למילוי מוקדם
 				</div>
 
 				<!-- Divider -->
