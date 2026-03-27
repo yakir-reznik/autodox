@@ -1,0 +1,1 @@
+ALTER TABLE `submissions_table` ADD `name` varchar(255);

@@ -34,6 +34,8 @@
 	const error = ref<string | null>(null);
 	const showOverrides = ref(false);
 
+	const submissionName = ref("");
+
 	// Form elements for prefill
 	const fields = ref<FormElement[]>([]);
 	const prefillData = ref<Record<string, any>>({});
@@ -80,6 +82,7 @@
 	);
 
 	function resetState() {
+		submissionName.value = "";
 		prefillData.value = {};
 		overridePassword.value = false;
 		passwordValue.value = "";
@@ -173,6 +176,9 @@
 			}
 
 			const body: Record<string, unknown> = {};
+			if (submissionName.value.trim()) {
+				body.name = submissionName.value.trim();
+			}
 			if (Object.keys(filteredPrefill).length > 0) {
 				body.prefill = filteredPrefill;
 			}
@@ -232,6 +238,17 @@
 
 			<!-- Form -->
 			<div v-else class="max-h-[60vh] overflow-y-auto space-y-6 px-8">
+				<!-- Name field -->
+				<div class="space-y-1">
+					<label class="block text-sm font-medium text-gray-700">שם ההגשה</label>
+					<UiInput
+						v-model="submissionName"
+						type="text"
+						placeholder="לדוגמה: לקוח א׳ - מרץ 2025"
+					/>
+					<p class="text-xs text-gray-400">לשימוש פנימי בלבד — הממלא הטופס לא יראה את השם הזה</p>
+				</div>
+
 				<!-- Prefill section -->
 				<div v-if="fields.length" class="space-y-4">
 					<div>

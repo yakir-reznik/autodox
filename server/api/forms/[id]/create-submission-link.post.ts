@@ -60,6 +60,7 @@ export default defineEventHandler(async (event) => {
 		}
 
 		const body = await readBody<{
+			name?: string;
 			prefill?: Record<string, unknown>;
 			additionalData?: Record<string, unknown>;
 			webhook_url?: string;
@@ -108,6 +109,7 @@ export default defineEventHandler(async (event) => {
 		await db.insert(submissionsTable).values({
 			token,
 			formId,
+			name: body?.name ?? null,
 			prefillData: body?.prefill ?? null,
 			additionalData: body?.additionalData ?? null,
 			createdByUserId: user.id,

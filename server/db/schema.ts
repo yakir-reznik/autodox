@@ -353,6 +353,9 @@ export const submissionsTable = mysqlTable("submissions_table", {
 		.notNull()
 		.references(() => formsTable.id, { onDelete: "cascade" }),
 
+	// Optional display name for this submission
+	name: varchar("name", { length: 255 }),
+
 	// Link creation data
 	prefillData: json("prefill_data").$type<Record<string, unknown>>(),
 	additionalData: json("additional_data").$type<Record<string, unknown>>(),

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 	type Submission = {
 		id: number;
+		name: string | null;
 		token: string;
 		formId: number;
 		prefillData: Record<string, unknown> | null;
@@ -207,6 +208,11 @@
 							ID
 						</th>
 						<th
+							class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
+						>
+							שם
+						</th>
+						<th
 							v-if="showFormColumn"
 							class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
 						>
@@ -252,6 +258,9 @@
 					>
 						<td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
 							{{ submission.id }}
+						</td>
+						<td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+							{{ submission.name ?? "-" }}
 						</td>
 						<td v-if="showFormColumn" class="px-6 py-4 text-sm whitespace-nowrap">
 							<NuxtLink

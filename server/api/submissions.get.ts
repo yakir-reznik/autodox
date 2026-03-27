@@ -50,6 +50,7 @@ export default defineEventHandler(async (event) => {
 						createdAt: submissionsTable.createdAt,
 						startedAt: submissionsTable.startedAt,
 						submittedAt: submissionsTable.submittedAt,
+						name: submissionsTable.name,
 						lockedAt: submissionsTable.lockedAt,
 						formTitle: formsTable.title,
 					})
@@ -74,6 +75,7 @@ export default defineEventHandler(async (event) => {
 						createdAt: submissionsTable.createdAt,
 						startedAt: submissionsTable.startedAt,
 						submittedAt: submissionsTable.submittedAt,
+						name: submissionsTable.name,
 						lockedAt: submissionsTable.lockedAt,
 					})
 					.from(submissionsTable)

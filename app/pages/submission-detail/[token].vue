@@ -1,6 +1,7 @@
 <script setup lang="ts">
 	interface Submission {
 		id: number;
+		name: string | null;
 		token: string;
 		formId: number;
 		prefillData: Record<string, unknown> | null;
@@ -221,6 +222,11 @@
 			<div v-else-if="submission">
 				<!-- Submission Overview Card -->
 				<div class="mb-8 rounded-lg bg-white p-6 shadow">
+					<div v-if="submission.name" class="mb-4 pb-4 border-b border-gray-200">
+						<p class="text-xs text-gray-500">שם ההגשה</p>
+						<p class="text-lg font-medium text-gray-900 mt-0.5">{{ submission.name }}</p>
+					</div>
+
 					<div class="grid grid-cols-1 gap-6 md:grid-cols-4">
 						<!-- Status -->
 						<div>
