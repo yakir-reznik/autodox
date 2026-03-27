@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "~~/server/db";
 import { formsTable, submissionsTable, usersTable } from "~~/server/db/schema";
 
-const TTL_DAYS = 7;
+const TTL_DAYS = 14;
 const TTL_MS = TTL_DAYS * 24 * 60 * 60 * 1000;
 
 function generateToken(): string {
