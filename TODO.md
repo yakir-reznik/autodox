@@ -13,8 +13,8 @@
 ## Features
 
 - [ ] submissions link expire 14 days after generating (create-submission-link.post.ts) we need to add option to change this in form settings and in submission settings. i want the @server/api/forms/[id]/create-submission-link.post.ts to return the number of days the link is good for and we need to display it on the success message instead of a hardcoded value
-- [ ] Add "submission created" message in create new submission modal and add buttons: view submission (open in new tab), copy link, view all form submissions
 - [ ] Allow saving without submitting. Also allow saving while form is only partially filled. Max 1 save per user per form and it should expire after 30 days. new save overwrites last one. (Plan file ready - save-submission-drafts.md)
+- [x] Add "submission created" message in create new submission modal and add buttons: view submission (open in new tab), copy link, view all form submissions
 - [x] Add feature to add name to a submission and show it in the table view and submission detail view
 - [ ] Help text appears beneath radio buttons it needs to be between the title and the radio buttons
 - [x] In submission-detail view - add a button to resend the webhook.
