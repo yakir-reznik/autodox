@@ -1,0 +1,1 @@
+ALTER TABLE `forms_table` MODIFY COLUMN `theme` varchar(50) NOT NULL DEFAULT 'default';

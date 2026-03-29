@@ -1,5 +1,5 @@
 <template>
-	<div class="">
+	<div class="form-fill-fieldset-checkboxes">
 		<div class="mb-3">
 			<p
 				v-if="config.label"

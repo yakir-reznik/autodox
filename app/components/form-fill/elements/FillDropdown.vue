@@ -1,49 +1,5 @@
-<script setup lang="ts">
-import type { BuilderElement, SelectionOption } from "~/types/form-builder";
-
-type Props = {
-	element: BuilderElement;
-	modelValue?: string | string[] | boolean;
-	error?: string;
-	conditionRequired?: boolean;
-};
-
-const props = defineProps<Props>();
-
-const emit = defineEmits<{
-	"update:modelValue": [value: string | string[] | boolean];
-	blur: [];
-}>();
-
-const inputId = useId();
-
-const config = computed(
-	() =>
-		props.element.config as {
-			label?: string;
-			placeholder?: string;
-			helpText?: string;
-			options?: SelectionOption[];
-			allowUserOption?: boolean;
-			validation?: { required?: boolean };
-		},
-);
-
-const isRequired = computed(
-	() =>
-		props.element.isRequired ||
-		config.value.validation?.required ||
-		props.conditionRequired,
-);
-
-const { isOtherSelected, otherText, selectOther, updateOtherText } = useOtherOption(
-	computed(() => props.modelValue),
-	(v) => emit("update:modelValue", v),
-);
-</script>
-
 <template>
-	<div>
+	<div class="form-fill-fieldset-dropdown">
 		<label
 			v-if="config.label"
 			:for="inputId"
@@ -88,3 +44,47 @@ const { isOtherSelected, otherText, selectOther, updateOtherText } = useOtherOpt
 		</p>
 	</div>
 </template>
+
+<script setup lang="ts">
+	import type { BuilderElement, SelectionOption } from "~/types/form-builder";
+
+	type Props = {
+		element: BuilderElement;
+		modelValue?: string | string[] | boolean;
+		error?: string;
+		conditionRequired?: boolean;
+	};
+
+	const props = defineProps<Props>();
+
+	const emit = defineEmits<{
+		"update:modelValue": [value: string | string[] | boolean];
+		blur: [];
+	}>();
+
+	const inputId = useId();
+
+	const config = computed(
+		() =>
+			props.element.config as {
+				label?: string;
+				placeholder?: string;
+				helpText?: string;
+				options?: SelectionOption[];
+				allowUserOption?: boolean;
+				validation?: { required?: boolean };
+			},
+	);
+
+	const isRequired = computed(
+		() =>
+			props.element.isRequired ||
+			config.value.validation?.required ||
+			props.conditionRequired,
+	);
+
+	const { isOtherSelected, otherText, selectOther, updateOtherText } = useOtherOption(
+		computed(() => props.modelValue),
+		(v) => emit("update:modelValue", v),
+	);
+</script>

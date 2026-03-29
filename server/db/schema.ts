@@ -11,6 +11,7 @@ import {
 	boolean,
 } from "drizzle-orm/mysql-core";
 import { relations, sql } from "drizzle-orm";
+import type { FormTheme } from "~~/app/types/themes";
 
 // ============================================
 // USERS TABLE
@@ -40,9 +41,7 @@ export const usersTable = mysqlTable("users_table", {
 export const formStatusEnum = ["draft", "published", "archived"] as const;
 export type FormStatus = (typeof formStatusEnum)[number];
 
-// Form theme enum
-export const formThemeEnum = ["default", "dark", "ocean", "forest", "unicorn", "orange"] as const;
-export type FormTheme = (typeof formThemeEnum)[number];
+export type { FormTheme };
 
 // Element type enum - covers all field types and layout elements
 export const elementTypeEnum = [
@@ -264,7 +263,7 @@ export const formsTable = mysqlTable("forms_table", {
 	status: mysqlEnum("status", formStatusEnum).notNull().default("draft"),
 
 	// Theme
-	theme: mysqlEnum("theme", formThemeEnum).notNull().default("default"),
+	theme: varchar("theme", { length: 50 }).notNull().default("default"),
 
 	// Webhook configuration
 	webhookUrl: varchar("webhook_url", { length: 2048 }),

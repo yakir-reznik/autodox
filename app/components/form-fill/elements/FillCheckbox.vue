@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="form-fill-fieldset-checkbox">
 		<label
 			class="form-fill-checkbox flex items-center gap-2 cursor-pointer"
 			:class="{ 'ring-1 ring-destructive rounded-md p-2': error }"

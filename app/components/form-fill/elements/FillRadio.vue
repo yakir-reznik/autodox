@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="form-fill-fieldset-radio">
 		<div class="mb-3">
 			<p
 				v-if="config.label"
