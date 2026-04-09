@@ -42,6 +42,18 @@
 	const fields = ref<FormElement[]>([]);
 	const prefillData = ref<Record<string, any>>({});
 
+	// Additional data (key-value pairs)
+	const showAdditionalData = ref(false);
+	const additionalDataRows = ref<{ key: string; value: string }[]>([]);
+
+	function addAdditionalDataRow() {
+		additionalDataRows.value.push({ key: "", value: "" });
+	}
+
+	function removeAdditionalDataRow(index: number) {
+		additionalDataRows.value.splice(index, 1);
+	}
+
 	// Settings overrides
 	const overridePassword = ref(false);
 	const passwordValue = ref("");
@@ -86,6 +98,8 @@
 	function resetState() {
 		submissionName.value = "";
 		prefillData.value = {};
+		additionalDataRows.value = [];
+		showAdditionalData.value = false;
 		overridePassword.value = false;
 		passwordValue.value = "";
 		overrideWebhookUrl.value = false;
@@ -194,6 +208,10 @@
 			}
 			if (overrideWebhookPdf.value) {
 				body.webhook_include_pdf = webhookPdfValue.value;
+			}
+			const filledRows = additionalDataRows.value.filter((r) => r.key.trim());
+			if (filledRows.length > 0) {
+				body.additionalData = Object.fromEntries(filledRows.map((r) => [r.key.trim(), r.value]));
 			}
 
 			const response = await $fetch<{ link: string }>(`/api/forms/${props.formId}/create-submission-link`, {
@@ -392,6 +410,60 @@
 								</label>
 							</div>
 						</div>
+					</div>
+				</div>
+
+				<!-- Additional data section -->
+				<div class="space-y-3">
+					<button
+						type="button"
+						class="flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700"
+						@click="showAdditionalData = !showAdditionalData"
+					>
+						<Icon
+							name="heroicons:chevron-left"
+							class="h-4 w-4 transition-transform"
+							:class="{ '-rotate-90': showAdditionalData }"
+						/>
+						נתונים נוספים
+					</button>
+
+					<div v-if="showAdditionalData" class="space-y-2 pr-6">
+						<div
+							v-for="(row, index) in additionalDataRows"
+							:key="index"
+							class="flex items-center gap-2"
+						>
+							<UiInput
+								v-model="row.key"
+								type="text"
+								placeholder="מפתח"
+								class="flex-1"
+								dir="ltr"
+							/>
+							<UiInput
+								v-model="row.value"
+								type="text"
+								placeholder="ערך"
+								class="flex-1"
+								dir="ltr"
+							/>
+							<button
+								type="button"
+								class="text-gray-400 hover:text-red-500 transition-colors"
+								@click="removeAdditionalDataRow(index)"
+							>
+								<Icon name="heroicons:x-mark" class="h-4 w-4" />
+							</button>
+						</div>
+						<button
+							type="button"
+							class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+							@click="addAdditionalDataRow"
+						>
+							<Icon name="heroicons:plus" class="h-4 w-4" />
+							הוסף שדה
+						</button>
 					</div>
 				</div>
 
