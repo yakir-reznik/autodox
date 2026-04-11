@@ -1,7 +1,8 @@
 import { db } from "~~/server/db";
-import { submissionsTable } from "~~/server/db/schema";
+import { submissionsTable, formsTable } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { deliverWebhook } from "~~/server/utils/webhookDelivery";
+import { resolveFormSettings } from "~~/server/utils/overrideableFormSettings";
 
 export default defineEventHandler(async (event) => {
 	const token = getRouterParam(event, "token");
@@ -26,7 +27,15 @@ export default defineEventHandler(async (event) => {
 		throw createError({ statusCode: 404, message: "Submission not found" });
 	}
 
-	const result = await deliverWebhook(submission.id, submission.webhookUrl);
+	const [form] = await db
+		.select()
+		.from(formsTable)
+		.where(eq(formsTable.id, submission.formId))
+		.limit(1);
+
+	const { webhookIncludePdf } = resolveFormSettings(form, submission);
+
+	const result = await deliverWebhook(submission.id, submission.webhookUrl, { includePdf: !!webhookIncludePdf });
 
 	return { success: true, data: result };
 });
