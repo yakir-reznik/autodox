@@ -420,8 +420,8 @@
 						<BaseCopyButton :text="JSON.stringify(submission.prefillData, null, 2)" variant="ghost" />
 					</div>
 					<div class="relative">
-						<div dir="ltr" class="overflow-x-auto p-4 font-mono text-sm">
-							<pre class="whitespace-pre-wrap wrap-break-word text-gray-800">{{ visiblePrefillData }}</pre>
+						<div dir="ltr" class="overflow-x-auto p-4 text-sm [&_.shiki]:bg-transparent!">
+							<Shiki lang="json" :code="visiblePrefillData" />
 						</div>
 						<div
 							v-if="prefillDataLines.length > 10 && !isPrefillDataExpanded"
@@ -438,18 +438,13 @@
 				</div>
 
 				<!-- Additional Data -->
-				<div v-if="submission.additionalData" class="mb-8 rounded-lg bg-white p-6 shadow">
-					<h2 class="mb-4 text-lg font-medium text-gray-900">Additional Data</h2>
-					<div
-						dir="ltr"
-						class="overflow-x-auto rounded-lg bg-gray-50 p-4 font-mono text-sm"
-					>
-						<pre class="whitespace-pre-wrap wrap-break-word text-gray-800">{{
-							JSON.stringify(submission.additionalData, null, 2)
-						}}</pre>
+				<div v-if="submission.additionalData" class="mb-8 overflow-hidden rounded-lg bg-white shadow">
+					<div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3">
+						<h2 class="text-lg font-medium text-gray-900">Additional Data</h2>
+						<BaseCopyButton :text="JSON.stringify(submission.additionalData, null, 2)" variant="ghost" />
 					</div>
-					<div class="mt-4 flex gap-2">
-						<BaseCopyButton :text="JSON.stringify(submission.additionalData, null, 2)" />
+					<div dir="ltr" class="overflow-x-auto p-4 text-sm [&_.shiki]:bg-transparent!">
+						<Shiki lang="json" :code="JSON.stringify(submission.additionalData, null, 2)" />
 					</div>
 				</div>
 
