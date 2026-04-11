@@ -37,6 +37,7 @@
 	const createdLink = ref<string | null>(null);
 
 	const submissionName = ref("");
+	const externalId = ref("");
 
 	// Form elements for prefill
 	const fields = ref<FormElement[]>([]);
@@ -97,6 +98,7 @@
 
 	function resetState() {
 		submissionName.value = "";
+		externalId.value = "";
 		prefillData.value = {};
 		additionalDataRows.value = [];
 		showAdditionalData.value = false;
@@ -196,6 +198,9 @@
 			const body: Record<string, unknown> = {};
 			if (submissionName.value.trim()) {
 				body.name = submissionName.value.trim();
+			}
+			if (externalId.value.trim()) {
+				body.externalId = externalId.value.trim();
 			}
 			if (Object.keys(filteredPrefill).length > 0) {
 				body.prefill = filteredPrefill;
@@ -306,6 +311,18 @@
 						placeholder="לדוגמה: לקוח א׳ - מרץ 2025"
 					/>
 					<p class="text-xs text-gray-400">לשימוש פנימי בלבד — הממלא הטופס לא יראה את השם הזה</p>
+				</div>
+
+				<!-- External ID field -->
+				<div class="space-y-1">
+					<label class="block text-sm font-medium text-gray-700">מזהה חיצוני</label>
+					<UiInput
+						v-model="externalId"
+						type="text"
+						dir="ltr"
+						placeholder="לדוגמה: CRM-1234"
+					/>
+					<p class="text-xs text-gray-400">מזהה ממערכת חיצונית — לשימוש פנימי בלבד</p>
 				</div>
 
 				<!-- Prefill section -->

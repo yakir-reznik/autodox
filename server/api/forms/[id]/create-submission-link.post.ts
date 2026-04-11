@@ -61,6 +61,7 @@ export default defineEventHandler(async (event) => {
 
 		const body = await readBody<{
 			name?: string;
+			externalId?: string;
 			prefill?: Record<string, unknown>;
 			additionalData?: Record<string, unknown>;
 			webhook_url?: string;
@@ -110,6 +111,7 @@ export default defineEventHandler(async (event) => {
 			token,
 			formId,
 			name: body?.name ?? null,
+			externalId: body?.externalId ?? null,
 			prefillData: body?.prefill ?? null,
 			additionalData: body?.additionalData ?? null,
 			createdByUserId: user.id,

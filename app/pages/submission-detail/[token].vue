@@ -6,6 +6,7 @@
 		formId: number;
 		prefillData: Record<string, unknown> | null;
 		additionalData: Record<string, unknown> | null;
+		externalId: string | null;
 		createdByUserId: number | null;
 		expiresAt: string;
 		status: "pending" | "in_progress" | "submitted" | "locked";
@@ -222,9 +223,15 @@
 			<div v-else-if="submission">
 				<!-- Submission Overview Card -->
 				<div class="mb-8 rounded-lg bg-white p-6 shadow">
-					<div v-if="submission.name" class="mb-4 pb-4 border-b border-gray-200">
-						<p class="text-xs text-gray-500">שם ההגשה</p>
-						<p class="text-lg font-medium text-gray-900 mt-0.5">{{ submission.name }}</p>
+					<div v-if="submission.name || submission.externalId" class="mb-4 pb-4 border-b border-gray-200 flex gap-8">
+						<div v-if="submission.name">
+							<p class="text-xs text-gray-500">שם ההגשה</p>
+							<p class="text-lg font-medium text-gray-900 mt-0.5">{{ submission.name }}</p>
+						</div>
+						<div v-if="submission.externalId">
+							<p class="text-xs text-gray-500">מזהה חיצוני</p>
+							<p class="text-lg font-medium text-gray-900 mt-0.5 font-mono">{{ submission.externalId }}</p>
+						</div>
 					</div>
 
 					<div class="grid grid-cols-1 gap-6 md:grid-cols-4">
