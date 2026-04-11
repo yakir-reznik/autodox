@@ -107,13 +107,16 @@ export default defineEventHandler(async (event) => {
 			webhookUrl = form.webhookUrl;
 		}
 
+		const sortKeys = (obj: Record<string, unknown>) =>
+			Object.fromEntries(Object.keys(obj).sort().map((k) => [k, obj[k]]));
+
 		await db.insert(submissionsTable).values({
 			token,
 			formId,
 			name: body?.name ?? null,
 			externalId: body?.externalId ?? null,
-			prefillData: body?.prefill ?? null,
-			additionalData: body?.additionalData ?? null,
+			prefillData: body?.prefill ? sortKeys(body.prefill) : null,
+			additionalData: body?.additionalData ? sortKeys(body.additionalData) : null,
 			createdByUserId: user.id,
 			expiresAt,
 			status: "pending",
