@@ -135,9 +135,12 @@
 		return lines.slice(0, 10).join("\n");
 	});
 
+	const sortKeys = (obj: Record<string, unknown>): Record<string, unknown> =>
+		Object.fromEntries(Object.keys(obj).sort().map((k) => [k, obj[k]]));
+
 	const prefillDataLines = computed(() => {
 		if (!submission.value?.prefillData) return [];
-		return JSON.stringify(submission.value.prefillData, null, 2).split("\n");
+		return JSON.stringify(sortKeys(submission.value.prefillData), null, 2).split("\n");
 	});
 
 	const visiblePrefillData = computed(() => {
@@ -417,7 +420,7 @@
 				<div v-if="submission.prefillData" class="mb-8 overflow-hidden rounded-lg bg-white shadow">
 					<div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3">
 						<h2 class="text-lg font-medium text-gray-900">Prefill Data</h2>
-						<BaseCopyButton :text="JSON.stringify(submission.prefillData, null, 2)" variant="ghost" />
+						<BaseCopyButton :text="JSON.stringify(sortKeys(submission.prefillData!), null, 2)" variant="ghost" />
 					</div>
 					<div class="relative">
 						<div dir="ltr" class="overflow-x-auto p-4 text-sm [&_.shiki]:bg-transparent!">

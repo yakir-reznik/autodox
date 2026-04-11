@@ -16,6 +16,7 @@
 		form: FormMetadata;
 		elements: BuilderElement[];
 		values: Record<string, any>;
+		prefillData?: Record<string, any>;
 		submissionTimeline: SubmissionTimelineEvent[];
 	};
 
@@ -29,6 +30,7 @@
 
 	provide("formElements", computed(() => props.elements));
 	provide("rootFormData", props.values);
+	provide("prefillData", computed(() => props.prefillData || {}));
 
 	// Get root elements (no parent)
 	const rootElements = computed(() => {

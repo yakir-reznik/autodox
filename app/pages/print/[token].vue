@@ -150,6 +150,7 @@
 			:form="form"
 			:elements="transformedElements"
 			:values="transformedValues"
+			:prefill-data="submission.prefillData || {}"
 			:submission-timeline="submissionTimeline"
 		/>
 	</div>
