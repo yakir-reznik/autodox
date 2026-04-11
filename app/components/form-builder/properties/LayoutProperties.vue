@@ -194,7 +194,7 @@
 
 		<!-- Media URL -->
 		<div v-if="['image', 'video'].includes(element.type)">
-			<label class="mb-1 block text-sm text-gray-600">URL</label>
+			<label class="mb-1 block text-sm text-gray-600">URL <span v-if="element.type === 'image'" class="text-gray-400">(ערך)</span></label>
 			<BaseInput
 				:model-value="config.url || ''"
 				placeholder="https://..."

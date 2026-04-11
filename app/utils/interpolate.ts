@@ -65,23 +65,47 @@ function getDisplayValue(element: BuilderElement, rawValue: any): string {
 	return String(rawValue);
 }
 
+function resolveToken(
+	fieldName: string,
+	elements: BuilderElement[],
+	formData: Record<string, any>,
+	prefillData: Record<string, any>,
+): string | null {
+	const fields = getInterpolatableFields(elements);
+	const field = fields.find((f) => f.name === fieldName);
+
+	if (field) {
+		const rawValue = formData[field.clientId];
+		return getDisplayValue(elements.find((el) => el.clientId === field.clientId)!, rawValue);
+	}
+
+	if (prefillData[fieldName] != null) {
+		return String(prefillData[fieldName]);
+	}
+
+	return null;
+}
+
 export function interpolateFieldValues(
 	text: string,
 	elements: BuilderElement[],
 	formData: Record<string, any>,
+	prefillData: Record<string, any> = {},
 ): string {
-	const fields = getInterpolatableFields(elements);
-
 	return text.replace(TOKEN_REGEX, (match, fieldName: string) => {
-		const field = fields.find((f) => f.name === fieldName);
-		if (!field) return match;
+		const resolved = resolveToken(fieldName, elements, formData, prefillData);
+		return resolved !== null ? escapeHtml(resolved) : match;
+	});
+}
 
-		const rawValue = formData[field.clientId];
-		const displayValue = getDisplayValue(
-			elements.find((el) => el.clientId === field.clientId)!,
-			rawValue,
-		);
-
-		return escapeHtml(displayValue);
+export function interpolateRawValues(
+	text: string,
+	elements: BuilderElement[],
+	formData: Record<string, any>,
+	prefillData: Record<string, any> = {},
+): string {
+	return text.replace(TOKEN_REGEX, (match, fieldName: string) => {
+		const resolved = resolveToken(fieldName, elements, formData, prefillData);
+		return resolved !== null ? resolved : match;
 	});
 }

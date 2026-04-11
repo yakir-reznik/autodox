@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import type { BuilderElement } from "~/types/form-builder";
+import { interpolateRawValues } from "~/utils/interpolate";
 
 interface Props {
 	element: BuilderElement;
 }
 
 const props = defineProps<Props>();
+
+const allElements = inject<ComputedRef<BuilderElement[]>>("formElements");
+const rootFormData = inject<Record<string, any>>("rootFormData", {});
+const prefillData = inject<ComputedRef<Record<string, any>>>("prefillData", computed(() => ({})));
 
 const config = computed(() => props.element.config as {
 	url?: string;
@@ -14,6 +19,10 @@ const config = computed(() => props.element.config as {
 	width?: number;
 	height?: number;
 });
+
+const resolvedUrl = computed(() =>
+	interpolateRawValues(config.value.url || "", allElements?.value ?? [], rootFormData, prefillData.value),
+);
 
 const mediaStyle = computed(() => {
 	const style: Record<string, string> = {};
@@ -30,11 +39,11 @@ const isVideo = computed(() => props.element.type === "video");
 </script>
 
 <template>
-	<div v-if="config.url">
+	<div v-if="resolvedUrl">
 		<!-- Video -->
 		<template v-if="isVideo">
 			<video
-				:src="config.url"
+				:src="resolvedUrl"
 				:style="mediaStyle"
 				class="form-fill-media max-w-full rounded-md"
 				controls
@@ -44,7 +53,7 @@ const isVideo = computed(() => props.element.type === "video");
 		<!-- Image -->
 		<template v-else>
 			<img
-				:src="config.url"
+				:src="resolvedUrl"
 				:alt="config.alt || ''"
 				:style="mediaStyle"
 				class="form-fill-media max-w-full rounded-md"

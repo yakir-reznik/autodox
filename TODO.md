@@ -12,6 +12,8 @@
 
 ## Features
 
+- [ ] In submission detail view - order prefill data keys in alphabetical order
+- [ ] In submission detail view - show prefill data and additional data as json with syntax highlighting
 - [ ] Add create submission modal to form editor view
 - [ ] submissions link expire 14 days after generating (create-submission-link.post.ts) we need to add option to change this in form settings and in submission settings. i want the @server/api/forms/[id]/create-submission-link.post.ts to return the number of days the link is good for and we need to display it on the success message instead of a hardcoded value
 - [ ] Allow saving without submitting. Also allow saving while form is only partially filled. Max 1 save per user per form and it should expire after 30 days. new save overwrites last one. (Plan file ready - save-submission-drafts.md)

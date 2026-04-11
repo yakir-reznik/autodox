@@ -183,6 +183,12 @@
 	provide("formElements", allElements);
 	provide("rootFormData", formData);
 
+	const prefillData = computed(() => {
+		if (!form.value || !("prefillData" in form.value)) return {};
+		return form.value.prefillData || {};
+	});
+	provide("prefillData", prefillData);
+
 	// Apply default values for elements that don't have prefill data
 	function applyDefaults() {
 		for (const element of allElements.value) {

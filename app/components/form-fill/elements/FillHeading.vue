@@ -11,6 +11,7 @@ const props = defineProps<Props>();
 
 const allElements = inject<ComputedRef<BuilderElement[]>>("formElements");
 const rootFormData = inject<Record<string, any>>("rootFormData", {});
+const prefillData = inject<ComputedRef<Record<string, any>>>("prefillData", computed(() => ({})));
 
 const config = computed(() => props.element.config as {
 	text?: string;
@@ -37,7 +38,7 @@ const alignmentStyle = computed(() => ({
 
 const resolvedHtml = computed(() => {
 	const text = config.value.text || "";
-	const interpolated = interpolateFieldValues(text, allElements?.value ?? [], rootFormData);
+	const interpolated = interpolateFieldValues(text, allElements?.value ?? [], rootFormData, prefillData.value);
 	return linkifyText(interpolated);
 });
 </script>
