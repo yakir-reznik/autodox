@@ -355,6 +355,9 @@ export const submissionsTable = mysqlTable("submissions_table", {
 	// Optional display name for this submission
 	name: varchar("name", { length: 255 }),
 
+	// Optional external identifier (e.g., from a third-party system)
+	externalId: varchar("external_id", { length: 255 }),
+
 	// Link creation data
 	prefillData: json("prefill_data").$type<Record<string, unknown>>(),
 	additionalData: json("additional_data").$type<Record<string, unknown>>(),

@@ -1,0 +1,1 @@
+ALTER TABLE `submissions_table` ADD `external_id` varchar(255);

@@ -1,9 +1,5 @@
 import { db } from "~~/server/db";
-import {
-	webhookDeliveriesTable,
-	submissionsTable,
-	formsTable,
-} from "~~/server/db/schema";
+import { webhookDeliveriesTable, submissionsTable, formsTable } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { queuePDFGeneration } from "./pdfQueue";
 import { getSubmissionEntrancesByToken } from "./submissions";
@@ -13,6 +9,7 @@ interface WebhookPayload {
 	timestamp: string;
 	submissionId: number;
 	formId: number;
+	externalId: string | null;
 	token: string;
 	status: string;
 	submissionData: Record<string, unknown> | null;
@@ -47,7 +44,7 @@ interface DeliveryResult {
 async function attemptDelivery(
 	webhookUrl: string,
 	payload: WebhookPayload,
-	requestHeaders: Record<string, string>
+	requestHeaders: Record<string, string>,
 ): Promise<DeliveryResult> {
 	try {
 		const response = await fetch(webhookUrl, {
@@ -147,6 +144,7 @@ export async function deliverWebhook(
 		timestamp: new Date().toISOString(),
 		submissionId: submission.id,
 		formId: submission.formId,
+		externalId: submission.externalId,
 		token: submission.token,
 		status: submission.status,
 		submissionData: submission.submissionData,
