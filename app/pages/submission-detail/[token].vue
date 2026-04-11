@@ -399,8 +399,8 @@
 						<BaseCopyButton :text="JSON.stringify(submission.submissionData, null, 2)" variant="ghost" />
 					</div>
 					<div class="relative">
-						<div dir="ltr" class="overflow-x-auto p-4 font-mono text-sm">
-							<pre class="whitespace-pre-wrap wrap-break-word text-gray-800">{{ visibleSubmissionData }}</pre>
+						<div dir="ltr" class="overflow-x-auto p-4 text-sm [&_.shiki]:bg-transparent!">
+							<Shiki lang="json" :code="visibleSubmissionData" />
 						</div>
 						<div
 							v-if="submissionDataLines.length > 10 && !isSubmissionDataExpanded"
