@@ -51,7 +51,7 @@
 				<div class="mb-8">
 					<div class="flex items-center gap-2">
 						<div
-							class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center"
+							class="w-10 h-10 rounded-xl bg-linear-to-br from-blue-600 to-blue-700 flex items-center justify-center"
 						>
 							<Icon name="ph:stack-fill" class="w-6 h-6 text-white" />
 						</div>
@@ -156,7 +156,7 @@
 					<BaseButton
 						type="submit"
 						variant="primary"
-						class="w-full !py-3 !rounded-xl"
+						class="w-full py-3! rounded-xl!"
 						:disabled="loading"
 					>
 						{{ loading ? "נרשם..." : "צור חשבון" }}
@@ -177,7 +177,7 @@
 
 		<!-- Decorative Panel -->
 		<div
-			class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-700 relative overflow-hidden"
+			class="hidden lg:flex lg:w-1/2 bg-linear-to-br from-blue-600 via-blue-500 to-blue-700 relative overflow-hidden"
 		>
 			<!-- Background glow orbs -->
 			<div
@@ -197,7 +197,7 @@
 
 			<!-- Floating shapes - Layer 2 (mid) -->
 			<div
-				class="absolute top-[10%] right-[20%] w-20 h-20 bg-gradient-to-br from-white/20 to-white/5 rounded-2xl animate-float-rotate"
+				class="absolute top-[10%] right-[20%] w-20 h-20 bg-linear-to-br from-white/20 to-white/5 rounded-2xl animate-float-rotate"
 			></div>
 			<div
 				class="absolute top-[35%] left-[8%] w-16 h-16 bg-yellow-400/25 rounded-full animate-bounce-gentle"
@@ -220,7 +220,7 @@
 				class="absolute top-[25%] right-[8%] w-8 h-8 bg-white/25 rounded-lg animate-ping-slow"
 			></div>
 			<div
-				class="absolute bottom-[15%] left-[40%] w-12 h-12 bg-gradient-to-tr from-violet-400/25 to-fuchsia-400/25 rounded-xl animate-float-rotate-reverse"
+				class="absolute bottom-[15%] left-[40%] w-12 h-12 bg-linear-to-tr from-violet-400/25 to-fuchsia-400/25 rounded-xl animate-float-rotate-reverse"
 			></div>
 			<div
 				class="absolute bottom-[35%] left-[5%] w-6 h-6 bg-amber-300/35 rounded-full animate-twinkle"
@@ -231,10 +231,10 @@
 
 			<!-- Decorative lines -->
 			<div
-				class="absolute top-[20%] right-[35%] w-px h-32 bg-gradient-to-b from-transparent via-white/20 to-transparent animate-shimmer"
+				class="absolute top-[20%] right-[35%] w-px h-32 bg-linear-to-b from-transparent via-white/20 to-transparent animate-shimmer"
 			></div>
 			<div
-				class="absolute bottom-[30%] left-[30%] w-24 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent animate-shimmer-delayed"
+				class="absolute bottom-[30%] left-[30%] w-24 h-px bg-linear-to-r from-transparent via-white/15 to-transparent animate-shimmer-delayed"
 			></div>
 
 			<!-- Content -->
