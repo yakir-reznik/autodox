@@ -17,10 +17,10 @@
 </script>
 
 <template>
-	<div class="space-y-3">
+	<div class="space-y-1 bg-primary-foreground rounded-md">
 		<button
 			type="button"
-			class="flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700"
+			class="flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 cursor-pointer p-4 w-full hover:bg-black/2 rounded-md"
 			@click="showAdditionalData = !showAdditionalData"
 		>
 			<Icon
@@ -31,30 +31,28 @@
 			נתונים נוספים
 		</button>
 
-		<div v-if="showAdditionalData" class="space-y-2 pr-6">
-			<div
-				v-for="(row, index) in rows"
-				:key="index"
-				class="flex items-center gap-2"
-			>
-				<UiInput v-model="row.key" type="text" placeholder="מפתח" class="flex-1" />
-				<UiInput v-model="row.value" type="text" placeholder="ערך" class="flex-1" />
-				<button
-					type="button"
-					class="text-gray-400 hover:text-red-500 transition-colors"
-					@click="removeRow(index)"
-				>
+		<div v-if="showAdditionalData" class="space-y-2 px-4 pb-6">
+			<div v-for="(row, index) in rows" :key="index" class="flex items-center gap-2">
+				<UiInput
+					v-model="row.key"
+					type="text"
+					placeholder="מפתח"
+					class="flex-1 bg-background"
+				/>
+				<UiInput
+					v-model="row.value"
+					type="text"
+					placeholder="ערך"
+					class="flex-1 bg-background"
+				/>
+				<UiButton type="button" variant="ghost" @click="removeRow(index)">
 					<Icon name="heroicons:x-mark" class="h-4 w-4" />
-				</button>
+				</UiButton>
 			</div>
-			<button
-				type="button"
-				class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-				@click="addRow"
-			>
+			<UiButton type="button" variant="link" @click="addRow">
 				<Icon name="heroicons:plus" class="h-4 w-4" />
 				הוסף שדה
-			</button>
+			</UiButton>
 		</div>
 	</div>
 </template>

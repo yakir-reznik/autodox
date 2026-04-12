@@ -52,7 +52,7 @@
 </script>
 
 <template>
-	<div class="space-y-3 bg-primary-foreground rounded-md">
+	<div class="space-y-1 bg-primary-foreground rounded-md">
 		<button
 			type="button"
 			class="flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 cursor-pointer p-4 w-full hover:bg-black/2 rounded-md"

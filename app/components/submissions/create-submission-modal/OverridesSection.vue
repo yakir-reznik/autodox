@@ -20,10 +20,10 @@
 </script>
 
 <template>
-	<div class="space-y-3">
+	<div class="space-y-1 bg-primary-foreground rounded-md">
 		<button
 			type="button"
-			class="flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700"
+			class="flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 cursor-pointer p-4 w-full hover:bg-black/2 rounded-md"
 			@click="showOverrides = !showOverrides"
 		>
 			<Icon
@@ -34,11 +34,11 @@
 			דריסת הגדרות טופס
 		</button>
 
-		<div v-if="showOverrides" class="space-y-4 pr-6">
+		<div v-if="showOverrides" class="space-y-4 px-4 pb-6">
 			<!-- Password override -->
 			<div class="space-y-2">
 				<label class="flex items-center gap-3 cursor-pointer">
-					<input type="checkbox" v-model="overridePassword" />
+					<UiCheckbox v-model="overridePassword" class="bg-background" />
 					<span class="text-sm text-gray-700">דרוס סיסמה</span>
 				</label>
 				<UiInput
@@ -54,7 +54,7 @@
 			<!-- Webhook URL override -->
 			<div class="space-y-2">
 				<label class="flex items-center gap-3 cursor-pointer">
-					<input type="checkbox" v-model="overrideWebhookUrl" />
+					<UiCheckbox v-model="overrideWebhookUrl" class="bg-background" />
 					<span class="text-sm text-gray-700">דרוס Webhook URL</span>
 				</label>
 				<UiInput
@@ -69,7 +69,7 @@
 			<!-- Webhook Include PDF override -->
 			<div class="space-y-2">
 				<label class="flex items-center gap-3 cursor-pointer">
-					<input type="checkbox" v-model="overrideWebhookPdf" />
+					<UiCheckbox v-model="overrideWebhookPdf" class="bg-background" />
 					<span class="text-sm text-gray-700">דרוס צירוף PDF</span>
 				</label>
 				<div v-if="overrideWebhookPdf" class="flex items-center gap-2">

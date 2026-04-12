@@ -227,7 +227,7 @@
 			</div>
 
 			<!-- Form -->
-			<div v-else class="max-h-[60vh] overflow-y-auto space-y-6 px-8">
+			<div v-else class="max-h-[60vh] overflow-y-auto space-y-3 px-8 pb-4">
 				<div class="space-y-1">
 					<label class="block text-sm font-medium text-gray-700">שם ההגשה</label>
 					<UiInput
@@ -251,6 +251,8 @@
 					<p class="text-xs text-gray-400">מזהה ממערכת חיצונית — לשימוש פנימי בלבד</p>
 				</div>
 
+				<UiSeparator class="my-8" />
+
 				<SubmissionsCreateSubmissionModalPrefillSection
 					v-if="fields.length"
 					:fields="fields"
@@ -258,8 +260,6 @@
 				/>
 
 				<SubmissionsCreateSubmissionModalAdditionalDataSection :rows="additionalDataRows" />
-
-				<UiSeparator />
 
 				<SubmissionsCreateSubmissionModalOverridesSection
 					v-model:overridePassword="overridePassword"
