@@ -139,14 +139,21 @@
 				const dv = (field.config as any)?.defaultValue;
 				if (field.type === "checkboxes") {
 					if (dv) {
-						try { prefillData.value[field.name!] = JSON.parse(dv); } catch { prefillData.value[field.name!] = []; }
+						try {
+							prefillData.value[field.name!] = JSON.parse(dv);
+						} catch {
+							prefillData.value[field.name!] = [];
+						}
 					} else {
 						prefillData.value[field.name!] = [];
 					}
 				} else if (field.type === "checkbox") {
 					if (dv === true) prefillData.value[field.name!] = true;
 				} else if (["date", "datetime", "time"].includes(field.type) && dv) {
-					const resolved = resolveDateTimeDefault(dv, field.type as "date" | "datetime" | "time");
+					const resolved = resolveDateTimeDefault(
+						dv,
+						field.type as "date" | "datetime" | "time",
+					);
 					if (resolved) prefillData.value[field.name!] = resolved;
 				} else if (field.type === "number" && dv) {
 					prefillData.value[field.name!] = Number(dv);
@@ -216,14 +223,19 @@
 			}
 			const filledRows = additionalDataRows.value.filter((r) => r.key.trim());
 			if (filledRows.length > 0) {
-				body.additionalData = Object.fromEntries(filledRows.map((r) => [r.key.trim(), r.value]));
+				body.additionalData = Object.fromEntries(
+					filledRows.map((r) => [r.key.trim(), r.value]),
+				);
 			}
 
-			const response = await $fetch<{ link: string }>(`/api/forms/${props.formId}/create-submission-link`, {
-				method: "POST",
-				headers: { "x-api-key": props.apiKey },
-				body,
-			});
+			const response = await $fetch<{ link: string }>(
+				`/api/forms/${props.formId}/create-submission-link`,
+				{
+					method: "POST",
+					headers: { "x-api-key": props.apiKey },
+					body,
+				},
+			);
 
 			createdLink.value = response.link;
 			emit("created");
@@ -251,7 +263,9 @@
 			<!-- Success state -->
 			<div v-if="createdLink" class="px-8 py-6 space-y-6">
 				<div class="flex flex-col items-center gap-3 text-center">
-					<div class="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+					<div
+						class="flex h-12 w-12 items-center justify-center rounded-full bg-green-100"
+					>
 						<Icon name="heroicons:check" class="h-6 w-6 text-green-600" />
 					</div>
 					<div>
@@ -260,7 +274,9 @@
 					</div>
 				</div>
 
-				<div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-600 font-mono break-all dir-ltr text-left">
+				<div
+					class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-600 font-mono break-all dir-ltr text-left"
+				>
 					{{ createdLink }}
 				</div>
 
@@ -310,7 +326,9 @@
 						type="text"
 						placeholder="לדוגמה: לקוח א׳ - מרץ 2025"
 					/>
-					<p class="text-xs text-gray-400">לשימוש פנימי בלבד — הממלא הטופס לא יראה את השם הזה</p>
+					<p class="text-xs text-gray-400">
+						לשימוש פנימי בלבד — הממלא הטופס לא יראה את השם הזה
+					</p>
 				</div>
 
 				<!-- External ID field -->
@@ -456,14 +474,12 @@
 								type="text"
 								placeholder="מפתח"
 								class="flex-1"
-								dir="ltr"
 							/>
 							<UiInput
 								v-model="row.value"
 								type="text"
 								placeholder="ערך"
 								class="flex-1"
-								dir="ltr"
 							/>
 							<button
 								type="button"

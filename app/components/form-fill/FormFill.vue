@@ -1,5 +1,10 @@
 <script setup lang="ts">
-	import type { FormWithElements, BuilderElement, ElementType, ConditionGroup } from "~/types/form-builder";
+	import type {
+		FormWithElements,
+		BuilderElement,
+		ElementType,
+		ConditionGroup,
+	} from "~/types/form-builder";
 	import { isFieldElement, isSubmittableElement } from "~/composables/useElementDefaults";
 	import FormField from "./FormField.vue";
 
@@ -47,7 +52,9 @@
 
 	// Check if password is required
 	const requiresPassword = computed(() => {
-		return form.value && "requiresPassword" in form.value && form.value.requiresPassword === true;
+		return (
+			form.value && "requiresPassword" in form.value && form.value.requiresPassword === true
+		);
 	});
 
 	// Check if token is required (form doesn't allow public submissions)
@@ -111,7 +118,9 @@
 							const transformedItem: Record<string, any> = {};
 							Object.entries(item).forEach(([childFieldName, childValue]) => {
 								// Find child element by name
-								const childElement = children.find((c) => c.name === childFieldName);
+								const childElement = children.find(
+									(c) => c.name === childFieldName,
+								);
 								if (childElement) {
 									transformedItem[childElement.clientId] = childValue;
 								}
@@ -119,13 +128,17 @@
 							return transformedItem;
 						});
 						formData[element.clientId] = transformedItems;
-					} else if (value !== null && value !== undefined && value !== "" && !(Array.isArray(value) && !value.length)) {
+					} else if (
+						value !== null &&
+						value !== undefined &&
+						value !== "" &&
+						!(Array.isArray(value) && !value.length)
+					) {
 						formData[element.clientId] = value;
 					}
 				}
 			});
 		}
-
 	});
 
 	// Check if form is published (only check if we have the full form response)
@@ -215,9 +228,13 @@
 		}
 	}
 
-	watch(allElements, (elements) => {
-		if (elements.length) applyDefaults();
-	}, { immediate: true });
+	watch(
+		allElements,
+		(elements) => {
+			if (elements.length) applyDefaults();
+		},
+		{ immediate: true },
+	);
 
 	// Condition evaluator
 	const { isVisible, isRequiredByCondition } = useConditionEvaluator(allElements, formData);
@@ -251,7 +268,12 @@
 	}
 
 	// Validate a single field with a given value
-	function validateFieldValue(element: BuilderElement, value: any, errorKey: string, conditionRequired = false): boolean {
+	function validateFieldValue(
+		element: BuilderElement,
+		value: any,
+		errorKey: string,
+		conditionRequired = false,
+	): boolean {
 		if (!isFieldElement(element.type)) return true;
 
 		const config = element.config as {
@@ -343,7 +365,12 @@
 	function validateField(clientId: string): boolean {
 		const element = allElements.value.find((el) => el.clientId === clientId);
 		if (!element) return true;
-		return validateFieldValue(element, formData[clientId], clientId, isRequiredByCondition(clientId));
+		return validateFieldValue(
+			element,
+			formData[clientId],
+			clientId,
+			isRequiredByCondition(clientId),
+		);
 	}
 
 	// Validate repeater children
@@ -361,7 +388,14 @@
 				if (isFieldElement(child.type)) {
 					const value = item[child.clientId];
 					const errorKey = `${repeaterClientId}[${itemIndex}].${child.clientId}`;
-					if (!validateFieldValue(child, value, errorKey, isRequiredByCondition(child.clientId))) {
+					if (
+						!validateFieldValue(
+							child,
+							value,
+							errorKey,
+							isRequiredByCondition(child.clientId),
+						)
+					) {
 						isValid = false;
 					}
 				}
@@ -439,12 +473,18 @@
 				const match = errorKey.match(/^(el_\d+)\[(\d+)\]\.(el_\d+)$/);
 				if (match) {
 					const [, repeaterClientId, itemIndex, fieldClientId] = match;
-					const repeater = allElements.value.find((el) => el.clientId === repeaterClientId);
+					const repeater = allElements.value.find(
+						(el) => el.clientId === repeaterClientId,
+					);
 					const field = allElements.value.find((el) => el.clientId === fieldClientId);
 					const fieldLabel =
-						(field?.config as { label?: string })?.label || field?.name || fieldClientId;
+						(field?.config as { label?: string })?.label ||
+						field?.name ||
+						fieldClientId;
 					const repeaterLabel =
-						(repeater?.config as { label?: string })?.label || repeater?.name || repeaterClientId;
+						(repeater?.config as { label?: string })?.label ||
+						repeater?.name ||
+						repeaterClientId;
 					label = `${repeaterLabel} (שורה ${Number(itemIndex) + 1}) - ${fieldLabel}`;
 					element = field;
 				}
@@ -515,7 +555,9 @@
 						const transformedItems = value.map((item: Record<string, any>) => {
 							const transformedItem: Record<string, any> = {};
 							Object.entries(item).forEach(([childClientId, childValue]) => {
-								const childElement = children.find((c) => c.clientId === childClientId);
+								const childElement = children.find(
+									(c) => c.clientId === childClientId,
+								);
 								const childKey = childElement?.name || childClientId;
 								transformedItem[childKey] = childValue;
 							});
@@ -550,20 +592,29 @@
 </script>
 
 <template>
-	<div class="form-fill-container min-h-screen bg-background font-sans p-6">
+	<div class="form-fill-container min-h-screen bg-background font-sans p-4 lg:p-6 pb-20">
 		<!-- Loading state -->
 		<div v-if="pending" class="grid place-items-center min-h-screen">
-			<div class="form-fill-loading flex items-center justify-center min-h-[200px]">
+			<div class="form-fill-loading flex items-center justify-center min-h-50">
 				<Icon name="svg-spinners:ring-resize" class="h-8 w-8 text-foreground" />
 			</div>
 		</div>
 
 		<!-- Error state (not found) -->
 		<div v-else-if="error" class="grid place-items-center min-h-screen">
-			<div class="form-fill-error-state form-fill-card max-w-[640px] mx-auto bg-card rounded-lg shadow-md p-8 text-center">
-				<Icon name="heroicons:exclamation-circle" class="mx-auto h-12 w-12 text-destructive" />
-				<h2 class="form-fill-error-title text-xl font-semibold text-destructive mb-2">הטופס לא נמצא</h2>
-				<p class="form-fill-error-message text-base text-muted-foreground">הטופס שאתה מחפש אינו קיים או הוסר.</p>
+			<div
+				class="form-fill-error-state form-fill-card max-w-160 mx-auto bg-card rounded-lg shadow-md p-8 text-center"
+			>
+				<Icon
+					name="heroicons:exclamation-circle"
+					class="mx-auto h-12 w-12 text-destructive"
+				/>
+				<h2 class="form-fill-error-title text-xl font-semibold text-destructive mb-2">
+					הטופס לא נמצא
+				</h2>
+				<p class="form-fill-error-message text-base text-muted-foreground">
+					הטופס שאתה מחפש אינו קיים או הוסר.
+				</p>
 			</div>
 		</div>
 
@@ -585,9 +636,13 @@
 
 		<!-- Already locked error -->
 		<div v-else-if="isAlreadyLocked" class="grid place-items-center min-h-screen">
-			<div class="form-fill-error-state form-fill-card max-w-[640px] mx-auto bg-card rounded-lg shadow-md p-8 text-center">
+			<div
+				class="form-fill-error-state form-fill-card max-w-160 mx-auto bg-card rounded-lg shadow-md p-8 text-center"
+			>
 				<Icon name="heroicons:lock-closed" class="mx-auto h-12 w-12 text-destructive" />
-				<h2 class="form-fill-error-title text-xl font-semibold text-destructive mb-2">הטופס כבר נשלח</h2>
+				<h2 class="form-fill-error-title text-xl font-semibold text-destructive mb-2">
+					הטופס כבר נשלח
+				</h2>
 				<p class="form-fill-error-message text-base text-muted-foreground">
 					טופס זה כבר נשלח וננעל. לא ניתן לבצע שינויים נוספים.
 				</p>
@@ -596,41 +651,58 @@
 
 		<!-- Not published error -->
 		<div v-else-if="!isPublished" class="grid place-items-center min-h-screen">
-			<div class="form-fill-error-state form-fill-card max-w-[640px] mx-auto bg-card rounded-lg shadow-md p-8 text-center">
-				<Icon name="heroicons:lock-closed" class="mx-auto h-12 w-12 text-muted-foreground" />
+			<div
+				class="form-fill-error-state form-fill-card max-w-160 mx-auto bg-card rounded-lg shadow-md p-8 text-center"
+			>
+				<Icon
+					name="heroicons:lock-closed"
+					class="mx-auto h-12 w-12 text-muted-foreground"
+				/>
 				<h2 class="form-fill-error-title text-xl font-semibold text-foreground mb-2">
 					הטופס אינו זמין
 				</h2>
-				<p class="form-fill-error-message text-base text-muted-foreground">טופס זה אינו מקבל הגשות כרגע.</p>
+				<p class="form-fill-error-message text-base text-muted-foreground">
+					טופס זה אינו מקבל הגשות כרגע.
+				</p>
 			</div>
 		</div>
 
 		<!-- Success state -->
 		<div v-else-if="isSubmitted" class="place-items-center grid min-h-screen">
-			<div class="form-fill-success form-fill-card max-w-[640px] mx-auto bg-card rounded-lg shadow-md p-8 text-center">
-				<Icon name="heroicons:check-circle" class="form-fill-success-icon h-16 w-16 mx-auto mb-4 text-green-500" />
-				<h2 class="form-fill-success-title text-xl font-semibold text-foreground mb-2">תודה רבה!</h2>
-				<p class="form-fill-success-message text-base text-muted-foreground">הטופס שלך התקבל בהצלחה.</p>
+			<div
+				class="form-fill-success form-fill-card max-w-160 mx-auto bg-card rounded-lg shadow-md p-8 text-center"
+			>
+				<Icon
+					name="heroicons:check-circle"
+					class="form-fill-success-icon h-16 w-16 mx-auto mb-4 text-green-500"
+				/>
+				<h2 class="form-fill-success-title text-xl font-semibold text-foreground mb-2">
+					תודה רבה!
+				</h2>
+				<p class="form-fill-success-message text-base text-muted-foreground">
+					הטופס שלך התקבל בהצלחה.
+				</p>
 			</div>
 		</div>
 
 		<!-- Form -->
-		<form v-else class="form-fill-card max-w-[640px] mx-auto bg-card rounded-lg shadow-md p-8" @submit.prevent="handleSubmit">
-			<!-- Navigation -->
-			<div class="text-center mb-8 my-4">
-				<NuxtLink to="/" class="form-fill-back-link form-fill-button bg-primary text-primary-foreground rounded-md px-4 py-2 hover:bg-primary/90 transition-colors">
-					<Icon name="heroicons:arrow-left" class="inline h-4 w-4 mr-1" />
-					לעמוד הבית
-				</NuxtLink>
-			</div>
-
-			<!-- Header -->
-			<header class="form-fill-header mb-8 text-center">
-				<h1 class="form-fill-title text-2xl font-semibold text-foreground mb-2">{{ form?.title }}</h1>
-				<p v-if="form && 'description' in form && form.description" class="form-fill-description text-base text-muted-foreground">
+		<form
+			v-else
+			class="form-fill-card max-w-160 mx-auto bg-card rounded-lg shadow-md desktop:p-8"
+			@submit.prevent="handleSubmit"
+		>
+			<!-- Header (hidden for now)-->
+			<!-- <header class="form-fill-header mb-8 text-center">
+				<h1 class="form-fill-title text-2xl font-semibold text-foreground mb-2">
+					{{ form?.title }}
+				</h1>
+				<p
+					v-if="form && 'description' in form && form.description"
+					class="form-fill-description text-base text-muted-foreground"
+				>
 					{{ form.description }}
 				</p>
-			</header>
+			</header> -->
 
 			<!-- Elements -->
 			<div class="form-fill-elements flex flex-col gap-6">
@@ -651,14 +723,28 @@
 			</div>
 
 			<!-- Error Summary -->
-			<div v-if="errorSummaries.length > 0" class="form-fill-error-summary bg-destructive/10 border border-destructive/30 rounded-md p-4 mb-6">
-				<div class="form-fill-error-summary-header flex items-center gap-2 text-destructive font-semibold mb-2">
+			<div
+				v-if="errorSummaries.length > 0"
+				class="form-fill-error-summary bg-destructive/10 border border-destructive/30 rounded-md p-4 mb-6"
+			>
+				<div
+					class="form-fill-error-summary-header flex items-center gap-2 text-destructive font-semibold mb-2"
+				>
 					<Icon name="heroicons:exclamation-triangle" class="h-5 w-5" />
 					<span>יש לתקן את השגיאות הבאות:</span>
 				</div>
-				<ul class="form-fill-error-summary-list list-disc ps-6 text-foreground text-sm flex flex-col gap-1">
-					<li v-for="err in errorSummaries" :key="err.errorKey" class="flex items-center gap-2 flex-wrap">
-						<span><strong class="text-destructive">{{ err.label }}:</strong> {{ err.message }}</span>
+				<ul
+					class="form-fill-error-summary-list list-disc ps-6 text-foreground text-sm flex flex-col gap-1"
+				>
+					<li
+						v-for="err in errorSummaries"
+						:key="err.errorKey"
+						class="flex items-center gap-2 flex-wrap"
+					>
+						<span
+							><strong class="text-destructive">{{ err.label }}:</strong>
+							{{ err.message }}</span
+						>
 						<button
 							type="button"
 							class="form-fill-error-summary-link text-xs text-primary underline hover:text-primary/80 cursor-pointer whitespace-nowrap"
@@ -672,7 +758,11 @@
 
 			<!-- Footer -->
 			<footer class="form-fill-footer mt-8">
-				<button type="submit" class="form-fill-submit w-full bg-primary text-primary-foreground text-base font-medium py-2 px-6 rounded-md border-none cursor-pointer hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :disabled="isSubmitting">
+				<button
+					type="submit"
+					class="form-fill-submit w-full bg-primary text-primary-foreground text-base font-medium py-2 px-6 rounded-md border-none cursor-pointer hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+					:disabled="isSubmitting"
+				>
 					<template v-if="isSubmitting">
 						<Icon name="svg-spinners:ring-resize" class="inline h-4 w-4" />
 						שולח...

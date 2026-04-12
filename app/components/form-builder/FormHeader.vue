@@ -20,6 +20,9 @@
 
 	// Settings modal state
 	const showSettingsModal = ref(false);
+	const showCreateSubmissionModal = ref(false);
+
+	const { user } = useUserSession();
 
 	const emit = defineEmits<{
 		"update:title": [value: string];
@@ -128,6 +131,11 @@
 					<Icon name="heroicons:check" />
 				</UiButton>
 
+				<UiButton variant="secondary" @click="showCreateSubmissionModal = true">
+					<span>יצירת הגשה</span>
+					<Icon name="heroicons:plus" class="h-4 w-4" />
+				</UiButton>
+
 				<UiButton variant="secondary" title="הגדרות טופס" @click="showSettingsModal = true">
 					<span>הגדרות טופס</span>
 					<Icon name="heroicons:cog-6-tooth" class="h-4 w-4" />
@@ -172,5 +180,13 @@
 		v-model="showSettingsModal"
 		:form-id="formId"
 		@saved="handleSettingsSaved"
+	/>
+
+	<!-- Create Submission Modal -->
+	<SubmissionsCreateSubmissionModal
+		v-if="formId"
+		v-model="showCreateSubmissionModal"
+		:form-id="formId"
+		:api-key="user?.apiKey ?? ''"
 	/>
 </template>

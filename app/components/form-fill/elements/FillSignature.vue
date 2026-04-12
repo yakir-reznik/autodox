@@ -21,8 +21,6 @@
 			props.element.config as {
 				label?: string;
 				helpText?: string;
-				maxWidth?: number;
-				maxHeight?: number;
 				validation?: { required?: boolean };
 			},
 	);
@@ -38,8 +36,8 @@
 	const isDrawing = ref(false);
 	const hasSignature = ref(false);
 
-	const canvasWidth = computed(() => config.value.maxWidth || 400);
-	const canvasHeight = computed(() => config.value.maxHeight || 200);
+	const canvasWidth = 400;
+	const canvasHeight = 200;
 
 	function startDrawing(event: MouseEvent | TouchEvent) {
 		isDrawing.value = true;
@@ -139,33 +137,34 @@
 		<!-- Readonly mode: display signature as image -->
 		<div
 			v-if="readonly && modelValue"
-			class="form-fill-signature-readonly border border-input rounded-md p-2 bg-card"
-			:style="{ maxWidth: `${canvasWidth}px` }"
+			class="form-fill-signature-readonly w-full md:max-w-[400px]"
 		>
 			<img
 				:src="modelValue"
 				:alt="config.label || 'חתימה'"
-				class="form-fill-signature-image block max-w-full h-auto"
+				class="form-fill-signature-image block w-full h-auto border border-input rounded-md"
 			/>
 		</div>
 
 		<!-- Edit mode: canvas for drawing -->
 		<template v-else>
 			<p v-if="config.helpText" class="form-fill-help text-sm text-muted-foreground mt-1">{{ config.helpText }}</p>
-			<canvas
-				ref="canvasRef"
-				:width="canvasWidth"
-				:height="canvasHeight"
-				class="form-fill-signature-canvas border border-input rounded-md bg-card cursor-crosshair"
-				:class="{ '!border-destructive': error }"
-				@mousedown="startDrawing"
-				@mousemove="draw"
-				@mouseup="stopDrawing"
-				@mouseleave="stopDrawing"
-				@touchstart.prevent="startDrawing"
-				@touchmove.prevent="draw"
-				@touchend="stopDrawing"
-			/>
+			<div class="w-full md:max-w-[400px]">
+				<canvas
+					ref="canvasRef"
+					:width="canvasWidth"
+					:height="canvasHeight"
+					class="form-fill-signature-canvas border border-input rounded-md bg-card cursor-crosshair w-full aspect-[2/1] block"
+					:class="{ '!border-destructive': error }"
+					@mousedown="startDrawing"
+					@mousemove="draw"
+					@mouseup="stopDrawing"
+					@mouseleave="stopDrawing"
+					@touchstart.prevent="startDrawing"
+					@touchmove.prevent="draw"
+					@touchend="stopDrawing"
+				/>
+			</div>
 
 			<div class="form-fill-signature-actions flex gap-2 mt-2">
 				<button
