@@ -178,6 +178,19 @@
 		return (config as any).options ?? [];
 	}
 
+	function toggleCheckboxValue(fieldName: string, value: string, checked: boolean) {
+		const arr = Array.isArray(prefillData.value[fieldName])
+			? [...prefillData.value[fieldName]]
+			: [];
+		if (checked && !arr.includes(value)) {
+			arr.push(value);
+		} else if (!checked) {
+			const idx = arr.indexOf(value);
+			if (idx > -1) arr.splice(idx, 1);
+		}
+		prefillData.value[fieldName] = arr;
+	}
+
 	function getInputType(
 		type: ElementType,
 	): "text" | "email" | "number" | "tel" | "date" | "time" | "datetime-local" {
@@ -344,10 +357,10 @@
 				</div>
 
 				<!-- Prefill section -->
-				<div v-if="fields.length" class="space-y-3">
+				<div v-if="fields.length" class="space-y-3 bg-primary-foreground rounded-md">
 					<button
 						type="button"
-						class="flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700"
+						class="flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 cursor-pointer p-4 w-full hover:bg-black/2 rounded-md"
 						@click="showPrefill = !showPrefill"
 					>
 						<Icon
@@ -358,7 +371,7 @@
 						מילוי מוקדם
 					</button>
 
-					<div v-if="showPrefill" class="space-y-4 pr-6">
+					<div v-if="showPrefill" class="space-y-4 px-4">
 						<div v-for="field in fields" :key="field.id" class="space-y-1">
 							<label class="block text-sm font-medium text-gray-700">
 								{{ (field.config as any).label || field.name }}
@@ -382,43 +395,50 @@
 								v-model="prefillData[field.name!]"
 								:type="getInputType(field.type)"
 								:placeholder="(field.config as any).placeholder || ''"
+								class="bg-background"
 							/>
 
 							<!-- Dropdown -->
-							<select
+							<UiSelect
 								v-else-if="field.type === 'dropdown'"
 								v-model="prefillData[field.name!]"
-								class="border-input h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+								dir="rtl"
+								class=""
 							>
-								<option value="">בחר...</option>
-								<option
-									v-for="opt in getOptions(field.config)"
-									:key="opt.id"
-									:value="opt.value"
-								>
-									{{ opt.label }}
-								</option>
-							</select>
+								<UiSelectTrigger class="bg-background w-full">
+									<UiSelectValue placeholder="בחר..." />
+								</UiSelectTrigger>
+								<UiSelectContent>
+									<UiSelectItem
+										v-for="opt in getOptions(field.config)"
+										:key="opt.id"
+										:value="opt.value"
+									>
+										{{ opt.label }}
+									</UiSelectItem>
+								</UiSelectContent>
+							</UiSelect>
 
 							<!-- Radio -->
-							<div
+							<UiRadioGroup
 								v-else-if="field.type === 'radio'"
+								v-model="prefillData[field.name!]"
 								class="flex flex-wrap gap-4 pt-1"
+								dir="rtl"
 							>
 								<label
 									v-for="opt in getOptions(field.config)"
 									:key="opt.id"
 									class="flex items-center gap-2 cursor-pointer"
 								>
-									<input
-										type="radio"
-										:name="`prefill-${field.name}`"
+									<UiRadioGroupItem
 										:value="opt.value"
-										v-model="prefillData[field.name!]"
+										dir="rtl"
+										class="bg-background"
 									/>
 									<span class="text-sm text-gray-700">{{ opt.label }}</span>
 								</label>
-							</div>
+							</UiRadioGroup>
 
 							<!-- Checkbox (single boolean) -->
 							<BaseToggle
@@ -436,10 +456,15 @@
 									:key="opt.id"
 									class="flex items-center gap-2 cursor-pointer"
 								>
-									<input
-										type="checkbox"
-										:value="opt.value"
-										v-model="prefillData[field.name!]"
+									<UiCheckbox
+										:checked="
+											Array.isArray(prefillData[field.name!]) &&
+											prefillData[field.name!].includes(opt.value)
+										"
+										@update:checked="
+											toggleCheckboxValue(field.name!, opt.value, $event)
+										"
+										class="bg-background"
 									/>
 									<span class="text-sm text-gray-700">{{ opt.label }}</span>
 								</label>
