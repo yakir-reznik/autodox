@@ -8,6 +8,7 @@
 		"generate": "nuxt generate",
 		"preview": "nuxt preview",
 		"postinstall": "nuxt prepare",
+		"find-large-files": "node scripts/find-large-files.ts",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:sync": "drizzle-kit generate && drizzle-kit migrate",
