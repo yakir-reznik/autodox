@@ -688,7 +688,7 @@
 		<!-- Form -->
 		<form
 			v-else
-			class="form-fill-card max-w-160 mx-auto bg-card rounded-lg shadow-md desktop:p-8"
+			class="form-fill-card max-w-160 mx-auto bg-card rounded-lg shadow-md lg:p-8 p-4"
 			@submit.prevent="handleSubmit"
 		>
 			<!-- Header (hidden for now)-->
