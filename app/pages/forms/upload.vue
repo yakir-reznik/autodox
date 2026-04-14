@@ -24,12 +24,24 @@
     { "type": "heading_h1", "text": "Registration" },
     { "type": "text", "label": "Full Name", "required": true, "placeholder": "Enter your name", "autocomplete": "name" },
     { "type": "email", "label": "Email Address", "required": true, "autocomplete": "email" },
-    { "type": "phone", "label": "Phone Number", "required": true, "placeholder": "050-0000000" },
+    { "type": "phone", "label": "Phone Number", "placeholder": "050-0000000",
+      "requiredConditions": [{ "fieldId": "contact_pref", "operator": "==", "value": "Phone" }] },
+    { "type": "radio", "id": "contact_pref", "label": "Preferred Contact Method", "options": ["Email", "Phone"], "required": true },
     { "type": "number", "label": "Age", "required": true, "step": 1 },
     { "type": "dropdown", "label": "Country", "options": ["Israel", "USA", "UK", "Other"], "defaultValue": "Israel" },
+    { "type": "radio", "id": "has_referral", "label": "Were you referred by someone?", "options": ["Yes", "No"], "required": true },
+    { "type": "text", "label": "Referrer Name",
+      "conditions": [{ "fieldId": "has_referral", "operator": "==", "value": "Yes" }],
+      "requiredConditions": [{ "fieldId": "has_referral", "operator": "==", "value": "Yes" }] },
     { "type": "radio", "label": "Gender", "options": ["Male", "Female", "Other"] },
     { "type": "textarea", "label": "Comments", "helpText": "Any additional information", "rows": 4 },
-    { "type": "checkboxes", "label": "Interests", "options": ["Sports", "Music", "Tech"], "allowOther": true },
+    { "type": "checkboxes", "id": "interests", "label": "Interests", "options": ["Sports", "Music", "Tech"], "allowOther": true },
+    { "type": "section", "label": "Tech Preferences",
+      "conditions": [{ "fieldId": "interests", "operator": "contains", "value": "Tech" }],
+      "children": [
+        { "type": "checkboxes", "label": "Topics", "options": ["AI", "Web Development", "Cybersecurity", "Mobile"], "required": true },
+        { "type": "textarea", "label": "What are you hoping to learn?", "rows": 3 }
+      ]},
     { "type": "checkbox", "label": "I agree to the terms and conditions", "required": true },
     { "type": "signature", "label": "Signature", "required": true }
   ]
@@ -38,6 +50,8 @@
 	const chatgptPrompt = `I have a PDF form that I need to convert to JSON format for a form builder system.
 
 Please analyze the attached PDF and generate a JSON structure following this exact schema:
+
+CRITICAL — TEXT FIDELITY: Copy all labels, headings, placeholders, option values, and paragraph text EXACTLY as they appear in the PDF. Do NOT correct spelling, grammar, punctuation, capitalization, or phrasing — even if the text seems wrong. The original wording must be preserved verbatim.
 
 {
   "title": "Form title here",
@@ -135,6 +149,60 @@ For repeater (repeating group):
   { "type": "number", "label": "Age", "required": true }
 ]}
 
+=== CONDITIONAL LOGIC ===
+
+Conditions can control two independent behaviors on any element:
+- "conditions" — controls VISIBILITY (show/hide the element)
+- "requiredConditions" — controls whether the element is REQUIRED (makes it required only when the conditions are met, regardless of whether "required" is set to true statically)
+
+Both accept the same array-of-condition-objects format. Both apply to any element type — including input fields, sections, and repeaters.
+
+Condition structure:
+{ "fieldId": "the_source_field_id", "operator": "==", "value": "expected value" }
+
+Supported operators: "==" (equals), "!=" (not equals), "contains", "not_contains"
+
+All conditions in the array must be true simultaneously for the rule to activate.
+
+To use conditions, the source field must have an "id" property, and the dependent element references it via "fieldId".
+
+Example — show a field only when a radio answer is "Yes", and make it required only then:
+{ "type": "radio", "id": "has_children", "label": "Do you have children?", "options": ["Yes", "No"], "required": true }
+{ "type": "number", "label": "Number of Children",
+  "conditions": [{ "fieldId": "has_children", "operator": "==", "value": "Yes" }],
+  "requiredConditions": [{ "fieldId": "has_children", "operator": "==", "value": "Yes" }] }
+
+Example — show an entire section only when a checkbox is checked:
+{ "type": "checkbox", "id": "is_employed", "label": "I am currently employed" }
+{ "type": "section", "label": "Employment Details",
+  "conditions": [{ "fieldId": "is_employed", "operator": "==", "value": "true" }],
+  "children": [
+    { "type": "text", "label": "Employer Name", "required": true },
+    { "type": "text", "label": "Job Title", "required": true }
+  ]}
+
+Example — show a repeater only when a dropdown value is selected:
+{ "type": "dropdown", "id": "has_dependents", "label": "Do you have dependents?", "options": ["Yes", "No"] }
+{ "type": "repeater", "label": "Dependents",
+  "conditions": [{ "fieldId": "has_dependents", "operator": "==", "value": "Yes" }],
+  "minItems": 1, "addButtonText": "Add Dependent", "children": [
+    { "type": "text", "label": "Name", "required": true },
+    { "type": "number", "label": "Age", "required": true }
+  ]}
+
+Example — a field that is always visible but only required under a condition:
+{ "type": "radio", "id": "contact_pref", "label": "Preferred contact method", "options": ["Email", "Phone"] }
+{ "type": "text", "label": "Phone Number",
+  "requiredConditions": [{ "fieldId": "contact_pref", "operator": "==", "value": "Phone" }] }
+
+Rules for conditional logic:
+- Only add "id" to fields that are referenced by other fields' conditions
+- "id" values must be unique, lowercase, use underscores (e.g., "has_insurance", "marital_status")
+- Apply "conditions" when the PDF shows fields/sections that are clearly dependent on a previous answer (e.g., "If yes, please specify...", fields indented or grouped under a checkbox/radio)
+- Apply "requiredConditions" when the PDF implies a field is only mandatory based on a prior answer
+- For checkbox fields, the value when checked is the string "true"
+- sections and repeaters support "conditions" just like regular fields — use them when an entire block of fields only applies in certain cases
+
 === IMPORTANT RULES ===
 
 1. Output ONLY valid JSON - no explanations, no markdown code blocks
@@ -142,14 +210,15 @@ For repeater (repeating group):
 3. For dropdown/radio/checkboxes: "options" must be a simple string array
 4. Mark fields as "required": true if they appear mandatory in the PDF (asterisk, "required" text, etc.)
 5. Maintain the exact order of fields as they appear in the PDF
-6. Use descriptive labels that match the PDF text
+6. Copy all text from the PDF EXACTLY as written — do NOT fix spelling, grammar, punctuation, or phrasing under any circumstances
 7. Use headings to separate form sections
 8. Use dividers or spacers for visual separation where appropriate
 9. Group related fields in sections when the PDF has clear groupings
 10. Use "defaultValue" when a field has a pre-filled or default value in the PDF
 11. Use "autocomplete" for fields that benefit from browser autofill (e.g., "name", "email", "tel", "address-line1")
 12. Use "allowOther": true on checkboxes/radio/dropdown when the PDF has an "Other" option with a write-in field
-13. Use "repeater" for sections where users can add multiple entries (e.g., list of family members, work history)`;
+13. Use "repeater" for sections where users can add multiple entries (e.g., list of family members, work history)
+14. Apply "conditions" to fields that are clearly dependent on a previous answer in the PDF (see CONDITIONAL LOGIC section above)`;
 
 	async function handleUpload() {
 		error.value = "";
