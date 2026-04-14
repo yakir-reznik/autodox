@@ -1,6 +1,8 @@
 <script setup lang="ts">
+	import { SelectItem, SelectItemText, SelectItemIndicator } from "reka-ui";
+	import { Check } from "lucide-vue-next";
 	import type { FormStatus, FormTheme } from "~/types/form-builder";
-	import { getThemeOptionsForSelect } from "~/composables/useThemes";
+	import { THEMES } from "~/composables/useThemes";
 
 	interface Props {
 		modelValue: boolean;
@@ -39,7 +41,7 @@
 		{ value: "archived", label: "בארכיון" },
 	];
 
-	const themeOptions = getThemeOptionsForSelect();
+	const selectedTheme = computed(() => THEMES.find((t) => t.id === theme.value));
 
 	// Fetch settings when modal opens
 	watch(
@@ -184,22 +186,56 @@
 					</div>
 
 					<div class="flex flex-col gap-1">
-						<label for="settings-theme" class="text-xs font-medium text-gray-600">
-							ערכת נושא
-						</label>
-						<select
-							id="settings-theme"
-							v-model="theme"
-							class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-						>
-							<option
-								v-for="option in themeOptions"
-								:key="option.value"
-								:value="option.value"
-							>
-								{{ option.label }}
-							</option>
-						</select>
+						<label class="text-xs font-medium text-gray-600"> ערכת נושא </label>
+						<UiSelect v-model="theme" dir="rtl">
+							<UiSelectTrigger class="w-full">
+								<div class="flex items-center gap-2">
+									<span>{{ selectedTheme?.title }}</span>
+									<div class="flex gap-0.5">
+										<div
+											v-for="color in selectedTheme?.colors"
+											:key="color"
+											:style="{ background: color }"
+											class="h-3.5 w-3.5 rounded-sm border border-black/10"
+										/>
+									</div>
+								</div>
+							</UiSelectTrigger>
+							<UiSelectContent>
+								<SelectItem
+									v-for="t in THEMES"
+									:key="t.id"
+									:value="t.id"
+									class="focus:bg-accent focus:text-accent-foreground relative flex w-full cursor-default select-none items-start rounded-sm py-2 pr-8 pl-2 outline-none data-disabled:pointer-events-none data-disabled:opacity-50"
+								>
+									<span
+										class="absolute right-2 mt-0.5 flex size-3.5 items-center justify-center"
+									>
+										<SelectItemIndicator>
+											<Check class="size-4" />
+										</SelectItemIndicator>
+									</span>
+									<div class="flex flex-col gap-1">
+										<div class="flex items-center gap-2">
+											<SelectItemText class="text-sm font-medium">{{
+												t.title
+											}}</SelectItemText>
+											<div class="flex gap-0.5">
+												<div
+													v-for="color in t.colors"
+													:key="color"
+													:style="{ background: color }"
+													class="h-3.5 w-3.5 rounded-sm border border-black/10"
+												/>
+											</div>
+										</div>
+										<p class="text-muted-foreground line-clamp-2 text-xs">
+											{{ t.description }}
+										</p>
+									</div>
+								</SelectItem>
+							</UiSelectContent>
+						</UiSelect>
 					</div>
 				</div>
 			</div>
