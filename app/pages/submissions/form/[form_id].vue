@@ -1,88 +1,3 @@
-<script setup lang="ts">
-	interface Submission {
-		id: number;
-		token: string;
-		formId: number;
-		prefillData: Record<string, unknown> | null;
-		additionalData: Record<string, unknown> | null;
-		createdByUserId: number | null;
-		expiresAt: string;
-		status: "pending" | "in_progress" | "submitted" | "locked";
-		isPublic: boolean;
-		submissionData: Record<string, unknown> | null;
-		createdAt: string;
-		startedAt: string | null;
-		submittedAt: string | null;
-		lockedAt: string | null;
-	}
-
-	interface Folder {
-		id: number;
-		name: string;
-		createdBy: number;
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	interface Form {
-		id: number;
-		title: string;
-		description: string | null;
-		folderId: number | null;
-		folder: Folder | null;
-		status: "draft" | "published" | "archived";
-		createdAt: string;
-		updatedAt: string;
-		createdByUserId: number;
-	}
-
-	interface PaginatedResponse {
-		data: Submission[];
-		pagination: {
-			page: number;
-			limit: number;
-			total: number;
-			totalPages: number;
-			hasNextPage: boolean;
-			hasPreviousPage: boolean;
-		};
-	}
-
-	const route = useRoute();
-	const { user, loggedIn } = useUserSession();
-	const router = useRouter();
-	const formId = Number(route.params.form_id);
-	const currentPage = ref(Number(route.query.page) || 1);
-	const showCreateModal = ref(false);
-
-	watch(currentPage, (newPage) => {
-		router.replace({ query: { ...route.query, page: newPage > 1 ? String(newPage) : undefined } });
-	});
-
-	const {
-		data: formData,
-		pending: formPending,
-		error: formError,
-	} = await useFetch<Form>(`/api/forms/${formId}`);
-
-	const {
-		data: response,
-		pending,
-		error,
-		refresh,
-	} = await useFetch<PaginatedResponse>(
-		() => `/api/submissions?formId=${formId}&page=${currentPage.value}`,
-	);
-
-	const submissions = computed(() => response.value?.data ?? []);
-	const pagination = computed(() => response.value?.pagination);
-	const isFormPublished = computed(() => formData.value?.status === "published");
-
-	useHead({
-		title: "Submissions - Autodox",
-	});
-</script>
-
 <template>
 	<div dir="rtl" class="min-h-screen bg-gray-100">
 		<SubmissionsHeader>
@@ -156,3 +71,75 @@
 		/>
 	</div>
 </template>
+
+<script setup lang="ts">
+	import { type Submission } from "~/types/Submission";
+
+	interface Folder {
+		id: number;
+		name: string;
+		createdBy: number;
+		createdAt: string;
+		updatedAt: string;
+	}
+
+	interface Form {
+		id: number;
+		title: string;
+		description: string | null;
+		folderId: number | null;
+		folder: Folder | null;
+		status: "draft" | "published" | "archived";
+		createdAt: string;
+		updatedAt: string;
+		createdByUserId: number;
+	}
+
+	interface PaginatedResponse {
+		data: Submission[];
+		pagination: {
+			page: number;
+			limit: number;
+			total: number;
+			totalPages: number;
+			hasNextPage: boolean;
+			hasPreviousPage: boolean;
+		};
+	}
+
+	const route = useRoute();
+	const { user, loggedIn } = useUserSession();
+	const router = useRouter();
+	const formId = Number(route.params.form_id);
+	const currentPage = ref(Number(route.query.page) || 1);
+	const showCreateModal = ref(false);
+
+	watch(currentPage, (newPage) => {
+		router.replace({
+			query: { ...route.query, page: newPage > 1 ? String(newPage) : undefined },
+		});
+	});
+
+	const {
+		data: formData,
+		pending: formPending,
+		error: formError,
+	} = await useFetch<Form>(`/api/forms/${formId}`);
+
+	const {
+		data: response,
+		pending,
+		error,
+		refresh,
+	} = await useFetch<PaginatedResponse>(
+		() => `/api/submissions?formId=${formId}&page=${currentPage.value}`,
+	);
+
+	const submissions = computed(() => response.value?.data ?? []);
+	const pagination = computed(() => response.value?.pagination);
+	const isFormPublished = computed(() => formData.value?.status === "published");
+
+	useHead({
+		title: "Submissions - Autodox",
+	});
+</script>

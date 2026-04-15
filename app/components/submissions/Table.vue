@@ -1,174 +1,3 @@
-<script setup lang="ts">
-	type Submission = {
-		id: number;
-		name: string | null;
-		token: string;
-		formId: number;
-		prefillData: Record<string, unknown> | null;
-		additionalData: Record<string, unknown> | null;
-		createdByUserId: number | null;
-		expiresAt: string;
-		status: "pending" | "in_progress" | "submitted" | "locked";
-		isPublic: boolean;
-		submissionData: Record<string, unknown> | null;
-		createdAt: string;
-		startedAt: string | null;
-		submittedAt: string | null;
-		lockedAt: string | null;
-		formTitle?: string;
-	};
-
-	type PaginationInfo = {
-		page: number;
-		limit: number;
-		total: number;
-		totalPages: number;
-		hasNextPage: boolean;
-		hasPreviousPage: boolean;
-	};
-
-	const props = withDefaults(
-		defineProps<{
-			submissions: Submission[];
-			pagination?: PaginationInfo;
-			pending: boolean;
-			error: any;
-			showFormColumn?: boolean;
-		}>(),
-		{
-			showFormColumn: false,
-		},
-	);
-
-	const page = defineModel<number>("page", { required: true });
-	const emit = defineEmits<{ refresh: [] }>();
-
-	const toasts = useToasts();
-
-	const selectedSubmission = ref<Submission | null>(null);
-	const showJsonModal = ref(false);
-	const downloadingPdfs = ref<Set<string>>(new Set());
-
-	const statusColors = {
-		pending: "bg-gray-100 text-gray-800",
-		in_progress: "bg-blue-100 text-blue-800",
-		submitted: "bg-green-100 text-green-800",
-		locked: "bg-red-100 text-red-800",
-	};
-
-	const statusLabels = {
-		pending: "Pending",
-		in_progress: "In Progress",
-		submitted: "Submitted",
-		locked: "Locked",
-	};
-
-	function formatDate(dateString: string) {
-		return new Date(dateString).toLocaleDateString("he-IL", {
-			year: "numeric",
-			month: "short",
-			day: "numeric",
-			hour: "2-digit",
-			minute: "2-digit",
-		});
-	}
-
-	function openJsonModal(submission: Submission) {
-		selectedSubmission.value = submission;
-		showJsonModal.value = true;
-	}
-
-	function closeJsonModal() {
-		showJsonModal.value = false;
-		selectedSubmission.value = null;
-	}
-
-	function openFillUrl(formId: number, token: string) {
-		const fillUrl = `${window.location.origin}/fill/${formId}?token=${token}`;
-		window.open(fillUrl, "_blank");
-	}
-
-	function downloadPDF(token: string) {
-		if (downloadingPdfs.value.has(token)) return;
-
-		try {
-			downloadingPdfs.value.add(token);
-
-			const link = document.createElement("a");
-			link.href = `/api/submissions/${token}/download-pdf`;
-			link.download = `submission-${token}-${new Date().toISOString().split("T")[0]}.pdf`;
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-
-			toasts.add({
-				title: "מוריד PDF...",
-				theme: "success",
-				duration: 2000,
-			});
-		} catch (err) {
-			console.error("Failed to download PDF:", err);
-			toasts.add({
-				title: "שגיאה: לא ניתן להוריד PDF",
-				theme: "error",
-				duration: 3000,
-			});
-		} finally {
-			setTimeout(() => {
-				downloadingPdfs.value.delete(token);
-			}, 1000);
-		}
-	}
-
-	function handlePreviousPage() {
-		if (props.pagination?.hasPreviousPage) {
-			page.value--;
-		}
-	}
-
-	function handleNextPage() {
-		if (props.pagination?.hasNextPage) {
-			page.value++;
-		}
-	}
-
-	function goToPage(p: number) {
-		page.value = p;
-	}
-
-	const paginationPages = computed(() => {
-		if (!props.pagination) return [];
-		const totalPages = props.pagination.totalPages;
-		const currentPageNum = props.pagination.page;
-		const pages: (number | string)[] = [];
-
-		pages.push(1);
-
-		const start = Math.max(2, currentPageNum - 1);
-		const end = Math.min(totalPages - 1, currentPageNum + 1);
-
-		if (start > 2) {
-			pages.push("...");
-		}
-
-		for (let i = start; i <= end; i++) {
-			if (i !== 1 && i !== totalPages) {
-				pages.push(i);
-			}
-		}
-
-		if (end < totalPages - 1) {
-			pages.push("...");
-		}
-
-		if (totalPages > 1 && !pages.includes(totalPages)) {
-			pages.push(totalPages);
-		}
-
-		return pages;
-	});
-</script>
-
 <template>
 	<!-- Loading state -->
 	<div v-if="pending" class="flex items-center justify-center py-12">
@@ -205,48 +34,43 @@
 						<th
 							class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
 						>
-							ID
+							מזהה
 						</th>
 						<th
 							class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
 						>
-							שם
+							שם הגשה
 						</th>
 						<th
 							v-if="showFormColumn"
 							class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
 						>
-							Form
+							טופס
 						</th>
 						<th
 							class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
 						>
-							Status
+							סטטוס
 						</th>
 						<th
 							class="px-6 py-3 text-sm font-medium text-gray-700 text-center whitespace-nowrap"
 						>
-							Created By User ID
+							נוצר על-ידי משתמש
 						</th>
 						<th
 							class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
 						>
-							Created
+							נוצר ב
 						</th>
 						<th
 							class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
 						>
-							Submitted
+							הוגש ב
 						</th>
 						<th
 							class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
 						>
-							Actions
-						</th>
-						<th
-							class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
-						>
-							Token
+							פעולות
 						</th>
 					</tr>
 				</thead>
@@ -298,52 +122,13 @@
 							{{ submission.submittedAt ? formatDate(submission.submittedAt) : "-" }}
 						</td>
 						<td class="px-6 py-4 text-sm whitespace-nowrap">
-							<div class="flex gap-2">
+							<div class="flex gap-2 items-center">
 								<NuxtLink :to="`/submission-detail/${submission.token}`">
 									<UiButton size="sm">
 										<Icon name="heroicons:eye" class="h-4 w-4" />
-										Details
+										הצג פרטים
 									</UiButton>
 								</NuxtLink>
-								<NuxtLink
-									:to="`/print/${submission.token}`"
-									target="_blank"
-								>
-									<BaseButton
-										variant="secondary"
-										size="sm"
-										title="תצוגת הדפסה"
-									>
-										<Icon name="heroicons:printer" class="h-4 w-4" />
-										תצוגת הדפסה
-									</BaseButton>
-								</NuxtLink>
-								<BaseButton
-									variant="secondary"
-									size="sm"
-									@click="downloadPDF(submission.token)"
-									:disabled="downloadingPdfs.has(submission.token)"
-									:title="'Download PDF report'"
-								>
-									<Icon
-										:name="
-											downloadingPdfs.has(submission.token)
-												? 'svg-spinners:ring-resize'
-												: 'heroicons:arrow-down-tray'
-										"
-										class="h-4 w-4"
-									/>
-									PDF
-								</BaseButton>
-								<BaseButton
-									v-if="submission.submissionData"
-									variant="secondary"
-									size="sm"
-									@click="openJsonModal(submission)"
-								>
-									<Icon name="heroicons:document-text" class="h-4 w-4" />
-									View Data
-								</BaseButton>
 								<BaseButton
 									v-if="!['submitted', 'locked'].includes(submission.status)"
 									variant="secondary"
@@ -354,18 +139,87 @@
 										name="heroicons:arrow-top-right-on-square"
 										class="h-4 w-4"
 									/>
-									Open Form
+									הצגת טופס
 								</BaseButton>
+								<BaseButton
+									variant="secondary"
+									size="sm"
+									@click="downloadPDF(submission.token)"
+									:disabled="downloadingPdfs.has(submission.token)"
+									title="הורד PDF"
+								>
+									<Icon
+										:name="
+											downloadingPdfs.has(submission.token)
+												? 'svg-spinners:ring-resize'
+												: 'heroicons:arrow-down-tray'
+										"
+										class="h-4 w-4"
+									/>
+									הורד PDF
+								</BaseButton>
+
+								<!-- פעולות נוספות -->
+								<UiDropdownMenu dir="rtl">
+									<UiDropdownMenuTrigger as-child>
+										<BaseButton variant="secondary" size="sm">
+											<Icon
+												name="heroicons:ellipsis-vertical"
+												class="h-4 w-4"
+											/>
+											פעולות נוספות
+										</BaseButton>
+									</UiDropdownMenuTrigger>
+									<UiDropdownMenuContent align="end" class="w-52">
+										<UiDropdownMenuItem
+											@click="
+												copyFormLink(submission.formId, submission.token)
+											"
+										>
+											<Icon name="heroicons:link" class="h-4 w-4 ml-2" />
+											העתק קישור לטופס
+										</UiDropdownMenuItem>
+										<UiDropdownMenuItem @click="copyToken(submission.token)">
+											<Icon
+												name="heroicons:clipboard-document"
+												class="h-4 w-4 ml-2"
+											/>
+											העתק טוקן
+										</UiDropdownMenuItem>
+										<UiDropdownMenuItem as-child>
+											<NuxtLink
+												:to="`/print/${submission.token}`"
+												target="_blank"
+												class="flex items-center w-full"
+											>
+												<Icon
+													name="heroicons:printer"
+													class="h-4 w-4 ml-2"
+												/>
+												תצוגת הדפסה
+											</NuxtLink>
+										</UiDropdownMenuItem>
+										<UiDropdownMenuSeparator />
+										<UiDropdownMenuItem
+											disabled
+											class="text-gray-400 cursor-not-allowed"
+										>
+											<Icon
+												name="heroicons:archive-box"
+												class="h-4 w-4 ml-2"
+											/>
+											העברה לארכיון
+										</UiDropdownMenuItem>
+										<UiDropdownMenuItem
+											disabled
+											class="text-gray-400 cursor-not-allowed"
+										>
+											<Icon name="heroicons:pencil" class="h-4 w-4 ml-2" />
+											שינוי שם הגשה
+										</UiDropdownMenuItem>
+									</UiDropdownMenuContent>
+								</UiDropdownMenu>
 							</div>
-						</td>
-						<td class="px-6 py-4 text-sm whitespace-nowrap">
-							<BaseCopyButton
-								:text="submission.token"
-								variant="ghost"
-								:title="`Copy token: ${submission.token}`"
-							>
-								<code class="font-mono text-xs text-gray-700 ltr">{{ submission.token.substring(0, 5) }}...</code>
-							</BaseCopyButton>
 						</td>
 					</tr>
 				</tbody>
@@ -460,3 +314,185 @@
 		</div>
 	</div>
 </template>
+
+<script setup lang="ts">
+	type Submission = {
+		id: number;
+		name: string | null;
+		token: string;
+		formId: number;
+		prefillData: Record<string, unknown> | null;
+		additionalData: Record<string, unknown> | null;
+		createdByUserId: number | null;
+		expiresAt: string;
+		status: "pending" | "in_progress" | "submitted" | "locked";
+		isPublic: boolean;
+		submissionData: Record<string, unknown> | null;
+		createdAt: string;
+		startedAt: string | null;
+		submittedAt: string | null;
+		lockedAt: string | null;
+		formTitle?: string;
+	};
+
+	type PaginationInfo = {
+		page: number;
+		limit: number;
+		total: number;
+		totalPages: number;
+		hasNextPage: boolean;
+		hasPreviousPage: boolean;
+	};
+
+	const props = withDefaults(
+		defineProps<{
+			submissions: Submission[];
+			pagination?: PaginationInfo;
+			pending: boolean;
+			error: any;
+			showFormColumn?: boolean;
+		}>(),
+		{
+			showFormColumn: false,
+		},
+	);
+
+	const page = defineModel<number>("page", { required: true });
+	const emit = defineEmits<{ refresh: [] }>();
+
+	const toasts = useToasts();
+
+	const selectedSubmission = ref<Submission | null>(null);
+	const showJsonModal = ref(false);
+	const downloadingPdfs = ref<Set<string>>(new Set());
+
+	const statusColors = {
+		pending: "bg-gray-100 text-gray-800",
+		in_progress: "bg-blue-100 text-blue-800",
+		submitted: "bg-green-100 text-green-800",
+		locked: "bg-red-100 text-red-800",
+	};
+
+	const statusLabels = {
+		pending: "Pending",
+		in_progress: "In Progress",
+		submitted: "Submitted",
+		locked: "Locked",
+	};
+
+	function formatDate(dateString: string) {
+		return new Date(dateString).toLocaleDateString("he-IL", {
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+		});
+	}
+
+	function openJsonModal(submission: Submission) {
+		selectedSubmission.value = submission;
+		showJsonModal.value = true;
+	}
+
+	function closeJsonModal() {
+		showJsonModal.value = false;
+		selectedSubmission.value = null;
+	}
+
+	function openFillUrl(formId: number, token: string) {
+		const fillUrl = `${window.location.origin}/fill/${formId}?token=${token}`;
+		window.open(fillUrl, "_blank");
+	}
+
+	async function copyFormLink(formId: number, token: string) {
+		const url = `${window.location.origin}/fill/${formId}?token=${token}`;
+		await navigator.clipboard.writeText(url);
+		toasts.add({ title: "הקישור הועתק", theme: "success", duration: 2000 });
+	}
+
+	async function copyToken(token: string) {
+		await navigator.clipboard.writeText(token);
+		toasts.add({ title: "הטוקן הועתק", theme: "success", duration: 2000 });
+	}
+
+	function downloadPDF(token: string) {
+		if (downloadingPdfs.value.has(token)) return;
+
+		try {
+			downloadingPdfs.value.add(token);
+
+			const link = document.createElement("a");
+			link.href = `/api/submissions/${token}/download-pdf`;
+			link.download = `submission-${token}-${new Date().toISOString().split("T")[0]}.pdf`;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+
+			toasts.add({
+				title: "מוריד PDF...",
+				theme: "success",
+				duration: 2000,
+			});
+		} catch (err) {
+			console.error("Failed to download PDF:", err);
+			toasts.add({
+				title: "שגיאה: לא ניתן להוריד PDF",
+				theme: "error",
+				duration: 3000,
+			});
+		} finally {
+			setTimeout(() => {
+				downloadingPdfs.value.delete(token);
+			}, 1000);
+		}
+	}
+
+	function handlePreviousPage() {
+		if (props.pagination?.hasPreviousPage) {
+			page.value--;
+		}
+	}
+
+	function handleNextPage() {
+		if (props.pagination?.hasNextPage) {
+			page.value++;
+		}
+	}
+
+	function goToPage(p: number) {
+		page.value = p;
+	}
+
+	const paginationPages = computed(() => {
+		if (!props.pagination) return [];
+		const totalPages = props.pagination.totalPages;
+		const currentPageNum = props.pagination.page;
+		const pages: (number | string)[] = [];
+
+		pages.push(1);
+
+		const start = Math.max(2, currentPageNum - 1);
+		const end = Math.min(totalPages - 1, currentPageNum + 1);
+
+		if (start > 2) {
+			pages.push("...");
+		}
+
+		for (let i = start; i <= end; i++) {
+			if (i !== 1 && i !== totalPages) {
+				pages.push(i);
+			}
+		}
+
+		if (end < totalPages - 1) {
+			pages.push("...");
+		}
+
+		if (totalPages > 1 && !pages.includes(totalPages)) {
+			pages.push(totalPages);
+		}
+
+		return pages;
+	});
+</script>
