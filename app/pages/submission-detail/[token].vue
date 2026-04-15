@@ -5,6 +5,7 @@
 		id: number;
 		title: string;
 		description: string | null;
+		webhookUrl?: string | null;
 	}
 
 	interface WebhookDelivery {
@@ -85,9 +86,9 @@
 				<SubmissionDetailFormEntrances :entrances />
 
 				<SubmissionDetailWebhookDeliveries
-					v-if="webhookDeliveries.length > 0"
 					:deliveries="webhookDeliveries"
-					:submission-token="token"
+					:submission
+					:form
 					@refresh="refresh"
 				/>
 			</div>
