@@ -6,6 +6,7 @@ export default defineEventHandler(async (event) => {
 	const query = getQuery(event);
 	const formId = Number(query.formId) || undefined;
 	const userId = Number(query.userId) || undefined;
+	const archived = query.archived === "true";
 
 	if (!formId && !userId) {
 		throw createError({ statusCode: 400, message: "formId or userId is required" });
@@ -15,6 +16,7 @@ export default defineEventHandler(async (event) => {
 	const conditions = [];
 	if (formId) conditions.push(eq(submissionsTable.formId, formId));
 	if (userId) conditions.push(eq(formsTable.createdBy, userId));
+	conditions.push(eq(submissionsTable.isArchived, archived));
 	const where = conditions.length === 1 ? conditions[0] : and(...conditions);
 
 	const page = Math.max(1, Number(query.page) || 1);
@@ -52,6 +54,8 @@ export default defineEventHandler(async (event) => {
 						submittedAt: submissionsTable.submittedAt,
 						name: submissionsTable.name,
 						lockedAt: submissionsTable.lockedAt,
+						isArchived: submissionsTable.isArchived,
+						archivedAt: submissionsTable.archivedAt,
 						formTitle: formsTable.title,
 					})
 					.from(submissionsTable)
@@ -77,6 +81,8 @@ export default defineEventHandler(async (event) => {
 						submittedAt: submissionsTable.submittedAt,
 						name: submissionsTable.name,
 						lockedAt: submissionsTable.lockedAt,
+						isArchived: submissionsTable.isArchived,
+						archivedAt: submissionsTable.archivedAt,
 					})
 					.from(submissionsTable)
 					.where(where)

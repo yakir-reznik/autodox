@@ -22,12 +22,20 @@
 			<!-- Status -->
 			<div>
 				<label class="block text-sm font-medium text-gray-700">Status</label>
-				<div class="mt-2">
+				<div class="mt-2 flex items-center gap-2">
 					<span
 						class="rounded-full px-3 py-1 text-sm font-medium"
 						:class="statusColors[submission.status]"
 					>
 						{{ statusLabels[submission.status] }}
+					</span>
+					<span
+						v-if="submission.isArchived"
+						class="rounded-full bg-amber-100 text-amber-800 px-3 py-1 text-sm font-medium flex items-center gap-1"
+						title="הגשה בארכיון"
+					>
+						<Icon name="heroicons:archive-box" class="h-3 w-3" />
+						ארכיון
 					</span>
 				</div>
 			</div>
@@ -124,6 +132,22 @@
 						<p class="text-sm font-medium text-gray-900">Form Submitted</p>
 						<p class="text-sm text-gray-600">
 							{{ formatDate(submission.submittedAt) }}
+						</p>
+					</div>
+				</div>
+
+				<div v-if="submission.archivedAt" class="flex gap-4">
+					<div class="flex flex-col items-center">
+						<div
+							class="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100"
+						>
+							<Icon name="heroicons:archive-box" class="h-4 w-4 text-amber-600" />
+						</div>
+					</div>
+					<div class="flex-1">
+						<p class="text-sm font-medium text-gray-900">הועבר לארכיון</p>
+						<p class="text-sm text-gray-600">
+							{{ formatDate(submission.archivedAt) }}
 						</p>
 					</div>
 				</div>

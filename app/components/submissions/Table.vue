@@ -52,11 +52,7 @@
 						>
 							סטטוס
 						</th>
-						<th
-							class="px-6 py-3 text-sm font-medium text-gray-700 text-center whitespace-nowrap"
-						>
-							נוצר על-ידי משתמש
-						</th>
+
 						<th
 							class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
 						>
@@ -110,11 +106,17 @@
 									<Icon name="heroicons:globe-alt" class="h-3 w-3" />
 									ציבורי
 								</span>
+								<span
+									v-if="submission.isArchived"
+									class="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-medium flex items-center gap-1"
+									title="הגשה בארכיון"
+								>
+									<Icon name="heroicons:archive-box" class="h-3 w-3" />
+									ארכיון
+								</span>
 							</div>
 						</td>
-						<td class="px-6 py-4 text-sm text-gray-600 text-center whitespace-nowrap">
-							{{ submission.createdByUserId ?? "-" }}
-						</td>
+
 						<td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
 							{{ formatDate(submission.createdAt) }}
 						</td>
@@ -130,7 +132,10 @@
 									</UiButton>
 								</NuxtLink>
 								<BaseButton
-									v-if="!['submitted', 'locked'].includes(submission.status)"
+									v-if="
+										!['submitted', 'locked'].includes(submission.status) &&
+										!submission.isArchived
+									"
 									variant="secondary"
 									size="sm"
 									@click="openFillUrl(submission.formId, submission.token)"
@@ -200,20 +205,22 @@
 											</NuxtLink>
 										</UiDropdownMenuItem>
 										<UiDropdownMenuSeparator />
-										<UiDropdownMenuItem
-											disabled
-											class="text-gray-400 cursor-not-allowed"
-										>
+										<UiDropdownMenuItem @click="toggleArchive(submission)">
 											<Icon
-												name="heroicons:archive-box"
+												:name="
+													submission.isArchived
+														? 'heroicons:archive-box-x-mark'
+														: 'heroicons:archive-box-arrow-down'
+												"
 												class="h-4 w-4 ml-2"
 											/>
-											העברה לארכיון
+											{{
+												submission.isArchived
+													? "שחזור מארכיון"
+													: "העברה לארכיון"
+											}}
 										</UiDropdownMenuItem>
-										<UiDropdownMenuItem
-											disabled
-											class="text-gray-400 cursor-not-allowed"
-										>
+										<UiDropdownMenuItem @click="openRenameModal(submission)">
 											<Icon name="heroicons:pencil" class="h-4 w-4 ml-2" />
 											שינוי שם הגשה
 										</UiDropdownMenuItem>
@@ -278,6 +285,31 @@
 		</div>
 	</template>
 
+	<!-- Rename Modal -->
+	<UiDialog v-model:open="showRenameModal">
+		<UiDialogContent class="sm:max-w-md" dir="rtl">
+			<UiDialogHeader>
+				<UiDialogTitle>שינוי שם הגשה</UiDialogTitle>
+				<UiDialogDescription>הזן שם חדש להגשה</UiDialogDescription>
+			</UiDialogHeader>
+			<div class="py-2">
+				<UiInput
+					v-model="renameName"
+					placeholder="שם ההגשה"
+					class="w-full"
+					@keydown.enter="submitRename"
+				/>
+			</div>
+			<UiDialogFooter class="flex gap-2 justify-start flex-row-reverse">
+				<UiButton :disabled="renaming" @click="submitRename">
+					<Icon v-if="renaming" name="svg-spinners:ring-resize" class="h-4 w-4" />
+					שמור
+				</UiButton>
+				<UiButton variant="outline" @click="showRenameModal = false">ביטול</UiButton>
+			</UiDialogFooter>
+		</UiDialogContent>
+	</UiDialog>
+
 	<!-- JSON Modal -->
 	<div
 		v-if="showJsonModal && selectedSubmission"
@@ -327,6 +359,8 @@
 		expiresAt: string;
 		status: "pending" | "in_progress" | "submitted" | "locked";
 		isPublic: boolean;
+		isArchived: boolean;
+		archivedAt: string | null;
 		submissionData: Record<string, unknown> | null;
 		createdAt: string;
 		startedAt: string | null;
@@ -365,6 +399,11 @@
 	const selectedSubmission = ref<Submission | null>(null);
 	const showJsonModal = ref(false);
 	const downloadingPdfs = ref<Set<string>>(new Set());
+
+	const showRenameModal = ref(false);
+	const renameTarget = ref<Submission | null>(null);
+	const renameName = ref("");
+	const renaming = ref(false);
 
 	const statusColors = {
 		pending: "bg-gray-100 text-gray-800",
@@ -462,6 +501,35 @@
 
 	function goToPage(p: number) {
 		page.value = p;
+	}
+
+	function openRenameModal(submission: Submission) {
+		renameTarget.value = submission;
+		renameName.value = submission.name ?? "";
+		showRenameModal.value = true;
+	}
+
+	async function submitRename() {
+		if (!renameTarget.value || !renameName.value.trim()) return;
+		renaming.value = true;
+		try {
+			await $fetch(`/api/submissions/${renameTarget.value.token}/rename`, {
+				method: "PATCH",
+				body: { name: renameName.value.trim() },
+			});
+			toasts.add({ title: "שם ההגשה עודכן", theme: "success", duration: 2000 });
+			showRenameModal.value = false;
+			emit("refresh");
+		} catch {
+			toasts.add({ title: "שגיאה: לא ניתן לשנות שם", theme: "error", duration: 3000 });
+		} finally {
+			renaming.value = false;
+		}
+	}
+
+	async function toggleArchive(submission: Submission) {
+		await $fetch(`/api/submissions/${submission.token}/archive`, { method: "PATCH" });
+		emit("refresh");
 	}
 
 	const paginationPages = computed(() => {

@@ -15,6 +15,8 @@ export interface Submission {
 	submittedAt: string | null;
 	lockedAt: string | null;
 	isPublic: boolean;
+	isArchived: boolean;
+	archivedAt: string | null;
 }
 
 export type FormEntrance = {

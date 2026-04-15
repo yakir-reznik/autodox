@@ -45,6 +45,14 @@ export default defineEventHandler(async (event) => {
 		});
 	}
 
+	// Check if submission is archived
+	if (submission.isArchived) {
+		throw createError({
+			statusCode: 403,
+			message: "Submission is archived",
+		});
+	}
+
 	// Check if submission has expired
 	if (submission.expiresAt && new Date(submission.expiresAt) < new Date()) {
 		throw createError({

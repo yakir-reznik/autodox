@@ -81,6 +81,12 @@
 				return; // Don't proceed with tracking or prefill
 			}
 
+			// Check if submission is archived
+			if ("isArchived" in form.value && form.value.isArchived) {
+				isArchived.value = true;
+				return;
+			}
+
 			try {
 				await $fetch(`/api/forms/${props.formId}/entrances`, {
 					method: "POST",
@@ -157,6 +163,7 @@
 	const isSubmitting = ref(false);
 	const isSubmitted = ref(false);
 	const isAlreadyLocked = ref(false);
+	const isArchived = ref(false);
 
 	// Convert server elements to client format with hierarchy
 	const allElements = computed((): BuilderElement[] => {
@@ -645,6 +652,21 @@
 				</h2>
 				<p class="form-fill-error-message text-base text-muted-foreground">
 					טופס זה כבר נשלח וננעל. לא ניתן לבצע שינויים נוספים.
+				</p>
+			</div>
+		</div>
+
+		<!-- Archived error -->
+		<div v-else-if="isArchived" class="grid place-items-center min-h-screen">
+			<div
+				class="form-fill-error-state form-fill-card max-w-160 mx-auto bg-card rounded-lg shadow-md p-8 text-center"
+			>
+				<Icon name="heroicons:archive-box" class="mx-auto h-12 w-12 text-muted-foreground" />
+				<h2 class="form-fill-error-title text-xl font-semibold text-foreground mb-2">
+					הגשה זו הועברה לארכיון
+				</h2>
+				<p class="form-fill-error-message text-base text-muted-foreground">
+					הגשה זו אינה זמינה למילוי.
 				</p>
 			</div>
 		</div>

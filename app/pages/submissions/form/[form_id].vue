@@ -20,7 +20,7 @@
 		<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 			<!-- Action Buttons -->
 			<div class="mb-6 flex justify-end gap-3">
-				<BaseButton
+				<UiButton
 					variant="secondary"
 					@click="refresh"
 					:disabled="pending"
@@ -29,28 +29,39 @@
 					<Icon v-if="pending" name="svg-spinners:ring-resize" class="h-4 w-4" />
 					<Icon v-else name="heroicons:arrow-path" class="h-4 w-4" />
 					{{ pending ? "טוען..." : "רענן" }}
-				</BaseButton>
+				</UiButton>
 				<NuxtLink :to="`/edit/${formId}`">
-					<BaseButton variant="secondary">
+					<UiButton variant="secondary">
 						<Icon name="heroicons:pencil" class="h-4 w-4" />
 						עריכת טופס
-					</BaseButton>
+					</UiButton>
 				</NuxtLink>
 				<NuxtLink :to="`/forms/${formId}/submission-data-structure`">
-					<BaseButton variant="secondary">
+					<UiButton variant="secondary">
 						<Icon name="heroicons:code-bracket" class="h-4 w-4" />
 						מבנה נתונים
-					</BaseButton>
+					</UiButton>
 				</NuxtLink>
-				<BaseButton
-					variant="primary"
+				<UiButton
+					variant="secondary"
+					class="bg-foreground/10"
+					@click="showArchived = !showArchived"
+				>
+					<Icon
+						:name="showArchived ? 'heroicons:inbox' : 'heroicons:archive-box'"
+						class="h-4 w-4"
+					/>
+					{{ showArchived ? "הצג פעיל" : "הצג ארכיון" }}
+				</UiButton>
+				<UiButton
+					variant="default"
 					@click="showCreateModal = true"
 					:disabled="!loggedIn || !isFormPublished"
 					:title="!isFormPublished ? 'צור הגשה רק עבור טפסים פורסומים' : ''"
 				>
 					<Icon name="heroicons:plus" class="h-4 w-4" />
 					צור הגשה חדשה
-				</BaseButton>
+				</UiButton>
 			</div>
 
 			<SubmissionsTable
@@ -113,11 +124,16 @@
 	const formId = Number(route.params.form_id);
 	const currentPage = ref(Number(route.query.page) || 1);
 	const showCreateModal = ref(false);
+	const showArchived = ref(false);
 
 	watch(currentPage, (newPage) => {
 		router.replace({
 			query: { ...route.query, page: newPage > 1 ? String(newPage) : undefined },
 		});
+	});
+
+	watch(showArchived, () => {
+		currentPage.value = 1;
 	});
 
 	const {
@@ -132,7 +148,8 @@
 		error,
 		refresh,
 	} = await useFetch<PaginatedResponse>(
-		() => `/api/submissions?formId=${formId}&page=${currentPage.value}`,
+		() =>
+			`/api/submissions?formId=${formId}&page=${currentPage.value}&archived=${showArchived.value}`,
 	);
 
 	const submissions = computed(() => response.value?.data ?? []);

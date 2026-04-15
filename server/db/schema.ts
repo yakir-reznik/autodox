@@ -385,6 +385,8 @@ export const submissionsTable = mysqlTable("submissions_table", {
 	startedAt: timestamp("started_at"),
 	submittedAt: timestamp("submitted_at"),
 	lockedAt: timestamp("locked_at"),
+	isArchived: boolean("is_archived").notNull().default(false),
+	archivedAt: timestamp("archived_at"),
 });
 
 // Webhook Deliveries Table - Tracks webhook delivery attempts with audit trail

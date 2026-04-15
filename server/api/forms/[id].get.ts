@@ -51,6 +51,7 @@ export default defineEventHandler(async (event) => {
 	let prefillData = null;
 	let submissionStatus = null;
 	let isLocked = false;
+	let isArchived = false;
 	let submission = null;
 
 	if (token) {
@@ -69,6 +70,7 @@ export default defineEventHandler(async (event) => {
 
 			submissionStatus = submission.status;
 			isLocked = submission.status === "locked";
+			isArchived = submission.isArchived;
 
 			// If already submitted/locked, use submission data instead of prefill
 			if (isLocked && submission.submissionData) {
@@ -107,5 +109,6 @@ export default defineEventHandler(async (event) => {
 		prefillData,
 		submissionStatus,
 		isLocked,
+		isArchived,
 	};
 });
