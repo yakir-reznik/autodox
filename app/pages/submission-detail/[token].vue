@@ -65,7 +65,6 @@
 	}
 
 	const route = useRoute();
-	const { user, loggedIn } = useUserSession();
 
 	const token = route.params.token as string;
 
@@ -136,7 +135,11 @@
 	});
 
 	const sortKeys = (obj: Record<string, unknown>): Record<string, unknown> =>
-		Object.fromEntries(Object.keys(obj).sort().map((k) => [k, obj[k]]));
+		Object.fromEntries(
+			Object.keys(obj)
+				.sort()
+				.map((k) => [k, obj[k]]),
+		);
 
 	const prefillDataLines = computed(() => {
 		if (!submission.value?.prefillData) return [];
@@ -180,29 +183,7 @@
 
 <template>
 	<div dir="rtl" class="min-h-screen bg-gray-100">
-		<!-- Header -->
-		<header class="bg-white shadow">
-			<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-				<div class="flex items-center justify-between">
-					<div class="flex items-center gap-4">
-						<NuxtLink to="/forms">
-							<BaseButton variant="secondary" size="sm">
-								<Icon name="heroicons:arrow-left" class="h-5 w-5" />
-							</BaseButton>
-						</NuxtLink>
-						<div>
-							<h1 class="text-2xl font-bold text-gray-900">Submission Details</h1>
-							<p class="text-sm text-gray-600">Token: {{ token }}</p>
-						</div>
-					</div>
-					<div class="flex items-center gap-3">
-						<div class="text-sm text-gray-600" v-if="loggedIn">
-							{{ user?.name }}
-						</div>
-					</div>
-				</div>
-			</div>
-		</header>
+		<SubmissionDetailHeader :token />
 
 		<!-- Content -->
 		<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -226,14 +207,21 @@
 			<div v-else-if="submission">
 				<!-- Submission Overview Card -->
 				<div class="mb-8 rounded-lg bg-white p-6 shadow">
-					<div v-if="submission.name || submission.externalId" class="mb-4 pb-4 border-b border-gray-200 flex gap-8">
+					<div
+						v-if="submission.name || submission.externalId"
+						class="mb-4 pb-4 border-b border-gray-200 flex gap-8"
+					>
 						<div v-if="submission.name">
 							<p class="text-xs text-gray-500">שם ההגשה</p>
-							<p class="text-lg font-medium text-gray-900 mt-0.5">{{ submission.name }}</p>
+							<p class="text-lg font-medium text-gray-900 mt-0.5">
+								{{ submission.name }}
+							</p>
 						</div>
 						<div v-if="submission.externalId">
 							<p class="text-xs text-gray-500">מזהה חיצוני</p>
-							<p class="text-lg font-medium text-gray-900 mt-0.5 font-mono">{{ submission.externalId }}</p>
+							<p class="text-lg font-medium text-gray-900 mt-0.5 font-mono">
+								{{ submission.externalId }}
+							</p>
 						</div>
 					</div>
 
@@ -393,13 +381,24 @@
 				</div>
 
 				<!-- Submission Data -->
-				<div v-if="submission.submissionData" class="mb-8 overflow-hidden rounded-lg bg-white shadow">
-					<div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3">
+				<div
+					v-if="submission.submissionData"
+					class="mb-8 overflow-hidden rounded-lg bg-white shadow"
+				>
+					<div
+						class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3"
+					>
 						<h2 class="text-lg font-medium text-gray-900">Submitted Data</h2>
-						<BaseCopyButton :text="JSON.stringify(submission.submissionData, null, 2)" variant="ghost" />
+						<BaseCopyButton
+							:text="JSON.stringify(submission.submissionData, null, 2)"
+							variant="ghost"
+						/>
 					</div>
 					<div class="relative">
-						<div dir="ltr" class="overflow-x-auto p-4 text-sm [&_.shiki]:bg-transparent!">
+						<div
+							dir="ltr"
+							class="overflow-x-auto p-4 text-sm [&_.shiki]:bg-transparent!"
+						>
 							<Shiki lang="json" :code="visibleSubmissionData" />
 						</div>
 						<div
@@ -412,18 +411,33 @@
 						class="w-full cursor-pointer border-t border-gray-100 py-2.5 text-center text-sm text-blue-600 transition hover:bg-gray-50"
 						@click="isSubmissionDataExpanded = !isSubmissionDataExpanded"
 					>
-						{{ isSubmissionDataExpanded ? "הצג פחות" : `הצג עוד (${submissionDataLines.length - 10} שורות נוספות)` }}
+						{{
+							isSubmissionDataExpanded
+								? "הצג פחות"
+								: `הצג עוד (${submissionDataLines.length - 10} שורות נוספות)`
+						}}
 					</button>
 				</div>
 
 				<!-- Prefill Data -->
-				<div v-if="submission.prefillData" class="mb-8 overflow-hidden rounded-lg bg-white shadow">
-					<div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3">
+				<div
+					v-if="submission.prefillData"
+					class="mb-8 overflow-hidden rounded-lg bg-white shadow"
+				>
+					<div
+						class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3"
+					>
 						<h2 class="text-lg font-medium text-gray-900">Prefill Data</h2>
-						<BaseCopyButton :text="JSON.stringify(sortKeys(submission.prefillData!), null, 2)" variant="ghost" />
+						<BaseCopyButton
+							:text="JSON.stringify(sortKeys(submission.prefillData!), null, 2)"
+							variant="ghost"
+						/>
 					</div>
 					<div class="relative">
-						<div dir="ltr" class="overflow-x-auto p-4 text-sm [&_.shiki]:bg-transparent!">
+						<div
+							dir="ltr"
+							class="overflow-x-auto p-4 text-sm [&_.shiki]:bg-transparent!"
+						>
 							<Shiki lang="json" :code="visiblePrefillData" />
 						</div>
 						<div
@@ -436,23 +450,41 @@
 						class="w-full cursor-pointer border-t border-gray-100 py-2.5 text-center text-sm text-blue-600 transition hover:bg-gray-50"
 						@click="isPrefillDataExpanded = !isPrefillDataExpanded"
 					>
-						{{ isPrefillDataExpanded ? "הצג פחות" : `הצג עוד (${prefillDataLines.length - 10} שורות נוספות)` }}
+						{{
+							isPrefillDataExpanded
+								? "הצג פחות"
+								: `הצג עוד (${prefillDataLines.length - 10} שורות נוספות)`
+						}}
 					</button>
 				</div>
 
 				<!-- Additional Data -->
-				<div v-if="submission.additionalData" class="mb-8 overflow-hidden rounded-lg bg-white shadow">
-					<div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3">
+				<div
+					v-if="submission.additionalData"
+					class="mb-8 overflow-hidden rounded-lg bg-white shadow"
+				>
+					<div
+						class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3"
+					>
 						<h2 class="text-lg font-medium text-gray-900">Additional Data</h2>
-						<BaseCopyButton :text="JSON.stringify(submission.additionalData, null, 2)" variant="ghost" />
+						<BaseCopyButton
+							:text="JSON.stringify(submission.additionalData, null, 2)"
+							variant="ghost"
+						/>
 					</div>
 					<div dir="ltr" class="overflow-x-auto p-4 text-sm [&_.shiki]:bg-transparent!">
-						<Shiki lang="json" :code="JSON.stringify(submission.additionalData, null, 2)" />
+						<Shiki
+							lang="json"
+							:code="JSON.stringify(submission.additionalData, null, 2)"
+						/>
 					</div>
 				</div>
 
 				<!-- Form Entrances -->
-				<div v-if="entrances.length > 0" class="mb-8 overflow-hidden rounded-lg bg-white shadow">
+				<div
+					v-if="entrances.length > 0"
+					class="mb-8 overflow-hidden rounded-lg bg-white shadow"
+				>
 					<div class="border-b border-gray-200 bg-gray-50 px-6 py-3">
 						<h2 class="text-lg font-medium text-gray-900">
 							Form Entrances ({{ entrances.length }})
@@ -461,102 +493,102 @@
 					<div class="relative">
 						<div class="overflow-x-auto">
 							<table class="w-full">
-							<thead class="border-b border-gray-200 bg-gray-50">
-								<tr>
-									<th
-										class="px-4 py-3 text-right text-sm font-medium text-gray-700"
-									>
-										Entrance #
-									</th>
-									<th
-										class="px-4 py-3 text-right text-sm font-medium text-gray-700"
-									>
-										Date & Time
-									</th>
-									<th
-										class="px-4 py-3 text-center text-sm font-medium text-gray-700"
-									>
-										Device Type
-									</th>
-									<th
-										class="px-4 py-3 text-right text-sm font-medium text-gray-700"
-									>
-										Browser
-									</th>
-									<th
-										class="px-4 py-3 text-right text-sm font-medium text-gray-700"
-									>
-										OS
-									</th>
-									<th
-										class="px-4 py-3 text-center text-sm font-medium text-gray-700"
-									>
-										IP Address
-									</th>
-									<th
-										class="px-4 py-3 text-center text-sm font-medium text-gray-700"
-									>
-										Country
-									</th>
-									<th
-										class="px-4 py-3 text-center text-sm font-medium text-gray-700"
-									>
-										New Session
-									</th>
-								</tr>
-							</thead>
-							<tbody class="divide-y divide-gray-200">
-								<tr
-									v-for="(entrance, index) in visibleEntrances"
-									:key="entrance.id"
-									class="hover:bg-gray-50"
-								>
-									<td class="px-4 py-3 text-sm text-gray-900">
-										#{{ index + 1 }}
-									</td>
-									<td class="px-4 py-3 text-sm text-gray-600">
-										{{ formatDate(entrance.timestamp) }}
-									</td>
-									<td class="px-4 py-3 text-center text-sm text-gray-600">
-										<span
-											class="inline-block rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800"
+								<thead class="border-b border-gray-200 bg-gray-50">
+									<tr>
+										<th
+											class="px-4 py-3 text-right text-sm font-medium text-gray-700"
 										>
-											{{ deviceTypeLabels[entrance.deviceType] }}
-										</span>
-									</td>
-									<td class="px-4 py-3 text-sm text-gray-600">
-										{{ entrance.browserName ?? "-" }}
-									</td>
-									<td class="px-4 py-3 text-sm text-gray-600">
-										{{ entrance.osName ?? "-" }}
-									</td>
-									<td class="px-4 py-3 text-center text-sm">
-										<code
-											v-if="entrance.ipAddress"
-											class="rounded bg-gray-100 px-2 py-1 font-mono text-xs text-gray-700"
+											Entrance #
+										</th>
+										<th
+											class="px-4 py-3 text-right text-sm font-medium text-gray-700"
 										>
-											{{ entrance.ipAddress }}
-										</code>
-										<span v-else class="text-gray-400">-</span>
-									</td>
-									<td class="px-4 py-3 text-center text-sm text-gray-600">
-										{{ entrance.country ?? "-" }}
-									</td>
-									<td class="px-4 py-3 text-center text-sm">
-										<Icon
-											v-if="entrance.isNewSession"
-											name="heroicons:check-circle"
-											class="mx-auto h-5 w-5 text-green-600"
-										/>
-										<Icon
-											v-else
-											name="heroicons:x-circle"
-											class="mx-auto h-5 w-5 text-gray-400"
-										/>
-									</td>
-								</tr>
-							</tbody>
-						</table>
+											Date & Time
+										</th>
+										<th
+											class="px-4 py-3 text-center text-sm font-medium text-gray-700"
+										>
+											Device Type
+										</th>
+										<th
+											class="px-4 py-3 text-right text-sm font-medium text-gray-700"
+										>
+											Browser
+										</th>
+										<th
+											class="px-4 py-3 text-right text-sm font-medium text-gray-700"
+										>
+											OS
+										</th>
+										<th
+											class="px-4 py-3 text-center text-sm font-medium text-gray-700"
+										>
+											IP Address
+										</th>
+										<th
+											class="px-4 py-3 text-center text-sm font-medium text-gray-700"
+										>
+											Country
+										</th>
+										<th
+											class="px-4 py-3 text-center text-sm font-medium text-gray-700"
+										>
+											New Session
+										</th>
+									</tr>
+								</thead>
+								<tbody class="divide-y divide-gray-200">
+									<tr
+										v-for="(entrance, index) in visibleEntrances"
+										:key="entrance.id"
+										class="hover:bg-gray-50"
+									>
+										<td class="px-4 py-3 text-sm text-gray-900">
+											#{{ index + 1 }}
+										</td>
+										<td class="px-4 py-3 text-sm text-gray-600">
+											{{ formatDate(entrance.timestamp) }}
+										</td>
+										<td class="px-4 py-3 text-center text-sm text-gray-600">
+											<span
+												class="inline-block rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800"
+											>
+												{{ deviceTypeLabels[entrance.deviceType] }}
+											</span>
+										</td>
+										<td class="px-4 py-3 text-sm text-gray-600">
+											{{ entrance.browserName ?? "-" }}
+										</td>
+										<td class="px-4 py-3 text-sm text-gray-600">
+											{{ entrance.osName ?? "-" }}
+										</td>
+										<td class="px-4 py-3 text-center text-sm">
+											<code
+												v-if="entrance.ipAddress"
+												class="rounded bg-gray-100 px-2 py-1 font-mono text-xs text-gray-700"
+											>
+												{{ entrance.ipAddress }}
+											</code>
+											<span v-else class="text-gray-400">-</span>
+										</td>
+										<td class="px-4 py-3 text-center text-sm text-gray-600">
+											{{ entrance.country ?? "-" }}
+										</td>
+										<td class="px-4 py-3 text-center text-sm">
+											<Icon
+												v-if="entrance.isNewSession"
+												name="heroicons:check-circle"
+												class="mx-auto h-5 w-5 text-green-600"
+											/>
+											<Icon
+												v-else
+												name="heroicons:x-circle"
+												class="mx-auto h-5 w-5 text-gray-400"
+											/>
+										</td>
+									</tr>
+								</tbody>
+							</table>
 						</div>
 						<div
 							v-if="entrances.length > ENTRANCES_LIMIT && !isEntrancesExpanded"
@@ -568,7 +600,11 @@
 						class="w-full cursor-pointer border-t border-gray-100 py-2.5 text-center text-sm text-blue-600 transition hover:bg-gray-50"
 						@click="isEntrancesExpanded = !isEntrancesExpanded"
 					>
-						{{ isEntrancesExpanded ? "הצג פחות" : `הצג עוד (${entrances.length - ENTRANCES_LIMIT} כניסות נוספות)` }}
+						{{
+							isEntrancesExpanded
+								? "הצג פחות"
+								: `הצג עוד (${entrances.length - ENTRANCES_LIMIT} כניסות נוספות)`
+						}}
 					</button>
 				</div>
 
