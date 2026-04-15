@@ -38,6 +38,8 @@ interface DeliveryResult {
 	errorMessage?: string;
 }
 
+const RESPONSE_BODY_TRUNCATE_BYTE_LIMIT = 500; // 500 byts
+
 /**
  * Attempt to deliver webhook with optional retry
  */
@@ -60,7 +62,14 @@ async function attemptDelivery(
 			responseHeaders[key] = value;
 		});
 
-		const responseBody = await response.text();
+		let responseBody = await response.text();
+
+		// Truncate response body to prevent large records
+		if (responseBody.length > RESPONSE_BODY_TRUNCATE_BYTE_LIMIT) {
+			responseBody =
+				responseBody.substring(0, RESPONSE_BODY_TRUNCATE_BYTE_LIMIT) +
+				`\n...(truncated ${responseBody.length - RESPONSE_BODY_TRUNCATE_BYTE_LIMIT} characters)`;
+		}
 
 		if (response.ok) {
 			return {
@@ -168,6 +177,12 @@ export async function deliverWebhook(
 		"X-Form-Id": String(submission.formId),
 	};
 
+	// Create version for database with pdfBase64 omitted to prevent large records
+	const payloadForDb = {
+		...payload,
+		pdfBase64: "<omitted to prevent large records>",
+	};
+
 	// If no webhook URL, log to table but mark as success with no delivery
 	if (!webhookUrl) {
 		const [insertResult] = await db.insert(webhookDeliveriesTable).values({
@@ -175,7 +190,7 @@ export async function deliverWebhook(
 			webhookUrl: "none",
 			status: "success",
 			httpStatusCode: null,
-			requestPayload: payload as unknown as Record<string, unknown>,
+			requestPayload: payloadForDb as unknown as Record<string, unknown>,
 			requestHeaders,
 			responseBody: "No webhook URL configured - skipped delivery",
 			responseHeaders: null,
@@ -195,7 +210,7 @@ export async function deliverWebhook(
 		submissionId,
 		webhookUrl,
 		status: "pending",
-		requestPayload: payload as unknown as Record<string, unknown>,
+		requestPayload: payloadForDb as unknown as Record<string, unknown>,
 		requestHeaders,
 		retryCount: 0,
 	});
