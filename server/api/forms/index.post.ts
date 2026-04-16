@@ -22,6 +22,7 @@ export default defineEventHandler(async (event) => {
 		title: body.title,
 		description: body.description || null,
 		status: "draft",
+		theme: body.theme || "lightning",
 		createdBy: body.createdBy,
 		folderId: body.folderId || null,
 	});

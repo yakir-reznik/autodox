@@ -50,7 +50,7 @@ export function useFormBuilder() {
 		title: "",
 		description: "",
 		status: "draft",
-		theme: "default",
+		theme: "lightning",
 		elements: [],
 		selectedElementId: null,
 		isDirty: false,
@@ -279,6 +279,7 @@ export function useFormBuilder() {
 				title: state.title || "Untitled Form",
 				description: state.description,
 				createdBy: 1, // TODO: Get from auth
+				theme: state.theme,
 			},
 		});
 
@@ -464,7 +465,7 @@ export function useFormBuilder() {
 		state.title = "";
 		state.description = "";
 		state.status = "draft";
-		state.theme = "default";
+		state.theme = "lightning";
 		state.elements = [];
 		state.selectedElementId = null;
 		state.isDirty = false;
