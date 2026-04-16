@@ -12,8 +12,10 @@
 
 ## Features
 
-- [ ] Implement archiving feature in submissions/form/{form_id} - there is also ui in more actions dropdown. we need to show a approve modal and if approved mark as archived. in the filtering section allow showing archived items
-- [ ] Implement renaming submission (not locked ones!) there is also ui in more actions dropdown
+- [ ] Add sha 256 checksum hash to locked submission
+- [ ] It's super hard or even impossible to drag fields into a section element, even if it has one field in it.
+- [x] Implement archiving feature in submissions/form/{form_id} - there is also ui in more actions dropdown. we need to show a approve modal and if approved mark as archived. in the filtering section allow showing archived items
+- [x] Implement renaming submission (not locked ones!) there is also ui in more actions dropdown
 - [ ] for submissions that have expired - they are stuck in "In Progress". we need to change their status to "expired"
 - [ ] submissions link expire 14 days after generating (create-submission-link.post.ts) we need to add option to change this in form settings and in submission settings. i want the @server/api/forms/[id]/create-submission-link.post.ts to return the number of days the link is good for and we need to display it on the success message instead of a hardcoded value
 - [ ] Allow saving without submitting. Also allow saving while form is only partially filled. Max 1 save per user per form and it should expire after 30 days. new save overwrites last one. (Plan file ready - save-submission-drafts.md)
