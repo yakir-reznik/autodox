@@ -53,27 +53,36 @@ export default defineEventHandler(async (event) => {
 
 	const newFormId = result[0].insertId;
 
-	// Copy elements, remapping parentId references
+	// Copy elements in two passes to correctly remap parentId references
+	// regardless of the order elements appear relative to their parents.
 	if (sourceForm.elements.length > 0) {
 		const oldIdToNewId = new Map<number, number>();
 
+		// Pass 1: insert all elements without parentId
 		for (const element of sourceForm.elements) {
-			const parentId =
-				element.parentId !== null
-					? oldIdToNewId.get(element.parentId) ?? null
-					: null;
-
 			const insertResult = await db.insert(formElementsTable).values({
 				formId: newFormId,
 				type: element.type,
 				position: element.position,
-				parentId,
+				parentId: null,
 				name: element.name,
 				config: element.config,
 				isDeleted: false,
 			});
 
 			oldIdToNewId.set(element.id, insertResult[0].insertId);
+		}
+
+		// Pass 2: update parentId references using the remapped IDs
+		for (const element of sourceForm.elements) {
+			if (element.parentId !== null) {
+				const newId = oldIdToNewId.get(element.id)!;
+				const newParentId = oldIdToNewId.get(element.parentId) ?? null;
+				await db
+					.update(formElementsTable)
+					.set({ parentId: newParentId })
+					.where(eq(formElementsTable.id, newId));
+			}
 		}
 	}
 
