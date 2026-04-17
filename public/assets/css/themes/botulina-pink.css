@@ -204,6 +204,18 @@
 	background-color: var(--secondary);
 }
 
+/* Disable padding for fields inside section / repeater */
+.form-fill-repeater-item,
+.form-fill-section {
+	.form-fill-fieldset-input,
+	.form-fill-fieldset-dropdown,
+	.form-fill-fieldset-checkbox,
+	.form-fill-fieldset-checkboxes,
+	.form-fill-fieldset-radio {
+		padding: 0;
+	}
+}
+
 .form-fill-checkbox-option,
 .form-fill-radio-option {
 	padding: 0.5rem;
