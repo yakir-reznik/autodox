@@ -227,28 +227,44 @@ export function useFormBuilder() {
 
 		const newPosition = getPositionBetween(afterElement || null, nextElement);
 
-		// Use internal add to avoid double recording
-		const elementName = isFieldElement(element.type)
-			? generateUniqueName(element.type, state.elements)
+		const newElement = cloneElementTree(element, element.parentId, newPosition);
+		state.isDirty = true;
+		state.selectedElementId = newElement.clientId;
+
+		return newElement;
+	}
+
+	function cloneElementTree(
+		source: BuilderElement,
+		newParentId: string | null,
+		newPosition: number
+	): BuilderElement {
+		const elementName = isFieldElement(source.type)
+			? generateUniqueName(source.type, state.elements)
 			: null;
 
 		const newElement: BuilderElement = {
 			id: null,
 			clientId: generateClientId(),
-			type: element.type,
+			type: source.type,
 			position: newPosition,
-			parentId: element.parentId,
+			parentId: newParentId,
 			name: elementName,
-			config: JSON.parse(JSON.stringify(element.config)),
-			isRequired: element.isRequired,
-			conditions: element.conditions
-				? JSON.parse(JSON.stringify(element.conditions))
+			config: JSON.parse(JSON.stringify(source.config)),
+			isRequired: source.isRequired,
+			conditions: source.conditions
+				? JSON.parse(JSON.stringify(source.conditions))
 				: null,
 		};
 
 		state.elements.push(newElement);
-		state.isDirty = true;
-		state.selectedElementId = newElement.clientId;
+
+		if (source.type === "section" || source.type === "repeater") {
+			const children = getChildElements(source.clientId);
+			for (const child of children) {
+				cloneElementTree(child, newElement.clientId, child.position);
+			}
+		}
 
 		return newElement;
 	}

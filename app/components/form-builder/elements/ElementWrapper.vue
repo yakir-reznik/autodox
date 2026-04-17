@@ -40,6 +40,9 @@
 		});
 	}
 
+	// Shared drag state — used to expand container drop zones during a drag
+	const { isDragging } = useFormBuilderDragState();
+
 	// Check if element is a container type (can have nested children)
 	const isContainer = computed(
 		() => props.element.type === "section" || props.element.type === "repeater",
@@ -197,9 +200,25 @@
 					item-key="clientId"
 					handle=".drag-handle"
 					animation="200"
-					:class="children.length > 0 ? 'space-y-3' : 'min-h-20'"
+					:class="[
+						children.length > 0 ? 'space-y-3' : 'min-h-20',
+						isDragging && 'rounded-lg bg-blue-50/40 pt-10 pb-10 transition-all',
+					]"
 					@change="handleNestedChange"
+					@start="isDragging = true"
+					@end="isDragging = false"
 				>
+					<template #header>
+						<div
+							v-if="isDragging && children.length > 0"
+							class="mb-3 flex items-center justify-center rounded border-2 border-dashed border-blue-200 bg-white/60 py-2 text-xs font-medium text-blue-300 pointer-events-none"
+						>
+							<Icon name="heroicons:arrow-down-tray" class="me-1 h-4 w-4" />
+							שחרר כאן כדי להוסיף לתחילת
+							{{ element.type === "repeater" ? "שדה החזרה" : "המקטע" }}
+						</div>
+					</template>
+
 					<template #item="{ element: child }">
 						<ElementWrapper
 							:element="child"
@@ -216,13 +235,29 @@
 						/>
 					</template>
 
-					<!-- Empty section state -->
+					<!-- Drop-zone footer: empty state + drop-at-end ghost while dragging -->
 					<template #footer>
 						<div
 							v-if="children.length === 0"
-							class="flex min-h-20 items-center justify-center rounded border-2 border-dashed border-gray-200 bg-gray-50"
+							class="flex min-h-20 items-center justify-center rounded border-2 border-dashed bg-gray-50"
+							:class="isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-200'"
 						>
-							<p class="text-sm text-gray-400">הוספ/י אלמנטים לכאן</p>
+							<p
+								class="text-sm"
+								:class="isDragging ? 'text-blue-600 font-medium' : 'text-gray-400'"
+							>
+								{{
+									isDragging ? "שחרר כאן כדי להוסיף למקטע" : "הוספ/י אלמנטים לכאן"
+								}}
+							</p>
+						</div>
+						<div
+							v-else-if="isDragging"
+							class="mt-3 flex items-center justify-center rounded border-2 border-dashed border-blue-200 bg-white/60 py-2 text-xs font-medium text-blue-300 pointer-events-none"
+						>
+							<Icon name="heroicons:arrow-up-tray" class="me-1 h-4 w-4" />
+							שחרר כאן כדי להוסיף לסוף
+							{{ element.type === "repeater" ? "שדה החזרה" : "המקטע" }}
 						</div>
 					</template>
 				</draggable>

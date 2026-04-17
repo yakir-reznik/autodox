@@ -23,6 +23,9 @@
 	// Track dragging over drop zones
 	const isDraggingOver = ref(false);
 
+	// Shared drag state so nested containers can expand their drop zones
+	const { isDragging } = useFormBuilderDragState();
+
 	// Local copy for draggable
 	const localElements = computed({
 		get: () => [...props.elements],
@@ -80,6 +83,8 @@
 				'space-y-3': elements.length > 0,
 			}"
 			@change="handleChange"
+			@start="isDragging = true"
+			@end="isDragging = false"
 		>
 			<template #item="{ element }">
 				<FormBuilderElementsElementWrapper
