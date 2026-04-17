@@ -1,6 +1,6 @@
 ## Bugs
 
-- [ ] Dragging elements into repeater is kind of hard
+- [x] Dragging elements into repeater is kind of hard
 - [x] Signature fields inside repeater don't export in pdf
 - [x] What the hell happens when repeater field is marked is required? - basically nothing - removed this prop from repeater fields
 - [x] Field name appears twice for repeater field in properties in FormBuilder
@@ -13,7 +13,6 @@
 ## Features
 
 - [ ] Add sha 256 checksum hash to locked submission
-- [ ] It's super hard or even impossible to drag fields into a section element, even if it has one field in it.
 - [x] Implement archiving feature in submissions/form/{form_id} - there is also ui in more actions dropdown. we need to show a approve modal and if approved mark as archived. in the filtering section allow showing archived items
 - [x] Implement renaming submission (not locked ones!) there is also ui in more actions dropdown
 - [ ] for submissions that have expired - they are stuck in "In Progress". we need to change their status to "expired"

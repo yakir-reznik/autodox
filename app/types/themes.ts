@@ -41,6 +41,13 @@ export const THEMES = [
 		cssFile: "/assets/css/themes/lightning.css",
 		colors: ["#eff6ff", "#bfdbfe", "#60a5fa", "#2563eb", "#1e40af"],
 	},
+	{
+		id: "botulina-pink",
+		title: "וורוד בוטולינה",
+		description: "ורוד עז ובוטולינה",
+		cssFile: "/assets/css/themes/botulina-pink.css",
+		colors: ["#fdf2f8", "#fce7f3", "#f472b6", "#F1117F", "#be185d"],
+	},
 ] as const;
 
 export type Theme = (typeof THEMES)[number];
