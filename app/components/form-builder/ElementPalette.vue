@@ -34,7 +34,7 @@
 	<div class="p-4 max-h-[calc(100vh-90px)]">
 		<h2 class="mb-4 text-lg font-semibold text-gray-900">רכיבים</h2>
 
-		<div v-for="category in categories" :key="category.key" class="mb-6">
+		<div v-for="category in categories" :key="category.key" class="mb-6 pb-12">
 			<h3 class="mb-2 text-xs font-medium uppercase tracking-wider text-gray-500">
 				{{ category.label }}
 			</h3>

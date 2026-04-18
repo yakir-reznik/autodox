@@ -174,6 +174,11 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 				bordered: true,
 				backgroundColor: "#f9fafb",
 			};
+		case "grid":
+			return {
+				desktop: { columns: 2, gap: "1rem", justify: "stretch", align: "start" },
+				mobile: { columns: 1, gap: "0.5rem", justify: "stretch", align: "start" },
+			};
 
 		default:
 			return {};
@@ -328,6 +333,12 @@ export function usePaletteElements(): PaletteElement[] {
 			icon: "heroicons:rectangle-group",
 			category: "layout",
 		},
+		{
+			type: "grid",
+			label: "רשת",
+			icon: "heroicons:squares-2x2",
+			category: "layout",
+		},
 	];
 }
 
@@ -369,6 +380,7 @@ export function getElementComponent(type: ElementType): string | undefined {
 		divider: "DividerElement",
 		spacer: "SpacerElement",
 		section: "SectionElement",
+		grid: "GridElement",
 	};
 
 	return componentMap[type];
@@ -427,4 +439,21 @@ export function isConditionSource(type: ElementType): boolean {
 // Check if element type has options (dropdown, radio, checkboxes)
 export function hasOptions(type: ElementType): boolean {
 	return ["dropdown", "radio", "checkboxes"].includes(type);
+}
+
+// Container element types that can hold other elements
+export function isContainerType(type: ElementType): boolean {
+	return type === "section" || type === "repeater" || type === "grid";
+}
+
+// Containment rule: can `childType` be placed inside `parentType` (null = root)?
+// - grid can only live at the root (not inside section/repeater/grid)
+// - grid cannot contain other container elements (section/repeater/grid)
+export function canAccept(
+	parentType: ElementType | null,
+	childType: ElementType,
+): boolean {
+	if (childType === "grid" && parentType !== null) return false;
+	if (parentType === "grid" && isContainerType(childType)) return false;
+	return true;
 }

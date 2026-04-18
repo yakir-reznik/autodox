@@ -6,6 +6,8 @@ import type {
 	ValidationRules,
 	SelectionOption,
 	ConditionGroup,
+	GridAxis,
+	GridBreakpointConfig,
 } from "~~/server/db/schema";
 
 // Re-export schema types for convenience
@@ -17,6 +19,8 @@ export type {
 	ValidationRules,
 	SelectionOption,
 	ConditionGroup,
+	GridAxis,
+	GridBreakpointConfig,
 };
 
 // Client-side element type (may not have real ID yet)

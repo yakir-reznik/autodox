@@ -41,6 +41,7 @@ const elementTypeName = computed(() => {
 		divider: "Divider",
 		spacer: "Spacer",
 		section: "Section",
+		grid: "Grid",
 	};
 	return typeNames[props.element.type] || props.element.type;
 });
@@ -106,7 +107,7 @@ function updateRequired(isRequired: boolean) {
 
 			<!-- Layout properties -->
 			<FormBuilderPropertiesLayoutProperties
-				v-if="!isFieldElement(element.type) && element.type !== 'repeater'"
+				v-if="!isFieldElement(element.type) && element.type !== 'repeater' && element.type !== 'grid'"
 				:element="element"
 				:all-elements="allElements"
 				@update:config="updateConfig"
@@ -115,6 +116,13 @@ function updateRequired(isRequired: boolean) {
 			<!-- Repeater properties -->
 			<FormBuilderPropertiesRepeaterProperties
 				v-if="element.type === 'repeater'"
+				:element="element"
+				@update:config="updateConfig"
+			/>
+
+			<!-- Grid properties -->
+			<FormBuilderPropertiesGridProperties
+				v-if="element.type === 'grid'"
 				:element="element"
 				@update:config="updateConfig"
 			/>

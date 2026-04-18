@@ -75,6 +75,7 @@ export const elementTypeEnum = [
 	"divider",
 	"spacer",
 	"section", // grouping container
+	"grid", // responsive grid container
 ] as const;
 export type ElementType = (typeof elementTypeEnum)[number];
 
@@ -198,6 +199,20 @@ type SectionConfig = {
 	backgroundColor?: string;
 };
 
+export type GridAxis = "start" | "center" | "end" | "stretch";
+
+export type GridBreakpointConfig = {
+	columns: number;
+	gap: string;
+	justify: GridAxis;
+	align: GridAxis;
+};
+
+type GridConfig = {
+	desktop: GridBreakpointConfig;
+	mobile: GridBreakpointConfig;
+};
+
 type RepeaterConfig = {
 	label?: string;
 	helpText?: string;
@@ -221,7 +236,8 @@ export type ElementConfig =
 	| DividerConfig
 	| SpacerConfig
 	| SectionConfig
-	| RepeaterConfig;
+	| RepeaterConfig
+	| GridConfig;
 
 // ============================================
 // FORM BUILDER TABLES

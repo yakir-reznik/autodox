@@ -12,6 +12,7 @@
 	import FillSpacer from "./elements/FillSpacer.vue";
 	import FillSection from "./elements/FillSection.vue";
 	import FillRepeater from "./elements/FillRepeater.vue";
+	import FillGrid from "./elements/FillGrid.vue";
 
 	interface Props {
 		element: BuilderElement;
@@ -72,6 +73,8 @@
 				return FillSection;
 			case "repeater":
 				return FillRepeater;
+			case "grid":
+				return FillGrid;
 			default:
 				return "";
 		}

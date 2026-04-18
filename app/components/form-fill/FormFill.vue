@@ -455,7 +455,7 @@
 				if (!validateRepeater(element.clientId)) {
 					isValid = false;
 				}
-			} else if (element.type === "section") {
+			} else if (element.type === "section" || element.type === "grid") {
 				if (!validateSection(element.clientId)) {
 					isValid = false;
 				}

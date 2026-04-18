@@ -1,7 +1,7 @@
 <script setup lang="ts">
 	import draggable from "vuedraggable";
-	import type { BuilderElement, ElementType } from "~/types/form-builder";
-	import { getElementComponent } from "~/composables/useElementDefaults";
+	import type { BuilderElement, ElementType, GridBreakpointConfig } from "~/types/form-builder";
+	import { canAccept, getElementComponent } from "~/composables/useElementDefaults";
 	import InputElement from "./InputElement.vue";
 	import TextareaElement from "./TextareaElement.vue";
 	import SelectionElement from "./SelectionElement.vue";
@@ -13,15 +13,23 @@
 	import SpacerElement from "./SpacerElement.vue";
 	import SectionElement from "./SectionElement.vue";
 	import RepeaterElement from "./RepeaterElement.vue";
+	import GridElement from "./GridElement.vue";
 
 	interface Props {
 		element: BuilderElement;
 		selected: boolean;
 		selectedId: string | null;
 		getChildren: (parentId: string) => BuilderElement[];
+		parentIsGrid?: boolean;
+		gridIndex?: number;
+		gridSiblingCount?: number;
 	}
 
-	const props = defineProps<Props>();
+	const props = withDefaults(defineProps<Props>(), {
+		parentIsGrid: false,
+		gridIndex: 0,
+		gridSiblingCount: 0,
+	});
 
 	const emit = defineEmits<{
 		select: [clientId?: string];
@@ -31,6 +39,7 @@
 		drop: [type: ElementType, position: number, parentId: string];
 		update: [clientId: string, updates: Partial<BuilderElement>];
 		editConditions: [clientId: string];
+		move: [direction: -1 | 1];
 	}>();
 
 	// Handle config updates from child elements (e.g., drag-and-drop upload in MediaElement)
@@ -45,8 +54,28 @@
 
 	// Check if element is a container type (can have nested children)
 	const isContainer = computed(
-		() => props.element.type === "section" || props.element.type === "repeater",
+		() =>
+			props.element.type === "section" ||
+			props.element.type === "repeater" ||
+			props.element.type === "grid",
 	);
+
+	const isGrid = computed(() => props.element.type === "grid");
+
+	// Desktop layout for the builder canvas (mobile values apply only in fill mode)
+	const gridStyle = computed(() => {
+		if (!isGrid.value) return undefined;
+		const cfg = props.element.config as { desktop?: GridBreakpointConfig };
+		const d = cfg.desktop;
+		if (!d) return undefined;
+		return {
+			display: "grid",
+			gridTemplateColumns: `repeat(${d.columns}, minmax(0, 1fr))`,
+			gap: d.gap,
+			justifyItems: d.justify,
+			alignItems: d.align,
+		};
+	});
 
 	// Get children for container elements (section, repeater)
 	const children = computed(() => {
@@ -74,6 +103,27 @@
 				emit("drop", element.type, position, props.element.clientId);
 			}
 		}
+	}
+
+	// Reject drops that violate containment rules (e.g. containers into a grid)
+	function handleMove(event: any): boolean {
+		const dragged = event.draggedContext?.element;
+		const childType: ElementType | undefined = dragged?.type;
+		if (!childType) return true;
+		return canAccept(props.element.type, childType);
+	}
+
+	// Manual reorder for grid children (drag in flex-wrap is unreliable)
+	function moveChild(index: number, direction: -1 | 1) {
+		const arr = [...children.value];
+		const newIndex = index + direction;
+		if (newIndex < 0 || newIndex >= arr.length) return;
+		const a = arr[index];
+		const b = arr[newIndex];
+		if (!a || !b) return;
+		arr[index] = b;
+		arr[newIndex] = a;
+		emit("reorder", arr, props.element.clientId);
 	}
 
 	function calculateNestedPosition(index: number): number {
@@ -104,6 +154,7 @@
 		SpacerElement,
 		SectionElement,
 		RepeaterElement,
+		GridElement,
 	};
 
 	// Get container background color for styling (section, repeater)
@@ -128,7 +179,7 @@
 
 <template>
 	<div
-		class="group relative rounded-lg border transition-all"
+		class="group relative rounded-lg border transition-all select-none"
 		:class="[
 			!isContainer && 'bg-white',
 			selected
@@ -167,6 +218,30 @@
 			</button>
 		</div>
 
+		<!-- Grid reorder buttons (top-left, drag in 2D grid is unreliable) -->
+		<div
+			v-if="parentIsGrid"
+			class="absolute -top-3 end-4 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
+			:class="{ 'opacity-100': selected }"
+		>
+			<button
+				class="rounded bg-gray-100 p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700 disabled:opacity-30 disabled:hover:bg-gray-100 disabled:hover:text-gray-500"
+				title="הזז אחורה"
+				:disabled="gridIndex === 0"
+				@click.stop="$emit('move', -1)"
+			>
+				<Icon name="heroicons:chevron-right" class="h-4 w-4" />
+			</button>
+			<button
+				class="rounded bg-gray-100 p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700 disabled:opacity-30 disabled:hover:bg-gray-100 disabled:hover:text-gray-500"
+				title="הזז קדימה"
+				:disabled="gridIndex >= gridSiblingCount - 1"
+				@click.stop="$emit('move', 1)"
+			>
+				<Icon name="heroicons:chevron-left" class="h-4 w-4" />
+			</button>
+		</div>
+
 		<!-- Condition indicator (always visible) -->
 		<div
 			v-if="element.conditions?.enabled && element.conditions.rules.length > 0"
@@ -199,32 +274,41 @@
 					group="form-elements"
 					item-key="clientId"
 					handle=".drag-handle"
-					animation="200"
+					:animation="200"
+					:force-fallback="isGrid"
+					:fallback-on-body="isGrid"
+					:invert-swap="isGrid"
+					:move="handleMove"
 					:class="[
-						children.length > 0 ? 'space-y-3' : 'min-h-20',
-						isDragging && 'rounded-lg bg-blue-50/40 pt-10 pb-10 transition-all',
+						!isGrid && (children.length > 0 ? 'space-y-3' : 'min-h-20'),
+						isDragging && 'rounded-lg bg-blue-50/40 transition-all',
 					]"
+					:style="gridStyle"
 					@change="handleNestedChange"
 					@start="isDragging = true"
 					@end="isDragging = false"
 				>
-					<template #header>
+					<!-- <template #header>
 						<div
 							v-if="isDragging && children.length > 0"
 							class="mb-3 flex items-center justify-center rounded border-2 border-dashed border-blue-200 bg-white/60 py-2 text-xs font-medium text-blue-300 pointer-events-none"
+							:style="isGrid ? { gridColumn: '1 / -1' } : undefined"
 						>
 							<Icon name="heroicons:arrow-down-tray" class="me-1 h-4 w-4" />
 							שחרר כאן כדי להוסיף לתחילת
 							{{ element.type === "repeater" ? "שדה החזרה" : "המקטע" }}
 						</div>
-					</template>
+					</template> -->
 
-					<template #item="{ element: child }">
+					<template #item="{ element: child, index }">
 						<ElementWrapper
 							:element="child"
 							:selected="child.clientId === selectedId"
 							:selected-id="selectedId"
 							:get-children="getChildren"
+							:parent-is-grid="isGrid"
+							:grid-index="index"
+							:grid-sibling-count="children.length"
 							@select="(clientId) => $emit('select', clientId)"
 							@delete="(clientId) => $emit('delete', clientId)"
 							@duplicate="(clientId) => $emit('duplicate', clientId)"
@@ -232,15 +316,17 @@
 							@drop="(type, pos, parentId) => $emit('drop', type, pos, parentId)"
 							@update="(clientId, updates) => $emit('update', clientId, updates)"
 							@edit-conditions="(clientId) => $emit('editConditions', clientId)"
+							@move="(direction) => moveChild(index, direction)"
 						/>
 					</template>
 
 					<!-- Drop-zone footer: empty state + drop-at-end ghost while dragging -->
-					<template #footer>
+					<!-- <template #footer>
 						<div
 							v-if="children.length === 0"
 							class="flex min-h-20 items-center justify-center rounded border-2 border-dashed bg-gray-50"
 							:class="isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-200'"
+							:style="isGrid ? { gridColumn: '1 / -1' } : undefined"
 						>
 							<p
 								class="text-sm"
@@ -254,12 +340,13 @@
 						<div
 							v-else-if="isDragging"
 							class="mt-3 flex items-center justify-center rounded border-2 border-dashed border-blue-200 bg-white/60 py-2 text-xs font-medium text-blue-300 pointer-events-none"
+							:style="isGrid ? { gridColumn: '1 / -1' } : undefined"
 						>
 							<Icon name="heroicons:arrow-up-tray" class="me-1 h-4 w-4" />
 							שחרר כאן כדי להוסיף לסוף
 							{{ element.type === "repeater" ? "שדה החזרה" : "המקטע" }}
 						</div>
-					</template>
+					</template> -->
 				</draggable>
 			</div>
 		</div>

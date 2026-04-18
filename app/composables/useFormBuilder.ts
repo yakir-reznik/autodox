@@ -150,9 +150,9 @@ export function useFormBuilder() {
 			recordHistory();
 		}
 
-		// Also remove children if it's a section
+		// Also remove children if it's a container (section/grid)
 		const element = state.elements.find((el) => el.clientId === clientId);
-		if (element?.type === "section") {
+		if (element?.type === "section" || element?.type === "grid") {
 			const children = getChildElements(clientId);
 			for (const child of children) {
 				removeElement(child.clientId, true);
@@ -259,7 +259,11 @@ export function useFormBuilder() {
 
 		state.elements.push(newElement);
 
-		if (source.type === "section" || source.type === "repeater") {
+		if (
+			source.type === "section" ||
+			source.type === "repeater" ||
+			source.type === "grid"
+		) {
 			const children = getChildElements(source.clientId);
 			for (const child of children) {
 				cloneElementTree(child, newElement.clientId, child.position);
