@@ -13,11 +13,12 @@
 ## Features
 
 - [ ] Add sha 256 checksum hash to locked submission
-- [x] Implement archiving feature in submissions/form/{form_id} - there is also ui in more actions dropdown. we need to show a approve modal and if approved mark as archived. in the filtering section allow showing archived items
-- [x] Implement renaming submission (not locked ones!) there is also ui in more actions dropdown
 - [ ] for submissions that have expired - they are stuck in "In Progress". we need to change their status to "expired"
 - [ ] submissions link expire 14 days after generating (create-submission-link.post.ts) we need to add option to change this in form settings and in submission settings. i want the @server/api/forms/[id]/create-submission-link.post.ts to return the number of days the link is good for and we need to display it on the success message instead of a hardcoded value
 - [ ] Allow saving without submitting. Also allow saving while form is only partially filled. Max 1 save per user per form and it should expire after 30 days. new save overwrites last one. (Plan file ready - save-submission-drafts.md)
+- [x] Remove form name from print view (Causes double title)
+- [x] Implement archiving feature in submissions/form/{form_id} - there is also ui in more actions dropdown. we need to show a approve modal and if approved mark as archived. in the filtering section allow showing archived items
+- [x] Implement renaming submission (not locked ones!) there is also ui in more actions dropdown
 - [x] Add create submission modal to form editor view
 - [x] In submission detail view - order prefill data keys in alphabetical order - There's code in create-submission-link.post.ts that is supposed to do this but it does not seem to work
 - [x] In submission detail view - show prefill data and additional data as json with syntax highlighting

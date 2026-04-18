@@ -28,9 +28,15 @@
 		);
 	});
 
-	provide("formElements", computed(() => props.elements));
+	provide(
+		"formElements",
+		computed(() => props.elements),
+	);
 	provide("rootFormData", props.values);
-	provide("prefillData", computed(() => props.prefillData || {}));
+	provide(
+		"prefillData",
+		computed(() => props.prefillData || {}),
+	);
 
 	// Get root elements (no parent)
 	const rootElements = computed(() => {
@@ -47,14 +53,6 @@
 
 <template>
 	<div class="form-print-container">
-		<!-- Header -->
-		<header class="form-fill-header mb-8 text-center">
-			<h1 class="form-fill-title text-2xl font-semibold text-foreground mb-2">{{ form.title }}</h1>
-			<p v-if="form.description" class="form-fill-description text-base text-muted-foreground">
-				{{ form.description }}
-			</p>
-		</header>
-
 		<!-- Form Elements (Read-only) -->
 		<div class="form-fill-elements flex flex-col gap-6">
 			<FormField
