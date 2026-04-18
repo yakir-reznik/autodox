@@ -15,10 +15,6 @@
 	import RepeaterElement from "./RepeaterElement.vue";
 	import GridElement from "./GridElement.vue";
 
-	// Feature flag: RTL multi-column drag-sorting inside a grid is unreliable,
-	// so by default we disable internal grid reorder and rely on the ↔ buttons.
-	const allowDragSortingGridItems = false;
-
 	interface Props {
 		element: BuilderElement;
 		selected: boolean;
@@ -93,14 +89,6 @@
 	const localChildren = computed({
 		get: () => [...children.value],
 		set: (newElements) => {
-			// Block internal reorders inside a grid (RTL multi-column sort isn't reliable — use ↔ buttons)
-			if (isGrid.value && !allowDragSortingGridItems) {
-				const current = children.value;
-				const sameSet =
-					newElements.length === current.length &&
-					newElements.every((el) => current.some((c) => c.clientId === el.clientId));
-				if (sameSet) return;
-			}
 			emit("reorder", newElements, props.element.clientId);
 		},
 	});
@@ -118,9 +106,7 @@
 	}
 
 	// Reject drops that violate containment rules (e.g. containers into a grid)
-	// Also reject reordering inside a grid (RTL multi-column sort isn't supported)
 	function handleMove(event: any): boolean {
-		if (isGrid.value && !allowDragSortingGridItems && event.from === event.to) return false;
 		const dragged = event.draggedContext?.element;
 		const childType: ElementType | undefined = dragged?.type;
 		if (!childType) return true;
@@ -289,7 +275,6 @@
 					item-key="clientId"
 					handle=".drag-handle"
 					:animation="200"
-					:sort="!isGrid || allowDragSortingGridItems"
 					:move="handleMove"
 					:class="[
 						!isGrid && (children.length > 0 ? 'space-y-3' : 'min-h-20'),
