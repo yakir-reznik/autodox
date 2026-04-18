@@ -20,16 +20,9 @@
 		selected: boolean;
 		selectedId: string | null;
 		getChildren: (parentId: string) => BuilderElement[];
-		parentIsGrid?: boolean;
-		gridIndex?: number;
-		gridSiblingCount?: number;
 	}
 
-	const props = withDefaults(defineProps<Props>(), {
-		parentIsGrid: false,
-		gridIndex: 0,
-		gridSiblingCount: 0,
-	});
+	const props = defineProps<Props>();
 
 	const emit = defineEmits<{
 		select: [clientId?: string];
@@ -39,7 +32,6 @@
 		drop: [type: ElementType, position: number, parentId: string];
 		update: [clientId: string, updates: Partial<BuilderElement>];
 		editConditions: [clientId: string];
-		move: [direction: -1 | 1];
 	}>();
 
 	// Handle config updates from child elements (e.g., drag-and-drop upload in MediaElement)
@@ -111,19 +103,6 @@
 		const childType: ElementType | undefined = dragged?.type;
 		if (!childType) return true;
 		return canAccept(props.element.type, childType);
-	}
-
-	// Manual reorder for grid children (drag in flex-wrap is unreliable)
-	function moveChild(index: number, direction: -1 | 1) {
-		const arr = [...children.value];
-		const newIndex = index + direction;
-		if (newIndex < 0 || newIndex >= arr.length) return;
-		const a = arr[index];
-		const b = arr[newIndex];
-		if (!a || !b) return;
-		arr[index] = b;
-		arr[newIndex] = a;
-		emit("reorder", arr, props.element.clientId);
 	}
 
 	function calculateNestedPosition(index: number): number {
@@ -218,30 +197,6 @@
 			</button>
 		</div>
 
-		<!-- Grid reorder buttons (top-left, drag in 2D grid is unreliable) -->
-		<div
-			v-if="parentIsGrid"
-			class="absolute -top-3 end-4 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
-			:class="{ 'opacity-100': selected }"
-		>
-			<button
-				class="rounded bg-gray-100 p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700 disabled:opacity-30 disabled:hover:bg-gray-100 disabled:hover:text-gray-500"
-				title="הזז אחורה"
-				:disabled="gridIndex === 0"
-				@click.stop="$emit('move', -1)"
-			>
-				<Icon name="heroicons:chevron-right" class="h-4 w-4" />
-			</button>
-			<button
-				class="rounded bg-gray-100 p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700 disabled:opacity-30 disabled:hover:bg-gray-100 disabled:hover:text-gray-500"
-				title="הזז קדימה"
-				:disabled="gridIndex >= gridSiblingCount - 1"
-				@click.stop="$emit('move', 1)"
-			>
-				<Icon name="heroicons:chevron-left" class="h-4 w-4" />
-			</button>
-		</div>
-
 		<!-- Condition indicator (always visible) -->
 		<div
 			v-if="element.conditions?.enabled && element.conditions.rules.length > 0"
@@ -285,27 +240,31 @@
 					@start="isDragging = true"
 					@end="isDragging = false"
 				>
-					<template #header>
-						<div
-							v-if="isDragging && children.length > 0"
-							class="mb-3 flex items-center justify-center rounded border-2 border-dashed border-blue-200 bg-white/60 py-2 text-xs font-medium text-blue-300 pointer-events-none"
-							:style="isGrid ? { gridColumn: '1 / -1' } : undefined"
-						>
-							<Icon name="heroicons:arrow-down-tray" class="me-1 h-4 w-4" />
-							שחרר כאן כדי להוסיף לתחילת
-							{{ element.type === "repeater" ? "שדה החזרה" : "המקטע" }}
-						</div>
-					</template>
+					<!-- <template #header>
+						<Transition name="expand">
+							<div
+								v-if="isDragging && children.length > 0"
+								class="expand-wrap"
+								:style="isGrid ? { gridColumn: '1 / -1' } : undefined"
+							>
+								<div
+									class="expand-inner mb-3 flex items-center justify-center rounded border-2 border-dashed border-blue-200 bg-white/60 py-2 text-xs font-medium text-blue-300 pointer-events-none"
+								>
+									<Icon name="heroicons:arrow-down-tray" class="me-1 h-4 w-4" />
+									שחרר כאן כדי להוסיף לתחילת
+									{{ element.type === "repeater" ? "שדה החזרה" : "המקטע" }}
+								</div>
+							</div>
+						</Transition>
+					</template> -->
 
 					<template #item="{ element: child, index }">
 						<ElementWrapper
+							:key="child.clientId"
 							:element="child"
 							:selected="child.clientId === selectedId"
 							:selected-id="selectedId"
 							:get-children="getChildren"
-							:parent-is-grid="isGrid"
-							:grid-index="index"
-							:grid-sibling-count="children.length"
 							@select="(clientId) => $emit('select', clientId)"
 							@delete="(clientId) => $emit('delete', clientId)"
 							@duplicate="(clientId) => $emit('duplicate', clientId)"
@@ -313,7 +272,6 @@
 							@drop="(type, pos, parentId) => $emit('drop', type, pos, parentId)"
 							@update="(clientId, updates) => $emit('update', clientId, updates)"
 							@edit-conditions="(clientId) => $emit('editConditions', clientId)"
-							@move="(direction) => moveChild(index, direction)"
 						/>
 					</template>
 
@@ -334,18 +292,45 @@
 								}}
 							</p>
 						</div>
-						<div
-							v-else-if="isDragging"
-							class="mt-3 flex items-center justify-center rounded border-2 border-dashed border-blue-200 bg-white/60 py-2 text-xs font-medium text-blue-300 pointer-events-none"
-							:style="isGrid ? { gridColumn: '1 / -1' } : undefined"
-						>
-							<Icon name="heroicons:arrow-up-tray" class="me-1 h-4 w-4" />
-							שחרר כאן כדי להוסיף לסוף
-							{{ element.type === "repeater" ? "שדה החזרה" : "המקטע" }}
-						</div>
+						<!-- <Transition name="expand">
+							<div
+								v-if="children.length > 0 && isDragging"
+								class="expand-wrap"
+								:style="isGrid ? { gridColumn: '1 / -1' } : undefined"
+							>
+								<div
+									class="expand-inner mt-3 flex items-center justify-center rounded border-2 border-dashed border-blue-200 bg-white/60 py-2 text-xs font-medium text-blue-300 pointer-events-none"
+								>
+									<Icon name="heroicons:arrow-up-tray" class="me-1 h-4 w-4" />
+									שחרר כאן כדי להוסיף לסוף
+									{{ element.type === "repeater" ? "שדה החזרה" : "המקטע" }}
+								</div>
+							</div>
+						</Transition> -->
 					</template>
 				</draggable>
 			</div>
 		</div>
 	</div>
 </template>
+
+<style lang="css">
+	.expand-wrap {
+		display: grid;
+		grid-template-rows: 1fr;
+		transition:
+			grid-template-rows 200ms ease,
+			opacity 500ms ease;
+	}
+
+	.expand-inner {
+		overflow: hidden;
+		min-height: 0;
+	}
+
+	.expand-enter-from,
+	.expand-leave-to {
+		grid-template-rows: 0fr;
+		opacity: 0;
+	}
+</style>
