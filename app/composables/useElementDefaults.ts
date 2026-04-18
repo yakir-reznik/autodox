@@ -176,8 +176,8 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 			};
 		case "grid":
 			return {
-				desktop: { columns: 2, gap: "1rem", justify: "stretch", align: "start" },
-				mobile: { columns: 1, gap: "0.5rem", justify: "stretch", align: "start" },
+				desktop: { columns: 2, gap: "1rem", justify: "stretch", align: "stretch" },
+				mobile: { columns: 1, gap: "0.5rem", justify: "stretch", align: "stretch" },
 			};
 
 		default:

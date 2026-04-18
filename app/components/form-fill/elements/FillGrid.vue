@@ -33,8 +33,8 @@
 			"--grid-gap-d": d.gap,
 			"--grid-justify-m": m.justify,
 			"--grid-justify-d": d.justify,
-			"--grid-align-m": m.align,
-			"--grid-align-d": d.align,
+			"--grid-align-m": "stretch",
+			"--grid-align-d": "stretch",
 		} as Record<string, string>;
 	});
 
@@ -69,6 +69,12 @@
 		gap: var(--grid-gap-m);
 		justify-items: var(--grid-justify-m);
 		align-items: var(--grid-align-m);
+	}
+
+	.form-fill-grid :deep(.form-fill-field > *) {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
 	}
 
 	@media (min-width: 768px) {

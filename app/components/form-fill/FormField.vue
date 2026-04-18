@@ -87,6 +87,7 @@
 	<div class="form-fill-field flex flex-col" :class="{ 'has-error': error }" :data-field-id="element.clientId">
 		<component
 			:is="componentName"
+			class="flex-1"
 			:element="element"
 			:model-value="modelValue"
 			:error="error"
