@@ -1,0 +1,162 @@
+--- a/node_modules/sortablejs/Sortable.js
++++ b/node_modules/sortablejs/Sortable.js
+@@ -1249,6 +1249,9 @@
+       direction: function direction() {
+         return _detectDirection(el, this.options);
+       },
++      rtl: function rtl() {
++        return (css(el, 'direction') === 'rtl') !== (css(el, 'flex-direction') === 'row-reverse');
++      },
+       ghostClass: 'sortable-ghost',
+       chosenClass: 'sortable-chosen',
+       dragClass: 'sortable-drag',
+@@ -1332,6 +1335,9 @@
+     _getDirection: function _getDirection(evt, target) {
+       return typeof this.options.direction === 'function' ? this.options.direction.call(this, evt, target, dragEl) : this.options.direction;
+     },
++    _getRtl: function _getRtl(evt, target) {
++      return typeof this.options.rtl === 'function' ? this.options.rtl.call(this, evt, target, dragEl) : this.options.rtl;
++    },
+     _onTapStart: function _onTapStart(
+     /** Event|TouchEvent */
+     evt) {
+@@ -1989,6 +1995,7 @@
+       if (activeSortable && !options.disabled && (isOwner ? canSort || (revert = parentEl !== rootEl) // Reverting item into the original list
+       : putSortable === this || (this.lastPutMode = activeGroup.checkPull(this, activeSortable, dragEl, evt)) && group.checkPut(this, activeSortable, dragEl, evt))) {
+         vertical = this._getDirection(evt, target) === 'vertical';
++        var rtl = this._getRtl(evt, target);
+         dragRect = getRect(dragEl);
+         dragOverEvent('dragOverValid');
+         if (Sortable.eventCanceled) return completedFired;
+@@ -2015,7 +2022,7 @@
+ 
+         var elLastChild = lastChild(el, options.draggable);
+ 
+-        if (!elLastChild || _ghostIsLast(evt, vertical, this) && !elLastChild.animated) {
++        if (!elLastChild || _ghostIsLast(evt, vertical, rtl, this) && !elLastChild.animated) {
+           // Insert to end of list
+           // If already at end of list: Do not insert
+           if (elLastChild === dragEl) {
+@@ -2039,7 +2046,7 @@
+             changed();
+             return completed(true);
+           }
+-        } else if (elLastChild && _ghostIsFirst(evt, vertical, this)) {
++        } else if (elLastChild && _ghostIsFirst(evt, vertical, rtl, this)) {
+           // Insert to start of list
+           var firstChild = getChild(el, 0, options, true);
+ 
+@@ -2568,16 +2575,28 @@
+     _silent = false;
+   }
+ 
+-  function _ghostIsFirst(evt, vertical, sortable) {
++  function _ghostIsFirst(evt, vertical, rtl, sortable) {
+     var rect = getRect(getChild(sortable.el, 0, sortable.options, true));
+     var spacer = 10;
+-    return vertical ? evt.clientX < rect.left - spacer || evt.clientY < rect.top && evt.clientX < rect.right : evt.clientY < rect.top - spacer || evt.clientY < rect.bottom && evt.clientX < rect.left;
++    if (vertical) {
++      return evt.clientX < rect.left - spacer || evt.clientY < rect.top && evt.clientX < rect.right;
++    } else if (!rtl) {
++      return evt.clientY < rect.top - spacer || evt.clientY < rect.bottom && evt.clientX < rect.left;
++    } else {
++      return evt.clientY < rect.top - spacer || evt.clientY < rect.bottom && evt.clientX > rect.right;
++    }
+   }
+ 
+-  function _ghostIsLast(evt, vertical, sortable) {
++  function _ghostIsLast(evt, vertical, rtl, sortable) {
+     var rect = getRect(lastChild(sortable.el, sortable.options.draggable));
+     var spacer = 10;
+-    return vertical ? evt.clientX > rect.right + spacer || evt.clientX <= rect.right && evt.clientY > rect.bottom && evt.clientX >= rect.left : evt.clientX > rect.right && evt.clientY > rect.top || evt.clientX <= rect.right && evt.clientY > rect.bottom + spacer;
++    if (vertical) {
++      return evt.clientX > rect.right + spacer || evt.clientX <= rect.right && evt.clientY > rect.bottom && evt.clientX >= rect.left;
++    } else if (!rtl) {
++      return evt.clientX > rect.right && evt.clientY > rect.top || evt.clientX <= rect.right && evt.clientY > rect.bottom + spacer;
++    } else {
++      return evt.clientX < rect.left && evt.clientY > rect.top || evt.clientX >= rect.left && evt.clientY > rect.bottom + spacer;
++    }
+   }
+ 
+   function _getSwapDirection(evt, target, targetRect, vertical, swapThreshold, invertedSwapThreshold, invertSwap, isLastTarget) {
+--- a/node_modules/sortablejs/modular/sortable.esm.js
++++ b/node_modules/sortablejs/modular/sortable.esm.js
+@@ -1243,6 +1243,9 @@
+     direction: function direction() {
+       return _detectDirection(el, this.options);
+     },
++    rtl: function rtl() {
++      return (css(el, 'direction') === 'rtl') !== (css(el, 'flex-direction') === 'row-reverse');
++    },
+     ghostClass: 'sortable-ghost',
+     chosenClass: 'sortable-chosen',
+     dragClass: 'sortable-drag',
+@@ -1326,6 +1329,9 @@
+   _getDirection: function _getDirection(evt, target) {
+     return typeof this.options.direction === 'function' ? this.options.direction.call(this, evt, target, dragEl) : this.options.direction;
+   },
++  _getRtl: function _getRtl(evt, target) {
++    return typeof this.options.rtl === 'function' ? this.options.rtl.call(this, evt, target, dragEl) : this.options.rtl;
++  },
+   _onTapStart: function _onTapStart(
+   /** Event|TouchEvent */
+   evt) {
+@@ -1983,6 +1989,7 @@
+     if (activeSortable && !options.disabled && (isOwner ? canSort || (revert = parentEl !== rootEl) // Reverting item into the original list
+     : putSortable === this || (this.lastPutMode = activeGroup.checkPull(this, activeSortable, dragEl, evt)) && group.checkPut(this, activeSortable, dragEl, evt))) {
+       vertical = this._getDirection(evt, target) === 'vertical';
++      var rtl = this._getRtl(evt, target);
+       dragRect = getRect(dragEl);
+       dragOverEvent('dragOverValid');
+       if (Sortable.eventCanceled) return completedFired;
+@@ -2009,7 +2016,7 @@
+ 
+       var elLastChild = lastChild(el, options.draggable);
+ 
+-      if (!elLastChild || _ghostIsLast(evt, vertical, this) && !elLastChild.animated) {
++      if (!elLastChild || _ghostIsLast(evt, vertical, rtl, this) && !elLastChild.animated) {
+         // Insert to end of list
+         // If already at end of list: Do not insert
+         if (elLastChild === dragEl) {
+@@ -2033,7 +2040,7 @@
+           changed();
+           return completed(true);
+         }
+-      } else if (elLastChild && _ghostIsFirst(evt, vertical, this)) {
++      } else if (elLastChild && _ghostIsFirst(evt, vertical, rtl, this)) {
+         // Insert to start of list
+         var firstChild = getChild(el, 0, options, true);
+ 
+@@ -2562,16 +2569,28 @@
+   _silent = false;
+ }
+ 
+-function _ghostIsFirst(evt, vertical, sortable) {
++function _ghostIsFirst(evt, vertical, rtl, sortable) {
+   var rect = getRect(getChild(sortable.el, 0, sortable.options, true));
+   var spacer = 10;
+-  return vertical ? evt.clientX < rect.left - spacer || evt.clientY < rect.top && evt.clientX < rect.right : evt.clientY < rect.top - spacer || evt.clientY < rect.bottom && evt.clientX < rect.left;
++  if (vertical) {
++    return evt.clientX < rect.left - spacer || evt.clientY < rect.top && evt.clientX < rect.right;
++  } else if (!rtl) {
++    return evt.clientY < rect.top - spacer || evt.clientY < rect.bottom && evt.clientX < rect.left;
++  } else {
++    return evt.clientY < rect.top - spacer || evt.clientY < rect.bottom && evt.clientX > rect.right;
++  }
+ }
+ 
+-function _ghostIsLast(evt, vertical, sortable) {
++function _ghostIsLast(evt, vertical, rtl, sortable) {
+   var rect = getRect(lastChild(sortable.el, sortable.options.draggable));
+   var spacer = 10;
+-  return vertical ? evt.clientX > rect.right + spacer || evt.clientX <= rect.right && evt.clientY > rect.bottom && evt.clientX >= rect.left : evt.clientX > rect.right && evt.clientY > rect.top || evt.clientX <= rect.right && evt.clientY > rect.bottom + spacer;
++  if (vertical) {
++    return evt.clientX > rect.right + spacer || evt.clientX <= rect.right && evt.clientY > rect.bottom && evt.clientX >= rect.left;
++  } else if (!rtl) {
++    return evt.clientX > rect.right && evt.clientY > rect.top || evt.clientX <= rect.right && evt.clientY > rect.bottom + spacer;
++  } else {
++    return evt.clientX < rect.left && evt.clientY > rect.top || evt.clientX >= rect.left && evt.clientY > rect.bottom + spacer;
++  }
+ }
+ 
+ function _getSwapDirection(evt, target, targetRect, vertical, swapThreshold, invertedSwapThreshold, invertSwap, isLastTarget) {
