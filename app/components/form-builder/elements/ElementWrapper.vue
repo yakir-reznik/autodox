@@ -179,7 +179,7 @@
 
 <template>
 	<div
-		class="group relative rounded-lg border transition-all select-none"
+		class="group relative rounded-lg border select-none"
 		:class="[
 			!isContainer && 'bg-white',
 			selected
