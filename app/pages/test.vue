@@ -2,7 +2,7 @@
 	<h1>Vue Draggable test</h1>
 	<div class="w-3xl mx-auto py-24">
 		<draggable
-			class="list-group flex flex-row gap-2 flex-wrap rtl"
+			class="list-group grid grid-cols-3 gap-2 rtl"
 			item-key="id"
 			tag="ul"
 			v-model="list"
@@ -12,9 +12,7 @@
 			:invertSwap="false"
 		>
 			<template #item="{ element }">
-				<li
-					class="list-group-item p-4 bg-blue-100 border-blue-600 border rtl flex-basis-1 w-1/4"
-				>
+				<li class="list-group-item p-4 bg-blue-100 border-blue-600 border">
 					{{ element.label }}
 				</li>
 			</template>
