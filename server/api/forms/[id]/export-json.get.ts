@@ -33,6 +33,8 @@ export default defineEventHandler(async (event) => {
 
 	type DbElement = (typeof form.elements)[number];
 
+	const idToName = new Map(form.elements.filter((e) => e.name).map((e) => [e.id, e.name!]));
+
 	function elementToUpload(el: DbElement, allElements: DbElement[]): Record<string, unknown> {
 		const config = el.config as Record<string, any>;
 		const out: Record<string, unknown> = { type: el.type };
@@ -66,6 +68,28 @@ export default defineEventHandler(async (event) => {
 			if (config.minItems !== undefined) out.minItems = config.minItems;
 			if (config.maxItems !== undefined) out.maxItems = config.maxItems;
 			if (config.addButtonText) out.addButtonText = config.addButtonText;
+		}
+
+		if (config._conditions?.enabled && config._conditions.rules?.length) {
+			const cond = config._conditions;
+			const operatorMap: Record<string, string> = {
+				equals: "==",
+				not_equals: "!=",
+				contains: "contains",
+				greater_than: "greater_than",
+				less_than: "less_than",
+			};
+			const rules = cond.rules
+				.map((r: any) => {
+					const fieldName = idToName.get(Number(r.sourceFieldId));
+					if (!fieldName) return null;
+					return { fieldId: fieldName, operator: operatorMap[r.operator] ?? r.operator, value: r.value };
+				})
+				.filter(Boolean);
+			if (rules.length) {
+				if (cond.action === "require") out.requiredConditions = rules;
+				else out.conditions = rules;
+			}
 		}
 
 		if (el.type === "section" || el.type === "repeater") {

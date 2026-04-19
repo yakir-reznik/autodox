@@ -7,23 +7,43 @@ import {
 	type ElementType,
 	type ElementConfig,
 	type SelectionOption,
+	type ConditionGroup,
+	type ConditionAction,
+	type ConditionOperator,
 } from "~~/server/db/schema";
+
+type UploadCondition = {
+	fieldId: string;
+	operator: string;
+	value?: string;
+};
 
 // Simplified JSON structure for ChatGPT-generated forms
 interface UploadElement {
 	type: string;
+	id?: string;
 	label?: string;
 	placeholder?: string;
 	helpText?: string;
 	required?: boolean;
 	options?: string[];
+	allowOther?: boolean;
 	text?: string;
 	align?: "left" | "center" | "right";
 	url?: string;
 	caption?: string;
 	height?: number;
 	style?: "solid" | "dashed" | "dotted";
+	step?: number;
+	rows?: number;
+	defaultValue?: string | number | boolean;
+	autocomplete?: string;
+	minItems?: number;
+	maxItems?: number;
+	addButtonText?: string;
 	children?: UploadElement[];
+	conditions?: UploadCondition[];
+	requiredConditions?: UploadCondition[];
 }
 
 interface UploadFormBody {
@@ -37,6 +57,7 @@ const fieldTypes: ElementType[] = [
 	"text",
 	"email",
 	"number",
+	"phone",
 	"textarea",
 	"date",
 	"time",
@@ -47,6 +68,31 @@ const fieldTypes: ElementType[] = [
 	"checkboxes",
 	"signature",
 ];
+
+function mapOperator(op: string): ConditionOperator {
+	const map: Record<string, ConditionOperator> = {
+		"==": "equals",
+		"!=": "not_equals",
+		"contains": "contains",
+		"not_contains": "not_equals",
+		"greater_than": "greater_than",
+		"less_than": "less_than",
+	};
+	return map[op] ?? "equals";
+}
+
+function buildConditionGroup(conditions: UploadCondition[], action: ConditionAction, nameToDbId: Record<string, number>): ConditionGroup {
+	return {
+		enabled: true,
+		action,
+		logic: "and",
+		rules: conditions.map((c) => ({
+			sourceFieldId: String(nameToDbId[c.fieldId] ?? c.fieldId),
+			operator: mapOperator(c.operator),
+			value: c.value ?? "",
+		})),
+	};
+}
 
 export default defineEventHandler(async (event) => {
 	// Get user from session
@@ -153,6 +199,19 @@ export default defineEventHandler(async (event) => {
 				label: el.label || getDefaultLabel(type),
 				placeholder: el.placeholder || "",
 				helpText: el.helpText || "",
+				...(el.defaultValue !== undefined ? { defaultValue: el.defaultValue } : {}),
+				...(el.autocomplete ? { autocomplete: el.autocomplete } : {}),
+				validation: { required: el.required ?? false },
+			};
+		}
+
+		// Phone field
+		if (type === "phone") {
+			return {
+				label: el.label || "Phone Number",
+				placeholder: el.placeholder || "",
+				helpText: el.helpText || "",
+				autocomplete: el.autocomplete || "tel",
 				validation: { required: el.required ?? false },
 			};
 		}
@@ -163,7 +222,8 @@ export default defineEventHandler(async (event) => {
 				label: el.label || "Number",
 				placeholder: el.placeholder || "",
 				helpText: el.helpText || "",
-				step: 1,
+				step: el.step ?? 1,
+				...(el.defaultValue !== undefined ? { defaultValue: el.defaultValue } : {}),
 				validation: { required: el.required ?? false },
 			};
 		}
@@ -174,7 +234,7 @@ export default defineEventHandler(async (event) => {
 				label: el.label || "Text Area",
 				placeholder: el.placeholder || "",
 				helpText: el.helpText || "",
-				rows: 4,
+				rows: el.rows ?? 4,
 				validation: { required: el.required ?? false },
 			};
 		}
@@ -194,6 +254,8 @@ export default defineEventHandler(async (event) => {
 				placeholder: type === "dropdown" ? "Select an option" : undefined,
 				helpText: el.helpText || "",
 				options,
+				...(el.allowOther ? { allowOther: true } : {}),
+				...(el.defaultValue !== undefined ? { defaultValue: el.defaultValue } : {}),
 				validation: { required: el.required ?? false },
 			};
 		}
@@ -270,6 +332,19 @@ export default defineEventHandler(async (event) => {
 			};
 		}
 
+		// Repeater
+		if (type === "repeater") {
+			return {
+				label: el.label || "Repeater",
+				helpText: el.helpText || "",
+				minItems: el.minItems ?? 1,
+				maxItems: el.maxItems,
+				addButtonText: el.addButtonText || "Add Item",
+				bordered: true,
+				backgroundColor: "#f9fafb",
+			};
+		}
+
 		return {};
 	}
 
@@ -293,6 +368,12 @@ export default defineEventHandler(async (event) => {
 
 	// Insert elements with positions
 	let position = 0;
+	const nameToDbId: Record<string, number> = {};
+	const conditionUpdates: Array<{
+		dbId: number;
+		conditions?: UploadCondition[];
+		requiredConditions?: UploadCondition[];
+	}> = [];
 
 	async function insertElements(
 		elements: UploadElement[],
@@ -303,7 +384,7 @@ export default defineEventHandler(async (event) => {
 			const type = el.type as ElementType;
 			const config = buildConfig(el);
 			const isField = fieldTypes.includes(type);
-			const name = isField ? generateName(type) : null;
+			const name = el.id || (isField ? generateName(type) : null);
 
 			const result = await db.insert(formElementsTable).values({
 				formId,
@@ -315,15 +396,42 @@ export default defineEventHandler(async (event) => {
 				isRequired: el.required ?? false,
 			});
 
-			// Handle children for sections
-			if (type === "section" && el.children && el.children.length > 0) {
-				const sectionId = result[0].insertId;
-				await insertElements(el.children, sectionId);
+			const dbId = result[0].insertId;
+			if (name) nameToDbId[name] = dbId;
+
+			if (el.conditions?.length || el.requiredConditions?.length) {
+				conditionUpdates.push({ dbId, conditions: el.conditions, requiredConditions: el.requiredConditions });
+			}
+
+			// Handle children for sections and repeaters
+			if ((type === "section" || type === "repeater") && el.children && el.children.length > 0) {
+				await insertElements(el.children, dbId);
 			}
 		}
 	}
 
 	await insertElements(body.elements);
+
+	// Second pass: resolve condition field references and store in config
+	for (const { dbId, conditions, requiredConditions } of conditionUpdates) {
+		const condGroup = conditions?.length
+			? buildConditionGroup(conditions, "show", nameToDbId)
+			: requiredConditions?.length
+				? buildConditionGroup(requiredConditions, "require", nameToDbId)
+				: null;
+
+		if (!condGroup) continue;
+
+		const existing = await db.query.formElementsTable.findFirst({
+			where: eq(formElementsTable.id, dbId),
+		});
+		if (!existing) continue;
+
+		await db
+			.update(formElementsTable)
+			.set({ config: { ...(existing.config as object), _conditions: condGroup } as ElementConfig })
+			.where(eq(formElementsTable.id, dbId));
+	}
 
 	return {
 		formId,
