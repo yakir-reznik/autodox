@@ -17,6 +17,15 @@ const config = computed(() => props.element.config as {
 	caption?: string;
 	width?: number;
 	height?: number;
+	align?: "left" | "center" | "right";
+});
+
+const alignClass = computed(() => {
+	switch (config.value.align) {
+		case "left": return "items-end";
+		case "right": return "items-start";
+		default: return "items-center";
+	}
 });
 
 // Drag and drop state
@@ -80,7 +89,7 @@ const handleDrop = async (event: DragEvent) => {
 </script>
 
 <template>
-	<div class="text-center">
+	<div class="flex flex-col" :class="alignClass">
 		<!-- Image -->
 		<template v-if="element.type === 'image'">
 			<div

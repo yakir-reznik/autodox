@@ -142,11 +142,13 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 				url: "",
 				alt: "",
 				caption: "",
+				align: "center",
 			};
 		case "video":
 			return {
 				url: "",
 				caption: "",
+				align: "center",
 			};
 		case "divider":
 			return {

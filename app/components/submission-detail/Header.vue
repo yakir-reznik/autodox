@@ -4,7 +4,7 @@
 		<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-4">
-					<NuxtLink to="/forms">
+					<NuxtLink to="/submissions">
 						<BaseButton variant="secondary" size="sm">
 							<Icon name="heroicons:arrow-left" class="h-5 w-5" />
 						</BaseButton>

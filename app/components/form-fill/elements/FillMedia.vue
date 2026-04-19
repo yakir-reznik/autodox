@@ -18,6 +18,15 @@ const config = computed(() => props.element.config as {
 	caption?: string;
 	width?: number;
 	height?: number;
+	align?: "left" | "center" | "right";
+});
+
+const alignClass = computed(() => {
+	switch (config.value.align) {
+		case "left": return "flex flex-col items-end";
+		case "right": return "flex flex-col items-start";
+		default: return "flex flex-col items-center";
+	}
 });
 
 const resolvedUrl = computed(() =>
@@ -39,7 +48,7 @@ const isVideo = computed(() => props.element.type === "video");
 </script>
 
 <template>
-	<div v-if="resolvedUrl">
+	<div v-if="resolvedUrl" :class="alignClass">
 		<!-- Video -->
 		<template v-if="isVideo">
 			<video

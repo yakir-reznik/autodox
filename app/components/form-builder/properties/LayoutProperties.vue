@@ -41,9 +41,9 @@
 	}
 
 	const alignOptions = [
-		{ label: "Left", value: "left" },
-		{ label: "Center", value: "center" },
-		{ label: "Right", value: "right" },
+		{ label: "שמאל", value: "left" },
+		{ label: "מרכז", value: "center" },
+		{ label: "ימין", value: "right" },
 	];
 
 	const dividerStyles = [
@@ -210,6 +210,16 @@
 				:model-value="config.alt || ''"
 				placeholder="Image description..."
 				@update:model-value="$emit('update:config', { alt: $event })"
+			/>
+		</div>
+
+		<!-- Media alignment -->
+		<div v-if="['image', 'video'].includes(element.type)">
+			<label class="mb-1 block text-sm text-gray-600">יישור</label>
+			<BaseSelect
+				:model-value="config.align || 'center'"
+				:options="alignOptions"
+				@update:model-value="$emit('update:config', { align: $event })"
 			/>
 		</div>
 
