@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
 			name,
 			email,
 			password: hashedPassword,
-			role: "admin",
+			role: "user",
 			apiKey,
 		})
 		.$returningId();
@@ -66,7 +66,7 @@ export default defineEventHandler(async (event) => {
 			id: newUser.id,
 			email,
 			name,
-			role: "admin",
+			role: "user",
 			apiKey,
 		},
 	});
@@ -77,7 +77,7 @@ export default defineEventHandler(async (event) => {
 			id: newUser.id,
 			email,
 			name,
-			role: "admin",
+			role: "user",
 		},
 	};
 });

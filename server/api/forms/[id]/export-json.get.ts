@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
 		throw createError({ statusCode: 404, message: "Form not found" });
 	}
 
-	if (form.createdBy !== session.user.id) {
+	if (form.createdBy !== session.user.id && session.user.role !== "admin") {
 		throw createError({ statusCode: 403, message: "Not authorized" });
 	}
 

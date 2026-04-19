@@ -18,7 +18,7 @@ import type { FormTheme } from "~~/app/types/themes";
 // ============================================
 
 // User roles enum
-export const userRoleEnum = ["admin", "viewer"] as const;
+export const userRoleEnum = ["admin", "user", "viewer"] as const;
 export type UserRole = (typeof userRoleEnum)[number];
 
 export const usersTable = mysqlTable("users_table", {
