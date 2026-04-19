@@ -67,6 +67,17 @@ export interface PaletteElement {
 // Auto-save status
 export type SaveStatus = "idle" | "pending" | "saving" | "saved" | "error";
 
+export type SubmissionsByExternalIdRow = {
+	formId: number;
+	formName: string;
+	externalId: string | null;
+	pending: number;
+	in_progress: number;
+	submitted: number;
+	locked: number;
+	total: number;
+};
+
 // Folder types
 export interface Folder {
 	id: number;

@@ -175,6 +175,12 @@
 								{{ user?.name }}
 							</NuxtLink>
 						</div>
+						<NuxtLink v-if="user?.role === 'admin'" to="/admin/reports">
+							<BaseButton variant="secondary">
+								<Icon name="heroicons:chart-bar" class="h-5 w-5" />
+								דוחות
+							</BaseButton>
+						</NuxtLink>
 						<NuxtLink to="/forms/upload">
 							<BaseButton variant="secondary">
 								<Icon name="heroicons:arrow-up-tray" class="h-5 w-5" />
