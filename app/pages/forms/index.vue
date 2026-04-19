@@ -20,25 +20,23 @@
 	// Fetch folders
 	const { data: folders, refresh: refreshFolders } = await useFetch<Folder[]>("/api/folders");
 
-	// Fetch forms based on selected folder
-	const formsQuery = computed(() => {
-		const id = selectedFolderId.value;
-		if (id === "unfiled") return "/api/forms?folderId=null";
-		if (typeof id === "number") return `/api/forms?folderId=${id}`;
-		return "/api/forms";
-	});
+	const { data: forms, pending, error, refresh } = await useFetch<FormListItem[]>("/api/forms");
 
-	const { data: forms, pending, error, refresh } = await useFetch<FormListItem[]>(formsQuery);
-
-	// Filter forms based on search query
+	// Filter forms by selected folder, then by search query
 	const filteredForms = computed(() => {
 		if (!forms.value) return [];
-		if (!searchQuery.value.trim()) return forms.value;
+
+		const id = selectedFolderId.value;
+		let list = forms.value;
+		if (id === "unfiled") list = list.filter((f) => f.folderId === null);
+		else if (typeof id === "number") list = list.filter((f) => f.folderId === id);
+
+		if (!searchQuery.value.trim()) return list;
 
 		const query = searchQuery.value.toLowerCase().trim();
-		return forms.value.filter((form) => {
+		return list.filter((form) => {
 			const title = form.title.toLowerCase();
-			// Simple fuzzy matching: check if all characters in query appear in title in order
+			// Fuzzy match: all query chars appear in title in order
 			let titleIndex = 0;
 			for (const char of query) {
 				titleIndex = title.indexOf(char, titleIndex);
