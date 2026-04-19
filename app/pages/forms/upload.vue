@@ -9,12 +9,26 @@
 	const jsonInput = ref("");
 	const error = ref("");
 	const loading = ref(false);
+	const prefilling = ref(false);
 	const formId = computed(() => {
 		const id = route.query.formId;
 		return id ? Number(id) : null;
 	});
 
 	const isUpdatingMode = computed(() => formId.value !== null);
+
+	onMounted(async () => {
+		if (!isUpdatingMode.value || !formId.value) return;
+		prefilling.value = true;
+		try {
+			const data = await $fetch(`/api/forms/${formId.value}/export-json`);
+			jsonInput.value = JSON.stringify(data, null, 2);
+		} catch {
+			error.value = "Failed to load form JSON";
+		} finally {
+			prefilling.value = false;
+		}
+	});
 
 	// Example JSON for users to copy
 	const exampleJson = `{
@@ -341,7 +355,11 @@ Rules for conditional logic:
 								: "Paste the JSON output from ChatGPT here. The form will be created automatically."
 						}}
 					</p>
+					<div v-if="prefilling" class="flex h-96 items-center justify-center rounded-lg border border-gray-300 bg-gray-50">
+						<Icon name="svg-spinners:ring-resize" class="h-6 w-6 text-gray-400" />
+					</div>
 					<textarea
+						v-else
 						v-model="jsonInput"
 						dir="ltr"
 						class="h-96 w-full rounded-lg border border-gray-300 p-4 font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
