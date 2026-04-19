@@ -103,17 +103,14 @@ export function generateFilePaths(
 	const year = now.getFullYear();
 	const month = String(now.getMonth() + 1).padStart(2, "0");
 
-	// Paths
-	const relativePath = `uploads/${year}/${month}/${filename}`;
-	const uploadDir = join(
-		process.cwd(),
-		"public",
-		"uploads",
-		year.toString(),
-		month
-	);
+	// Base upload directory — configurable via env var so dev and prod can diverge
+	// Dev default: <cwd>/storage/uploads, Prod: set UPLOAD_DIR in env (e.g. /var/www/autodox/storage/uploads)
+	const baseDir =
+		process.env.UPLOAD_DIR || join(process.cwd(), "storage", "uploads");
+
+	const uploadDir = join(baseDir, year.toString(), month);
 	const storagePath = join(uploadDir, filename);
-	const publicUrl = `/${relativePath}`;
+	const publicUrl = `/uploads/${year}/${month}/${filename}`;
 
 	return {
 		filename,

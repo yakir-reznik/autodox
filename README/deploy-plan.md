@@ -143,6 +143,15 @@ NODE_ENV=production
 NUXT_HOST=0.0.0.0
 NUXT_PORT=3000
 
+# Uploads — stored outside the deploy artifact so they survive git reset / rebuilds
+UPLOAD_DIR=/var/www/autodox/storage/uploads
+```
+
+**Create the uploads directory (once, before first deploy):**
+
+```bash
+sudo mkdir -p /var/www/autodox/storage/uploads
+sudo chown -R autodox:autodox /var/www/autodox/storage
 ```
 
 ```bash
@@ -222,6 +231,15 @@ server {
     server_name your-domain.com www.your-domain.com;
 
     client_max_body_size 50M;
+
+    # Serve user uploads directly from disk — bypasses Node for speed.
+    # Nitro has a fallback route at /uploads/* if this block is ever removed.
+    location /uploads/ {
+        alias /var/www/autodox/storage/uploads/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
 
     location / {
         proxy_pass http://localhost:3000;

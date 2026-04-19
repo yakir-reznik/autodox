@@ -23,6 +23,6 @@ logs
 .env.*
 !.env.example
 
-# User uploads (regenerated at runtime)
-public/uploads/*
-!public/uploads/.gitkeep
+# User uploads — stored outside public/ so they survive deploys and are served by Nginx in prod
+storage/uploads/*
+!storage/uploads/.gitkeep
