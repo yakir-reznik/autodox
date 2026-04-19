@@ -78,17 +78,27 @@ export default defineEventHandler(async (event) => {
 				contains: "contains",
 				greater_than: "greater_than",
 				less_than: "less_than",
+				is_empty: "is_empty",
+				is_not_empty: "is_not_empty",
 			};
 			const rules = cond.rules
 				.map((r: any) => {
 					const fieldName = idToName.get(Number(r.sourceFieldId));
 					if (!fieldName) return null;
-					return { fieldId: fieldName, operator: operatorMap[r.operator] ?? r.operator, value: r.value };
+					const rule: Record<string, unknown> = { fieldId: fieldName, operator: operatorMap[r.operator] ?? r.operator };
+					if (r.operator !== "is_empty" && r.operator !== "is_not_empty") rule.value = r.value;
+					return rule;
 				})
 				.filter(Boolean);
 			if (rules.length) {
-				if (cond.action === "require") out.requiredConditions = rules;
-				else out.conditions = rules;
+				if (cond.action === "require") {
+					out.requiredConditions = rules;
+					if (cond.logic === "or") out.requiredConditionsLogic = "or";
+				} else {
+					out.conditions = rules;
+					if (cond.action === "hide") out.conditionsAction = "hide";
+					if (cond.logic === "or") out.conditionsLogic = "or";
+				}
 			}
 		}
 

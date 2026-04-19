@@ -18,6 +18,8 @@ type UploadCondition = {
 	value?: string;
 };
 
+type UploadConditionLogic = "and" | "or";
+
 // Simplified JSON structure for ChatGPT-generated forms
 interface UploadElement {
 	type: string;
@@ -43,7 +45,10 @@ interface UploadElement {
 	addButtonText?: string;
 	children?: UploadElement[];
 	conditions?: UploadCondition[];
+	conditionsAction?: "show" | "hide";
+	conditionsLogic?: UploadConditionLogic;
 	requiredConditions?: UploadCondition[];
+	requiredConditionsLogic?: UploadConditionLogic;
 }
 
 interface UploadFormBody {
@@ -77,15 +82,17 @@ function mapOperator(op: string): ConditionOperator {
 		"not_contains": "not_equals",
 		"greater_than": "greater_than",
 		"less_than": "less_than",
+		"is_empty": "is_empty",
+		"is_not_empty": "is_not_empty",
 	};
 	return map[op] ?? "equals";
 }
 
-function buildConditionGroup(conditions: UploadCondition[], action: ConditionAction, nameToDbId: Record<string, number>): ConditionGroup {
+function buildConditionGroup(conditions: UploadCondition[], action: ConditionAction, logic: "and" | "or", nameToDbId: Record<string, number>): ConditionGroup {
 	return {
 		enabled: true,
 		action,
-		logic: "and",
+		logic,
 		rules: conditions.map((c) => ({
 			sourceFieldId: String(nameToDbId[c.fieldId] ?? c.fieldId),
 			operator: mapOperator(c.operator),
@@ -341,7 +348,10 @@ export default defineEventHandler(async (event) => {
 	const conditionUpdates: Array<{
 		dbId: number;
 		conditions?: UploadCondition[];
+		conditionsAction?: "show" | "hide";
+		conditionsLogic?: UploadConditionLogic;
 		requiredConditions?: UploadCondition[];
+		requiredConditionsLogic?: UploadConditionLogic;
 	}> = [];
 
 	async function insertElements(
@@ -369,7 +379,14 @@ export default defineEventHandler(async (event) => {
 			if (name) nameToDbId[name] = dbId;
 
 			if (el.conditions?.length || el.requiredConditions?.length) {
-				conditionUpdates.push({ dbId, conditions: el.conditions, requiredConditions: el.requiredConditions });
+				conditionUpdates.push({
+					dbId,
+					conditions: el.conditions,
+					conditionsAction: el.conditionsAction,
+					conditionsLogic: el.conditionsLogic,
+					requiredConditions: el.requiredConditions,
+					requiredConditionsLogic: el.requiredConditionsLogic,
+				});
 			}
 
 			// Handle children for sections and repeaters
@@ -382,11 +399,11 @@ export default defineEventHandler(async (event) => {
 	await insertElements(body.elements);
 
 	// Second pass: resolve condition field references and store in config
-	for (const { dbId, conditions, requiredConditions } of conditionUpdates) {
+	for (const { dbId, conditions, conditionsAction, conditionsLogic, requiredConditions, requiredConditionsLogic } of conditionUpdates) {
 		const condGroup = conditions?.length
-			? buildConditionGroup(conditions, "show", nameToDbId)
+			? buildConditionGroup(conditions, conditionsAction ?? "show", conditionsLogic ?? "and", nameToDbId)
 			: requiredConditions?.length
-				? buildConditionGroup(requiredConditions, "require", nameToDbId)
+				? buildConditionGroup(requiredConditions, "require", requiredConditionsLogic ?? "and", nameToDbId)
 				: null;
 
 		if (!condGroup) continue;

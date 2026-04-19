@@ -77,7 +77,7 @@ CRITICAL — TEXT FIDELITY: Copy all labels, headings, placeholders, option valu
 
 === ALL SUPPORTED ELEMENT TYPES ===
 
-INPUT FIELDS (use "label", "placeholder", "helpText", "required", "defaultValue", "autocomplete"):
+INPUT FIELDS (use "label", "placeholder", "helpText", "required", "defaultValue", "autocomplete", "id"):
 - "text" - Single line text input (names, addresses, etc.)
 - "email" - Email address input
 - "number" - Numeric input (age, quantity, etc.) - also supports "step"
@@ -87,7 +87,7 @@ INPUT FIELDS (use "label", "placeholder", "helpText", "required", "defaultValue"
 - "time" - Time picker (HH:MM)
 - "datetime" - Date and time combined picker
 
-SELECTION FIELDS (use "label", "options", "required", "defaultValue", "allowOther"):
+SELECTION FIELDS (use "label", "options", "required", "defaultValue", "allowOther", "id"):
 - "dropdown" - Dropdown/select list (single choice from list)
 - "radio" - Radio buttons (single choice, all options visible)
 - "checkbox" - Single checkbox (yes/no, agree/disagree)
@@ -125,8 +125,8 @@ For textarea:
 For dropdown:
 { "type": "dropdown", "label": "Select Country", "options": ["Israel", "USA", "UK", "Other"], "required": true, "defaultValue": "Israel" }
 
-For radio:
-{ "type": "radio", "label": "Gender", "options": ["Male", "Female", "Other"], "required": true }
+For radio (add "id" only when other fields reference it via conditions):
+{ "type": "radio", "id": "gender", "label": "Gender", "options": ["Male", "Female", "Other"], "required": true }
 
 For checkbox (single yes/no):
 { "type": "checkbox", "label": "I agree to the terms and conditions", "required": true }
@@ -166,7 +166,7 @@ For repeater (repeating group):
 === CONDITIONAL LOGIC ===
 
 Conditions can control two independent behaviors on any element:
-- "conditions" — controls VISIBILITY (show/hide the element)
+- "conditions" — controls VISIBILITY. By default shows the element when conditions are met. Add "conditionsAction": "hide" to hide it instead.
 - "requiredConditions" — controls whether the element is REQUIRED (makes it required only when the conditions are met, regardless of whether "required" is set to true statically)
 
 Both accept the same array-of-condition-objects format. Both apply to any element type — including input fields, sections, and repeaters.
@@ -174,11 +174,14 @@ Both accept the same array-of-condition-objects format. Both apply to any elemen
 Condition structure:
 { "fieldId": "the_source_field_id", "operator": "==", "value": "expected value" }
 
-Supported operators: "==" (equals), "!=" (not equals), "contains", "not_contains"
+Supported operators: "==" (equals), "!=" (not equals), "contains", "not_contains", "is_empty", "is_not_empty"
+Note: "is_empty" and "is_not_empty" do not require a "value" field.
 
-All conditions in the array must be true simultaneously for the rule to activate.
+By default, all conditions in the array must be true simultaneously (AND logic).
+To use OR logic (any condition must be true), add "conditionsLogic": "or" or "requiredConditionsLogic": "or" to the element.
 
 To use conditions, the source field must have an "id" property, and the dependent element references it via "fieldId".
+"id" values must be unique, lowercase, use underscores (e.g., "has_insurance", "marital_status").
 
 Example — show a field only when a radio answer is "Yes", and make it required only then:
 { "type": "radio", "id": "has_children", "label": "Do you have children?", "options": ["Yes", "No"], "required": true }
@@ -211,7 +214,6 @@ Example — a field that is always visible but only required under a condition:
 
 Rules for conditional logic:
 - Only add "id" to fields that are referenced by other fields' conditions
-- "id" values must be unique, lowercase, use underscores (e.g., "has_insurance", "marital_status")
 - Apply "conditions" when the PDF shows fields/sections that are clearly dependent on a previous answer (e.g., "If yes, please specify...", fields indented or grouped under a checkbox/radio)
 - Apply "requiredConditions" when the PDF implies a field is only mandatory based on a prior answer
 - For checkbox fields, the value when checked is the string "true"
