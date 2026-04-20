@@ -813,7 +813,7 @@
 	.fade-scale-move-enter-from,
 	.fade-scale-move-leave-to {
 		opacity: 0;
-		scale: 0.975;
+		scale: 0.985;
 		transform: translateY(1rem);
 	}
 </style>
