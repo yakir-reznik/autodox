@@ -24,15 +24,15 @@
 	const children = computed(() => props.getChildren(props.element.clientId));
 
 	const gridVars = computed(() => {
-		const d = config.value.desktop;
-		const m = config.value.mobile;
+		const d = config.value.desktop ?? {};
+		const m = config.value.mobile ?? {};
 		return {
-			"--grid-cols-m": String(m.columns),
-			"--grid-cols-d": String(d.columns),
-			"--grid-gap-m": m.gap,
-			"--grid-gap-d": d.gap,
-			"--grid-justify-m": m.justify,
-			"--grid-justify-d": d.justify,
+			"--grid-cols-m": String((m as GridBreakpointConfig).columns ?? 1),
+			"--grid-cols-d": String((d as GridBreakpointConfig).columns ?? 1),
+			"--grid-gap-m": (m as GridBreakpointConfig).gap ?? "1rem",
+			"--grid-gap-d": (d as GridBreakpointConfig).gap ?? "1rem",
+			"--grid-justify-m": (m as GridBreakpointConfig).justify ?? "start",
+			"--grid-justify-d": (d as GridBreakpointConfig).justify ?? "start",
 			"--grid-align-m": "stretch",
 			"--grid-align-d": "stretch",
 		} as Record<string, string>;
