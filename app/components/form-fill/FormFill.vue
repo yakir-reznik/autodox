@@ -661,7 +661,10 @@
 			<div
 				class="form-fill-error-state form-fill-card max-w-160 mx-auto bg-card rounded-lg shadow-md p-8 text-center"
 			>
-				<Icon name="heroicons:archive-box" class="mx-auto h-12 w-12 text-muted-foreground" />
+				<Icon
+					name="heroicons:archive-box"
+					class="mx-auto h-12 w-12 text-muted-foreground"
+				/>
 				<h2 class="form-fill-error-title text-xl font-semibold text-foreground mb-2">
 					הגשה זו הועברה לארכיון
 				</h2>
@@ -728,20 +731,22 @@
 
 			<!-- Elements -->
 			<div class="form-fill-elements flex flex-col gap-6">
-				<FormField
-					v-for="element in visibleRootElements"
-					:key="element.clientId"
-					:element="element"
-					:get-children="getVisibleChildElements"
-					:model-value="formData[element.clientId]"
-					:error="errors[element.clientId]"
-					:form-data="formData"
-					:errors="errors"
-					:condition-required="isRequiredByCondition(element.clientId)"
-					:get-condition-required="isRequiredByCondition"
-					@update:model-value="updateFormData(element.clientId, $event)"
-					@blur="validateField(element.clientId)"
-				/>
+				<TransitionGroup name="fade-scale-move">
+					<FormField
+						v-for="element in visibleRootElements"
+						:key="element.clientId"
+						:element="element"
+						:get-children="getVisibleChildElements"
+						:model-value="formData[element.clientId]"
+						:error="errors[element.clientId]"
+						:form-data="formData"
+						:errors="errors"
+						:condition-required="isRequiredByCondition(element.clientId)"
+						:get-condition-required="isRequiredByCondition"
+						@update:model-value="updateFormData(element.clientId, $event)"
+						@blur="validateField(element.clientId)"
+					/>
+				</TransitionGroup>
 			</div>
 
 			<!-- Error Summary -->
@@ -795,3 +800,20 @@
 		</form>
 	</div>
 </template>
+
+<style lang="css">
+	.fade-scale-move-enter-active,
+	.fade-scale-move-leave-active {
+		transition:
+			opacity 0.3s ease,
+			scale 0.2s ease-out,
+			transform 0.2s ease-out;
+	}
+
+	.fade-scale-move-enter-from,
+	.fade-scale-move-leave-to {
+		opacity: 0;
+		scale: 0.975;
+		transform: translateY(1rem);
+	}
+</style>
