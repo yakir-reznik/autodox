@@ -6,6 +6,7 @@
 		ConditionGroup,
 	} from "~/types/form-builder";
 	import { isFieldElement, isSubmittableElement } from "~/composables/useElementDefaults";
+	import { hasInterpolationTokens, getReferencedTokens, interpolateRawValues } from "~/utils/interpolate";
 	import FormField from "./FormField.vue";
 
 	interface Props {
@@ -230,6 +231,10 @@
 					if (arr.length) formData[element.clientId] = arr;
 				} catch {}
 			} else if (["dropdown", "radio", "text", "email", "phone", "textarea"].includes(type)) {
+				if (typeof dv === "string" && hasInterpolationTokens(dv) && ["text", "email", "phone", "textarea"].includes(type)) {
+					// handled by the live interpolation watchEffect below
+					continue;
+				}
 				formData[element.clientId] = dv;
 			}
 		}
@@ -242,6 +247,17 @@
 		},
 		{ immediate: true },
 	);
+
+	const LIVE_INTERPOLATION_TYPES = ["text", "email", "phone", "textarea"];
+	watchEffect(() => {
+		for (const element of allElements.value) {
+			if (!LIVE_INTERPOLATION_TYPES.includes(element.type)) continue;
+			const dv = (element.config as any)?.defaultValue;
+			if (typeof dv !== "string" || !hasInterpolationTokens(dv)) continue;
+			if (element.name && getReferencedTokens(dv).includes(element.name)) continue;
+			formData[element.clientId] = interpolateRawValues(dv, allElements.value, formData, prefillData.value);
+		}
+	});
 
 	// Condition evaluator
 	const { isVisible, isRequiredByCondition } = useConditionEvaluator(allElements, formData);

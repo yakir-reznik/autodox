@@ -98,6 +98,18 @@ export function interpolateFieldValues(
 	});
 }
 
+export function hasInterpolationTokens(text: string): boolean {
+	return /\{\{\w+\}\}/.test(text);
+}
+
+export function getReferencedTokens(text: string): string[] {
+	const seen = new Set<string>();
+	for (const match of text.matchAll(TOKEN_REGEX)) {
+		seen.add(match[1]!);
+	}
+	return [...seen];
+}
+
 export function interpolateRawValues(
 	text: string,
 	elements: BuilderElement[],
