@@ -163,7 +163,7 @@
 					ref="canvasRef"
 					:width="canvasWidth"
 					:height="canvasHeight"
-					class="form-fill-signature-canvas border border-input rounded-md bg-card cursor-crosshair w-full block"
+					class="form-fill-signature-canvas border border-input rounded-md bg-card cursor-crosshair w-full block aspect-3/2 md:aspect-auto"
 					:class="{ 'border-destructive!': error }"
 					@mousedown="startDrawing"
 					@mousemove="draw"
