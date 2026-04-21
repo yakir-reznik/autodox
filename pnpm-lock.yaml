@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@adonisjs/hash':
+        specifier: ^10.1.0
+        version: 10.1.0
       '@nuxt/fonts':
         specifier: 0.12.1
         version: 0.12.1(db0@0.3.4(drizzle-orm@0.45.1(mysql2@3.16.0))(mysql2@3.16.0))(ioredis@5.8.2)(magicast@0.5.1)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -84,7 +87,7 @@ importers:
         specifier: ^4.6.4
         version: 4.6.4(vue@3.5.26(typescript@5.9.3))
       vuedraggable:
-        specifier: ^4.1.0
+        specifier: 4.1.0
         version: 4.1.0(vue@3.5.26(typescript@5.9.3))
     devDependencies:
       '@nuxtjs/tailwindcss':
@@ -110,6 +113,18 @@ importers:
         version: 5.9.3
 
 packages:
+
+  '@adonisjs/hash@10.1.0':
+    resolution: {integrity: sha512-lW0lGwpscu9PUo3Sb3PF580jYU29I9wsPn3dIKzZbTVedqkpaNpBK3YKedwZYkDpYmiyYXi08eTTNhdWjiGLQw==}
+    engines: {node: '>=20.6.0'}
+    peerDependencies:
+      argon2: ^0.31.2 || ^0.41.0 || ^0.43.0 || ^0.44.0
+      bcrypt: ^5.1.1 || ^6.0.0
+    peerDependenciesMeta:
+      argon2:
+        optional: true
+      bcrypt:
+        optional: true
 
   '@adonisjs/hash@9.1.1':
     resolution: {integrity: sha512-ZkRguwjAp4skKvKDdRAfdJ2oqQ0N7p9l3sioyXO1E8o0WcsyDgEpsTQtuVNoIdMiw4sn4gJlmL3nyF4BcK1ZDQ==}
@@ -1298,9 +1313,15 @@ packages:
   '@poppinss/string@1.7.1':
     resolution: {integrity: sha512-OrLzv/nGDU6l6dLXIQHe8nbNSWWfuSbpB/TW5nRpZFf49CLuQlIHlSPN9IdSUv2vG+59yGM6LoibsaHn8B8mDw==}
 
+  '@poppinss/types@1.2.1':
+    resolution: {integrity: sha512-qUYnzl0m9HJTWsXtr8Xo7CwDx6wcjrvo14bOVbIMIlKJCzKrm3LX55dRTDr1/x4PpSvKVgmxvC6Ly2YiqXKOvQ==}
+
   '@poppinss/utils@6.10.1':
     resolution: {integrity: sha512-da+MMyeXhBaKtxQiWPfy7+056wk3lVIhioJnXHXkJ2/OHDaZfFcyKHNl1R06sdYO8lIRXcXdoZ6LO2ARmkAREA==}
     engines: {node: '>=18.16.0'}
+
+  '@poppinss/utils@7.0.1':
+    resolution: {integrity: sha512-mveSvLI2YPC114mK5HCuSYfUtjpClf1wHG1VCqZJCp4U2ypPhIt62Iku5urh0kPAFvnvCVHx2bXBSH14qMTOlQ==}
 
   '@puppeteer/browsers@2.11.1':
     resolution: {integrity: sha512-YmhAxs7XPuxN0j7LJloHpfD1ylhDuFmmwMvfy/+6nBSrETT2ycL53LrhgPtR+f+GcPSybQVuQ5inWWu5MrWCpA==}
@@ -4729,6 +4750,11 @@ packages:
 
 snapshots:
 
+  '@adonisjs/hash@10.1.0':
+    dependencies:
+      '@phc/format': 1.0.0
+      '@poppinss/utils': 7.0.1
+
   '@adonisjs/hash@9.1.1':
     dependencies:
       '@phc/format': 1.0.0
@@ -5938,6 +5964,8 @@ snapshots:
       pluralize: 8.0.0
       slugify: 1.6.6
 
+  '@poppinss/types@1.2.1': {}
+
   '@poppinss/utils@6.10.1':
     dependencies:
       '@poppinss/exception': 1.2.3
@@ -5946,6 +5974,14 @@ snapshots:
       flattie: 1.1.1
       safe-stable-stringify: 2.5.0
       secure-json-parse: 4.1.0
+
+  '@poppinss/utils@7.0.1':
+    dependencies:
+      '@poppinss/exception': 1.2.3
+      '@poppinss/object-builder': 1.1.0
+      '@poppinss/string': 1.7.1
+      '@poppinss/types': 1.2.1
+      flattie: 1.1.1
 
   '@puppeteer/browsers@2.11.1':
     dependencies:

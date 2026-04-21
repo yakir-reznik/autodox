@@ -3,15 +3,12 @@ import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import * as schema from "../server/db/schema";
 import { eq } from "drizzle-orm";
-import { scrypt, randomBytes } from "crypto";
-import { promisify } from "util";
-
-const scryptAsync = promisify(scrypt);
+import { Hash } from "@adonisjs/hash";
+import { Scrypt } from "@adonisjs/hash/drivers/scrypt";
 
 async function hashPassword(password: string): Promise<string> {
-	const salt = randomBytes(16).toString("hex");
-	const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
-	return `${salt}:${derivedKey.toString("hex")}`;
+	const hash = new Hash(new Scrypt({}));
+	return await hash.make(password);
 }
 
 function randomApiKey(): string {

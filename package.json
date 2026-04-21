@@ -17,6 +17,7 @@
 		"deploy:prod": "ssh admin@booking.botulina.co.il 'bash /var/www/autodox/scripts/deploy.sh'"
 	},
 	"dependencies": {
+		"@adonisjs/hash": "^10.1.0",
 		"@nuxt/fonts": "0.12.1",
 		"@nuxt/icon": "2.1.1",
 		"@pinia/nuxt": "0.11.3",

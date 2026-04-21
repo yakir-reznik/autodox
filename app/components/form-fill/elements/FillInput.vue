@@ -8,19 +8,26 @@
 			{{ config.label }}
 			<span v-if="isRequired" class="form-fill-required text-destructive ms-0.5">*</span>
 		</label>
-		<input
-			:id="inputId"
-			:type="inputType"
-			:value="modelValue"
-			:placeholder="config.placeholder"
-			:step="config.step"
-			:autocomplete="config.autocomplete || 'off'"
-			:dir="['email', 'phone', 'date', 'time'].includes(element.type) ? 'ltr' : 'rtl'"
-			class="form-fill-input w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10 placeholder:text-muted-foreground"
-			:class="{ 'border-destructive!': error }"
-			@input="handleInput"
-			@blur="element.type === 'phone' ? handlePhoneBlur($event) : emit('blur')"
-		/>
+		<div class="relative">
+			<input
+				:id="inputId"
+				:type="inputType"
+				:value="modelValue"
+				:placeholder="config.placeholder"
+				:step="config.step"
+				:autocomplete="config.autocomplete || 'off'"
+				:dir="['email', 'phone', 'date', 'time'].includes(element.type) ? 'ltr' : 'rtl'"
+				class="form-fill-input w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10 placeholder:text-muted-foreground"
+				:class="[
+					{
+						'border-destructive!': error,
+						'appearance-none': ['date'].includes(element.type),
+					},
+				]"
+				@input="handleInput"
+				@blur="element.type === 'phone' ? handlePhoneBlur($event) : emit('blur')"
+			/>
+		</div>
 		<p v-if="error" class="form-fill-error text-sm text-destructive mt-1">{{ error }}</p>
 		<p v-else-if="config.helpText" class="form-fill-help text-sm text-muted-foreground mt-1">
 			{{ config.helpText }}
