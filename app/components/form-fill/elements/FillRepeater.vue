@@ -137,7 +137,7 @@
 			<TransitionGroup name="fade-scale-move">
 				<div
 					v-for="(item, itemIndex) in items"
-					:key="item as any"
+					:key="itemIndex"
 					class="form-fill-repeater-item relative rounded-md border border-input p-4 bg-accent"
 					:class="{ 'border-destructive!': error }"
 				>
