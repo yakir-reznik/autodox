@@ -67,6 +67,8 @@
 			/>
 		</div>
 
+		<div class="h-24"></div>
+
 		<!-- Submission Timeline -->
 		<FormPrintSubmissionTimeline :submission-timeline="submissionTimeline" />
 
