@@ -118,10 +118,9 @@
 				method: "PATCH",
 				body: { status },
 			});
-			forms.value =
-				forms.value?.map((f) =>
-					f.id === changeStatusForm.value!.id ? { ...f, status } : f,
-				);
+			forms.value = forms.value?.map((f) =>
+				f.id === changeStatusForm.value!.id ? { ...f, status } : f,
+			);
 		} catch (error) {
 			console.error("Failed to change form status:", error);
 		}
@@ -295,12 +294,14 @@
 		/>
 
 		<FormListDeleteFormModal
+			v-if="deletingForm"
 			v-model="showDeleteFormModal"
 			:form="deletingForm"
 			@confirm="deleteForm"
 		/>
 
 		<FormListChangeStatusModal
+			v-if="changeStatusForm"
 			v-model="showChangeStatusModal"
 			:form="changeStatusForm"
 			@confirm="changeStatus"

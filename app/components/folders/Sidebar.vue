@@ -19,7 +19,11 @@
 	}>();
 
 	// Local state for optimistic updates
-	const localFolders = ref<Folder[]>([...props.folders]);
+	const localFolders = ref<Folder[]>([]);
+
+	onMounted(() => {
+		localFolders.value = [...props.folders];
+	});
 
 	// Sync local folders when prop changes (from parent refresh)
 	watch(

@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div id="autodox-app">
 		<Toasts />
 		<NuxtLayout>
 			<NuxtPage />
