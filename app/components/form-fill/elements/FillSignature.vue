@@ -142,10 +142,7 @@
 		</label>
 
 		<!-- Readonly mode: display signature as image -->
-		<div
-			v-if="readonly && modelValue"
-			class="form-fill-signature-readonly w-full md:max-w-[400px]"
-		>
+		<div v-if="readonly && modelValue" class="form-fill-signature-readonly w-full md:max-w-100">
 			<img
 				:src="modelValue"
 				:alt="config.label || 'חתימה'"
@@ -158,7 +155,7 @@
 			<p v-if="config.helpText" class="form-fill-help text-sm text-muted-foreground mt-1">
 				{{ config.helpText }}
 			</p>
-			<div class="w-full md:max-w-[400px]">
+			<div class="w-full md:max-w-100">
 				<canvas
 					ref="canvasRef"
 					:width="canvasWidth"
