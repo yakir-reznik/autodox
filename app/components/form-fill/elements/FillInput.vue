@@ -1,3 +1,33 @@
+<template>
+	<div class="form-fill-fieldset-input">
+		<label
+			v-if="config.label"
+			:for="inputId"
+			class="form-fill-label block text-sm font-medium text-foreground mb-1"
+		>
+			{{ config.label }}
+			<span v-if="isRequired" class="form-fill-required text-destructive ms-0.5">*</span>
+		</label>
+		<input
+			:id="inputId"
+			:type="inputType"
+			:value="modelValue"
+			:placeholder="config.placeholder"
+			:step="config.step"
+			:autocomplete="config.autocomplete || 'off'"
+			:dir="['email', 'phone', 'date', 'time'].includes(element.type) ? 'ltr' : 'rtl'"
+			class="form-fill-input w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10 placeholder:text-muted-foreground"
+			:class="{ 'border-destructive!': error }"
+			@input="handleInput"
+			@blur="element.type === 'phone' ? handlePhoneBlur($event) : emit('blur')"
+		/>
+		<p v-if="error" class="form-fill-error text-sm text-destructive mt-1">{{ error }}</p>
+		<p v-else-if="config.helpText" class="form-fill-help text-sm text-muted-foreground mt-1">
+			{{ config.helpText }}
+		</p>
+	</div>
+</template>
+
 <script setup lang="ts">
 	import type { BuilderElement } from "~/types/form-builder";
 
@@ -16,6 +46,11 @@
 	}>();
 
 	const inputId = useId();
+
+	const inputDir = () => {
+		const ltrInputs = ["email", "phone", "date", "time"];
+		return ltrInputs.includes(inputType.value);
+	};
 
 	const config = computed(
 		() =>
@@ -91,33 +126,3 @@
 		emit("blur");
 	}
 </script>
-
-<template>
-	<div class="form-fill-fieldset-input">
-		<label
-			v-if="config.label"
-			:for="inputId"
-			class="form-fill-label block text-sm font-medium text-foreground mb-1"
-		>
-			{{ config.label }}
-			<span v-if="isRequired" class="form-fill-required text-destructive ms-0.5">*</span>
-		</label>
-		<input
-			:id="inputId"
-			:type="inputType"
-			:value="modelValue"
-			:placeholder="config.placeholder"
-			:step="config.step"
-			:autocomplete="config.autocomplete || 'off'"
-			:dir="element.type === 'phone' ? 'ltr' : undefined"
-			class="form-fill-input w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10 placeholder:text-muted-foreground"
-			:class="{ '!border-destructive': error }"
-			@input="handleInput"
-			@blur="element.type === 'phone' ? handlePhoneBlur($event) : emit('blur')"
-		/>
-		<p v-if="error" class="form-fill-error text-sm text-destructive mt-1">{{ error }}</p>
-		<p v-else-if="config.helpText" class="form-fill-help text-sm text-muted-foreground mt-1">
-			{{ config.helpText }}
-		</p>
-	</div>
-</template>
