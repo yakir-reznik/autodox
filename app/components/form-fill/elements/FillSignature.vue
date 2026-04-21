@@ -37,7 +37,7 @@
 	const hasSignature = ref(false);
 
 	const canvasWidth = 400;
-	const canvasHeight = 200;
+	const canvasHeight = 250;
 
 	function startDrawing(event: MouseEvent | TouchEvent) {
 		isDrawing.value = true;
@@ -79,16 +79,20 @@
 	}
 
 	function getPoint(event: MouseEvent | TouchEvent, rect: DOMRect) {
+		const canvas = canvasRef.value;
+		const scaleX = canvas ? canvas.width / rect.width : 1;
+		const scaleY = canvas ? canvas.height / rect.height : 1;
+
 		if ("touches" in event) {
-			const touch = event.touches[0];
+			const touch = event.touches[0] ?? event.changedTouches[0];
 			return {
-				x: (touch?.clientX ?? 0) - rect.left,
-				y: (touch?.clientY ?? 0) - rect.top,
+				x: ((touch?.clientX ?? 0) - rect.left) * scaleX,
+				y: ((touch?.clientY ?? 0) - rect.top) * scaleY,
 			};
 		}
 		return {
-			x: event.clientX - rect.left,
-			y: event.clientY - rect.top,
+			x: (event.clientX - rect.left) * scaleX,
+			y: (event.clientY - rect.top) * scaleY,
 		};
 	}
 
@@ -129,7 +133,10 @@
 
 <template>
 	<div>
-		<label v-if="config.label" class="form-fill-label block text-sm font-medium text-foreground mb-1">
+		<label
+			v-if="config.label"
+			class="form-fill-label block text-sm font-medium text-foreground mb-1"
+		>
 			{{ config.label }}
 			<span v-if="isRequired" class="form-fill-required text-destructive ms-0.5">*</span>
 		</label>
@@ -148,14 +155,16 @@
 
 		<!-- Edit mode: canvas for drawing -->
 		<template v-else>
-			<p v-if="config.helpText" class="form-fill-help text-sm text-muted-foreground mt-1">{{ config.helpText }}</p>
+			<p v-if="config.helpText" class="form-fill-help text-sm text-muted-foreground mt-1">
+				{{ config.helpText }}
+			</p>
 			<div class="w-full md:max-w-[400px]">
 				<canvas
 					ref="canvasRef"
 					:width="canvasWidth"
 					:height="canvasHeight"
-					class="form-fill-signature-canvas border border-input rounded-md bg-card cursor-crosshair w-full aspect-[2/1] block"
-					:class="{ '!border-destructive': error }"
+					class="form-fill-signature-canvas border border-input rounded-md bg-card cursor-crosshair w-full block"
+					:class="{ 'border-destructive!': error }"
 					@mousedown="startDrawing"
 					@mousemove="draw"
 					@mouseup="stopDrawing"
@@ -180,4 +189,3 @@
 		<p v-if="error" class="form-fill-error text-sm text-destructive mt-1">{{ error }}</p>
 	</div>
 </template>
-
