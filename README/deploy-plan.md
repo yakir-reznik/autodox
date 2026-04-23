@@ -84,6 +84,10 @@ sudo apt install -y mysql-server
 
 # Install PM2 (process manager)
 npm install -g pm2
+
+# Install Hebrew locale (required for PDF generation)
+sudo locale-gen he_IL.UTF-8
+sudo update-locale
 ```
 
 ### 3. MySQL Setup
