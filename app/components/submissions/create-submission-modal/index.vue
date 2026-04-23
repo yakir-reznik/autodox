@@ -111,7 +111,7 @@
 			]);
 
 			fields.value = formResponse.elements.filter(
-				(el) => el.name && !el.parentId && prefillableTypes.includes(el.type),
+				(el) => el.name && prefillableTypes.includes(el.type),
 			);
 
 			for (const field of fields.value) {
