@@ -109,6 +109,11 @@ export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 	const browser = await puppeteer.launch({
 		headless: true,
 		args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--lang=he-IL"],
+		env: {
+			...process.env,
+			LANG: "he_IL.UTF-8",
+			LC_ALL: "he_IL.UTF-8",
+		},
 	});
 
 	try {
