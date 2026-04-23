@@ -108,15 +108,15 @@ export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 
 	const browser = await puppeteer.launch({
 		headless: true,
-		args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+		args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--lang=he-IL"],
 	});
 
 	try {
 		const page = await browser.newPage();
 
-		// Set authentication header for internal access
 		await page.setExtraHTTPHeaders({
 			"X-Puppeteer-Secret": process.env.PUPPETEER_SECRET || "",
+			"Accept-Language": "he-IL,he;q=0.9",
 		});
 
 		// Navigate to print view
