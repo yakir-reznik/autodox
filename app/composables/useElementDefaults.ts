@@ -164,7 +164,6 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 				collapsible: false,
 				defaultCollapsed: false,
 				bordered: true,
-				backgroundColor: "#f9fafb",
 			};
 		case "repeater":
 			return {
