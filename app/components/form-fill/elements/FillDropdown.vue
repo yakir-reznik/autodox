@@ -32,7 +32,7 @@
 			v-if="config.allowUserOption && isOtherSelected"
 			type="text"
 			:value="otherText"
-			class="form-fill-input w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10 placeholder:text-muted-foreground mt-2"
+			class="form-fill-input w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10 placeholder:text-muted-foreground/50 mt-2"
 			placeholder="פרט..."
 			@input="updateOtherText(($event.target as HTMLInputElement).value)"
 			@blur="emit('blur')"
