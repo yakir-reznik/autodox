@@ -1,5 +1,6 @@
 <script setup lang="ts">
 	import type { ElementType, ElementConfig } from "~/types/form-builder";
+	import { hasInterpolationTokens } from "~/utils/interpolate";
 
 	type FormElement = {
 		id: number;
@@ -116,6 +117,7 @@
 
 			for (const field of fields.value) {
 				const dv = (field.config as any)?.defaultValue;
+				if (typeof dv === "string" && hasInterpolationTokens(dv)) continue;
 				if (field.type === "checkboxes") {
 					prefillData[field.name!] = dv
 						? (() => {

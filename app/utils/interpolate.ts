@@ -70,12 +70,14 @@ function resolveToken(
 	elements: BuilderElement[],
 	formData: Record<string, any>,
 	prefillData: Record<string, any>,
+	raw = false,
 ): string | null {
 	const fields = getInterpolatableFields(elements);
 	const field = fields.find((f) => f.name === fieldName);
 
 	if (field) {
 		const rawValue = formData[field.clientId];
+		if (raw && (rawValue == null || rawValue === "")) return "";
 		return getDisplayValue(elements.find((el) => el.clientId === field.clientId)!, rawValue);
 	}
 
@@ -117,7 +119,7 @@ export function interpolateRawValues(
 	prefillData: Record<string, any> = {},
 ): string {
 	return text.replace(TOKEN_REGEX, (match, fieldName: string) => {
-		const resolved = resolveToken(fieldName, elements, formData, prefillData);
-		return resolved !== null ? resolved : match;
+		const resolved = resolveToken(fieldName, elements, formData, prefillData, true);
+		return resolved !== null ? resolved : "";
 	});
 }
