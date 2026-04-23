@@ -111,8 +111,8 @@ export async function generateSubmissionPDF(token: string): Promise<Buffer> {
 		args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
 		env: {
 			...process.env,
-			LANG: "he_IL.UTF-8",
-			LC_ALL: "he_IL.UTF-8",
+			// LANG: "he_IL.UTF-8",
+			// LC_ALL: "he_IL.UTF-8",
 		},
 	});
 
