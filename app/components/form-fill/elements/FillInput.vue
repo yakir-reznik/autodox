@@ -9,7 +9,20 @@
 			<span v-if="isRequired" class="form-fill-required text-destructive ms-0.5">*</span>
 		</label>
 		<div class="relative">
+			<span
+				v-if="readonly && ['date', 'datetime', 'time'].includes(element.type)"
+				class="form-fill-input flex items-center justify-between w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground"
+				dir="ltr"
+			>
+				<span>{{ formattedReadonlyValue }}</span>
+				<Icon
+					:name="element.type === 'time' ? 'lucide:clock' : 'lucide:calendar'"
+					class="text-muted-foreground opacity-50 shrink-0"
+					size="16"
+				/>
+			</span>
 			<input
+				v-else
 				:id="inputId"
 				:type="inputType"
 				:value="modelValue"
@@ -43,6 +56,7 @@
 		modelValue?: string | number;
 		error?: string;
 		conditionRequired?: boolean;
+		readonly?: boolean;
 	}
 
 	const props = defineProps<Props>();
@@ -54,10 +68,23 @@
 
 	const inputId = useId();
 
-	const inputDir = () => {
-		const ltrInputs = ["email", "phone", "date", "time"];
-		return ltrInputs.includes(inputType.value);
-	};
+	const formattedReadonlyValue = computed(() => {
+		const val = props.modelValue;
+		if (!val) return "-";
+		const dateStr = String(val);
+		if (props.element.type === "date") {
+			const d = new Date(dateStr);
+			return isNaN(d.getTime()) ? dateStr : d.toLocaleDateString("he-IL");
+		}
+		if (props.element.type === "datetime") {
+			const d = new Date(dateStr);
+			return isNaN(d.getTime()) ? dateStr : d.toLocaleString("he-IL");
+		}
+		if (props.element.type === "time") {
+			return dateStr;
+		}
+		return dateStr;
+	});
 
 	const config = computed(
 		() =>
