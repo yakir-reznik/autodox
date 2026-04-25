@@ -42,11 +42,11 @@ The app currently has three roles (`admin`, `user`, `viewer`) but most API endpo
 | `POST /api/submissions/[token]/submit` | Public submitter                                |
 | `GET /api/[...].ts`                    | 404 catch-all                                   |
 
-### API-key auth (no changes)
+### API-key auth (ownership check needed)
 
-| Endpoint                                      | Notes                           |
-| --------------------------------------------- | ------------------------------- |
-| `POST /api/forms/[id]/create-submission-link` | Already uses `x-api-key` header |
+| Endpoint                                      | Notes                                                                                  |
+| --------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `POST /api/forms/[id]/create-submission-link` | Uses `x-api-key` header — add ownership check: user must own the form or be admin |
 
 ### Admin only
 
@@ -124,6 +124,14 @@ async function requireSubmissionAccess(
   event,
   token: string,
 ): Promise<{ session; submission; form }>;
+
+// For API-key authenticated endpoints: extracts x-api-key header, looks up user,
+// fetches form, checks ownership (admin bypasses). Returns { user, form }.
+// No session involved — used only by create-submission-link.
+async function requireApiKeyFormAccess(
+  event,
+  formId: number,
+): Promise<{ user; form }>;
 ```
 
 Remove `requireUserRole` (replaced by `requireRoles`). Keep `getUserRole` / `hasUserRole` but update to work with `roles` array.
@@ -194,6 +202,7 @@ const isAdmin = session.user.roles.includes("admin");
 | `server/api/user/reroll-api-key.post.ts` | Session build                                                                              |
 | `server/routes/auth/google.get.ts`       | Session build                                                                              |
 | `app/middleware/auth.global.ts`          | Gate logic (admin → user+)                                                                 |
+| `server/api/forms/[id]/create-submission-link.post.ts` | Replace manual auth + form fetch with `requireApiKeyFormAccess` |
 | All 20+ endpoint files listed above      | Auth checks                                                                                |
 
 ---
