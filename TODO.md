@@ -12,6 +12,8 @@
 
 ## Features
 
+- [ ] Form share. Users should be able to share forms with other users. If i share my form with a user they can view data related to this form (submission), they can create submissions for it etc but they CAN NOT edit the form itself. We need to make an extensive plan for this and then update the authorization plan before executing.
+- [ ] Implement authorization plan... server endpoints are currently not protected
 - [ ] Import / export form json is a mess... does not export all props of fields and also does not import all. we need a simpler solution to dump an export with to much fuss and import back.
 - [ ] Add sha 256 checksum hash to locked submission
 - [ ] for submissions that have expired - they are stuck in "In Progress". we need to change their status to "expired"
