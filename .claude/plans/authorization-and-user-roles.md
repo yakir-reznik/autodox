@@ -188,6 +188,16 @@ const isAdmin = session.user.roles.includes("admin");
 // if (!isAdmin) add WHERE createdBy = session.user.id to query
 ```
 
+### Step 6 — Sweep for inline auth logic
+
+After all endpoint changes are done, grep every modified file to confirm no authorization is done outside of `server/utils/authorization.ts`:
+
+- No `session.user.role === "..."` or `session.user.roles.includes(...)` comparisons outside the utility
+- No manual `x-api-key` header extraction / DB user lookups outside `requireApiKeyFormAccess`
+- No bare `requireUserSession` calls followed by inline role or ownership checks (the only valid bare use is `/user/*` own-account endpoints)
+
+Fix any violations found before considering the step complete.
+
 ---
 
 ## Critical Files
