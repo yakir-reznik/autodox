@@ -1,10 +1,12 @@
 // shared/types/auth.d.ts
+import type { UserRole } from "../../server/db/schema"
+
 declare module "#auth-utils" {
 	interface User {
 		id: number;
 		name: string;
 		email: string;
-		role: "admin" | "viewer";
+		role: UserRole;
 		apiKey: string;
 	}
 
