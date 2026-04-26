@@ -1,4 +1,10 @@
+// Creates or updates an admin user in the database.
+// Usage: npx tsx scripts/create-admin.ts [email] [password] [name]
+// Example: npx tsx scripts/create-admin.ts admin@example.com mypassword "Admin User"
+// Defaults: admin@example.com / admin123 / "Admin User"
+
 import "dotenv/config";
+import { randomBytes } from "crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import * as schema from "../server/db/schema";
