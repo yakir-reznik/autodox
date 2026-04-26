@@ -42,5 +42,6 @@ export default defineEventHandler(async (event) => {
 		webhookIncludePdf: form.webhookIncludePdf,
 		password: form.password,
 		allowPublicSubmissions: form.allowPublicSubmissions,
+		createdBy: form.createdBy,
 	};
 });

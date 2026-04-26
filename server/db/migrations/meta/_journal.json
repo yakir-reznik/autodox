@@ -99,6 +99,13 @@
       "when": 1776496402007,
       "tag": "0013_next_calypso",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1777183653638,
+      "tag": "0014_peaceful_power_pack",
+      "breakpoints": true
     }
   ]
 }

@@ -9,6 +9,7 @@ import {
 	mysqlEnum,
 	decimal,
 	boolean,
+	uniqueIndex,
 } from "drizzle-orm/mysql-core";
 import { relations, sql } from "drizzle-orm";
 import type { FormTheme } from "~~/app/types/themes";
@@ -468,6 +469,38 @@ export const formEntrancesTable = mysqlTable("form_entrances_table", {
 });
 
 // ============================================
+// FORM SHARES TABLE
+// ============================================
+
+export const formSharesTable = mysqlTable(
+	"form_shares_table",
+	{
+		id: int().primaryKey().autoincrement(),
+		formId: int("form_id")
+			.notNull()
+			.references(() => formsTable.id, { onDelete: "cascade" }),
+		granteeUserId: int("grantee_user_id")
+			.notNull()
+			.references(() => usersTable.id, { onDelete: "cascade" }),
+		grantedBy: int("granted_by")
+			.notNull()
+			.references(() => usersTable.id),
+
+		canViewSubmissions: boolean("can_view_submissions").notNull().default(false),
+		canCreateSubmissions: boolean("can_create_submissions").notNull().default(false),
+		canManageSubmissions: boolean("can_manage_submissions").notNull().default(false),
+		canEditForm: boolean("can_edit_form").notNull().default(false),
+
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at")
+			.notNull()
+			.defaultNow()
+			.$onUpdate(() => sql`now()`),
+	},
+	(t) => [uniqueIndex("form_shares_form_grantee_unique").on(t.formId, t.granteeUserId)],
+);
+
+// ============================================
 // UPLOADS TABLE
 // ============================================
 
@@ -523,6 +556,7 @@ export const formsRelations = relations(formsTable, ({ one, many }) => ({
 	elements: many(formElementsTable),
 	submissions: many(submissionsTable),
 	entrances: many(formEntrancesTable),
+	shares: many(formSharesTable),
 }));
 
 export const formElementsRelations = relations(formElementsTable, ({ one, many }) => ({
@@ -572,5 +606,22 @@ export const uploadsRelations = relations(uploadsTable, ({ one }) => ({
 		fields: [uploadsTable.uploadedBy],
 		references: [usersTable.id],
 		relationName: "upload_creator",
+	}),
+}));
+
+export const formSharesRelations = relations(formSharesTable, ({ one }) => ({
+	form: one(formsTable, {
+		fields: [formSharesTable.formId],
+		references: [formsTable.id],
+	}),
+	grantee: one(usersTable, {
+		fields: [formSharesTable.granteeUserId],
+		references: [usersTable.id],
+		relationName: "share_grantee",
+	}),
+	grantor: one(usersTable, {
+		fields: [formSharesTable.grantedBy],
+		references: [usersTable.id],
+		relationName: "share_grantor",
 	}),
 }));
