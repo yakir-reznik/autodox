@@ -36,7 +36,7 @@
 						עריכת טופס
 					</UiButton>
 				</NuxtLink>
-				<NuxtLink :to="`/forms/${formId}/submission-data-structure`">
+				<NuxtLink :to="`/manage/form/${formId}/submission-data-structure`">
 					<UiButton variant="secondary">
 						<Icon name="heroicons:code-bracket" class="h-4 w-4" />
 						מבנה נתונים

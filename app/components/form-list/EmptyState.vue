@@ -3,7 +3,7 @@
 		<Icon name="heroicons:document-plus" class="mx-auto h-12 w-12 text-gray-400" />
 		<h3 class="mt-4 text-lg font-medium text-gray-900">אין טפסים</h3>
 		<p class="mt-2 text-gray-500">התחל ליצור את הטופס הראשון שלך.</p>
-		<NuxtLink to="/forms/new" class="mt-6 inline-block">
+		<NuxtLink to="/manage/form/new" class="mt-6 inline-block">
 			<BaseButton variant="primary">
 				<Icon name="heroicons:plus" class="h-5 w-5" />
 				יצירת טופס

@@ -142,7 +142,7 @@
 	const actionItems = [
 		{
 			label: "יצירת טופס חדש",
-			to: "/forms/new",
+			to: "/manage/form/new",
 			icon: "heroicons:document-plus",
 			disabled: false,
 		},

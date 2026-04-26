@@ -88,7 +88,7 @@
 				</NuxtLink>
 
 				<NuxtLink
-					:to="`/forms/upload?formId=${formId}`"
+					:to="`/manage/form/upload?formId=${formId}`"
 					title="Upload JSON to replace form structure"
 				>
 					<UiButton variant="secondary">
