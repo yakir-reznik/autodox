@@ -78,7 +78,7 @@
 				</NuxtLink>
 
 				<NuxtLink
-					:to="`/forms/${formId}/submission-data-structure`"
+					:to="`/manage/form/${formId}/submission-data-structure`"
 					title="הצג מבנה נתונים"
 				>
 					<UiButton variant="secondary">

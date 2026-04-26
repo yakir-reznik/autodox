@@ -1,12 +1,137 @@
+<template>
+	<div class="max-w-3xl">
+		<!-- Loading -->
+		<div v-if="pending" class="flex flex-col items-center justify-center py-20 text-gray-400">
+			<Icon name="svg-spinners:ring-resize" class="h-8 w-8" />
+			<p class="mt-3 text-sm">טוען נתוני טופס...</p>
+		</div>
+
+		<template v-else>
+			<!-- TypeScript -->
+			<div class="mb-6 overflow-hidden rounded-xl border border-gray-200 bg-white">
+				<div
+					class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3"
+				>
+					<span class="text-sm font-medium text-gray-600">TypeScript</span>
+					<BaseCopyButton :text="tsCode" variant="ghost"> העתקה </BaseCopyButton>
+				</div>
+				<div class="relative">
+					<div dir="ltr" class="overflow-x-auto text-left text-sm">
+						<table class="w-full border-collapse">
+							<tr
+								v-for="(line, i) in visibleTsCode.split('\n')"
+								:key="i"
+								class="leading-6"
+							>
+								<td
+									class="w-0 select-none border-l border-gray-100 px-3 text-right text-xs text-gray-400"
+								>
+									{{ i + 1 }}
+								</td>
+								<td class="px-4 [&_.shiki]:bg-transparent!">
+									<Shiki lang="typescript" :code="line || ' '" as="span" />
+								</td>
+							</tr>
+						</table>
+					</div>
+					<div
+						v-if="tsLines.length > COLLAPSED_LINES && !expandedTs"
+						class="pointer-events-none absolute bottom-0 left-0 right-0 h-20 bg-linear-to-t from-white to-transparent"
+					/>
+				</div>
+				<button
+					v-if="tsLines.length > COLLAPSED_LINES"
+					class="w-full border-t border-gray-100 py-2.5 text-center text-sm text-primary hover:bg-gray-50 transition cursor-pointer"
+					@click="expandedTs = !expandedTs"
+				>
+					{{ expandedTs ? "הצג פחות" : `הצג הכל (${tsLines.length} שורות)` }}
+				</button>
+			</div>
+
+			<!-- JSON Schema -->
+			<div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
+				<div
+					class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3"
+				>
+					<span class="text-sm font-medium text-gray-600">JSON Schema</span>
+					<BaseCopyButton :text="jsonSchemaCode" variant="ghost"> העתקה </BaseCopyButton>
+				</div>
+				<div class="relative">
+					<div dir="ltr" class="overflow-x-auto text-left text-sm">
+						<table class="w-full border-collapse">
+							<tr
+								v-for="(line, i) in visibleJsonCode.split('\n')"
+								:key="i"
+								class="leading-6"
+							>
+								<td
+									class="w-0 select-none border-l border-gray-100 px-3 text-right text-xs text-gray-400"
+								>
+									{{ i + 1 }}
+								</td>
+								<td class="px-4 [&_.shiki]:bg-transparent!">
+									<Shiki lang="json" :code="line || ' '" as="span" />
+								</td>
+							</tr>
+						</table>
+					</div>
+					<div
+						v-if="jsonLines.length > COLLAPSED_LINES && !expandedJson"
+						class="pointer-events-none absolute bottom-0 left-0 right-0 h-20 bg-linear-to-t from-white to-transparent"
+					/>
+				</div>
+				<button
+					v-if="jsonLines.length > COLLAPSED_LINES"
+					class="w-full border-t border-gray-100 py-2.5 text-center text-sm text-primary hover:bg-gray-50 transition cursor-pointer"
+					@click="expandedJson = !expandedJson"
+				>
+					{{ expandedJson ? "הצג פחות" : `הצג הכל (${jsonLines.length} שורות)` }}
+				</button>
+			</div>
+		</template>
+	</div>
+</template>
+
 <script setup lang="ts">
 	import { ArrowRight } from "lucide-vue-next";
 	import type { FormWithElements } from "~/types/form-builder";
 	import type { ElementType } from "~~/server/db/schema";
 
+	definePageMeta({
+		layout: "management-panel",
+		heading: "מבנה נתונים של הגשה",
+		breadcrumbs: [
+			{
+				label: "רשימת טפסים",
+				to: "/manage",
+			},
+			{
+				label: "עריכת טופס",
+			},
+			{
+				label: "מבנה נתונים של הגשה",
+			},
+		],
+	});
+
 	const route = useRoute();
 	const formId = route.params.form_id as string;
 
 	const { data: form, pending } = await useFetch<FormWithElements>(`/api/forms/${formId}`);
+
+	route.meta.breadcrumbs = [
+		{
+			label: "רשימת טפסים",
+			to: "/manage",
+		},
+		{
+			label: `עריכת טופס (${form.value?.title})`,
+			to: `/manage/form/${formId}/edit`,
+		},
+		{
+			label: "מבנה נתונים של הגשה",
+		},
+	];
 
 	const layoutTypes: ElementType[] = [
 		"heading_h1",
@@ -207,122 +332,4 @@
 			? jsonSchemaCode.value
 			: jsonLines.value.slice(0, COLLAPSED_LINES).join("\n"),
 	);
-
-
 </script>
-
-<template>
-	<div class="min-h-screen bg-gray-50 p-8" dir="rtl">
-		<div class="mx-auto max-w-3xl">
-			<div class="mb-6 flex items-center gap-3">
-				<NuxtLink
-					:to="`/forms`"
-					class="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
-				>
-					טפסים
-				</NuxtLink>
-				<ArrowRight class="h-4 w-4 rotate-180 text-gray-400" />
-				<h1 class="text-lg font-semibold text-gray-900">
-					מבנה נתוני הגשה — {{ form?.title }}
-				</h1>
-			</div>
-
-			<!-- Loading -->
-			<div
-				v-if="pending"
-				class="flex flex-col items-center justify-center py-20 text-gray-400"
-			>
-				<Icon name="svg-spinners:ring-resize" class="h-8 w-8" />
-				<p class="mt-3 text-sm">טוען נתוני טופס...</p>
-			</div>
-
-			<template v-else>
-				<!-- TypeScript -->
-				<div class="mb-6 overflow-hidden rounded-xl border border-gray-200 bg-white">
-					<div
-						class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3"
-					>
-						<span class="text-sm font-medium text-gray-600">TypeScript</span>
-						<BaseCopyButton :text="tsCode" variant="ghost">
-							העתקה
-						</BaseCopyButton>
-					</div>
-					<div class="relative">
-						<div dir="ltr" class="overflow-x-auto text-left text-sm">
-							<table class="w-full border-collapse">
-								<tr
-									v-for="(line, i) in visibleTsCode.split('\n')"
-									:key="i"
-									class="leading-6"
-								>
-									<td
-										class="w-0 select-none border-l border-gray-100 px-3 text-right text-xs text-gray-400"
-									>
-										{{ i + 1 }}
-									</td>
-									<td class="px-4 [&_.shiki]:bg-transparent!">
-										<Shiki lang="typescript" :code="line || ' '" as="span" />
-									</td>
-								</tr>
-							</table>
-						</div>
-						<div
-							v-if="tsLines.length > COLLAPSED_LINES && !expandedTs"
-							class="pointer-events-none absolute bottom-0 left-0 right-0 h-20 bg-linear-to-t from-white to-transparent"
-						/>
-					</div>
-					<button
-						v-if="tsLines.length > COLLAPSED_LINES"
-						class="w-full border-t border-gray-100 py-2.5 text-center text-sm text-primary hover:bg-gray-50 transition cursor-pointer"
-						@click="expandedTs = !expandedTs"
-					>
-						{{ expandedTs ? "הצג פחות" : `הצג הכל (${tsLines.length} שורות)` }}
-					</button>
-				</div>
-
-				<!-- JSON Schema -->
-				<div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
-					<div
-						class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3"
-					>
-						<span class="text-sm font-medium text-gray-600">JSON Schema</span>
-						<BaseCopyButton :text="jsonSchemaCode" variant="ghost">
-							העתקה
-						</BaseCopyButton>
-					</div>
-					<div class="relative">
-						<div dir="ltr" class="overflow-x-auto text-left text-sm">
-							<table class="w-full border-collapse">
-								<tr
-									v-for="(line, i) in visibleJsonCode.split('\n')"
-									:key="i"
-									class="leading-6"
-								>
-									<td
-										class="w-0 select-none border-l border-gray-100 px-3 text-right text-xs text-gray-400"
-									>
-										{{ i + 1 }}
-									</td>
-									<td class="px-4 [&_.shiki]:bg-transparent!">
-										<Shiki lang="json" :code="line || ' '" as="span" />
-									</td>
-								</tr>
-							</table>
-						</div>
-						<div
-							v-if="jsonLines.length > COLLAPSED_LINES && !expandedJson"
-							class="pointer-events-none absolute bottom-0 left-0 right-0 h-20 bg-linear-to-t from-white to-transparent"
-						/>
-					</div>
-					<button
-						v-if="jsonLines.length > COLLAPSED_LINES"
-						class="w-full border-t border-gray-100 py-2.5 text-center text-sm text-primary hover:bg-gray-50 transition cursor-pointer"
-						@click="expandedJson = !expandedJson"
-					>
-						{{ expandedJson ? "הצג פחות" : `הצג הכל (${jsonLines.length} שורות)` }}
-					</button>
-				</div>
-			</template>
-		</div>
-	</div>
-</template>

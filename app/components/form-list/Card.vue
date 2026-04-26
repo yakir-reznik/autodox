@@ -74,7 +74,7 @@
 						<Icon name="heroicons:arrow-path" class="h-4 w-4" />
 						שינוי סטטוס
 					</UiDropdownMenuItem class="px-4">
-					<NuxtLink :to="`/forms/${form.id}/submission-data-structure`">
+					<NuxtLink :to="`/manage/form/${form.id}/submission-data-structure`">
 						<UiDropdownMenuItem class="px-4">
 							<Icon name="heroicons:code-bracket" class="h-4 w-4" />
 							הצג מבנה נתונים
