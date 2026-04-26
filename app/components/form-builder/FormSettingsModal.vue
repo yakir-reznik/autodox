@@ -60,21 +60,22 @@
 					<div class="flex items-center gap-4">
 						<div class="flex flex-col gap-1 w-36">
 							<label for="settings-status" class="text-xs font-medium text-gray-600">
-								סטטוס
+								סטטוס טופס
 							</label>
-							<select
-								id="settings-status"
-								v-model="status"
-								class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-							>
-								<option
-									v-for="option in statusOptions"
-									:key="option.value"
-									:value="option.value"
-								>
-									{{ option.label }}
-								</option>
-							</select>
+							<UiSelect v-model="status" dir="rtl" id="settings-status">
+								<UiSelectTrigger class="w-full">
+									{{ statusLabels[status] }}
+								</UiSelectTrigger>
+								<UiSelectContent>
+									<UiSelectItem
+										v-for="[val, label] in Object.entries(statusLabels)"
+										:key="val"
+										:value="val"
+									>
+										{{ label }}
+									</UiSelectItem>
+								</UiSelectContent>
+							</UiSelect>
 						</div>
 
 						<div class="flex flex-col gap-1 grow">
@@ -312,6 +313,11 @@
 	const error = ref<string | null>(null);
 
 	const status = ref<FormStatus>("draft");
+	const statusLabels = {
+		draft: "טיוטא",
+		published: "פורסם",
+		archived: "בארכיון",
+	};
 	const theme = ref<FormTheme>("ocean");
 	const passwordEnabled = ref(false);
 	const password = ref("");
