@@ -66,10 +66,7 @@
 	definePageMeta({
 		layout: "management-panel",
 		heading: "הגשות",
-		breadcrumbs: [
-			{ label: "רשימת טפסים", to: "/forms" },
-			{ label: "הגשות" },
-		],
+		breadcrumbs: [{ label: "רשימת טפסים", to: "/manage" }, { label: "הגשות" }],
 	});
 
 	type Folder = {
@@ -131,7 +128,8 @@
 		error,
 		refresh,
 	} = await useFetch<PaginatedResponse>(
-		() => `/api/submissions?formId=${formId}&page=${currentPage.value}&archived=${showArchived.value}`,
+		() =>
+			`/api/submissions?formId=${formId}&page=${currentPage.value}&archived=${showArchived.value}`,
 	);
 
 	const submissions = computed(() => response.value?.data ?? []);

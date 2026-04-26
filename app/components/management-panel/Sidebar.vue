@@ -31,7 +31,10 @@
 								size="lg"
 								:tooltip="item.label"
 							>
-								<NuxtLink :to="item.to">
+								<NuxtLink
+									:to="item.to"
+									exact-active-class="text-primary! bg-primary/5!"
+								>
 									<Icon :name="item.icon" class="text-lg shrink-0" />
 									<span class="text-base group-data-[collapsible=icon]:hidden">
 										{{ item.label }}
@@ -129,10 +132,10 @@
 	const route = useRoute();
 
 	const mainNavItems = [
-		{ label: "ניהול טפסים", to: "/forms", icon: "heroicons:document-text" },
-		{ label: "טפסים משותפים", to: "/forms/shared", icon: "heroicons:users" },
+		{ label: "ניהול טפסים", to: "/manage/", icon: "heroicons:document-text" },
+		{ label: "טפסים משותפים", to: "/manage/forms/shared", icon: "heroicons:users" },
 		{ label: "הגשות", to: "/manage/submissions/20", icon: "heroicons:inbox-stack" },
-		{ label: "דוחות", to: "/admin/reports", icon: "heroicons:chart-bar" },
+		{ label: "דוחות", to: "/manage/reports", icon: "heroicons:chart-bar" },
 		{ label: "ניהול משתמש", to: "/user", icon: "heroicons:user-circle" },
 	];
 

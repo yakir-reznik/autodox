@@ -125,7 +125,8 @@
 						</td>
 						<td class="px-6 py-4 text-sm whitespace-nowrap">
 							<div class="flex gap-2 items-center">
-								<NuxtLink :to="`/submission-detail/${submission.token}`">
+								<!-- <NuxtLink :to="`/submission-detail/${submission.token}`"> -->
+								<NuxtLink :to="`/manage/submission-details/${submission.token}`">
 									<UiButton size="sm">
 										<Icon name="heroicons:eye" class="h-4 w-4" />
 										הצג פרטים

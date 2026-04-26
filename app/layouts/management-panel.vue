@@ -6,7 +6,7 @@
 				<slot name="header" />
 				<ManagementPanelBreadcrumb />
 			</header>
-			<main class="flex-1 overflow-auto py-6 px-12">
+			<main class="flex-1 overflow-auto py-8 px-16">
 				<h1 v-if="heading" class="text-3xl font-bold mb-6">{{ heading }}</h1>
 				<slot />
 			</main>
