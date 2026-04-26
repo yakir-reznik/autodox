@@ -80,6 +80,10 @@
 							הצג מבנה נתונים
 						</UiDropdownMenuItem>
 					</NuxtLink>
+					<UiDropdownMenuItem class="px-4" @select="emit('openSettings', form)">
+						<Icon name="heroicons:cog-6-tooth" class="h-4 w-4" />
+						הגדרות טופס ושיתוף
+					</UiDropdownMenuItem>
 					<UiDropdownMenuSeparator />
 					<UiDropdownMenuItem class="px-4" variant="destructive" @select="emit('deleteForm', form)">
 						<Icon name="heroicons:trash" class="h-4 w-4" />
@@ -108,6 +112,7 @@
 		createSubmission: [form: FormListItem];
 		changeStatus: [form: FormListItem];
 		deleteForm: [form: FormListItem];
+		openSettings: [form: FormListItem];
 	}>();
 
 	function handleMoveForm(form: FormListItem) {

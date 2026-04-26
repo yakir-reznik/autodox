@@ -15,6 +15,8 @@
 	const createSubmissionForm = ref<FormListItem | null>(null);
 	const showChangeStatusModal = ref(false);
 	const changeStatusForm = ref<FormListItem | null>(null);
+	const showSettingsModal = ref(false);
+	const settingsForm = ref<FormListItem | null>(null);
 	const searchQuery = ref("");
 
 	// Fetch folders
@@ -124,6 +126,12 @@
 		} catch (error) {
 			console.error("Failed to change form status:", error);
 		}
+	}
+
+	// Open settings handler
+	function handleOpenSettings(form: FormListItem) {
+		settingsForm.value = form;
+		showSettingsModal.value = true;
 	}
 
 	// Form move handlers
@@ -277,6 +285,7 @@
 							@delete-form="handleDeleteForm"
 							@create-submission="handleCreateSubmission"
 							@change-status="handleChangeStatus"
+						@open-settings="handleOpenSettings"
 						/>
 					</div>
 				</div>
@@ -312,6 +321,12 @@
 			v-model="showCreateSubmissionModal"
 			:form-id="createSubmissionForm.id"
 			:api-key="user?.apiKey ?? ''"
+		/>
+
+		<FormBuilderFormSettingsModal
+			v-if="settingsForm"
+			v-model="showSettingsModal"
+			:form-id="settingsForm.id"
 		/>
 	</div>
 </template>
