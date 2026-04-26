@@ -50,38 +50,6 @@
 			:error="error"
 			@refresh="refresh"
 		/>
-		<SubmissionsTable
-			v-model:page="currentPage"
-			:submissions="submissions"
-			:pagination="pagination"
-			:pending="pending"
-			:error="error"
-			@refresh="refresh"
-		/>
-		<SubmissionsTable
-			v-model:page="currentPage"
-			:submissions="submissions"
-			:pagination="pagination"
-			:pending="pending"
-			:error="error"
-			@refresh="refresh"
-		/>
-		<SubmissionsTable
-			v-model:page="currentPage"
-			:submissions="submissions"
-			:pagination="pagination"
-			:pending="pending"
-			:error="error"
-			@refresh="refresh"
-		/>
-		<SubmissionsTable
-			v-model:page="currentPage"
-			:submissions="submissions"
-			:pagination="pagination"
-			:pending="pending"
-			:error="error"
-			@refresh="refresh"
-		/>
 
 		<SubmissionsCreateSubmissionModal
 			v-model="showCreateModal"

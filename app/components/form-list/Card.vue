@@ -1,7 +1,7 @@
 <template>
 	<div
 		:key="form.id"
-		class="group flex flex-col h-full rounded-md border border-gray-200 bg-white p-6 transition-all hover:border-gray-300 hover:shadow-sm"
+		class="group flex flex-col h-full rounded-md border border-gray-200 bg-white p-4 transition-all hover:border-gray-300 hover:shadow-sm"
 	>
 		<!-- Header: Title & Description -->
 		<div class="mb-4">
@@ -44,7 +44,7 @@
 					עריכה
 				</BaseButton>
 			</NuxtLink>
-			<NuxtLink :to="`/submissions/form/${form.id}`" class="flex-1">
+			<NuxtLink :to="`/manage/submissions/form/${form.id}`" class="flex-1">
 				<BaseButton variant="secondary" class="w-full justify-center" size="sm">
 					<Icon name="heroicons:inbox" class="h-4 w-4" />
 					הגשות
@@ -52,9 +52,9 @@
 			</NuxtLink>
 			<UiDropdownMenu>
 				<UiDropdownMenuTrigger as-child>
-					<BaseButton variant="ghost" size="sm">
+					<BaseButton variant="ghost" size="sm" class="whitespace-nowrap">
 						<Icon name="heroicons:ellipsis-vertical" class="h-4 w-4" />
-						פעולות נוספות
+						עוד פעולות
 					</BaseButton>
 				</UiDropdownMenuTrigger>
 				<UiDropdownMenuContent align="end">

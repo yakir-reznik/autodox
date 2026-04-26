@@ -67,8 +67,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 	}
 
 	// Submissions routes: allow authenticated users with specific access rules
-	if (to.path === "/submissions" || to.path.startsWith("/submissions/user/")) {
-		const match = to.path.match(/^\/submissions\/user\/(\d+)$/);
+	if (to.path === "/manage/submissions" || to.path.startsWith("/manage/submissions/user/")) {
+		const match = to.path.match(/^\/manage\/submissions\/user\/(\d+)$/);
 		if (match) {
 			const targetUserId = Number(match[1]);
 			if (user.value?.id !== targetUserId && user.value?.role !== "admin") {

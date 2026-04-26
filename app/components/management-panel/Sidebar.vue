@@ -87,7 +87,7 @@
 			<div
 				class="rounded-lg bg-muted p-3 flex flex-col gap-2 group-data-[collapsible=icon]:hidden"
 			>
-				<NuxtLink to="/user">
+				<NuxtLink to="/manage/user">
 					<div class="flex items-center gap-2">
 						<div
 							class="flex size-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-violet-600 text-white text-sm font-semibold"
@@ -115,7 +115,7 @@
 				</div>
 			</div>
 			<div class="hidden group-data-[collapsible=icon]:flex justify-center pb-2">
-				<NuxtLink to="/user">
+				<NuxtLink to="/manage/user">
 					<div
 						class="flex size-8 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-violet-600 text-white text-sm font-semibold"
 					>
@@ -134,9 +134,9 @@
 	const mainNavItems = [
 		{ label: "ניהול טפסים", to: "/manage/", icon: "heroicons:document-text" },
 		{ label: "טפסים משותפים", to: "/manage/forms/shared", icon: "heroicons:users" },
-		{ label: "הגשות", to: "/manage/submissions/20", icon: "heroicons:inbox-stack" },
+		{ label: "הגשות", to: "/manage/submissions", icon: "heroicons:inbox-stack" },
 		{ label: "דוחות", to: "/manage/reports", icon: "heroicons:chart-bar" },
-		{ label: "ניהול משתמש", to: "/user", icon: "heroicons:user-circle" },
+		{ label: "ניהול משתמש", to: "/manage/user", icon: "heroicons:user-circle" },
 	];
 
 	const actionItems = [

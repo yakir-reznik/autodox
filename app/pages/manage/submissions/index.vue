@@ -2,7 +2,7 @@
 	const { user } = useUserSession();
 
 	if (user.value?.id) {
-		navigateTo(`/submissions/user/${user.value.id}`, { replace: true });
+		navigateTo(`/manage/submissions/user/${user.value.id}`, { replace: true });
 	}
 </script>
 

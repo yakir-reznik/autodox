@@ -59,6 +59,7 @@
 							נוצר ב
 						</th>
 						<th
+							v-if="showSubmittedAtColumn"
 							class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
 						>
 							הוגש ב
@@ -79,13 +80,14 @@
 						<td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
 							{{ submission.id }}
 						</td>
-						<td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-							{{ submission.name ?? "-" }}
+						<td class="px-6 py-4 text-sm text-gray-900 max-w-32">
+							<span class="block truncate" :title="submission.name ?? '-'">{{ submission.name ?? "-" }}</span>
 						</td>
-						<td v-if="showFormColumn" class="px-6 py-4 text-sm whitespace-nowrap">
+						<td v-if="showFormColumn" class="px-6 py-4 text-sm max-w-32">
 							<NuxtLink
-								:to="`/submissions/form/${submission.formId}`"
-								class="text-blue-600 hover:text-blue-800 hover:underline"
+								:to="`/manage/submissions/form/${submission.formId}`"
+								class="block truncate text-blue-600 hover:text-blue-800 hover:underline"
+								:title="submission.formTitle ?? `Form #${submission.formId}`"
 							>
 								{{ submission.formTitle ?? `Form #${submission.formId}` }}
 							</NuxtLink>
@@ -120,12 +122,11 @@
 						<td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
 							{{ formatDate(submission.createdAt) }}
 						</td>
-						<td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
+						<td v-if="showSubmittedAtColumn" class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
 							{{ submission.submittedAt ? formatDate(submission.submittedAt) : "-" }}
 						</td>
 						<td class="px-6 py-4 text-sm whitespace-nowrap">
 							<div class="flex gap-2 items-center">
-								<!-- <NuxtLink :to="`/submission-detail/${submission.token}`"> -->
 								<NuxtLink :to="`/manage/submission-details/${submission.token}`">
 									<UiButton size="sm">
 										<Icon name="heroicons:eye" class="h-4 w-4" />
@@ -386,9 +387,11 @@
 			pending: boolean;
 			error: any;
 			showFormColumn?: boolean;
+			showSubmittedAtColumn?: boolean;
 		}>(),
 		{
 			showFormColumn: false,
+			showSubmittedAtColumn: true,
 		},
 	);
 

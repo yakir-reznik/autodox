@@ -65,7 +65,7 @@
 				<FormListEmptyState v-else-if="!filteredForms || filteredForms.length === 0" />
 
 				<!-- Forms grid -->
-				<div v-else class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+				<div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 					<FormListCard
 						v-for="form in filteredForms"
 						:key="form.id"

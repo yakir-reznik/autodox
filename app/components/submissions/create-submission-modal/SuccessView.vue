@@ -43,7 +43,7 @@
 		</div>
 
 		<NuxtLink
-			:to="`/submissions/form/${formId}`"
+			:to="`/manage/submissions/form/${formId}`"
 			class="flex items-center justify-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
 			@click="emit('close')"
 		>

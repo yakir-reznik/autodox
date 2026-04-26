@@ -68,7 +68,7 @@
 				</UiButton>
 
 				<NuxtLink
-					:to="`/submissions/form/${formId}`"
+					:to="`/manage/submissions/form/${formId}`"
 					title="View submissions for this form"
 				>
 					<UiButton variant="secondary">

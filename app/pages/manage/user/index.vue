@@ -1,140 +1,3 @@
-<script setup lang="ts">
-	const { clear, fetch: fetchSession } = useUserSession();
-	const router = useRouter();
-	const toasts = useToasts();
-
-	const { data: profile, refresh } = await useFetch("/api/user/profile");
-
-	// Name editing
-	const editingName = ref(false);
-	const editName = ref("");
-	const savingName = ref(false);
-
-	// Password modal
-	const showPasswordModal = ref(false);
-	const currentPassword = ref("");
-	const newPassword = ref("");
-	const passwordError = ref("");
-	const savingPassword = ref(false);
-
-	// API key
-	const showApiKey = ref(false);
-	const showRerollModal = ref(false);
-	const rerolling = ref(false);
-
-	// Google disconnect
-	const disconnecting = ref(false);
-
-	const formattedCreatedAt = computed(() => {
-		if (!profile.value?.createdAt) return "";
-		return formatDate(profile.value.createdAt);
-	});
-
-	const formattedLastLogin = computed(() => {
-		if (!profile.value?.lastLoginAt) return "—";
-		return formatDate(profile.value.lastLoginAt);
-	});
-
-	const maskedApiKey = computed(() => {
-		if (!profile.value?.apiKey) return "";
-		if (showApiKey.value) return profile.value.apiKey;
-		return "•".repeat(32);
-	});
-
-	function startEditName() {
-		editName.value = profile.value?.name || "";
-		editingName.value = true;
-	}
-
-	async function saveName() {
-		if (!editName.value.trim()) return;
-		savingName.value = true;
-		try {
-			await $fetch("/api/user/profile", {
-				method: "PATCH",
-				body: { name: editName.value.trim() },
-			});
-			editingName.value = false;
-			await refresh();
-			toasts.add({ title: "השם עודכן בהצלחה", theme: "success" });
-		} catch {
-			toasts.add({ title: "שגיאה בעדכון השם", theme: "error" });
-		} finally {
-			savingName.value = false;
-		}
-	}
-
-	function openPasswordModal() {
-		currentPassword.value = "";
-		newPassword.value = "";
-		passwordError.value = "";
-		showPasswordModal.value = true;
-	}
-
-	async function changePassword() {
-		passwordError.value = "";
-		if (newPassword.value.length < 6) {
-			passwordError.value = "הסיסמה חייבת להכיל לפחות 6 תווים";
-			return;
-		}
-		savingPassword.value = true;
-		try {
-			await $fetch("/api/user/change-password", {
-				method: "POST",
-				body: {
-					currentPassword: profile.value?.hasPassword ? currentPassword.value : undefined,
-					newPassword: newPassword.value,
-				},
-			});
-			showPasswordModal.value = false;
-			await refresh();
-			toasts.add({ title: "הסיסמה שונתה בהצלחה", theme: "success" });
-		} catch (error: any) {
-			passwordError.value = error?.data?.message || "שגיאה בשינוי הסיסמה";
-		} finally {
-			savingPassword.value = false;
-		}
-	}
-
-	async function rerollApiKey() {
-		rerolling.value = true;
-		try {
-			await $fetch("/api/user/reroll-api-key", { method: "POST" });
-			showRerollModal.value = false;
-			await Promise.all([refresh(), fetchSession()]);
-			toasts.add({ title: "מפתח API חודש בהצלחה", theme: "success" });
-		} catch {
-			toasts.add({ title: "שגיאה בחידוש מפתח API", theme: "error" });
-		} finally {
-			rerolling.value = false;
-		}
-	}
-
-	async function disconnectGoogle() {
-		disconnecting.value = true;
-		try {
-			await $fetch("/api/user/disconnect-google", { method: "POST" });
-			await refresh();
-			toasts.add({ title: "חשבון Google נותק בהצלחה", theme: "success" });
-		} catch (error: any) {
-			toasts.add({
-				title: error?.data?.message || "שגיאה בניתוק חשבון Google",
-				theme: "error",
-			});
-		} finally {
-			disconnecting.value = false;
-		}
-	}
-
-	async function handleLogout() {
-		await $fetch("/api/auth/logout", { method: "POST" });
-		await clear();
-		router.push("/login");
-	}
-
-	useHead({ title: "פרופיל משתמש - Autodox" });
-</script>
-
 <template>
 	<div class="min-h-screen bg-gray-50">
 		<!-- Header -->
@@ -245,7 +108,7 @@
 								<div class="mt-1 text-sm text-muted-foreground">טפסים</div>
 							</NuxtLink>
 							<NuxtLink
-								:to="`/submissions/user/${profile.id}`"
+								:to="`/manage/submissions/user/${profile.id}`"
 								class="rounded-md border p-4 text-center transition-colors hover:bg-muted"
 							>
 								<div class="text-3xl font-bold">
@@ -437,3 +300,140 @@
 		</UiDialog>
 	</div>
 </template>
+
+<script setup lang="ts">
+	const { clear, fetch: fetchSession } = useUserSession();
+	const router = useRouter();
+	const toasts = useToasts();
+
+	const { data: profile, refresh } = await useFetch("/api/user/profile");
+
+	// Name editing
+	const editingName = ref(false);
+	const editName = ref("");
+	const savingName = ref(false);
+
+	// Password modal
+	const showPasswordModal = ref(false);
+	const currentPassword = ref("");
+	const newPassword = ref("");
+	const passwordError = ref("");
+	const savingPassword = ref(false);
+
+	// API key
+	const showApiKey = ref(false);
+	const showRerollModal = ref(false);
+	const rerolling = ref(false);
+
+	// Google disconnect
+	const disconnecting = ref(false);
+
+	const formattedCreatedAt = computed(() => {
+		if (!profile.value?.createdAt) return "";
+		return formatDate(profile.value.createdAt);
+	});
+
+	const formattedLastLogin = computed(() => {
+		if (!profile.value?.lastLoginAt) return "—";
+		return formatDate(profile.value.lastLoginAt);
+	});
+
+	const maskedApiKey = computed(() => {
+		if (!profile.value?.apiKey) return "";
+		if (showApiKey.value) return profile.value.apiKey;
+		return "•".repeat(32);
+	});
+
+	function startEditName() {
+		editName.value = profile.value?.name || "";
+		editingName.value = true;
+	}
+
+	async function saveName() {
+		if (!editName.value.trim()) return;
+		savingName.value = true;
+		try {
+			await $fetch("/api/user/profile", {
+				method: "PATCH",
+				body: { name: editName.value.trim() },
+			});
+			editingName.value = false;
+			await refresh();
+			toasts.add({ title: "השם עודכן בהצלחה", theme: "success" });
+		} catch {
+			toasts.add({ title: "שגיאה בעדכון השם", theme: "error" });
+		} finally {
+			savingName.value = false;
+		}
+	}
+
+	function openPasswordModal() {
+		currentPassword.value = "";
+		newPassword.value = "";
+		passwordError.value = "";
+		showPasswordModal.value = true;
+	}
+
+	async function changePassword() {
+		passwordError.value = "";
+		if (newPassword.value.length < 6) {
+			passwordError.value = "הסיסמה חייבת להכיל לפחות 6 תווים";
+			return;
+		}
+		savingPassword.value = true;
+		try {
+			await $fetch("/api/user/change-password", {
+				method: "POST",
+				body: {
+					currentPassword: profile.value?.hasPassword ? currentPassword.value : undefined,
+					newPassword: newPassword.value,
+				},
+			});
+			showPasswordModal.value = false;
+			await refresh();
+			toasts.add({ title: "הסיסמה שונתה בהצלחה", theme: "success" });
+		} catch (error: any) {
+			passwordError.value = error?.data?.message || "שגיאה בשינוי הסיסמה";
+		} finally {
+			savingPassword.value = false;
+		}
+	}
+
+	async function rerollApiKey() {
+		rerolling.value = true;
+		try {
+			await $fetch("/api/user/reroll-api-key", { method: "POST" });
+			showRerollModal.value = false;
+			await Promise.all([refresh(), fetchSession()]);
+			toasts.add({ title: "מפתח API חודש בהצלחה", theme: "success" });
+		} catch {
+			toasts.add({ title: "שגיאה בחידוש מפתח API", theme: "error" });
+		} finally {
+			rerolling.value = false;
+		}
+	}
+
+	async function disconnectGoogle() {
+		disconnecting.value = true;
+		try {
+			await $fetch("/api/user/disconnect-google", { method: "POST" });
+			await refresh();
+			toasts.add({ title: "חשבון Google נותק בהצלחה", theme: "success" });
+		} catch (error: any) {
+			toasts.add({
+				title: error?.data?.message || "שגיאה בניתוק חשבון Google",
+				theme: "error",
+			});
+		} finally {
+			disconnecting.value = false;
+		}
+	}
+
+	async function handleLogout() {
+		await $fetch("/api/auth/logout", { method: "POST" });
+		await clear();
+		router.push("/login");
+	}
+
+	useHead({ title: "פרופיל משתמש - Autodox" });
+</script>
