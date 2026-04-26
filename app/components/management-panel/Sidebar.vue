@@ -33,9 +33,9 @@
 							>
 								<NuxtLink :to="item.to">
 									<Icon :name="item.icon" class="text-lg shrink-0" />
-									<span class="text-base group-data-[collapsible=icon]:hidden">{{
-										item.label
-									}}</span>
+									<span class="text-base group-data-[collapsible=icon]:hidden">
+										{{ item.label }}
+									</span>
 								</NuxtLink>
 							</UiSidebarMenuButton>
 						</UiSidebarMenuItem>
@@ -57,9 +57,9 @@
 							>
 								<NuxtLink :to="item.to!">
 									<Icon :name="item.icon" class="text-lg shrink-0" />
-									<span class="text-base group-data-[collapsible=icon]:hidden">{{
-										item.label
-									}}</span>
+									<span class="text-base group-data-[collapsible=icon]:hidden">
+										{{ item.label }}
+									</span>
 								</NuxtLink>
 							</UiSidebarMenuButton>
 							<UiSidebarMenuButton
@@ -70,9 +70,9 @@
 								class="opacity-50 cursor-not-allowed"
 							>
 								<Icon :name="item.icon" class="text-lg shrink-0" />
-								<span class="text-base group-data-[collapsible=icon]:hidden">{{
-									item.label
-								}}</span>
+								<span class="text-base group-data-[collapsible=icon]:hidden">
+									{{ item.label }}
+								</span>
 							</UiSidebarMenuButton>
 						</UiSidebarMenuItem>
 					</UiSidebarMenu>
@@ -101,11 +101,13 @@
 				</NuxtLink>
 				<div class="flex items-center justify-start">
 					<UiButton
-						variant="ghost"
-						class="text-sm text-destructive/50 hover:text-destructive/80 transition-colors mr-6"
+						variant="default"
+						size="sm"
 						@click="handleLogout"
+						class="mr-10 bg-foreground"
 					>
-						התנתקות מהמערכת
+						<span>התנתקות מהמערכת</span>
+						<Icon name="heroicons:arrow-left-start-on-rectangle" class="text-lg" />
 					</UiButton>
 				</div>
 			</div>
@@ -129,7 +131,7 @@
 	const mainNavItems = [
 		{ label: "ניהול טפסים", to: "/forms", icon: "heroicons:document-text" },
 		{ label: "טפסים משותפים", to: "/forms/shared", icon: "heroicons:users" },
-		{ label: "הגשות", to: "/submissions", icon: "heroicons:inbox-stack" },
+		{ label: "הגשות", to: "/manage/submissions/20", icon: "heroicons:inbox-stack" },
 		{ label: "דוחות", to: "/admin/reports", icon: "heroicons:chart-bar" },
 		{ label: "ניהול משתמש", to: "/user", icon: "heroicons:user-circle" },
 	];
