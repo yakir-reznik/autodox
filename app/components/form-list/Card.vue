@@ -38,7 +38,7 @@
 
 		<!-- Actions -->
 		<div class="flex items-center gap-2 mt-auto">
-			<NuxtLink :to="`/edit/${form.id}`" class="flex-1">
+			<NuxtLink :to="`/manage/form/${form.id}/edit`" class="flex-1">
 				<BaseButton variant="primary" class="w-full justify-center" size="sm">
 					<Icon name="heroicons:pencil-square" class="h-4 w-4" />
 					עריכה

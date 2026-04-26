@@ -30,7 +30,7 @@
 					<Icon v-else name="heroicons:arrow-path" class="h-4 w-4" />
 					{{ pending ? "טוען..." : "רענן" }}
 				</UiButton>
-				<NuxtLink :to="`/edit/${formId}`">
+				<NuxtLink :to="`/manage/form/${formId}/edit`">
 					<UiButton variant="secondary">
 						<Icon name="heroicons:pencil" class="h-4 w-4" />
 						עריכת טופס

@@ -259,7 +259,7 @@ Rules for conditional logic:
 					},
 				);
 				// Redirect back to form editor
-				await router.push(`/edit/${response.formId}`);
+				await router.push(`/manage/form/${response.formId}/edit`);
 			} else {
 				// Create new form
 				const response = await $fetch<{ formId: number; success: boolean }>(
@@ -270,7 +270,7 @@ Rules for conditional logic:
 					},
 				);
 				// Redirect to form editor
-				await router.push(`/edit/${response.formId}`);
+				await router.push(`/manage/form/${response.formId}/edit`);
 			}
 		} catch (e: any) {
 			error.value =
@@ -289,7 +289,7 @@ Rules for conditional logic:
 		<header class="bg-white shadow">
 			<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 				<div class="flex items-center gap-4">
-					<NuxtLink :to="isUpdatingMode ? `/edit/${formId}` : '/forms'">
+					<NuxtLink :to="isUpdatingMode ? `/manage/form/${formId}/edit` : '/forms'">
 						<BaseButton variant="secondary" size="sm">
 							<Icon name="heroicons:arrow-left" class="h-5 w-5" />
 						</BaseButton>

@@ -1,3 +1,102 @@
+<template>
+	<!-- Loading state -->
+	<div v-if="isLoading" class="flex min-h-screen items-center justify-center bg-gray-100">
+		<div class="text-center">
+			<Icon name="svg-spinners:ring-resize" class="mx-auto h-8 w-8 text-blue-500" />
+			<p class="mt-4 text-gray-600">טוען טופס...</p>
+		</div>
+	</div>
+
+	<!-- Error state -->
+	<div v-else-if="loadError" class="flex min-h-screen items-center justify-center bg-gray-100">
+		<div class="max-w-md rounded-lg bg-white p-6 text-center shadow-lg">
+			<Icon name="heroicons:exclamation-circle" class="mx-auto h-12 w-12 text-red-500" />
+			<h2 class="mt-4 text-lg font-semibold text-gray-900">Failed to load form</h2>
+			<p class="mt-2 text-sm text-gray-600">{{ loadError }}</p>
+			<BaseButton class="mt-4" @click="$router.push('/forms')"> Back to forms </BaseButton>
+		</div>
+	</div>
+
+	<!-- Main builder -->
+	<div v-else class="flex min-h-screen flex-col bg-gray-100">
+		<!-- Header -->
+		<FormBuilderFormHeader
+			v-model:title="state.title"
+			v-model:description="state.description"
+			:save-status="status"
+			:last-saved-at="state.lastSavedAt"
+			:is-dirty="state.isDirty"
+			:form-id="state.formId ?? undefined"
+			:can-undo="canUndo"
+			:can-redo="canRedo"
+			@save="forceSave"
+			@undo="undo"
+			@redo="redo"
+			@update:status="state.status = $event"
+			@update:theme="state.theme = $event"
+		/>
+
+		<!-- Main content -->
+		<div class="flex flex-1 overflow-hidden max-h-[calc(100vh-90px)]">
+			<!-- Property Panel (Left in RTL) -->
+			<aside class="w-80 shrink-0 overflow-y-auto border-e border-gray-200 bg-white">
+				<FormBuilderPropertyPanel
+					v-if="selectedElement"
+					:element="selectedElement"
+					:all-elements="state.elements"
+					@update="handlePropertyUpdate"
+					@close="selectElement(null)"
+					@edit-conditions="handleEditConditionsFromPanel"
+				/>
+				<div v-else class="flex h-full items-center justify-center p-6 text-center">
+					<div class="text-gray-400">
+						<Icon name="heroicons:cursor-arrow-rays" class="mx-auto h-12 w-12 mb-3" />
+						<p class="text-sm font-medium">לא נבחר אלמנט</p>
+						<p class="text-xs mt-2">
+							לחץ על אלמנט בטופס<br />כדי לערוך את המאפיינים שלו
+						</p>
+					</div>
+				</div>
+			</aside>
+
+			<!-- Canvas (Center) -->
+			<main
+				ref="canvasRef"
+				class="flex-1 overflow-y-auto p-6"
+				@click.self="handleCanvasClick"
+			>
+				<FormBuilderFormCanvas
+					:elements="rootElements"
+					:selected-id="state.selectedElementId"
+					:get-children="getChildElements"
+					@select="selectElement"
+					@delete="removeElement"
+					@duplicate="duplicateElement"
+					@reorder="handleReorder"
+					@drop="handleElementDrop"
+					@update="handleElementUpdate"
+					@edit-conditions="handleEditConditions"
+				/>
+			</main>
+
+			<!-- Element Palette (Right in RTL) -->
+			<aside class="w-64 shrink-0 overflow-y-auto border-s border-gray-200 bg-white">
+				<FormBuilderElementPalette @add="handleAddElement" />
+			</aside>
+		</div>
+
+		<!-- Condition logic modal -->
+		<FormBuilderConditionModal
+			v-if="conditionModalElement"
+			:model-value="!!conditionModalElement"
+			:element="conditionModalElement"
+			:all-elements="state.elements"
+			@update:model-value="conditionModalElementId = $event ? conditionModalElementId : null"
+			@update:conditions="handleConditionUpdate"
+		/>
+	</div>
+</template>
+
 <script setup lang="ts">
 	import type { BuilderElement, ElementType, ElementConfig } from "~/types/form-builder";
 	import { getDefaultConfig } from "~/composables/useElementDefaults";
@@ -205,102 +304,3 @@
 	const canvasRef = ref<HTMLElement | null>(null);
 	useEdgeScroll(canvasRef);
 </script>
-
-<template>
-	<!-- Loading state -->
-	<div v-if="isLoading" class="flex min-h-screen items-center justify-center bg-gray-100">
-		<div class="text-center">
-			<Icon name="svg-spinners:ring-resize" class="mx-auto h-8 w-8 text-blue-500" />
-			<p class="mt-4 text-gray-600">טוען טופס...</p>
-		</div>
-	</div>
-
-	<!-- Error state -->
-	<div v-else-if="loadError" class="flex min-h-screen items-center justify-center bg-gray-100">
-		<div class="max-w-md rounded-lg bg-white p-6 text-center shadow-lg">
-			<Icon name="heroicons:exclamation-circle" class="mx-auto h-12 w-12 text-red-500" />
-			<h2 class="mt-4 text-lg font-semibold text-gray-900">Failed to load form</h2>
-			<p class="mt-2 text-sm text-gray-600">{{ loadError }}</p>
-			<BaseButton class="mt-4" @click="$router.push('/forms')"> Back to forms </BaseButton>
-		</div>
-	</div>
-
-	<!-- Main builder -->
-	<div v-else class="flex min-h-screen flex-col bg-gray-100">
-		<!-- Header -->
-		<FormBuilderFormHeader
-			v-model:title="state.title"
-			v-model:description="state.description"
-			:save-status="status"
-			:last-saved-at="state.lastSavedAt"
-			:is-dirty="state.isDirty"
-			:form-id="state.formId ?? undefined"
-			:can-undo="canUndo"
-			:can-redo="canRedo"
-			@save="forceSave"
-			@undo="undo"
-			@redo="redo"
-			@update:status="state.status = $event"
-			@update:theme="state.theme = $event"
-		/>
-
-		<!-- Main content -->
-		<div class="flex flex-1 overflow-hidden max-h-[calc(100vh-90px)]">
-			<!-- Property Panel (Left in RTL) -->
-			<aside class="w-80 shrink-0 overflow-y-auto border-e border-gray-200 bg-white">
-				<FormBuilderPropertyPanel
-					v-if="selectedElement"
-					:element="selectedElement"
-					:all-elements="state.elements"
-					@update="handlePropertyUpdate"
-					@close="selectElement(null)"
-					@edit-conditions="handleEditConditionsFromPanel"
-				/>
-				<div v-else class="flex h-full items-center justify-center p-6 text-center">
-					<div class="text-gray-400">
-						<Icon name="heroicons:cursor-arrow-rays" class="mx-auto h-12 w-12 mb-3" />
-						<p class="text-sm font-medium">לא נבחר אלמנט</p>
-						<p class="text-xs mt-2">
-							לחץ על אלמנט בטופס<br />כדי לערוך את המאפיינים שלו
-						</p>
-					</div>
-				</div>
-			</aside>
-
-			<!-- Canvas (Center) -->
-			<main
-				ref="canvasRef"
-				class="flex-1 overflow-y-auto p-6"
-				@click.self="handleCanvasClick"
-			>
-				<FormBuilderFormCanvas
-					:elements="rootElements"
-					:selected-id="state.selectedElementId"
-					:get-children="getChildElements"
-					@select="selectElement"
-					@delete="removeElement"
-					@duplicate="duplicateElement"
-					@reorder="handleReorder"
-					@drop="handleElementDrop"
-					@update="handleElementUpdate"
-					@edit-conditions="handleEditConditions"
-				/>
-			</main>
-
-			<!-- Element Palette (Right in RTL) -->
-			<aside class="w-64 shrink-0 overflow-y-auto border-s border-gray-200 bg-white">
-				<FormBuilderElementPalette @add="handleAddElement" />
-			</aside>
-		</div>
-
-		<!-- Condition logic modal -->
-		<FormBuilderConditionModal
-			v-if="conditionModalElement"
-			:model-value="!!conditionModalElement"
-			:element="conditionModalElement"
-			:all-elements="state.elements"
-			@update:model-value="conditionModalElementId = $event ? conditionModalElementId : null"
-			@update:conditions="handleConditionUpdate"
-		/>
-	</div>
-</template>

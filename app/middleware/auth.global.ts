@@ -56,7 +56,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 	if (publicRoutes.includes(to.path)) {
 		// If logged in and trying to access login or signup page, redirect to forms
 		if (loggedIn.value && (to.path === "/login" || to.path === "/signup")) {
-			return navigateTo("/forms");
+			return navigateTo("/manage");
 		}
 		return;
 	}

@@ -1,8 +1,9 @@
-declare module 'vue-router' {
+declare module "vue-router" {
 	interface RouteMeta {
-		breadcrumbs?: { label: string; to?: string }[]
-		heading?: string
+		removePadding?: boolean;
+		breadcrumbs?: { label: string; to?: string }[];
+		heading?: string;
 	}
 }
 
-export {}
+export {};

@@ -16,7 +16,7 @@
 					<Icon v-else name="heroicons:arrow-path" class="h-4 w-4" />
 					{{ pending ? "טוען..." : "רענן" }}
 				</UiButton>
-				<NuxtLink :to="`/edit/${formId}`">
+				<NuxtLink :to="`/manage/form/${formId}/edit`">
 					<UiButton variant="outline" size="sm">
 						<Icon name="heroicons:pencil" class="h-4 w-4" />
 						עריכת טופס
@@ -42,6 +42,38 @@
 			</div>
 		</div>
 
+		<SubmissionsTable
+			v-model:page="currentPage"
+			:submissions="submissions"
+			:pagination="pagination"
+			:pending="pending"
+			:error="error"
+			@refresh="refresh"
+		/>
+		<SubmissionsTable
+			v-model:page="currentPage"
+			:submissions="submissions"
+			:pagination="pagination"
+			:pending="pending"
+			:error="error"
+			@refresh="refresh"
+		/>
+		<SubmissionsTable
+			v-model:page="currentPage"
+			:submissions="submissions"
+			:pagination="pagination"
+			:pending="pending"
+			:error="error"
+			@refresh="refresh"
+		/>
+		<SubmissionsTable
+			v-model:page="currentPage"
+			:submissions="submissions"
+			:pagination="pagination"
+			:pending="pending"
+			:error="error"
+			@refresh="refresh"
+		/>
 		<SubmissionsTable
 			v-model:page="currentPage"
 			:submissions="submissions"

@@ -16,7 +16,7 @@ if (error.value) {
 }
 
 // Redirect to the form editor
-await navigateTo(`/edit/${data.value?.id}`, { replace: true });
+await navigateTo(`/manage/form/${data.value?.id}/edit`, { replace: true });
 </script>
 
 <template>
