@@ -1,6 +1,6 @@
 <template>
 	<div
-		class="w-72 flex flex-col border rounded-sm border-gray-200 bg-gray-50 h-[calc(100svh-12rem)] mt-4"
+		class="w-60 flex flex-col border rounded-sm border-gray-200 bg-gray-50 h-[calc(100svh-12rem)] mt-4"
 	>
 		<!-- Header -->
 		<div class="border-b border-gray-200 px-4 py-4">

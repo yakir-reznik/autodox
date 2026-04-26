@@ -71,7 +71,9 @@
 	const selectedFormId = ref<number | null>(null);
 
 	watch(currentPage, (newPage) => {
-		router.replace({ query: { ...route.query, page: newPage > 1 ? String(newPage) : undefined } });
+		router.replace({
+			query: { ...route.query, page: newPage > 1 ? String(newPage) : undefined },
+		});
 	});
 
 	const { data: formsData } = await useFetch<FormOption[]>("/api/forms");
@@ -81,13 +83,11 @@
 		pending,
 		error,
 		refresh,
-	} = await useFetch<PaginatedResponse>(
-		() => {
-			let url = `/api/submissions?userId=${userId}&page=${currentPage.value}`;
-			if (selectedFormId.value) url += `&formId=${selectedFormId.value}`;
-			return url;
-		},
-	);
+	} = await useFetch<PaginatedResponse>(() => {
+		let url = `/api/submissions?userId=${userId}&page=${currentPage.value}`;
+		if (selectedFormId.value) url += `&formId=${selectedFormId.value}`;
+		return url;
+	});
 
 	const submissions = computed(() => response.value?.data ?? []);
 	const pagination = computed(() => response.value?.pagination);

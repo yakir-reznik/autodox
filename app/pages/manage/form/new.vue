@@ -1,22 +1,22 @@
 <script setup lang="ts">
-// Create a new form and redirect to the editor
-const { data, error } = await useFetch("/api/forms", {
-	method: "POST",
-	body: {
-		title: "Untitled Form",
-		createdBy: 1, // TODO: Get from auth
-	},
-});
-
-if (error.value) {
-	throw createError({
-		statusCode: 500,
-		message: "Failed to create form",
+	// Create a new form and redirect to the editor
+	const { data, error } = await useFetch("/api/forms", {
+		method: "POST",
+		body: {
+			title: "Untitled Form",
+			createdBy: 1, // TODO: Get from auth
+		},
 	});
-}
 
-// Redirect to the form editor
-await navigateTo(`/manage/form/${data.value?.id}/edit`, { replace: true });
+	if (error.value) {
+		throw createError({
+			statusCode: 500,
+			message: "Failed to create form",
+		});
+	}
+
+	// Redirect to the form editor
+	await navigateTo(`/manage/form/${data.value?.id}/edit`, { replace: true });
 </script>
 
 <template>

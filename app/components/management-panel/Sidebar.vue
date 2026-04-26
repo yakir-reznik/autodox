@@ -146,6 +146,12 @@
 			icon: "heroicons:document-plus",
 			disabled: false,
 		},
+		{
+			label: "טופס חדש מ-JSON",
+			to: "/manage/form/upload",
+			icon: "heroicons:code-bracket",
+			disabled: false,
+		},
 		{ label: "יצירת הגשה חדשה", to: null, icon: "heroicons:plus-circle", disabled: true },
 	];
 
