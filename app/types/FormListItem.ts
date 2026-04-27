@@ -1,3 +1,5 @@
+import type { FormSharePermissions } from "~/types/form-builder";
+
 export interface FormListItem {
 	id: number;
 	title: string;
@@ -11,6 +13,8 @@ export interface FormListItem {
 	updatedBy: number | null;
 	createdAt: string;
 	updatedAt: string;
+	isOwner: boolean;
+	permissions: FormSharePermissions;
 }
 
 export const formStatusLabels = {

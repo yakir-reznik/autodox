@@ -1,20 +1,18 @@
 import { db } from "~~/server/db";
-import { formsTable, formElementsTable } from "~~/server/db/schema";
+import { formElementsTable } from "~~/server/db/schema";
 import { eq, asc } from "drizzle-orm";
+import { requireFormPermission } from "~~/server/utils/authorization";
 
 export default defineEventHandler(async (event) => {
-	const session = await getUserSession(event);
-	if (!session.user) {
-		throw createError({ statusCode: 401, message: "Authentication required" });
-	}
-
 	const id = Number(getRouterParam(event, "id"));
 	if (isNaN(id)) {
 		throw createError({ statusCode: 400, message: "Invalid form ID" });
 	}
 
+	await requireFormPermission(event, id, "view");
+
 	const form = await db.query.formsTable.findFirst({
-		where: eq(formsTable.id, id),
+		where: (t, { eq }) => eq(t.id, id),
 		with: {
 			elements: {
 				where: eq(formElementsTable.isDeleted, false),
@@ -25,10 +23,6 @@ export default defineEventHandler(async (event) => {
 
 	if (!form) {
 		throw createError({ statusCode: 404, message: "Form not found" });
-	}
-
-	if (form.createdBy !== session.user.id && session.user.role !== "admin") {
-		throw createError({ statusCode: 403, message: "Not authorized" });
 	}
 
 	type DbElement = (typeof form.elements)[number];

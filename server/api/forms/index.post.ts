@@ -1,8 +1,9 @@
 import { db } from "~~/server/db";
 import { formsTable } from "~~/server/db/schema";
+import { requireRoles } from "~~/server/utils/authorization";
 
 export default defineEventHandler(async (event) => {
-	const session = await requireUserSession(event);
+	const session = await requireRoles(event, ["user"]);
 	const body = await readBody(event);
 
 	if (!body.title) {

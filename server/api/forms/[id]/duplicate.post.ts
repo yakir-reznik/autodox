@@ -1,17 +1,16 @@
 import { db } from "~~/server/db";
 import { formsTable, formElementsTable } from "~~/server/db/schema";
 import { eq, asc } from "drizzle-orm";
+import { requireFormPermission } from "~~/server/utils/authorization";
 
 export default defineEventHandler(async (event) => {
-	const session = await requireUserSession(event);
 	const id = Number(getRouterParam(event, "id"));
 
 	if (isNaN(id)) {
-		throw createError({
-			statusCode: 400,
-			message: "Invalid form ID",
-		});
+		throw createError({ statusCode: 400, message: "Invalid form ID" });
 	}
+
+	const { session } = await requireFormPermission(event, id, "view");
 
 	const sourceForm = await db.query.formsTable.findFirst({
 		where: eq(formsTable.id, id),
@@ -24,10 +23,7 @@ export default defineEventHandler(async (event) => {
 	});
 
 	if (!sourceForm) {
-		throw createError({
-			statusCode: 404,
-			message: "Form not found",
-		});
+		throw createError({ statusCode: 404, message: "Form not found" });
 	}
 
 	// Create the duplicated form

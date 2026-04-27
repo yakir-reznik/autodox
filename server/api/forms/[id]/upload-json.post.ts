@@ -1,5 +1,6 @@
 import { db } from "~~/server/db";
 import { eq } from "drizzle-orm";
+import { requireFormPermission } from "~~/server/utils/authorization";
 import {
 	formsTable,
 	formElementsTable,
@@ -102,43 +103,13 @@ function buildConditionGroup(conditions: UploadCondition[], action: ConditionAct
 }
 
 export default defineEventHandler(async (event) => {
-	// Get user from session
-	const session = await getUserSession(event);
-	if (!session.user) {
-		throw createError({
-			statusCode: 401,
-			message: "Authentication required",
-		});
-	}
-
 	const formId = Number(event.context.params?.id);
 
 	if (isNaN(formId)) {
-		throw createError({
-			statusCode: 400,
-			message: "Invalid form ID",
-		});
+		throw createError({ statusCode: 400, message: "Invalid form ID" });
 	}
 
-	// Verify the form exists and user can edit it
-	const form = await db.query.formsTable.findFirst({
-		where: eq(formsTable.id, formId),
-	});
-
-	if (!form) {
-		throw createError({
-			statusCode: 404,
-			message: "Form not found",
-		});
-	}
-
-	// Check if user is authorized to edit this form
-	if (form.createdBy !== session.user.id) {
-		throw createError({
-			statusCode: 403,
-			message: "Not authorized to edit this form",
-		});
-	}
+	await requireFormPermission(event, formId, "edit_form");
 
 	const body = await readBody<UploadFormBody>(event);
 

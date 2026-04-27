@@ -1,28 +1,16 @@
 import { db } from "~~/server/db";
-import { formsTable, formElementsTable } from "~~/server/db/schema";
+import { formElementsTable } from "~~/server/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
+import { requireFormPermission } from "~~/server/utils/authorization";
 
 export default defineEventHandler(async (event) => {
 	const formId = Number(getRouterParam(event, "id"));
 
 	if (isNaN(formId)) {
-		throw createError({
-			statusCode: 400,
-			message: "Invalid form ID",
-		});
+		throw createError({ statusCode: 400, message: "Invalid form ID" });
 	}
 
-	// Check if form exists
-	const form = await db.query.formsTable.findFirst({
-		where: eq(formsTable.id, formId),
-	});
-
-	if (!form) {
-		throw createError({
-			statusCode: 404,
-			message: "Form not found",
-		});
-	}
+	await requireFormPermission(event, formId, "edit_form");
 
 	const body = await readBody(event);
 	const { elements } = body;

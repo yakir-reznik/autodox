@@ -1,5 +1,6 @@
 import { db } from "~~/server/db";
 import { eq } from "drizzle-orm";
+import { requireRoles } from "~~/server/utils/authorization";
 import {
 	formsTable,
 	formElementsTable,
@@ -102,14 +103,7 @@ function buildConditionGroup(conditions: UploadCondition[], action: ConditionAct
 }
 
 export default defineEventHandler(async (event) => {
-	// Get user from session
-	const session = await getUserSession(event);
-	if (!session.user) {
-		throw createError({
-			statusCode: 401,
-			message: "Authentication required",
-		});
-	}
+	const session = await requireRoles(event, ["user"]);
 
 	const body = await readBody<UploadFormBody>(event);
 

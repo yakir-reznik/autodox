@@ -133,7 +133,11 @@
 
 	const mainNavItems = [
 		{ label: "ניהול טפסים", to: "/manage/", icon: "heroicons:document-text" },
-		{ label: "טפסים משותפים", to: "/manage/forms/shared", icon: "heroicons:users" },
+		{
+			label: "טפסים משותפים (להשלים)",
+			to: "/manage/forms/shared",
+			icon: "heroicons:users",
+		},
 		{ label: "הגשות", to: "/manage/submissions", icon: "heroicons:inbox-stack" },
 		{ label: "דוחות", to: "/manage/reports", icon: "heroicons:chart-bar" },
 		{ label: "ניהול משתמש", to: "/manage/user", icon: "heroicons:user-circle" },

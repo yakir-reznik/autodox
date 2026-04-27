@@ -64,16 +64,16 @@ Form endpoints resolve through `form_shares` in addition to ownership/admin.
 
 | Endpoint                                       | Status | Required                                                                                                   |
 | ---------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------- |
-| `GET /api/forms`                               | ⬜     | `requireRoles(event, ["user"])`. Returns owned ∪ shared. Each row carries `isOwner` + `permissions`.       |
-| `POST /api/forms`                              | ⬜     | `requireRoles(event, ["user"])`. Creator becomes owner.                                                    |
+| `GET /api/forms`                               | ✅     | `requireRoles(event, ["user"])`. Returns owned ∪ shared. Each row carries `isOwner` + `permissions`.       |
+| `POST /api/forms`                              | ✅     | `requireRoles(event, ["user"])`. Creator becomes owner.                                                    |
 | `GET /api/forms/[id]` (authenticated UI fetch) | ✅     | `getFormPermissions` + `view` check. Public token/password path unchanged. Returns `permissions` object.   |
 | `PATCH /api/forms/[id]`                        | ✅     | `requireFormPermission(event, id, "edit_form")`                                                            |
-| `DELETE /api/forms/[id]`                       | ⬜     | Owner or admin only — `requireFormPermission(event, id, "delete")`                                         |
-| `PUT /api/forms/[id]/elements`                 | ⬜     | `requireFormPermission(event, id, "edit_form")`                                                            |
-| `POST /api/forms/[id]/duplicate`               | ⬜     | `requireFormPermission(event, id, "view")`. New copy's `createdBy = session.user.id`.                      |
-| `GET /api/forms/[id]/export-json`              | ⬜     | Replace inline check with `requireFormPermission(event, id, "view")`                                       |
-| `POST /api/forms/[id]/upload-json`             | ⬜     | `requireFormPermission(event, id, "edit_form")`                                                            |
-| `POST /api/forms/upload-json`                  | ⬜     | `requireRoles(event, ["user"])`                                                                            |
+| `DELETE /api/forms/[id]`                       | ✅     | Owner or admin only — `requireFormPermission(event, id, "delete")`                                         |
+| `PUT /api/forms/[id]/elements`                 | ✅     | `requireFormPermission(event, id, "edit_form")`                                                            |
+| `POST /api/forms/[id]/duplicate`               | ✅     | `requireFormPermission(event, id, "view")`. New copy's `createdBy = session.user.id`.                      |
+| `GET /api/forms/[id]/export-json`              | ✅     | Replace inline check with `requireFormPermission(event, id, "view")`                                       |
+| `POST /api/forms/[id]/upload-json`             | ✅     | `requireFormPermission(event, id, "edit_form")`                                                            |
+| `POST /api/forms/upload-json`                  | ✅     | `requireRoles(event, ["user"])`                                                                            |
 
 ### User+ folder endpoints
 
