@@ -1,30 +1,29 @@
 import { db } from "~~/server/db";
 import { foldersTable } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
+import { requireRoles } from "~~/server/utils/authorization";
 
 export default defineEventHandler(async (event) => {
+	const session = await requireRoles(event, ["user"]);
 	const id = parseInt(getRouterParam(event, "id") || "0");
 
 	if (!id) {
-		throw createError({
-			statusCode: 400,
-			message: "Invalid folder ID",
-		});
+		throw createError({ statusCode: 400, message: "Invalid folder ID" });
 	}
 
-	// Check if folder exists
 	const folder = await db.query.foldersTable.findFirst({
-		where: (folders, { eq }) => eq(folders.id, id),
+		where: (t, { eq }) => eq(t.id, id),
 	});
 
 	if (!folder) {
-		throw createError({
-			statusCode: 404,
-			message: "Folder not found",
-		});
+		throw createError({ statusCode: 404, message: "Folder not found" });
 	}
 
-	// Delete the folder (cascade will delete all forms in the folder)
+	const isAdmin = session.user.roles.includes("admin");
+	if (!isAdmin && folder.createdBy !== session.user.id) {
+		throw createError({ statusCode: 403, message: "Forbidden" });
+	}
+
 	await db.delete(foldersTable).where(eq(foldersTable.id, id));
 
 	return { success: true };

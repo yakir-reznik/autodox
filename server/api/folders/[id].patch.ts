@@ -1,45 +1,36 @@
 import { db } from "~~/server/db";
 import { foldersTable } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
+import { requireRoles } from "~~/server/utils/authorization";
 
 export default defineEventHandler(async (event) => {
+	const session = await requireRoles(event, ["user"]);
 	const id = parseInt(getRouterParam(event, "id") || "0");
 
 	if (!id) {
-		throw createError({
-			statusCode: 400,
-			message: "Invalid folder ID",
-		});
+		throw createError({ statusCode: 400, message: "Invalid folder ID" });
 	}
 
 	const body = await readBody(event);
 
 	if (!body.name) {
-		throw createError({
-			statusCode: 400,
-			message: "Name is required",
-		});
+		throw createError({ statusCode: 400, message: "Name is required" });
 	}
 
-	// Update the folder
-	await db
-		.update(foldersTable)
-		.set({
-			name: body.name,
-		})
-		.where(eq(foldersTable.id, id));
-
-	// Fetch the updated folder
 	const folder = await db.query.foldersTable.findFirst({
-		where: (folders, { eq }) => eq(folders.id, id),
+		where: (t, { eq }) => eq(t.id, id),
 	});
 
 	if (!folder) {
-		throw createError({
-			statusCode: 404,
-			message: "Folder not found",
-		});
+		throw createError({ statusCode: 404, message: "Folder not found" });
 	}
 
-	return folder;
+	const isAdmin = session.user.roles.includes("admin");
+	if (!isAdmin && folder.createdBy !== session.user.id) {
+		throw createError({ statusCode: 403, message: "Forbidden" });
+	}
+
+	await db.update(foldersTable).set({ name: body.name }).where(eq(foldersTable.id, id));
+
+	return db.query.foldersTable.findFirst({ where: (t, { eq }) => eq(t.id, id) });
 });

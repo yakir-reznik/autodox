@@ -14,6 +14,7 @@
 
 - [ ] Implement authorization plan... server endpoints are currently not protected
 - [ ] Disable unauthorized actions in management panel UI. for example - user without delete permission on form should not be able to click the delete button... it needs to be disabled.
+- [ ] Allow users to share form folders
 - [ ] Import / export form json is a mess... does not export all props of fields and also does not import all. we need a simpler solution to dump an export with to much fuss and import back.
 - [ ] Add sha 256 checksum hash to locked submission
 - [ ] for submissions that have expired - they are stuck in "In Progress". we need to change their status to "expired"

@@ -1,5 +1,6 @@
 import { H3Error, createError, getRouterParam, setResponseHeaders } from "h3";
 import { queuePDFGeneration } from "~~/server/utils/pdfQueue";
+import { requireSubmissionPermission } from "~~/server/utils/authorization";
 
 export default defineEventHandler(async (event) => {
 	const token = getRouterParam(event, "token");
@@ -11,15 +12,7 @@ export default defineEventHandler(async (event) => {
 		});
 	}
 
-	// Check if user is authenticated and is an admin
-	const { user } = await requireUserSession(event);
-
-	if (user.role !== "admin") {
-		throw createError({
-			statusCode: 403,
-			message: "Only admin users can download submission PDFs",
-		});
-	}
+	await requireSubmissionPermission(event, token, "view_submissions");
 
 	try {
 		const pdfBuffer = await queuePDFGeneration(token);

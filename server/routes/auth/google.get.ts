@@ -74,7 +74,7 @@ export default defineOAuthGoogleEventHandler({
 			},
 		});
 
-		return sendRedirect(event, "/forms");
+		return sendRedirect(event, "/manage");
 	},
 	onError(event, error) {
 		console.error("Google OAuth error:", error);

@@ -79,23 +79,23 @@ Form endpoints resolve through `form_shares` in addition to ownership/admin.
 
 | Endpoint              | Status | Required                                                                        |
 | --------------------- | ------ | ------------------------------------------------------------------------------- |
-| `GET /api/folders`    | ⬜     | `requireRoles(event, ["user"])`                                                 |
-| `POST /api/folders`   | ⬜     | `requireRoles(event, ["user"])`                                                 |
-| `PATCH /api/folders/[id]` | ⬜ | `requireRoles(event, ["user"])` + own folder or admin (inline ownership check)  |
-| `DELETE /api/folders/[id]` | ⬜| `requireRoles(event, ["user"])` + own folder or admin (inline ownership check)  |
+| `GET /api/folders`    | ✅     | `requireRoles(event, ["user"])`                                                 |
+| `POST /api/folders`   | ✅     | `requireRoles(event, ["user"])`                                                 |
+| `PATCH /api/folders/[id]` | ✅ | `requireRoles(event, ["user"])` + own folder or admin (inline ownership check)  |
+| `DELETE /api/folders/[id]` | ✅| `requireRoles(event, ["user"])` + own folder or admin (inline ownership check)  |
 
 ### User+ submission endpoints
 
 | Endpoint                                       | Status | Required                                                                      |
 | ---------------------------------------------- | ------ | ----------------------------------------------------------------------------- |
-| `GET /api/submissions` (`formId` param)        | ⬜     | `requireFormPermission(event, formId, "view_submissions")`                    |
-| `GET /api/submissions` (`userId` param)        | ⬜     | Self or admin check (no form involved)                                        |
-| `GET /api/submissions?sharedWithMe=true`       | ⬜     | `requireRoles(event, ["user"])` — return submissions for forms with `view_submissions` share |
-| `GET /api/submissions/[token]/details`         | ⬜     | Replace inline check with `requireSubmissionPermission(event, token, "view_submissions")` (Puppeteer bypass stays) |
+| `GET /api/submissions` (`formId` param)        | ✅     | `requireFormPermission(event, formId, "view_submissions")`                    |
+| `GET /api/submissions` (`userId` param)        | ✅     | Self or admin check (no form involved)                                        |
+| `GET /api/submissions?sharedWithMe=true`       | ✅     | `requireRoles(event, ["user"])` — return submissions for forms with `view_submissions` share |
+| `GET /api/submissions/[token]/details`         | ✅     | Replace inline check with `requireSubmissionPermission(event, token, "view_submissions")` (Puppeteer bypass stays) |
 | `PATCH /api/submissions/[token]/rename`        | ⬜     | `requireSubmissionPermission(event, token, "manage_submissions")`             |
 | `PATCH /api/submissions/[token]/archive`       | ⬜     | `requireSubmissionPermission(event, token, "manage_submissions")` (loosen from admin-only) |
 | `POST /api/submissions/[token]/resend-webhook` | ⬜     | `requireSubmissionPermission(event, token, "manage_submissions")` (loosen from admin-only) |
-| `GET /api/submissions/[token]/download-pdf`    | ⬜     | `requireSubmissionPermission(event, token, "view_submissions")` (loosen from admin-only) |
+| `GET /api/submissions/[token]/download-pdf`    | ✅     | `requireSubmissionPermission(event, token, "view_submissions")` (loosen from admin-only) |
 | `GET /api/webhook-deliveries/[id]`             | ⬜     | `requireSubmissionPermission` via the submission's form (loosen from admin-only) |
 | `POST /api/uploads`                            | ⬜     | `requireRoles(event, ["user"])`                                               |
 

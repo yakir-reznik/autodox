@@ -2,6 +2,7 @@ import { db } from "~~/server/db";
 import { webhookDeliveriesTable } from "~~/server/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { H3Error, createError, getRouterParam, getQuery, getHeader } from "h3";
+import { requireSubmissionPermission } from "~~/server/utils/authorization";
 import {
 	getSubmissionDataByToken,
 	getSubmissionEntrancesByToken,
@@ -28,15 +29,7 @@ export default defineEventHandler(async (event) => {
 		const isPuppeteerAuth = puppeteerSecret && expectedSecret && puppeteerSecret === expectedSecret;
 
 		if (!isPuppeteerAuth) {
-			// Not Puppeteer, require admin session
-			const { user } = await requireUserSession(event);
-
-			if (user.role !== "admin") {
-				throw createError({
-					statusCode: 403,
-					message: "Only admin users can access this endpoint",
-				});
-			}
+			await requireSubmissionPermission(event, token, "view_submissions");
 		}
 
 		// Parse query parameter for conditional data inclusion
