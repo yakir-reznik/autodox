@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 	definePageMeta({
-		// layout: "management-panel",
+		layout: "management-panel",
 		breadcrumbs: [{ label: "שגיאה" }],
 	});
 
