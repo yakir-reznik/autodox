@@ -1,14 +1,29 @@
 import { db } from "~~/server/db";
 import { formsTable } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
+import { requireFormPermission } from "~~/server/utils/authorization";
 
-const ALLOWED_FIELDS = ["title", "description", "status", "theme", "updatedBy", "folderId", "password", "allowPublicSubmissions", "webhookUrl", "webhookIncludePdf"] as const;
+const ALLOWED_FIELDS = [
+	"title",
+	"description",
+	"status",
+	"theme",
+	"updatedBy",
+	"folderId",
+	"password",
+	"allowPublicSubmissions",
+	"webhookUrl",
+	"webhookIncludePdf",
+] as const;
 
 export default defineEventHandler(async (event) => {
 	const id = Number(getRouterParam(event, "id"));
 	if (isNaN(id)) {
 		throw createError({ statusCode: 400, message: "Invalid form ID" });
 	}
+
+	// Check user is allowed to edit form
+	await requireFormPermission(event, id, "edit_form");
 
 	const body = await readBody(event);
 

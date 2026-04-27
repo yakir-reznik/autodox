@@ -4,7 +4,6 @@
 		method: "POST",
 		body: {
 			title: "Untitled Form",
-			createdBy: 1, // TODO: Get from auth
 		},
 	});
 

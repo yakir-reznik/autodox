@@ -46,9 +46,9 @@ The app currently has three roles (`admin`, `user`, `viewer`) but most API endpo
 
 ### API-key auth (permission check needed)
 
-| Endpoint                                      | Notes                                                                                  |
-| --------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `POST /api/forms/[id]/create-submission-link` | Uses `x-api-key` header — user must have `create_submissions` (owner / admin / share)  |
+| Endpoint                                      | Notes                                                                                 |
+| --------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `POST /api/forms/[id]/create-submission-link` | Uses `x-api-key` header — user must have `create_submissions` (owner / admin / share) |
 
 ### Admin only
 
@@ -65,42 +65,42 @@ The app currently has three roles (`admin`, `user`, `viewer`) but most API endpo
 
 Form endpoints resolve through `form_shares` in addition to ownership/admin. The required permission per endpoint is listed below; helpers in Step 2 do the lookup.
 
-| Endpoint                                       | Required permission                                                                |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Endpoint                                       | Required permission                                                                                        |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `GET /api/forms`                               | `roles.includes("user")`. Returns owned ∪ shared (admin: all). Each row carries `isOwner` + `permissions`. |
-| `POST /api/forms`                              | `roles.includes("user")`. Creator becomes owner.                                   |
-| `GET /api/forms/[id]` (authenticated UI fetch) | `view` (owner / admin / any share row). Public token/password path is unchanged.   |
-| `PATCH /api/forms/[id]`                        | `edit_form`                                                                        |
-| `DELETE /api/forms/[id]`                       | **Owner or admin only**                                                            |
-| `PUT /api/forms/[id]/elements`                 | `edit_form`                                                                        |
-| `POST /api/forms/[id]/duplicate`               | `view` (new copy's `createdBy = session.user.id`)                                  |
-| `GET /api/forms/[id]/export-json`              | `view`                                                                             |
-| `POST /api/forms/[id]/upload-json`             | `edit_form`                                                                        |
-| `POST /api/forms/upload-json`                  | `roles.includes("user")`                                                           |
-| `GET /api/folders`                             | `roles.includes("user")` (folders are not shared)                                  |
-| `POST /api/folders`                            | `roles.includes("user")`                                                           |
-| `PATCH /api/folders/[id]`                      | `roles.includes("user")` + own folder or admin                                     |
-| `DELETE /api/folders/[id]`                     | `roles.includes("user")` + own folder or admin                                     |
-| `GET /api/submissions` (`formId`)              | `view_submissions` on form                                                         |
-| `GET /api/submissions` (`userId`)              | Self or admin (unchanged)                                                          |
-| `GET /api/submissions?sharedWithMe=true`       | `roles.includes("user")` — returns submissions for any form with `view_submissions` |
-| `GET /api/submissions/[token]/details`         | `view_submissions` (Puppeteer header bypass stays)                                 |
-| `PATCH /api/submissions/[token]/rename`        | `manage_submissions`                                                               |
-| `PATCH /api/submissions/[token]/archive`       | `manage_submissions` (loosen from current admin-only)                              |
-| `POST /api/submissions/[token]/resend-webhook` | `manage_submissions`                                                               |
-| `GET /api/submissions/[token]/download-pdf`    | `view_submissions` (loosen from admin-only)                                        |
-| `GET /api/webhook-deliveries/[id]`             | `view_submissions` on the related form (loosen from admin-only)                    |
-| `POST /api/uploads`                            | `roles.includes("user")`                                                           |
+| `POST /api/forms`                              | `roles.includes("user")`. Creator becomes owner.                                                           |
+| `GET /api/forms/[id]` (authenticated UI fetch) | `view` (owner / admin / any share row). Public token/password path is unchanged. ✅                        |
+| `PATCH /api/forms/[id]`                        | `edit_form` ✅                                                                                             |
+| `DELETE /api/forms/[id]`                       | **Owner or admin only**                                                                                    |
+| `PUT /api/forms/[id]/elements`                 | `edit_form`                                                                                                |
+| `POST /api/forms/[id]/duplicate`               | `view` (new copy's `createdBy = session.user.id`)                                                          |
+| `GET /api/forms/[id]/export-json`              | `view`                                                                                                     |
+| `POST /api/forms/[id]/upload-json`             | `edit_form`                                                                                                |
+| `POST /api/forms/upload-json`                  | `roles.includes("user")`                                                                                   |
+| `GET /api/folders`                             | `roles.includes("user")` (folders are not shared)                                                          |
+| `POST /api/folders`                            | `roles.includes("user")`                                                                                   |
+| `PATCH /api/folders/[id]`                      | `roles.includes("user")` + own folder or admin                                                             |
+| `DELETE /api/folders/[id]`                     | `roles.includes("user")` + own folder or admin                                                             |
+| `GET /api/submissions` (`formId`)              | `view_submissions` on form                                                                                 |
+| `GET /api/submissions` (`userId`)              | Self or admin (unchanged)                                                                                  |
+| `GET /api/submissions?sharedWithMe=true`       | `roles.includes("user")` — returns submissions for any form with `view_submissions`                        |
+| `GET /api/submissions/[token]/details`         | `view_submissions` (Puppeteer header bypass stays)                                                         |
+| `PATCH /api/submissions/[token]/rename`        | `manage_submissions`                                                                                       |
+| `PATCH /api/submissions/[token]/archive`       | `manage_submissions` (loosen from current admin-only)                                                      |
+| `POST /api/submissions/[token]/resend-webhook` | `manage_submissions`                                                                                       |
+| `GET /api/submissions/[token]/download-pdf`    | `view_submissions` (loosen from admin-only)                                                                |
+| `GET /api/webhook-deliveries/[id]`             | `view_submissions` on the related form (loosen from admin-only)                                            |
+| `POST /api/uploads`                            | `roles.includes("user")`                                                                                   |
 
 ### Share-management endpoints (created by `form-share-sharing-between-users.md`)
 
-| Endpoint                                              | Required permission                                                       |
-| ----------------------------------------------------- | ------------------------------------------------------------------------- |
-| `GET    /api/forms/[id]/shares`                       | `manage_shares` (owner or admin)                                          |
-| `POST   /api/forms/[id]/shares`                       | `manage_shares`                                                           |
-| `PATCH  /api/forms/[id]/shares/[shareId]`             | `manage_shares`                                                           |
-| `DELETE /api/forms/[id]/shares/[shareId]`             | `manage_shares`                                                           |
-| `GET    /api/users/search`                            | `roles.includes("user")` (rate-limited)                                   |
+| Endpoint                                  | Required permission                     |
+| ----------------------------------------- | --------------------------------------- |
+| `GET    /api/forms/[id]/shares`           | `manage_shares` (owner or admin)        |
+| `POST   /api/forms/[id]/shares`           | `manage_shares`                         |
+| `PATCH  /api/forms/[id]/shares/[shareId]` | `manage_shares`                         |
+| `DELETE /api/forms/[id]/shares/[shareId]` | `manage_shares`                         |
+| `GET    /api/users/search`                | `roles.includes("user")` (rate-limited) |
 
 When this plan ships, replace the temporary `requireFormOwnerOrAdmin` helper in those endpoints with `requireFormPermission(event, formId, "manage_shares")` and delete `server/utils/form-share-guard.ts`.
 
@@ -118,13 +118,13 @@ When this plan ships, replace the temporary `requireFormOwnerOrAdmin` helper in 
 
 ## Implementation Steps
 
-### Step 1 — Update session type
+### Step 1 — Update session type - ✅ Done
 
 **File:** `shared/types/auth.d.ts`
 
 - Change `role: UserRole` → `roles: UserRole[]`
 
-### Step 2 — Update authorization utility
+### Step 2 — Update authorization utility - ✅ Done
 
 **File:** `server/utils/authorization.ts`
 
@@ -136,13 +136,13 @@ function expandRoles(role: UserRole): UserRole[] {
 }
 
 type FormPermission =
-  | "view"               // owner / admin / any share row
+  | "view" // owner / admin / any share row
   | "view_submissions"
   | "create_submissions"
   | "manage_submissions"
   | "edit_form"
-  | "delete"             // owner / admin only
-  | "manage_shares";     // owner / admin only
+  | "delete" // owner / admin only
+  | "manage_shares"; // owner / admin only
 
 // Throws 403 if user has none of the required roles
 async function requireRoles(event, required: UserRole[]): Promise<session>;
@@ -181,7 +181,7 @@ async function requireApiKeyFormPermission(
 
 Remove `requireUserRole` (replaced by `requireRoles`). Keep `getUserRole` / `hasUserRole` but update to work with `roles` array. Delete the temporary `server/utils/form-share-guard.ts` from the prerequisite plan and switch share endpoints to `requireFormPermission(event, formId, "manage_shares")`.
 
-### Step 3 — Update all `setUserSession` calls
+### Step 3 — Update all `setUserSession` calls - ✅ Done
 
 **5 files** — replace `role: user.role` with `roles: expandRoles(user.role)`:
 
@@ -285,35 +285,35 @@ Fix any violations found before considering the step complete.
 
 ## Critical Files
 
-| File                                                   | Change                                                                                     |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| `shared/types/auth.d.ts`                               | `role` → `roles: UserRole[]`                                                               |
-| `server/utils/authorization.ts`                        | New helpers: `requireRoles`, `expandRoles`, `getFormPermissions`, `requireFormPermission`, `requireSubmissionPermission`, `requireApiKeyFormPermission` |
-| `server/utils/form-share-guard.ts`                     | **Delete** (was the temporary helper from the prerequisite plan)                           |
-| `server/api/auth/login.post.ts`                        | Session build                                                                              |
-| `server/api/auth/signup.post.ts`                       | Session build                                                                              |
-| `server/api/user/profile.patch.ts`                     | Session build                                                                              |
-| `server/api/user/reroll-api-key.post.ts`               | Session build                                                                              |
-| `server/routes/auth/google.get.ts`                     | Session build                                                                              |
-| `app/middleware/auth.global.ts`                        | Gate logic (admin → user+)                                                                 |
-| `server/api/forms/index.get.ts`                        | Union owned + shared; include `isOwner` + `permissions` per row                            |
-| `server/api/forms/[id].get.ts`                         | Apply `view`; include `permissions` field                                                  |
-| `server/api/forms/[id].patch.ts`                       | Apply `edit_form`                                                                          |
-| `server/api/forms/[id].delete.ts`                      | Owner-or-admin only                                                                        |
-| `server/api/forms/[id]/elements.put.ts`                | Apply `edit_form`                                                                          |
-| `server/api/forms/[id]/duplicate.post.ts`              | Apply `view`                                                                               |
-| `server/api/forms/[id]/upload-json.post.ts`            | Apply `edit_form`                                                                          |
-| `server/api/forms/[id]/create-submission-link.post.ts` | Replace manual auth + form fetch with `requireApiKeyFormPermission(..., "create_submissions")` |
-| `server/api/forms/[id]/shares/*`                       | Switch from `requireFormOwnerOrAdmin` to `requireFormPermission(..., "manage_shares")`     |
-| `server/api/submissions.get.ts`                        | Permission-aware filter; support `sharedWithMe`                                            |
-| `server/api/submissions/[token]/*.ts`                  | Apply per-action submission permission                                                     |
-| `server/api/webhook-deliveries/[id].get.ts`            | Apply `view_submissions`                                                                   |
-| `app/types/form-builder.ts`                            | `FormListItem` gains `isOwner` + `permissions`                                             |
-| `app/pages/forms/index.vue`                            | "Shared with me" filter + ownership badges + action gating                                 |
-| `app/pages/forms/[id]/edit.vue`                        | Read-only mode wiring driven by `permissions.canEditForm`                                  |
-| `app/plugins/management-panel-unauthorized-error-redirect.ts` | ✅ Done — intercepts 401/403 in `/manage/**` and redirects to `/manage/unauthorized` |
-| `app/pages/manage/unauthorized.vue`                    | Unauthorized page (already scaffolded)                                                     |
-| All other endpoint files listed above                  | Auth checks per the table                                                                  |
+| File                                                          | Change                                                                                                                                                  |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shared/types/auth.d.ts`                                      | `role` → `roles: UserRole[]`                                                                                                                            |
+| `server/utils/authorization.ts`                               | New helpers: `requireRoles`, `expandRoles`, `getFormPermissions`, `requireFormPermission`, `requireSubmissionPermission`, `requireApiKeyFormPermission` |
+| `server/utils/form-share-guard.ts`                            | **Delete** (was the temporary helper from the prerequisite plan)                                                                                        |
+| `server/api/auth/login.post.ts`                               | Session build                                                                                                                                           |
+| `server/api/auth/signup.post.ts`                              | Session build                                                                                                                                           |
+| `server/api/user/profile.patch.ts`                            | Session build                                                                                                                                           |
+| `server/api/user/reroll-api-key.post.ts`                      | Session build                                                                                                                                           |
+| `server/routes/auth/google.get.ts`                            | Session build                                                                                                                                           |
+| `app/middleware/auth.global.ts`                               | Gate logic (admin → user+)                                                                                                                              |
+| `server/api/forms/index.get.ts`                               | Union owned + shared; include `isOwner` + `permissions` per row                                                                                         |
+| `server/api/forms/[id].get.ts`                                | Apply `view`; include `permissions` field                                                                                                               |
+| `server/api/forms/[id].patch.ts`                              | Apply `edit_form`                                                                                                                                       |
+| `server/api/forms/[id].delete.ts`                             | Owner-or-admin only                                                                                                                                     |
+| `server/api/forms/[id]/elements.put.ts`                       | Apply `edit_form`                                                                                                                                       |
+| `server/api/forms/[id]/duplicate.post.ts`                     | Apply `view`                                                                                                                                            |
+| `server/api/forms/[id]/upload-json.post.ts`                   | Apply `edit_form`                                                                                                                                       |
+| `server/api/forms/[id]/create-submission-link.post.ts`        | Replace manual auth + form fetch with `requireApiKeyFormPermission(..., "create_submissions")`                                                          |
+| `server/api/forms/[id]/shares/*`                              | Switch from `requireFormOwnerOrAdmin` to `requireFormPermission(..., "manage_shares")`                                                                  |
+| `server/api/submissions.get.ts`                               | Permission-aware filter; support `sharedWithMe`                                                                                                         |
+| `server/api/submissions/[token]/*.ts`                         | Apply per-action submission permission                                                                                                                  |
+| `server/api/webhook-deliveries/[id].get.ts`                   | Apply `view_submissions`                                                                                                                                |
+| `app/types/form-builder.ts`                                   | `FormListItem` gains `isOwner` + `permissions`                                                                                                          |
+| `app/pages/forms/index.vue`                                   | "Shared with me" filter + ownership badges + action gating                                                                                              |
+| `app/pages/forms/[id]/edit.vue`                               | Read-only mode wiring driven by `permissions.canEditForm`                                                                                               |
+| `app/plugins/management-panel-unauthorized-error-redirect.ts` | ✅ Done — intercepts 401/403 in `/manage/**` and redirects to `/manage/unauthorized`                                                                    |
+| `app/pages/manage/unauthorized.vue`                           | Unauthorized page (already scaffolded)                                                                                                                  |
+| All other endpoint files listed above                         | Auth checks per the table                                                                                                                               |
 
 ---
 

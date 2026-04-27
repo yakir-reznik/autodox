@@ -2,6 +2,7 @@ import { db } from "~~/server/db";
 import { formsTable } from "~~/server/db/schema";
 
 export default defineEventHandler(async (event) => {
+	const session = await requireUserSession(event);
 	const body = await readBody(event);
 
 	if (!body.title) {
@@ -11,19 +12,12 @@ export default defineEventHandler(async (event) => {
 		});
 	}
 
-	if (!body.createdBy) {
-		throw createError({
-			statusCode: 400,
-			message: "CreatedBy is required",
-		});
-	}
-
 	const result = await db.insert(formsTable).values({
 		title: body.title,
 		description: body.description || null,
 		status: "draft",
 		theme: body.theme || "lightning",
-		createdBy: body.createdBy,
+		createdBy: session.user.id,
 		folderId: body.folderId || null,
 	});
 

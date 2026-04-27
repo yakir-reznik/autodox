@@ -202,7 +202,6 @@
 		try {
 			await $fetch(`/api/forms/${form.id}/duplicate`, {
 				method: "POST",
-				body: { createdBy: user.value?.id },
 			});
 			await refresh();
 		} catch (error) {

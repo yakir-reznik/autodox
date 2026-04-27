@@ -6,7 +6,7 @@ declare module "#auth-utils" {
 		id: number;
 		name: string;
 		email: string;
-		role: UserRole;
+		roles: UserRole[];
 		apiKey: string;
 	}
 

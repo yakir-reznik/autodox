@@ -42,7 +42,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 			return;
 		}
 		// Allow logged-in admins (works on both SSR and client)
-		if (loggedIn.value && user.value?.role === "admin") {
+		if (loggedIn.value && user.value?.roles.includes("admin")) {
 			return;
 		}
 		// Not authenticated — redirect to login
@@ -71,15 +71,15 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 		const match = to.path.match(/^\/manage\/submissions\/user\/(\d+)$/);
 		if (match) {
 			const targetUserId = Number(match[1]);
-			if (user.value?.id !== targetUserId && user.value?.role !== "admin") {
+			if (user.value?.id !== targetUserId && !user.value?.roles.includes("admin")) {
 				return showError({ statusCode: 401 });
 			}
 		}
 		return;
 	}
 
-	// Only admins can access admin routes (everything except fill)
-	if (user.value?.role !== "admin") {
+	// Users and admins can access the management panel; viewers are redirected
+	if (!user.value?.roles.includes("user")) {
 		return navigateTo("/");
 	}
 });

@@ -1,6 +1,7 @@
 import { db } from "~~/server/db";
 import { formsTable, formElementsTable, submissionsTable } from "~~/server/db/schema";
 import { eq, asc } from "drizzle-orm";
+import { getFormPermissions } from "~~/server/utils/authorization";
 
 export default defineEventHandler(async (event) => {
 	const id = Number(getRouterParam(event, "id"));
@@ -12,9 +13,52 @@ export default defineEventHandler(async (event) => {
 		});
 	}
 
-	// Check for token in query params
 	const token = getQuery(event).token as string | undefined;
 
+	// Management/authenticated fetch path: session exists, no submission token
+	if (!token) {
+		const { user } = await getUserSession(event);
+		if (user) {
+			const isAdmin = user.roles.includes("admin");
+
+			const form = await db.query.formsTable.findFirst({
+				where: eq(formsTable.id, id),
+				with: {
+					folder: true,
+					elements: {
+						where: eq(formElementsTable.isDeleted, false),
+						orderBy: [asc(formElementsTable.position)],
+					},
+				},
+			});
+
+			if (!form) {
+				throw createError({ statusCode: 404, message: "Form not found" });
+			}
+
+			const permissions = await getFormPermissions(user.id, id, isAdmin);
+			if (!permissions.has("view")) {
+				throw createError({ statusCode: 403, message: "Forbidden" });
+			}
+
+			const { password: _password, ...formWithoutPassword } = form;
+			return {
+				...formWithoutPassword,
+				hasPassword: !!form.password,
+				permissions: {
+					canView: permissions.has("view"),
+					canViewSubmissions: permissions.has("view_submissions"),
+					canCreateSubmissions: permissions.has("create_submissions"),
+					canManageSubmissions: permissions.has("manage_submissions"),
+					canEditForm: permissions.has("edit_form"),
+					canDelete: permissions.has("delete"),
+					canManageShares: permissions.has("manage_shares"),
+				},
+			};
+		}
+	}
+
+	// Public form fill path (token provided or no session)
 	const form = await db.query.formsTable.findFirst({
 		where: eq(formsTable.id, id),
 		with: {
@@ -33,11 +77,8 @@ export default defineEventHandler(async (event) => {
 		});
 	}
 
-	// Check for token in query params
 	const hasValidToken = !!token;
 
-	// If form requires token (doesn't allow public submissions) and no token provided,
-	// return limited response similar to password gate
 	if (!form.allowPublicSubmissions && !hasValidToken) {
 		return {
 			id: form.id,
@@ -47,7 +88,6 @@ export default defineEventHandler(async (event) => {
 		};
 	}
 
-	// If token is provided, fetch submission data for prefill
 	let prefillData = null;
 	let submissionStatus = null;
 	let isLocked = false;
@@ -60,7 +100,6 @@ export default defineEventHandler(async (event) => {
 		});
 
 		if (submission && submission.formId === id) {
-			// Check if token is expired
 			if (new Date() > new Date(submission.expiresAt)) {
 				throw createError({
 					statusCode: 410,
@@ -72,7 +111,6 @@ export default defineEventHandler(async (event) => {
 			isLocked = submission.status === "locked";
 			isArchived = submission.isArchived;
 
-			// If already submitted/locked, use submission data instead of prefill
 			if (isLocked && submission.submissionData) {
 				prefillData = submission.submissionData;
 			} else {
@@ -81,16 +119,13 @@ export default defineEventHandler(async (event) => {
 		}
 	}
 
-	// Determine password requirement (submission override > form default)
 	const { password: effectivePassword } = resolveFormSettings(form, submission);
 	const hasPassword = !!effectivePassword;
 
-	// Check if password has been verified via cookie
 	const cookieName = token ? `form_pwd_${token}` : `form_pwd_${id}`;
 	const verifiedCookie = getCookie(event, cookieName);
 	const isPasswordVerified = verifiedCookie === "verified";
 
-	// If password required and not verified, return limited response
 	if (hasPassword && !isPasswordVerified) {
 		return {
 			id: form.id,
@@ -100,7 +135,6 @@ export default defineEventHandler(async (event) => {
 		};
 	}
 
-	// Remove password from form object before returning (never expose password)
 	const { password: _password, ...formWithoutPassword } = form;
 
 	return {

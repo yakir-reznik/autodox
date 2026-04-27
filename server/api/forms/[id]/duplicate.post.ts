@@ -3,21 +3,13 @@ import { formsTable, formElementsTable } from "~~/server/db/schema";
 import { eq, asc } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
+	const session = await requireUserSession(event);
 	const id = Number(getRouterParam(event, "id"));
 
 	if (isNaN(id)) {
 		throw createError({
 			statusCode: 400,
 			message: "Invalid form ID",
-		});
-	}
-
-	const body = await readBody(event);
-
-	if (!body.createdBy) {
-		throw createError({
-			statusCode: 400,
-			message: "createdBy is required",
 		});
 	}
 
@@ -48,7 +40,7 @@ export default defineEventHandler(async (event) => {
 		webhookUrl: sourceForm.webhookUrl,
 		webhookIncludePdf: sourceForm.webhookIncludePdf,
 		allowPublicSubmissions: sourceForm.allowPublicSubmissions,
-		createdBy: body.createdBy,
+		createdBy: session.user.id,
 	});
 
 	const newFormId = result[0].insertId;

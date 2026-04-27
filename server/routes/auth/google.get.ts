@@ -69,7 +69,7 @@ export default defineOAuthGoogleEventHandler({
 				id: dbUser.id,
 				email: dbUser.email,
 				name: dbUser.name,
-				role: dbUser.role,
+				roles: expandRoles(dbUser.role),
 				apiKey: dbUser.apiKey ?? "",
 			},
 		});

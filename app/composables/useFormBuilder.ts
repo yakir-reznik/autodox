@@ -298,7 +298,6 @@ export function useFormBuilder() {
 			body: {
 				title: state.title || "Untitled Form",
 				description: state.description,
-				createdBy: 1, // TODO: Get from auth
 				theme: state.theme,
 			},
 		});

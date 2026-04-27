@@ -72,7 +72,7 @@ export default defineEventHandler(async (event) => {
 			id: newUser.id,
 			email,
 			name,
-			role: "user",
+			roles: expandRoles("user"),
 			apiKey,
 		},
 	});
