@@ -198,6 +198,14 @@ Remove `requireUserRole` (replaced by `requireRoles`). Keep `getUserRole` / `has
 - Change all `user.value?.role === "admin"` → `user.value?.roles.includes("admin")`
 - Change management panel gate from `role !== "admin"` → `!roles.includes("user")` (allows user + admin, redirects viewer)
 
+### Step 4b — Frontend 401/403 error handling ✅ Done
+
+**File:** `app/plugins/management-panel-unauthorized-error-redirect.ts` — **already implemented**
+
+A global `$fetch` interceptor catches 401 and 403 responses and redirects to `/manage/unauthorized` whenever the current route is under `/manage/**`. Fill routes and other public pages are unaffected by the route guard.
+
+Do **not** add any inline redirect-to-unauthorized logic in pages, composables, or other plugins — the plugin handles this centrally.
+
 ### Step 5 — Add/update endpoint checks
 
 Work through the endpoint table above. The pattern is:
@@ -303,6 +311,8 @@ Fix any violations found before considering the step complete.
 | `app/types/form-builder.ts`                            | `FormListItem` gains `isOwner` + `permissions`                                             |
 | `app/pages/forms/index.vue`                            | "Shared with me" filter + ownership badges + action gating                                 |
 | `app/pages/forms/[id]/edit.vue`                        | Read-only mode wiring driven by `permissions.canEditForm`                                  |
+| `app/plugins/management-panel-unauthorized-error-redirect.ts` | ✅ Done — intercepts 401/403 in `/manage/**` and redirects to `/manage/unauthorized` |
+| `app/pages/manage/unauthorized.vue`                    | Unauthorized page (already scaffolded)                                                     |
 | All other endpoint files listed above                  | Auth checks per the table                                                                  |
 
 ---
