@@ -6,7 +6,6 @@ Autodox is a **Nuxt 4** form builder for creating and filling dynamic forms (Vue
 
 - **Use tabs** use tabs over spaces for indentation when writing code
 - **Hebrew RTL**: All UI text is in Hebrew. The app uses `dir="rtl"` and `lang="he"`.
-- **SSR disabled**: Client-side only rendering.
 - **Type safety**: Shared types between client and server in `app/types/form-builder.ts`.
 - **Auto-imports**: Nuxt auto-imports Vue APIs (`ref`, `computed`), composables from `app/composables/`, and components from `app/components/`. No manual imports needed.
 
@@ -18,20 +17,12 @@ Autodox is a **Nuxt 4** form builder for creating and filling dynamic forms (Vue
 - **Modular structure**: Keep files focused. Extract reusable logic to composables, components to separate files, and shared types to `app/types/` use types over interfaces.
 - **Writing plans**: When planning write implementation steps in a way that each step can be done by a standalone agent without previous context.
 - **Implementing plans**: When implementing plans mark steps as complete in the plans markdown file
-- **Plans location path folder**: Save implementation plans to `.claude/plans/` (relative to project root, NOT home directory) as kebab-case markdown files. name the file in a semantic way that reflects the core essense of the plan.
--
-
-## Commands
-
-```bash
-pnpm dev      # Start dev server (http://localhost:3000)
-pnpm build    # Build for production
-```
 
 ## Constraints
 
 - **No database commands**: Ask the operator to run migrations, schema changes, etc.
 - **Tailwind only**: Avoid custom CSS unless absolutely necessary for animations/keyframes.
+- **Package.json commands**: Only `pnpm run typecheck` is allowed. Do not run `pnpm dev`, `pnpm build`, or drizzle commands (e.g., `drizzle-kit generate`, `db:generate`).
 
 ## Documentation
 
