@@ -9,6 +9,7 @@
 		"preview": "nuxt preview",
 		"postinstall": "patch-package && nuxt prepare",
 		"find-large-files": "node scripts/find-large-files.ts",
+		"typecheck": "nuxi typecheck",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:sync": "drizzle-kit generate && drizzle-kit migrate",
