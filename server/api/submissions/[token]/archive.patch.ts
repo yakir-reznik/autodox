@@ -1,28 +1,15 @@
 import { db } from "~~/server/db";
 import { submissionsTable } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
+import { requireSubmissionPermission } from "~~/server/utils/authorization";
 
 export default defineEventHandler(async (event) => {
-	const { user } = await requireUserSession(event);
-
-	if (user.role !== "admin") {
-		throw createError({ statusCode: 403, message: "Only admin users can access this endpoint" });
-	}
-
 	const token = getRouterParam(event, "token");
 	if (!token) {
 		throw createError({ statusCode: 400, message: "Submission token is required" });
 	}
 
-	const [submission] = await db
-		.select({ id: submissionsTable.id, isArchived: submissionsTable.isArchived })
-		.from(submissionsTable)
-		.where(eq(submissionsTable.token, token))
-		.limit(1);
-
-	if (!submission) {
-		throw createError({ statusCode: 404, message: "Submission not found" });
-	}
+	const { submission } = await requireSubmissionPermission(event, token, "manage_submissions");
 
 	const nowArchived = !submission.isArchived;
 

@@ -4,8 +4,11 @@ import { readMultipartFormData } from "h3";
 import { writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import { validateUpload, generateFilePaths } from "~~/server/utils/upload";
+import { requireRoles } from "~~/server/utils/authorization";
 
 export default defineEventHandler(async (event) => {
+	const { user } = await requireRoles(event, ["user"]);
+
 	// 1. Parse multipart form data
 	const formData = await readMultipartFormData(event);
 
@@ -64,7 +67,7 @@ export default defineEventHandler(async (event) => {
 		fileSize: fileField.data.length,
 		storagePath,
 		publicUrl,
-		uploadedBy: null, // Auth to be implemented later
+		uploadedBy: user.id,
 	});
 
 	const insertId = result[0].insertId;

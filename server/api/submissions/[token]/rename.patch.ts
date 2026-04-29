@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "~~/server/db";
 import { submissionsTable } from "~~/server/db/schema";
+import { requireSubmissionPermission } from "~~/server/utils/authorization";
 
 export default defineEventHandler(async (event) => {
 	const token = getRouterParam(event, "token");
@@ -11,13 +12,7 @@ export default defineEventHandler(async (event) => {
 		throw createError({ statusCode: 400, message: "Invalid name" });
 	}
 
-	const [submission] = await db
-		.select({ id: submissionsTable.id })
-		.from(submissionsTable)
-		.where(eq(submissionsTable.token, token))
-		.limit(1);
-
-	if (!submission) throw createError({ statusCode: 404, message: "Submission not found" });
+	const { submission } = await requireSubmissionPermission(event, token, "manage_submissions");
 
 	await db
 		.update(submissionsTable)
