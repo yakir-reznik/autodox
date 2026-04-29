@@ -1,5 +1,6 @@
 <script setup lang="ts">
 	import type { BuilderElement, UploadResponse } from "~/types/form-builder";
+	import BaseTextarea from "~/components/base/Textarea.vue";
 
 	interface Props {
 		element: BuilderElement;
@@ -24,7 +25,9 @@
 	const lastCursorPosition = ref<number | null>(null);
 
 	function saveCursorPosition() {
-		const textarea = textareaRef.value?.$el?.querySelector("textarea") as HTMLTextAreaElement | null;
+		const textarea = textareaRef.value?.$el?.querySelector(
+			"textarea",
+		) as HTMLTextAreaElement | null;
 		if (textarea) {
 			lastCursorPosition.value = textarea.selectionStart;
 		}
@@ -135,7 +138,10 @@
 				@click="saveCursorPosition"
 				@keyup="saveCursorPosition"
 			/>
-			<p class="mt-1 text-xs text-gray-500" v-text="'ניתן להוסיף ערך של שדה אחר באמצעות {{שם_שדה}}'" />
+			<p
+				class="mt-1 text-xs text-gray-500"
+				v-text="'ניתן להוסיף ערך של שדה אחר באמצעות {{שם_שדה}}'"
+			/>
 			<FormBuilderPropertiesInterpolationFieldPicker
 				v-if="showFieldPicker"
 				:elements="allElements"
@@ -194,7 +200,9 @@
 
 		<!-- Media URL -->
 		<div v-if="['image', 'video'].includes(element.type)">
-			<label class="mb-1 block text-sm text-gray-600">URL <span v-if="element.type === 'image'" class="text-gray-400">(ערך)</span></label>
+			<label class="mb-1 block text-sm text-gray-600"
+				>URL <span v-if="element.type === 'image'" class="text-gray-400">(ערך)</span></label
+			>
 			<BaseInput
 				:model-value="config.url || ''"
 				placeholder="https://..."
@@ -319,7 +327,9 @@
 
 			<BaseToggle
 				:model-value="!!config.backgroundColor"
-				@update:model-value="$emit('update:config', { backgroundColor: $event ? '#f9fafb' : '' })"
+				@update:model-value="
+					$emit('update:config', { backgroundColor: $event ? '#f9fafb' : '' })
+				"
 			>
 				Custom background color
 			</BaseToggle>
