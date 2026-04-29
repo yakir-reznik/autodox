@@ -1,9 +1,10 @@
 import { and, eq, like, ne, or } from "drizzle-orm";
 import { usersTable } from "~~/server/db/schema";
+import { requireRoles } from "~~/server/utils/authorization";
 import { db } from "~~/server/db";
 
 export default defineEventHandler(async (event) => {
-	const session = await requireUserSession(event);
+	const session = await requireRoles(event, ["user"]);
 	const { q } = getQuery(event) as { q?: string };
 
 	if (!q || q.trim().length < 1) return [];

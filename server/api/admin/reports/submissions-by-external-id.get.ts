@@ -1,6 +1,7 @@
 import { db } from "~~/server/db";
 import { submissionsTable, formsTable, submissionStatusEnum } from "~~/server/db/schema";
 import { eq, and, gte, lte, count } from "drizzle-orm";
+import { requireRoles } from "~~/server/utils/authorization";
 
 type ReportRow = {
 	formId: number;
@@ -14,10 +15,7 @@ type ReportRow = {
 };
 
 export default defineEventHandler(async (event) => {
-	const session = await getUserSession(event);
-	if (!session.user?.roles?.includes("admin")) {
-		throw createError({ statusCode: 403, message: "Admin access required" });
-	}
+	await requireRoles(event, ["admin"]);
 
 	const query = getQuery(event);
 	const { externalId, from, to } = query as Record<string, string>;

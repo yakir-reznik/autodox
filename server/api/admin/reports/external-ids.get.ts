@@ -1,12 +1,10 @@
 import { db } from "~~/server/db";
 import { submissionsTable } from "~~/server/db/schema";
 import { isNotNull } from "drizzle-orm";
+import { requireRoles } from "~~/server/utils/authorization";
 
 export default defineEventHandler(async (event) => {
-	const session = await getUserSession(event);
-	if (!session.user?.roles?.includes("admin")) {
-		throw createError({ statusCode: 403, message: "Admin access required" });
-	}
+	await requireRoles(event, ["admin"]);
 
 	return db
 		.selectDistinct({ externalId: submissionsTable.externalId })

@@ -1,13 +1,13 @@
 import { and, eq } from "drizzle-orm";
 import { formSharesTable } from "~~/server/db/schema";
-import { requireFormOwnerOrAdmin } from "~~/server/utils/form-share-guard";
+import { requireFormPermission } from "~~/server/utils/authorization";
 import type { FormSharePermissions } from "~~/app/types/form-builder";
 import { db } from "~~/server/db";
 
 export default defineEventHandler(async (event) => {
 	const formId = Number(getRouterParam(event, "id"));
 	const shareId = Number(getRouterParam(event, "shareId"));
-	await requireFormOwnerOrAdmin(event, formId);
+	await requireFormPermission(event, formId, "manage_shares");
 
 	const body = await readBody<{ permissions: FormSharePermissions }>(event);
 	if (!body.permissions) {

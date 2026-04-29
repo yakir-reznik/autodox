@@ -3,11 +3,7 @@ import { usersTable, formsTable, submissionsTable } from "~~/server/db/schema";
 import { db } from "~~/server/db";
 
 export default defineEventHandler(async (event) => {
-	const session = await getUserSession(event);
-	if (!session.user) {
-		throw createError({ statusCode: 401, message: "Authentication required" });
-	}
-
+	const session = await requireUserSession(event);
 	const userId = session.user.id;
 
 	const [user, formCountResult, submissionCountResult] = await Promise.all([

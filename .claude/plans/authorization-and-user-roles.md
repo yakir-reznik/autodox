@@ -30,99 +30,99 @@ Legend: ✅ Done | ⬜ Pending
 
 ### Public (no auth — no changes needed)
 
-| Endpoint                               | Status | Notes                                           |
-| -------------------------------------- | ------ | ----------------------------------------------- |
-| `GET /api/health`                      | ✅     |                                                 |
-| `POST /api/auth/login`                 | ✅     |                                                 |
-| `POST /api/auth/logout`                | ✅     |                                                 |
-| `GET /api/auth/session`                | ✅     |                                                 |
-| `POST /api/auth/signup`                | ✅     | Disabled in logic, stays public                 |
-| `GET /api/forms/[id]/theme.css`        | ✅     |                                                 |
-| `POST /api/forms/[id]/verify-password` | ✅     |                                                 |
-| `GET /api/forms/[id]/settings`         | ✅     | Used by public form fill                        |
-| `POST /api/forms/[id]/entrances`       | ✅     | Analytics recording during form fill (public)   |
-| `POST /api/submissions/[token]/start`  | ✅     | Public submitter                                |
-| `POST /api/submissions/[token]/submit` | ✅     | Public submitter                                |
-| `GET /api/[...].ts`                    | ✅     | 404 catch-all                                   |
+| Endpoint                               | Status | Notes                                         |
+| -------------------------------------- | ------ | --------------------------------------------- |
+| `GET /api/health`                      | ✅     |                                               |
+| `POST /api/auth/login`                 | ✅     |                                               |
+| `POST /api/auth/logout`                | ✅     |                                               |
+| `GET /api/auth/session`                | ✅     |                                               |
+| `POST /api/auth/signup`                | ✅     | Disabled in logic, stays public               |
+| `GET /api/forms/[id]/theme.css`        | ✅     |                                               |
+| `POST /api/forms/[id]/verify-password` | ✅     |                                               |
+| `GET /api/forms/[id]/settings`         | ✅     | Used by public form fill                      |
+| `POST /api/forms/[id]/entrances`       | ✅     | Analytics recording during form fill (public) |
+| `POST /api/submissions/[token]/start`  | ✅     | Public submitter                              |
+| `POST /api/submissions/[token]/submit` | ✅     | Public submitter                              |
+| `GET /api/[...].ts`                    | ✅     | 404 catch-all                                 |
 
 ### API-key auth
 
-| Endpoint                                      | Status | Required                                                                              |
-| --------------------------------------------- | ------ | ------------------------------------------------------------------------------------- |
-| `POST /api/forms/[id]/create-submission-link` | ⬜     | `requireApiKeyFormPermission(event, formId, "create_submissions")`                    |
+| Endpoint                                      | Status | Required                                                           |
+| --------------------------------------------- | ------ | ------------------------------------------------------------------ |
+| `POST /api/forms/[id]/create-submission-link` | ✅     | `requireApiKeyFormPermission(event, formId, "create_submissions")` |
 
 ### Admin only
 
-| Endpoint                                            | Status | Required                                          |
-| --------------------------------------------------- | ------ | ------------------------------------------------- |
-| `GET /api/admin/reports/external-ids`               | ⬜     | Replace inline check with `requireRoles(event, ["admin"])` |
-| `GET /api/admin/reports/submissions-by-external-id` | ⬜     | Replace inline check with `requireRoles(event, ["admin"])` |
+| Endpoint                                            | Status | Required                                                   |
+| --------------------------------------------------- | ------ | ---------------------------------------------------------- |
+| `GET /api/admin/reports/external-ids`               | ✅     | Replace inline check with `requireRoles(event, ["admin"])` |
+| `GET /api/admin/reports/submissions-by-external-id` | ✅     | Replace inline check with `requireRoles(event, ["admin"])` |
 
 ### User+ form endpoints (permission-aware)
 
 Form endpoints resolve through `form_shares` in addition to ownership/admin.
 
-| Endpoint                                       | Status | Required                                                                                                   |
-| ---------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------- |
-| `GET /api/forms`                               | ✅     | `requireRoles(event, ["user"])`. Returns owned ∪ shared. Each row carries `isOwner` + `permissions`.       |
-| `POST /api/forms`                              | ✅     | `requireRoles(event, ["user"])`. Creator becomes owner.                                                    |
-| `GET /api/forms/[id]` (authenticated UI fetch) | ✅     | `getFormPermissions` + `view` check. Public token/password path unchanged. Returns `permissions` object.   |
-| `PATCH /api/forms/[id]`                        | ✅     | `requireFormPermission(event, id, "edit_form")`                                                            |
-| `DELETE /api/forms/[id]`                       | ✅     | Owner or admin only — `requireFormPermission(event, id, "delete")`                                         |
-| `PUT /api/forms/[id]/elements`                 | ✅     | `requireFormPermission(event, id, "edit_form")`                                                            |
-| `POST /api/forms/[id]/duplicate`               | ✅     | `requireFormPermission(event, id, "view")`. New copy's `createdBy = session.user.id`.                      |
-| `GET /api/forms/[id]/export-json`              | ✅     | Replace inline check with `requireFormPermission(event, id, "view")`                                       |
-| `POST /api/forms/[id]/upload-json`             | ✅     | `requireFormPermission(event, id, "edit_form")`                                                            |
-| `POST /api/forms/upload-json`                  | ✅     | `requireRoles(event, ["user"])`                                                                            |
+| Endpoint                                       | Status | Required                                                                                                 |
+| ---------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------- |
+| `GET /api/forms`                               | ✅     | `requireRoles(event, ["user"])`. Returns owned ∪ shared. Each row carries `isOwner` + `permissions`.     |
+| `POST /api/forms`                              | ✅     | `requireRoles(event, ["user"])`. Creator becomes owner.                                                  |
+| `GET /api/forms/[id]` (authenticated UI fetch) | ✅     | `getFormPermissions` + `view` check. Public token/password path unchanged. Returns `permissions` object. |
+| `PATCH /api/forms/[id]`                        | ✅     | `requireFormPermission(event, id, "edit_form")`                                                          |
+| `DELETE /api/forms/[id]`                       | ✅     | Owner or admin only — `requireFormPermission(event, id, "delete")`                                       |
+| `PUT /api/forms/[id]/elements`                 | ✅     | `requireFormPermission(event, id, "edit_form")`                                                          |
+| `POST /api/forms/[id]/duplicate`               | ✅     | `requireFormPermission(event, id, "view")`. New copy's `createdBy = session.user.id`.                    |
+| `GET /api/forms/[id]/export-json`              | ✅     | Replace inline check with `requireFormPermission(event, id, "view")`                                     |
+| `POST /api/forms/[id]/upload-json`             | ✅     | `requireFormPermission(event, id, "edit_form")`                                                          |
+| `POST /api/forms/upload-json`                  | ✅     | `requireRoles(event, ["user"])`                                                                          |
 
 ### User+ folder endpoints
 
-| Endpoint              | Status | Required                                                                        |
-| --------------------- | ------ | ------------------------------------------------------------------------------- |
-| `GET /api/folders`    | ✅     | `requireRoles(event, ["user"])`                                                 |
-| `POST /api/folders`   | ✅     | `requireRoles(event, ["user"])`                                                 |
-| `PATCH /api/folders/[id]` | ✅ | `requireRoles(event, ["user"])` + own folder or admin (inline ownership check)  |
-| `DELETE /api/folders/[id]` | ✅| `requireRoles(event, ["user"])` + own folder or admin (inline ownership check)  |
+| Endpoint                   | Status | Required                                                                       |
+| -------------------------- | ------ | ------------------------------------------------------------------------------ |
+| `GET /api/folders`         | ✅     | `requireRoles(event, ["user"])`                                                |
+| `POST /api/folders`        | ✅     | `requireRoles(event, ["user"])`                                                |
+| `PATCH /api/folders/[id]`  | ✅     | `requireRoles(event, ["user"])` + own folder or admin (inline ownership check) |
+| `DELETE /api/folders/[id]` | ✅     | `requireRoles(event, ["user"])` + own folder or admin (inline ownership check) |
 
 ### User+ submission endpoints
 
-| Endpoint                                       | Status | Required                                                                      |
-| ---------------------------------------------- | ------ | ----------------------------------------------------------------------------- |
-| `GET /api/submissions` (`formId` param)        | ✅     | `requireFormPermission(event, formId, "view_submissions")`                    |
-| `GET /api/submissions` (`userId` param)        | ✅     | Self or admin check (no form involved)                                        |
-| `GET /api/submissions?sharedWithMe=true`       | ✅     | `requireRoles(event, ["user"])` — return submissions for forms with `view_submissions` share |
+| Endpoint                                       | Status | Required                                                                                                           |
+| ---------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------ |
+| `GET /api/submissions` (`formId` param)        | ✅     | `requireFormPermission(event, formId, "view_submissions")`                                                         |
+| `GET /api/submissions` (`userId` param)        | ✅     | Self or admin check (no form involved)                                                                             |
+| `GET /api/submissions?sharedWithMe=true`       | ✅     | `requireRoles(event, ["user"])` — return submissions for forms with `view_submissions` share                       |
 | `GET /api/submissions/[token]/details`         | ✅     | Replace inline check with `requireSubmissionPermission(event, token, "view_submissions")` (Puppeteer bypass stays) |
-| `PATCH /api/submissions/[token]/rename`        | ✅     | `requireSubmissionPermission(event, token, "manage_submissions")`             |
-| `PATCH /api/submissions/[token]/archive`       | ✅     | `requireSubmissionPermission(event, token, "manage_submissions")` (loosen from admin-only) |
-| `POST /api/submissions/[token]/resend-webhook` | ✅     | `requireSubmissionPermission(event, token, "manage_submissions")` (loosen from admin-only) |
-| `GET /api/submissions/[token]/download-pdf`    | ✅     | `requireSubmissionPermission(event, token, "view_submissions")` (loosen from admin-only) |
-| `GET /api/webhook-deliveries/[id]`             | ✅     | `requireSubmissionPermission` via the submission's form (loosen from admin-only) |
-| `POST /api/uploads`                            | ✅     | `requireRoles(event, ["user"])`                                               |
+| `PATCH /api/submissions/[token]/rename`        | ✅     | `requireSubmissionPermission(event, token, "manage_submissions")`                                                  |
+| `PATCH /api/submissions/[token]/archive`       | ✅     | `requireSubmissionPermission(event, token, "manage_submissions")` (loosen from admin-only)                         |
+| `POST /api/submissions/[token]/resend-webhook` | ✅     | `requireSubmissionPermission(event, token, "manage_submissions")` (loosen from admin-only)                         |
+| `GET /api/submissions/[token]/download-pdf`    | ✅     | `requireSubmissionPermission(event, token, "view_submissions")` (loosen from admin-only)                           |
+| `GET /api/webhook-deliveries/[id]`             | ✅     | `requireSubmissionPermission` via the submission's form (loosen from admin-only)                                   |
+| `POST /api/uploads`                            | ✅     | `requireRoles(event, ["user"])`                                                                                    |
 
 ### Share-management endpoints
 
 These use the old `requireFormOwnerOrAdmin` guard from `form-share-guard.ts`. Migrate to `requireFormPermission` and delete the guard file.
 
-| Endpoint                                  | Status | Required                                                                |
-| ----------------------------------------- | ------ | ----------------------------------------------------------------------- |
-| `GET    /api/forms/[id]/shares`           | ⬜     | `requireFormPermission(event, formId, "manage_shares")`                 |
-| `POST   /api/forms/[id]/shares`           | ⬜     | `requireFormPermission(event, formId, "manage_shares")`                 |
-| `PATCH  /api/forms/[id]/shares/[shareId]` | ⬜     | `requireFormPermission(event, formId, "manage_shares")`                 |
-| `DELETE /api/forms/[id]/shares/[shareId]` | ⬜     | `requireFormPermission(event, formId, "manage_shares")`                 |
-| `GET    /api/users/search`                | ⬜     | Replace bare `requireUserSession` with `requireRoles(event, ["user"])` |
-| `DELETE server/utils/form-share-guard.ts` | ⬜     | Delete file after migrating all 4 share endpoints above                 |
+| Endpoint                                  | Status | Required                                                               |
+| ----------------------------------------- | ------ | ---------------------------------------------------------------------- |
+| `GET    /api/forms/[id]/shares`           | ✅     | `requireFormPermission(event, formId, "manage_shares")`                |
+| `POST   /api/forms/[id]/shares`           | ✅     | `requireFormPermission(event, formId, "manage_shares")`                |
+| `PATCH  /api/forms/[id]/shares/[shareId]` | ✅     | `requireFormPermission(event, formId, "manage_shares")`                |
+| `DELETE /api/forms/[id]/shares/[shareId]` | ✅     | `requireFormPermission(event, formId, "manage_shares")`                |
+| `GET    /api/users/search`                | ✅     | Replace bare `requireUserSession` with `requireRoles(event, ["user"])` |
+| `DELETE server/utils/form-share-guard.ts` | ✅     | Delete file after migrating all 4 share endpoints above                |
 
 ### Own-account endpoints (standardize)
 
 These already block unauthenticated requests but use inline checks instead of `requireUserSession`.
 
-| Endpoint                           | Status | Required                                                        |
-| ---------------------------------- | ------ | --------------------------------------------------------------- |
-| `GET /api/user/profile`            | ⬜     | Replace inline check with `await requireUserSession(event)`     |
-| `PATCH /api/user/profile`          | ⬜     | Replace inline check with `await requireUserSession(event)`     |
-| `POST /api/user/change-password`   | ⬜     | Replace inline check with `await requireUserSession(event)`     |
-| `POST /api/user/disconnect-google` | ⬜     | Replace inline check with `await requireUserSession(event)`     |
-| `POST /api/user/reroll-api-key`    | ⬜     | Replace inline check with `await requireUserSession(event)`     |
+| Endpoint                           | Status | Required                                                    |
+| ---------------------------------- | ------ | ----------------------------------------------------------- |
+| `GET /api/user/profile`            | ✅     | Replace inline check with `await requireUserSession(event)` |
+| `PATCH /api/user/profile`          | ✅     | Replace inline check with `await requireUserSession(event)` |
+| `POST /api/user/change-password`   | ✅     | Replace inline check with `await requireUserSession(event)` |
+| `POST /api/user/disconnect-google` | ✅     | Replace inline check with `await requireUserSession(event)` |
+| `POST /api/user/reroll-api-key`    | ✅     | Replace inline check with `await requireUserSession(event)` |
 
 ---
 
@@ -329,18 +329,17 @@ Fix any violations found before considering the step complete.
 
 ## Verification
 
-1. **Type check**: `pnpm build` passes with no type errors on `roles` everywhere
-2. **Login as admin**: session has `roles: ["admin", "user"]`; all endpoints accessible
-3. **Login as user**: session has `roles: ["user"]`; management panel accessible; sees own forms ∪ forms shared with them
-4. **Unauthenticated**: protected endpoints return 401; public endpoints still work
-5. **Form fill**: public form fill (`/fill/[id]`) still works without login
-6. **Viewer role**: logs in but gets redirected to `/`
-7. **Sharing happy path** (depends on prerequisite plan): owner shares form to user B with `view_submissions + create_submissions`. User B:
+1. **Login as admin**: session has `roles: ["admin", "user"]`; all endpoints accessible
+2. **Login as user**: session has `roles: ["user"]`; management panel accessible; sees own forms ∪ forms shared with them
+3. **Unauthenticated**: protected endpoints return 401; public endpoints still work
+4. **Form fill**: public form fill (`/fill/[id]`) still works without login
+5. **Viewer role**: logs in but gets redirected to `/`
+6. **Sharing happy path** (depends on prerequisite plan): owner shares form to user B with `view_submissions + create_submissions`. User B:
    - Sees the form with a "Shared" badge and no delete option
    - Builder is read-only (no Save)
    - Can list submissions and create submission links via UI and via their own API key
    - Cannot rename/archive/resend-webhook (403)
-8. **Edit-only share**: user C with only `edit_form` can save form structure changes but does not see submissions
-9. **Owner-only ops**: shared users get 403 on `DELETE /api/forms/[id]` and on any `/shares/*` mutation
-10. **Revocation**: owner removes share — affected user's next request returns 403; the form disappears from their list
-11. **Inline auth sweep (Step 6)** comes back clean
+7. **Edit-only share**: user C with only `edit_form` can save form structure changes but does not see submissions
+8. **Owner-only ops**: shared users get 403 on `DELETE /api/forms/[id]` and on any `/shares/*` mutation
+9. **Revocation**: owner removes share — affected user's next request returns 403; the form disappears from their list
+10. **Inline auth sweep (Step 6)** comes back clean
