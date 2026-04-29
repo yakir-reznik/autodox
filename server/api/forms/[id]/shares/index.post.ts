@@ -63,6 +63,8 @@ export default defineEventHandler(async (event) => {
 		)
 		.limit(1);
 
+	if (!inserted) throw createError({ statusCode: 500, message: "Failed to retrieve created share" });
+
 	return {
 		id: inserted.id,
 		formId: inserted.formId,

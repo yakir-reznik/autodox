@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
 	// Set user session
 	await setUserSession(event, {
 		user: {
-			id: newUser.id,
+			id: newUser!.id,
 			email,
 			name,
 			roles: expandRoles("user"),
@@ -80,7 +80,7 @@ export default defineEventHandler(async (event) => {
 	return {
 		success: true,
 		user: {
-			id: newUser.id,
+			id: newUser!.id,
 			email,
 			name,
 			role: "user",

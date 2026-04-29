@@ -8,7 +8,7 @@ export async function requireFormOwnerOrAdmin(event: H3Event, formId: number) {
 	const session = await requireUserSession(event);
 	const form = await db.query.formsTable.findFirst({ where: eq(formsTable.id, formId) });
 	if (!form) throw createError({ statusCode: 404 });
-	const isAdmin = session.user.role === "admin";
+	const isAdmin = session.user.roles.includes("admin");
 	if (!isAdmin && form.createdBy !== session.user.id) throw createError({ statusCode: 403 });
 	return { session, form };
 }

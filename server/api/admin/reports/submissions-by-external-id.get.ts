@@ -15,7 +15,7 @@ type ReportRow = {
 
 export default defineEventHandler(async (event) => {
 	const session = await getUserSession(event);
-	if (session.user?.role !== "admin") {
+	if (!session.user?.roles?.includes("admin")) {
 		throw createError({ statusCode: 403, message: "Admin access required" });
 	}
 

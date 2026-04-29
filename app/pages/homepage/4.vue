@@ -203,7 +203,7 @@
         </div>
 
         <div class="grid md:grid-cols-3 gap-6">
-          <div v-for="(card, i) in featureCards" :key="card.title" :ref="el => featureCardRefs[i] = el" class="group relative p-8 rounded-2xl bg-white border border-navy/5 hover:border-brand/20 transition-all duration-500 hover:shadow-xl hover:shadow-brand/5 hover:-translate-y-1 opacity-0 translate-y-8">
+          <div v-for="(card, i) in featureCards" :key="card.title" :ref="el => featureCardRefs[i] = el as Element | null" class="group relative p-8 rounded-2xl bg-white border border-navy/5 hover:border-brand/20 transition-all duration-500 hover:shadow-xl hover:shadow-brand/5 hover:-translate-y-1 opacity-0 translate-y-8">
             <div class="w-12 h-12 rounded-xl mb-6 flex items-center justify-center transition-colors duration-300" :class="card.iconBg">
               <span v-html="card.icon"></span>
             </div>
@@ -425,7 +425,7 @@
           <div
             v-for="(el, i) in formElements"
             :key="el.label"
-            :ref="el2 => elementRefs[i] = el2"
+            :ref="el2 => elementRefs[i] = el2 as Element | null"
             class="group relative p-4 rounded-xl bg-white border border-navy/5 hover:border-brand/25 transition-all duration-300 hover:shadow-lg hover:shadow-brand/5 hover:-translate-y-1 cursor-default text-center opacity-0 translate-y-6"
           >
             <div class="w-10 h-10 mx-auto mb-3 rounded-xl flex items-center justify-center transition-colors duration-300" :class="el.bg">
@@ -447,7 +447,7 @@
         </div>
 
         <div class="grid md:grid-cols-3 gap-8">
-          <div v-for="(step, i) in steps" :key="step.title" :ref="el => stepRefs[i] = el" class="relative text-center opacity-0 translate-y-8">
+          <div v-for="(step, i) in steps" :key="step.title" :ref="el => stepRefs[i] = el as Element | null" class="relative text-center opacity-0 translate-y-8">
             <!-- Connector line -->
             <div v-if="i < 2" class="hidden md:block absolute top-12 -left-4 w-8 border-t-2 border-dashed border-navy/10"></div>
             <div class="w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center text-2xl font-extrabold text-white shadow-lg" :class="step.bg">
@@ -469,7 +469,7 @@
         </div>
 
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div v-for="(t, i) in testimonials" :key="i" :ref="el => testimonialRefs[i] = el" class="p-6 rounded-2xl bg-white border border-navy/5 hover:shadow-lg transition-all duration-500 hover:-translate-y-1 opacity-0 translate-y-8">
+          <div v-for="(t, i) in testimonials" :key="i" :ref="el => testimonialRefs[i] = el as Element | null" class="p-6 rounded-2xl bg-white border border-navy/5 hover:shadow-lg transition-all duration-500 hover:-translate-y-1 opacity-0 translate-y-8">
             <!-- Stars -->
             <div class="flex gap-0.5 mb-4">
               <svg v-for="s in 5" :key="s" width="16" height="16" viewBox="0 0 24 24" fill="#facc15" stroke="#facc15" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -496,7 +496,7 @@
         </div>
 
         <div class="space-y-3">
-          <div v-for="(faq, i) in faqs" :key="i" :ref="el => faqRefs[i] = el" class="rounded-xl border border-navy/5 bg-white overflow-hidden transition-all duration-300 opacity-0 translate-y-6" :class="openFaq === i ? 'shadow-lg shadow-brand/5 border-brand/15' : 'hover:border-navy/10'">
+          <div v-for="(faq, i) in faqs" :key="i" :ref="el => faqRefs[i] = el as Element | null" class="rounded-xl border border-navy/5 bg-white overflow-hidden transition-all duration-300 opacity-0 translate-y-6" :class="openFaq === i ? 'shadow-lg shadow-brand/5 border-brand/15' : 'hover:border-navy/10'">
             <button @click="toggleFaq(i)" class="w-full flex items-center justify-between px-6 py-5 text-right">
               <span class="text-[15px] font-semibold text-navy">{{ faq.q }}</span>
               <svg class="w-5 h-5 text-navy/30 transition-transform duration-300 flex-shrink-0 mr-4" :class="openFaq === i ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
@@ -585,11 +585,11 @@
 const scrolled = ref(false)
 const openFaq = ref<number | null>(null)
 
-const featureCardRefs = ref<(HTMLElement | null)[]>([])
-const elementRefs = ref<(HTMLElement | null)[]>([])
-const stepRefs = ref<(HTMLElement | null)[]>([])
-const testimonialRefs = ref<(HTMLElement | null)[]>([])
-const faqRefs = ref<(HTMLElement | null)[]>([])
+const featureCardRefs = ref<(Element | null)[]>([])
+const elementRefs = ref<(Element | null)[]>([])
+const stepRefs = ref<(Element | null)[]>([])
+const testimonialRefs = ref<(Element | null)[]>([])
+const faqRefs = ref<(Element | null)[]>([])
 
 const heroBadge = ref<HTMLElement | null>(null)
 const heroTitle = ref<HTMLElement | null>(null)

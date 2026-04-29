@@ -49,7 +49,7 @@ export function useFormShares(formId: number) {
 		const idx = shares.value.findIndex((s) => s.id === shareId)
 		if (idx === -1) return
 
-		const removed = shares.value.splice(idx, 1)[0]
+		const removed = shares.value.splice(idx, 1)[0]!
 
 		try {
 			await $fetch(`/api/forms/${formId}/shares/${shareId}`, { method: "DELETE" })
