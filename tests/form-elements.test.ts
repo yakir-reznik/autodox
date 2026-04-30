@@ -4,6 +4,7 @@ import { login, api, apiRequest, unauthRequest, ADMIN, USER, USER2 } from "./hel
 let adminCookie: string
 let userCookie: string
 let user2Cookie: string
+let user2Id: number
 
 const createdFormIds: number[] = []
 
@@ -13,6 +14,14 @@ beforeAll(async () => {
 		login(USER.email, USER.password),
 		login(USER2.email, USER2.password),
 	])
+
+	const results = await api<Array<{ id: number; email: string }>>(
+		"/api/users/search?q=vitest-user2",
+		adminCookie,
+	)
+	const found = results.find((u) => u.email === USER2.email)
+	if (!found) throw new Error("vitest-user2 not found — did you run the setup commands?")
+	user2Id = found.id
 })
 
 afterAll(async () => {
@@ -184,11 +193,13 @@ describe("Form elements API", () => {
 			const share = await api<{ id: number }>(`/api/forms/${formId}/shares`, userCookie, {
 				method: "POST",
 				json: {
-					granteeEmail: USER2.email,
-					canViewSubmissions: false,
-					canCreateSubmissions: false,
-					canManageSubmissions: false,
-					canEditForm: false,
+					granteeUserId: user2Id,
+					permissions: {
+						canViewSubmissions: false,
+						canCreateSubmissions: false,
+						canManageSubmissions: false,
+						canEditForm: false,
+					},
 				},
 			})
 			shareId = share.id
@@ -204,7 +215,14 @@ describe("Form elements API", () => {
 			// Upgrade share to include canEditForm
 			await apiRequest(`/api/forms/${formId}/shares/${shareId}`, userCookie, {
 				method: "PATCH",
-				json: { canEditForm: true },
+				json: {
+					permissions: {
+						canViewSubmissions: false,
+						canCreateSubmissions: false,
+						canManageSubmissions: false,
+						canEditForm: true,
+					},
+				},
 			})
 
 			const res = await apiRequest(`/api/forms/${formId}/elements`, user2Cookie, {
