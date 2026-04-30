@@ -20,9 +20,11 @@ Autodox is a **Nuxt 4** form builder for creating and filling dynamic forms (Vue
 
 ## Constraints
 
+- **No tests without permission**: Do not add tests for features without explicit operator approval. Ask when you think tests would be valuable.
+- **Testing stack**: Vitest and `@nuxt/test-utils` for tests when approved.
 - **No database commands**: Ask the operator to run migrations, schema changes, etc.
 - **Tailwind only**: Avoid custom CSS unless absolutely necessary for animations/keyframes.
-- **Package.json commands**: Only `pnpm run typecheck` is allowed. Do not run `pnpm dev`, `pnpm build`, or drizzle commands (e.g., `drizzle-kit generate`, `db:generate`).
+- **Package.json commands**: Only `pnpm run typecheck` and `pnpm run test:failures` are allowed. Do not run `pnpm dev`, `pnpm build`, drizzle commands (e.g., `drizzle-kit generate`, `db:generate`), or `pnpm run test` directly — always use `test:failures` to avoid polluting context with passing test output.
 
 ## Documentation
 

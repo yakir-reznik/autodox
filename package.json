@@ -11,6 +11,7 @@
 		"find-large-files": "node scripts/find-large-files.ts",
 		"typecheck": "nuxi typecheck",
 		"test": "vitest run",
+		"test:failures": "vitest run 2>&1 | grep -v \" ✓\"",
 		"test:watch": "vitest",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
