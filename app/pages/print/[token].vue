@@ -99,17 +99,24 @@
 				const element = transformedElements.value.find((el) => el.clientId === clientId);
 
 				if (element && element.type === "repeater" && Array.isArray(value)) {
-					// Transform repeater items: convert nested field names to clientIds
+					// Build a name→clientId map scoped to this repeater's children only,
+					// so same-named fields in different repeaters don't collide.
+					const childNameMap: Record<string, string> = {};
+					transformedElements.value
+						.filter((el) => el.parentId === clientId)
+						.forEach((el) => {
+							if (el.name) childNameMap[el.name] = el.clientId;
+						});
+
 					result[clientId] = value.map((item: any) => {
 						if (typeof item === "object" && item !== null) {
 							const transformedItem: Record<string, any> = {};
 
 							for (const [itemKey, itemValue] of Object.entries(item)) {
-								const childClientId = nameToClientIdMap.value[itemKey];
+								const childClientId = childNameMap[itemKey];
 								if (childClientId) {
 									transformedItem[childClientId] = itemValue;
 								} else {
-									// Keep the key as-is if no mapping found
 									transformedItem[itemKey] = itemValue;
 								}
 							}
