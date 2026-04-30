@@ -6,7 +6,11 @@
 		ConditionGroup,
 	} from "~/types/form-builder";
 	import { isFieldElement, isSubmittableElement } from "~/composables/useElementDefaults";
-	import { hasInterpolationTokens, getReferencedTokens, interpolateRawValues } from "~/utils/interpolate";
+	import {
+		hasInterpolationTokens,
+		getReferencedTokens,
+		interpolateRawValues,
+	} from "~/utils/interpolate";
 	import FormField from "./FormField.vue";
 
 	interface Props {
@@ -231,7 +235,11 @@
 					if (arr.length) formData[element.clientId] = arr;
 				} catch {}
 			} else if (["dropdown", "radio", "text", "email", "phone", "textarea"].includes(type)) {
-				if (typeof dv === "string" && hasInterpolationTokens(dv) && ["text", "email", "phone", "textarea"].includes(type)) {
+				if (
+					typeof dv === "string" &&
+					hasInterpolationTokens(dv) &&
+					["text", "email", "phone", "textarea"].includes(type)
+				) {
 					// handled by the live interpolation watchEffect below
 					continue;
 				}
@@ -255,7 +263,12 @@
 			const dv = (element.config as any)?.defaultValue;
 			if (typeof dv !== "string" || !hasInterpolationTokens(dv)) continue;
 			if (element.name && getReferencedTokens(dv).includes(element.name)) continue;
-			formData[element.clientId] = interpolateRawValues(dv, allElements.value, formData, prefillData.value);
+			formData[element.clientId] = interpolateRawValues(
+				dv,
+				allElements.value,
+				formData,
+				prefillData.value,
+			);
 		}
 	});
 
@@ -709,22 +722,7 @@
 		</div>
 
 		<!-- Success state -->
-		<div v-else-if="isSubmitted" class="place-items-center grid min-h-screen">
-			<div
-				class="form-fill-success form-fill-card max-w-160 mx-auto bg-card rounded-lg shadow-md p-8 text-center"
-			>
-				<Icon
-					name="heroicons:check-circle"
-					class="form-fill-success-icon h-16 w-16 mx-auto mb-4 text-green-500"
-				/>
-				<h2 class="form-fill-success-title text-xl font-semibold text-foreground mb-2">
-					תודה רבה!
-				</h2>
-				<p class="form-fill-success-message text-base text-muted-foreground">
-					הטופס שלך התקבל בהצלחה.
-				</p>
-			</div>
-		</div>
+		<FormFillSuccess v-else-if="isSubmitted" />
 
 		<!-- Form -->
 		<form
