@@ -18,7 +18,7 @@
 	</div>
 
 	<!-- Main builder -->
-	<div v-else class="flex min-h-screen flex-col bg-gray-100">
+	<div v-else class="flex h-[calc(100vh-56px)] flex-col bg-gray-100">
 		<!-- Header -->
 		<FormBuilderFormHeader
 			v-model:title="state.title"

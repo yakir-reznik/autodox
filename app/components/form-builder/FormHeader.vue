@@ -1,9 +1,9 @@
 <template>
-	<header class="border-b border-gray-200 bg-white px-12 pt-8 pb-4 sticky top-0 z-10">
+	<header class="border-b border-gray-200 bg-white px-4 py-4 sticky top-0 z-10">
 		<div class="flex items-start justify-between gap-4">
 			<!-- Back button and title/description -->
 			<div class="flex items-start gap-4">
-				<div class="flex-1 space-y-2">
+				<div class="flex-1 space-y-0 min-w-30">
 					<input
 						v-model="localTitle"
 						type="text"
@@ -20,7 +20,7 @@
 			</div>
 
 			<!-- Save status, undo/redo, and actions -->
-			<div class="flex items-center gap-4">
+			<div class="flex justify-end items-center gap-4 grow">
 				<FormBuilderSaveIndicator :status="saveStatus" :last-saved-at="lastSavedAt" />
 
 				<!-- Undo/Redo buttons -->
@@ -67,35 +67,34 @@
 					<Icon name="heroicons:cog-6-tooth" class="h-4 w-4" />
 				</UiButton>
 
-				<NuxtLink
-					:to="`/manage/submissions/form/${formId}`"
-					title="View submissions for this form"
-				>
-					<UiButton variant="secondary">
-						<span>הצגת הגשות לטופס זה</span>
-						<Icon name="heroicons:list-bullet" class="h-4 w-4" />
-					</UiButton>
-				</NuxtLink>
-
-				<NuxtLink
-					:to="`/manage/form/${formId}/submission-data-structure`"
-					title="הצג מבנה נתונים"
-				>
-					<UiButton variant="secondary">
-						<span>מבנה נתונים</span>
-						<Icon name="heroicons:code-bracket" class="h-4 w-4" />
-					</UiButton>
-				</NuxtLink>
-
-				<NuxtLink
-					:to="`/manage/form/upload?formId=${formId}`"
-					title="Upload JSON to replace form structure"
-				>
-					<UiButton variant="secondary">
-						<span>ייבוא JSON</span>
-						<Icon name="heroicons:arrow-up-tray" class="h-4 w-4" />
-					</UiButton>
-				</NuxtLink>
+				<UiDropdownMenu>
+					<UiDropdownMenuTrigger as-child>
+						<UiButton variant="secondary">
+							<span>עוד פעולות</span>
+							<Icon name="heroicons:ellipsis-vertical" class="h-4 w-4" />
+						</UiButton>
+					</UiDropdownMenuTrigger>
+					<UiDropdownMenuContent align="end">
+						<NuxtLink :to="`/manage/submissions/form/${formId}`">
+							<UiDropdownMenuItem class="px-4">
+								<Icon name="heroicons:list-bullet" class="h-4 w-4" />
+								הצגת הגשות לטופס זה
+							</UiDropdownMenuItem>
+						</NuxtLink>
+						<NuxtLink :to="`/manage/form/${formId}/submission-data-structure`">
+							<UiDropdownMenuItem class="px-4">
+								<Icon name="heroicons:code-bracket" class="h-4 w-4" />
+								מבנה נתונים
+							</UiDropdownMenuItem>
+						</NuxtLink>
+						<NuxtLink :to="`/manage/form/upload?formId=${formId}`">
+							<UiDropdownMenuItem class="px-4">
+								<Icon name="heroicons:arrow-up-tray" class="h-4 w-4" />
+								ייבוא JSON
+							</UiDropdownMenuItem>
+						</NuxtLink>
+					</UiDropdownMenuContent>
+				</UiDropdownMenu>
 			</div>
 		</div>
 	</header>

@@ -21,30 +21,30 @@
 	<div class="flex items-center gap-2 text-sm">
 		<!-- Idle: Show last saved time if available -->
 		<template v-if="status === 'idle' && formattedTime">
-			<span class="text-gray-400">נשמר ב {{ formattedTime }}</span>
+			<span class="whitespace-nowrap text-gray-400">נשמר ב {{ formattedTime }}</span>
 		</template>
 
 		<!-- Pending: Show typing indicator -->
 		<template v-else-if="status === 'pending'">
-			<span class="text-gray-400">שינויים שלא נשמרו...</span>
+			<span class="whitespace-nowrap text-gray-400">שינויים שלא נשמרו...</span>
 		</template>
 
 		<!-- Saving: Show spinner -->
 		<template v-else-if="status === 'saving'">
 			<Icon name="svg-spinners:ring-resize" class="h-4 w-4 text-blue-500" />
-			<span class="text-blue-500">שומר...</span>
+			<span class="whitespace-nowrap text-blue-500">שומר...</span>
 		</template>
 
 		<!-- Saved: Show checkmark -->
 		<template v-else-if="status === 'saved'">
 			<Icon name="heroicons:check-circle" class="h-4 w-4 text-green-500" />
-			<span class="text-green-500">נשמר</span>
+			<span class="whitespace-nowrap text-green-500">נשמר</span>
 		</template>
 
 		<!-- Error: Show error with retry hint -->
 		<template v-else-if="status === 'error'">
 			<Icon name="heroicons:exclamation-circle" class="h-4 w-4 text-red-500" />
-			<span class="text-red-500">שמירה נכשלה</span>
+			<span class="whitespace-nowrap text-red-500">שמירה נכשלה</span>
 		</template>
 	</div>
 </template>
