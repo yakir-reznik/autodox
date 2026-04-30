@@ -43,7 +43,12 @@ export default defineEventHandler(async (event) => {
 			canEditForm: body.permissions.canEditForm,
 		});
 	} catch (err: any) {
-		if (err?.code === "ER_DUP_ENTRY") {
+		const isDuplicate =
+			err?.code === "ER_DUP_ENTRY" ||
+			err?.cause?.code === "ER_DUP_ENTRY" ||
+			err?.errno === 1062 ||
+			err?.cause?.errno === 1062;
+		if (isDuplicate) {
 			throw createError({
 				statusCode: 409,
 				message: "User already has a share for this form",

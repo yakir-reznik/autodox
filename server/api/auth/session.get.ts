@@ -2,7 +2,7 @@ export default defineEventHandler(async (event) => {
 	const session = await getUserSession(event);
 
 	return {
-		user: session.user || null,
+		...(session.user ? { user: session.user } : {}),
 		loggedIn: !!session.user,
 	};
 });
