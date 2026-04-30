@@ -105,7 +105,7 @@
 			{ label: "רשימת טפסים", to: "/manage" },
 			{
 				label: `רשימת הגשות (${form.value.title})`,
-				to: `/manage/submissions/${form.value.id}`,
+				to: `/manage/submissions/form/${form.value.id}`,
 			},
 			{ label: "פרטי הגשה" },
 		];

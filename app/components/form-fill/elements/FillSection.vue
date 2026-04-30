@@ -1,63 +1,66 @@
 <script setup lang="ts">
-import type { BuilderElement } from "~/types/form-builder";
+	import type { BuilderElement } from "~/types/form-builder";
 
-interface Props {
-	element: BuilderElement;
-	getChildren: (parentClientId: string) => BuilderElement[];
-	formData: Record<string, any>;
-	errors: Record<string, string>;
-	readonly?: boolean;
-	getConditionRequired?: (clientId: string) => boolean;
-}
-
-const props = defineProps<Props>();
-
-const emit = defineEmits<{
-	"update:modelValue": [value: any];
-}>();
-
-const config = computed(() => props.element.config as {
-	collapsible?: boolean;
-	defaultCollapsed?: boolean;
-	bordered?: boolean;
-	backgroundColor?: string;
-});
-
-const isCollapsed = ref(config.value.defaultCollapsed || false);
-
-const children = computed(() => props.getChildren(props.element.clientId));
-
-const sectionClass = computed(() => {
-	const classes = ["form-fill-section"];
-	if (config.value.bordered) {
-		classes.push("bordered");
+	interface Props {
+		element: BuilderElement;
+		getChildren: (parentClientId: string) => BuilderElement[];
+		formData: Record<string, any>;
+		errors: Record<string, string>;
+		readonly?: boolean;
+		getConditionRequired?: (clientId: string) => boolean;
 	}
-	return classes.join(" ");
-});
 
-const sectionStyle = computed(() => {
-	if (config.value.backgroundColor) {
-		return { backgroundColor: config.value.backgroundColor };
+	const props = defineProps<Props>();
+
+	const emit = defineEmits<{
+		"update:modelValue": [value: any];
+	}>();
+
+	const config = computed(
+		() =>
+			props.element.config as {
+				collapsible?: boolean;
+				defaultCollapsed?: boolean;
+				bordered?: boolean;
+				backgroundColor?: string;
+			},
+	);
+
+	const isCollapsed = ref(config.value.defaultCollapsed || false);
+
+	const children = computed(() => props.getChildren(props.element.clientId));
+
+	const sectionClass = computed(() => {
+		const classes = ["form-fill-section"];
+		if (config.value.bordered) {
+			classes.push("bordered");
+		}
+		return classes.join(" ");
+	});
+
+	const sectionStyle = computed(() => {
+		if (config.value.backgroundColor) {
+			return { backgroundColor: config.value.backgroundColor };
+		}
+		return {};
+	});
+
+	function toggleCollapse() {
+		if (config.value.collapsible) {
+			isCollapsed.value = !isCollapsed.value;
+		}
 	}
-	return {};
-});
 
-function toggleCollapse() {
-	if (config.value.collapsible) {
-		isCollapsed.value = !isCollapsed.value;
+	// Bubble up form data changes
+	function updateChildData(clientId: string, value: any) {
+		// The parent FormFill handles the formData directly
+		// We need to emit the update for the child
+		props.formData[clientId] = value;
 	}
-}
-
-// Bubble up form data changes
-function updateChildData(clientId: string, value: any) {
-	// The parent FormFill handles the formData directly
-	// We need to emit the update for the child
-	props.formData[clientId] = value;
-}
 </script>
 
 <template>
-	<div :class="sectionClass" class="bg-accent rounded-md p-4" :style="sectionStyle">
+	<div :class="sectionClass" class="bg-secondary rounded-md p-4" :style="sectionStyle">
 		<!-- Collapse toggle -->
 		<div
 			v-if="config.collapsible"
