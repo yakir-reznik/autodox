@@ -34,6 +34,14 @@ export default defineEventHandler(async (event) => {
 		});
 	}
 
+	// Check if submission is locked (already completed)
+	if (submission.status === "locked") {
+		throw createError({
+			statusCode: 403,
+			message: "This submission has already been completed",
+		});
+	}
+
 	// Check if submission is archived
 	if (submission.isArchived) {
 		throw createError({

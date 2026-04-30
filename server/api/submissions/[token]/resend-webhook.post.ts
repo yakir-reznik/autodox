@@ -11,9 +11,9 @@ export default defineEventHandler(async (event) => {
 
 	const { submission, form } = await requireSubmissionPermission(event, token, "manage_submissions");
 
-	const { webhookIncludePdf } = resolveFormSettings(form, submission);
+	const { webhookUrl, webhookIncludePdf } = resolveFormSettings(form, submission);
 
-	const result = await deliverWebhook(submission.id, submission.webhookUrl, { includePdf: !!webhookIncludePdf });
+	const result = await deliverWebhook(submission.id, webhookUrl as string | null, { includePdf: !!webhookIncludePdf });
 
 	return { success: true, data: result };
 });

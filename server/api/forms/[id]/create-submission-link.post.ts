@@ -53,8 +53,6 @@ export default defineEventHandler(async (event) => {
 			throw createError({ statusCode: 400, message: "Invalid webhook URL format" });
 		}
 		webhookUrl = body.webhook_url;
-	} else if (form.webhookUrl) {
-		webhookUrl = form.webhookUrl;
 	}
 
 	const token = generateToken();

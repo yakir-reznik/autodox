@@ -77,9 +77,9 @@ export default defineEventHandler(async (event) => {
 			.where(eq(submissionsTable.token, token));
 
 		// Trigger webhook
-		if (submission.webhookUrl) {
-			const { webhookIncludePdf } = resolveFormSettings(form, submission);
-			deliverWebhook(submission.id, submission.webhookUrl, { includePdf: !!webhookIncludePdf })
+		const { webhookUrl: effectiveWebhookUrl, webhookIncludePdf } = resolveFormSettings(form, submission);
+		if (effectiveWebhookUrl) {
+			deliverWebhook(submission.id, effectiveWebhookUrl as string, { includePdf: !!webhookIncludePdf })
 				.then((result) => {
 					console.log(`[Webhook] Delivery completed for submission ${submission.id}:`, result);
 				})
