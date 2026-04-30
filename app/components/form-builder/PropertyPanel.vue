@@ -16,9 +16,11 @@
 			<FormBuilderPropertiesBaseProperties
 				v-if="isFieldElement(element.type)"
 				:element="element"
+				:conflicts="conflicts"
 				@update:name="updateName"
 				@update:config="updateConfig"
 				@update:required="updateRequired"
+				@select-field="(clientId) => $emit('selectField', clientId)"
 			/>
 
 			<!-- Input-specific properties -->
@@ -117,9 +119,12 @@
 	interface Props {
 		element: BuilderElement;
 		allElements: BuilderElement[];
+		conflicts?: BuilderElement[];
 	}
 
-	const props = defineProps<Props>();
+	const props = withDefaults(defineProps<Props>(), {
+		conflicts: () => [],
+	});
 	const panelRef = ref<HTMLElement | null>(null);
 
 	watch(() => props.element.id, () => {
@@ -130,6 +135,7 @@
 		update: [updates: Partial<BuilderElement>];
 		close: [];
 		editConditions: [];
+		selectField: [clientId: string];
 	}>();
 
 	// Element type display name

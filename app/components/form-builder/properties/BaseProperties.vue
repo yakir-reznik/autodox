@@ -3,14 +3,18 @@
 
 	interface Props {
 		element: BuilderElement;
+		conflicts?: BuilderElement[];
 	}
 
-	const props = defineProps<Props>();
+	const props = withDefaults(defineProps<Props>(), {
+		conflicts: () => [],
+	});
 
 	const emit = defineEmits<{
 		"update:name": [name: string];
 		"update:config": [config: Record<string, any>];
 		"update:required": [required: boolean];
+		"select-field": [clientId: string];
 	}>();
 
 	const config = computed(
@@ -29,6 +33,11 @@
 	function updateHelpText(helpText: string) {
 		emit("update:config", { helpText });
 	}
+
+	function conflictLabel(el: BuilderElement): string {
+		const cfg = el.config as { label?: string };
+		return cfg.label || el.name || el.clientId;
+	}
 </script>
 
 <template>
@@ -41,9 +50,28 @@
 			<BaseInput
 				:model-value="element.name || ''"
 				placeholder="e.g., first_name"
+				:class="conflicts.length > 0 ? 'border-red-400 focus:border-red-500' : ''"
 				@update:model-value="$emit('update:name', String($event))"
 			/>
-			<p class="mt-1 text-xs text-gray-500">Used to identify this field in submissions</p>
+			<p v-if="conflicts.length === 0" class="mt-1 text-xs text-gray-500">
+				Used to identify this field in submissions
+			</p>
+			<div v-else class="mt-1 text-xs text-red-600">
+				<p class="font-medium">
+					שם השדה כפול ברמה הזו. תקנו את אחד מהשדות הבאים:
+				</p>
+				<ul class="mt-1 list-disc ps-4 space-y-0.5">
+					<li v-for="c in conflicts" :key="c.clientId">
+						<button
+							type="button"
+							class="text-red-700 underline hover:text-red-800"
+							@click="$emit('select-field', c.clientId)"
+						>
+							{{ conflictLabel(c) }}
+						</button>
+					</li>
+				</ul>
+			</div>
 		</div>
 
 		<!-- Label -->

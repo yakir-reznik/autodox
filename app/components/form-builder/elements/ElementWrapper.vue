@@ -44,6 +44,15 @@
 	// Shared drag state — used to expand container drop zones during a drag
 	const { isDragging } = useFormBuilderDragState();
 
+	// Provided by FormBuilder.vue — Set of clientIds that have a duplicate field name conflict.
+	const duplicateClientIds = inject<ComputedRef<Set<string>>>(
+		"duplicateClientIds",
+		computed(() => new Set<string>()),
+	);
+	const hasDuplicateName = computed(() =>
+		duplicateClientIds.value.has(props.element.clientId),
+	);
+
 	// Check if element is a container type (can have nested children)
 	const isContainer = computed(
 		() =>
@@ -195,6 +204,22 @@
 			>
 				<Icon name="heroicons:trash" class="h-4 w-4" />
 			</button>
+		</div>
+
+		<!-- Duplicate field name indicator -->
+		<div
+			v-if="hasDuplicateName"
+			class="absolute -top-2.5 end-4 rounded bg-red-100 p-1 text-red-600 ring-1 ring-red-300"
+			:class="{
+				'end-32':
+					element.conditions?.enabled && element.conditions.rules.length > 0,
+			}"
+			title="שם שדה כפול ברמה הזו"
+		>
+			<div class="flex items-center gap-1 px-2 text-xs font-medium">
+				<Icon name="heroicons:exclamation-circle" class="h-3.5 w-3.5" />
+				<span>שם כפול</span>
+			</div>
 		</div>
 
 		<!-- Condition indicator (always visible) -->

@@ -9,6 +9,10 @@ import type {
 } from "~/types/form-builder";
 import { isFieldElement } from "./useElementDefaults";
 import { useHistory } from "./useHistory";
+import {
+	useFieldNameValidation,
+	DuplicateFieldNamesError,
+} from "./useFieldNameValidation";
 
 function generateClientId(): string {
 	return `el_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -62,6 +66,14 @@ export function useFormBuilder() {
 	// History management for undo/redo (only structural changes: add/remove/move/reorder/duplicate)
 	const history = useHistory();
 	const isUndoRedoOperation = ref(false);
+
+	// Field-name uniqueness validation (per submission scope)
+	const {
+		duplicateGroups,
+		duplicateClientIds,
+		hasDuplicates,
+		conflictsFor,
+	} = useFieldNameValidation(() => state.elements);
 
 	function getSnapshot(): HistoryEntry {
 		return {
@@ -369,6 +381,12 @@ export function useFormBuilder() {
 	async function save(): Promise<void> {
 		if (!state.isDirty && state.formId) return;
 
+		// Block save when same-scope field names collide — would silently corrupt submission data.
+		if (hasDuplicates.value) {
+			state.saveError = "Duplicate field names";
+			throw new DuplicateFieldNamesError(duplicateGroups.value);
+		}
+
 		state.isSaving = true;
 		state.saveError = null;
 
@@ -517,5 +535,10 @@ export function useFormBuilder() {
 		canRedo: history.canRedo,
 		undo: performUndo,
 		redo: performRedo,
+		// Field-name validation
+		duplicateGroups,
+		duplicateClientIds,
+		hasDuplicates,
+		conflictsFor,
 	};
 }

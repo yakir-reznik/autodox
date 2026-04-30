@@ -29,7 +29,7 @@
 			:form-id="state.formId ?? undefined"
 			:can-undo="canUndo"
 			:can-redo="canRedo"
-			@save="forceSave"
+			@save="handleForceSave"
 			@undo="undo"
 			@redo="redo"
 			@update:status="state.status = $event"
@@ -44,9 +44,11 @@
 					v-if="selectedElement"
 					:element="selectedElement"
 					:all-elements="state.elements"
+					:conflicts="selectedElementConflicts"
 					@update="handlePropertyUpdate"
 					@close="selectElement(null)"
 					@edit-conditions="handleEditConditionsFromPanel"
+					@select-field="selectElement"
 				/>
 				<div v-else class="flex h-full items-center justify-center p-6 text-center">
 					<div class="text-gray-400">
@@ -124,7 +126,18 @@
 		canRedo,
 		undo,
 		redo,
+		duplicateClientIds,
+		hasDuplicates,
+		conflictsFor,
 	} = useFormBuilder();
+
+	const toasts = useToasts();
+
+	provide("duplicateClientIds", duplicateClientIds);
+
+	const selectedElementConflicts = computed(() =>
+		selectedElement.value ? conflictsFor(selectedElement.value.clientId) : [],
+	);
 
 	// Setup keyboard shortcuts for undo/redo
 	useKeyboardShortcuts(undo, redo);
@@ -132,8 +145,32 @@
 	const { status, triggerSave, forceSave } = useAutoSave({
 		debounceMs: 10000,
 		onSave: save,
-		onError: (error) => console.error("Auto-save failed:", error),
+		onError: (error) => {
+			if (error.name === "DuplicateFieldNamesError") {
+				// Auto-save attempts stay silent — the inline error and canvas badge are the
+				// in-context signals. Manual save toasts via `handleForceSave` below.
+				console.warn("Save blocked: duplicate field names");
+				return;
+			}
+			console.error("Auto-save failed:", error);
+		},
 	});
+
+	async function handleForceSave() {
+		try {
+			await forceSave();
+		} catch (error) {
+			if ((error as Error).name === "DuplicateFieldNamesError") {
+				toasts.add({
+					theme: "error",
+					title: "לא ניתן לשמור",
+					subtitle: "ישנם שדות עם שמות כפולים באותה רמה. תקנו אותם ונסו שוב.",
+				});
+				return;
+			}
+			throw error;
+		}
+	}
 
 	// Watch for title/description/status/theme changes and mark as dirty
 	const initialTitle = ref<string>("");
@@ -202,15 +239,22 @@
 		},
 	);
 
-	// Watch for changes and trigger auto-save
+	// Watch for changes and trigger auto-save (skip when duplicates would block save anyway)
 	watch(
 		() => state.isDirty,
 		(isDirty) => {
-			if (isDirty) {
+			if (isDirty && !hasDuplicates.value) {
 				triggerSave();
 			}
 		},
 	);
+
+	// Re-trigger auto-save once duplicates are resolved on a dirty form
+	watch(hasDuplicates, (now) => {
+		if (!now && state.isDirty) {
+			triggerSave();
+		}
+	});
 
 	// Error state
 	const loadError = ref<string | null>(null);

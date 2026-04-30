@@ -2,6 +2,10 @@ import { db } from "~~/server/db";
 import { formElementsTable } from "~~/server/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { requireFormPermission } from "~~/server/utils/authorization";
+import {
+	findDuplicateNameGroups,
+	type ElementForValidation,
+} from "../../../../shared/utils/fieldNameValidation";
 
 export default defineEventHandler(async (event) => {
 	const formId = Number(getRouterParam(event, "id"));
@@ -19,6 +23,28 @@ export default defineEventHandler(async (event) => {
 		throw createError({
 			statusCode: 400,
 			message: "Elements must be an array",
+		});
+	}
+
+	// Reject duplicate field names within the same submission scope (root or repeater).
+	// Same check runs client-side; this is defense-in-depth against direct API misuse.
+	const validationPayload: ElementForValidation[] = elements.map((el) => ({
+		id: el.id != null ? `id:${el.id}` : `tmp:${el.tempId}`,
+		name: el.name ?? null,
+		parentId:
+			el.parentId == null
+				? null
+				: typeof el.parentId === "number"
+					? `id:${el.parentId}`
+					: `tmp:${el.parentId}`,
+		type: el.type,
+	}));
+	const duplicates = findDuplicateNameGroups(validationPayload);
+	if (duplicates.length > 0) {
+		throw createError({
+			statusCode: 400,
+			message: "Duplicate field names within the same scope",
+			data: { error: "duplicate_field_names", duplicates },
 		});
 	}
 
