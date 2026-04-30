@@ -2,14 +2,7 @@ import { eq } from "drizzle-orm";
 import { usersTable } from "~~/server/db/schema";
 import { db } from "~~/server/db";
 
-
 export default defineEventHandler(async (event) => {
-	// TODO: re-enable once security model is figured out
-	throw createError({
-		statusCode: 503,
-		statusMessage: "Signups temporarily disabled",
-	});
-
 	const body = await readBody(event);
 	const { name, email, password } = body;
 
