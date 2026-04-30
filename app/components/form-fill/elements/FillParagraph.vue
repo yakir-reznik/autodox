@@ -30,5 +30,5 @@ const resolvedHtml = computed(() => {
 </script>
 
 <template>
-	<p class="form-fill-paragraph text-base text-muted-foreground leading-relaxed" :style="alignmentStyle" v-html="resolvedHtml" />
+	<p class="form-fill-paragraph text-base text-muted-foreground leading-relaxed whitespace-pre-wrap" :style="alignmentStyle" v-html="resolvedHtml" />
 </template>
