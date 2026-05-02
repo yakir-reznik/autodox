@@ -19,7 +19,7 @@
 			</div>
 		</UiSidebarHeader>
 
-		<UiSidebarContent>
+		<UiSidebarContent class="group-data-[collapsible=icon]:mt-4">
 			<UiSidebarGroup>
 				<UiSidebarGroupLabel>ניווט</UiSidebarGroupLabel>
 				<UiSidebarGroupContent>
@@ -33,6 +33,7 @@
 							>
 								<NuxtLink
 									:to="item.to"
+									class="group-data-[collapsible=icon]:justify-center zzz group-data-[collapsible=icon]:my-1"
 									exact-active-class="text-primary! bg-primary/5!"
 								>
 									<Icon :name="item.icon" class="text-lg shrink-0" />
@@ -58,7 +59,10 @@
 								size="lg"
 								:tooltip="item.label"
 							>
-								<NuxtLink :to="item.to!">
+								<NuxtLink
+									:to="item.to!"
+									class="group-data-[collapsible=icon]:justify-center zzz group-data-[collapsible=icon]:my-1"
+								>
 									<Icon :name="item.icon" class="text-lg shrink-0" />
 									<span class="text-base group-data-[collapsible=icon]:hidden">
 										{{ item.label }}
@@ -70,7 +74,7 @@
 								disabled
 								size="lg"
 								:tooltip="item.label"
-								class="opacity-50 cursor-not-allowed"
+								class="opacity-50 cursor-not-allowed group-data-[collapsible=icon]:justify-center zzz group-data-[collapsible=icon]:my-1"
 							>
 								<Icon :name="item.icon" class="text-lg shrink-0" />
 								<span class="text-base group-data-[collapsible=icon]:hidden">
@@ -87,7 +91,10 @@
 			<div
 				class="rounded-lg bg-muted p-3 flex flex-col gap-2 group-data-[collapsible=icon]:hidden"
 			>
-				<NuxtLink to="/manage/user">
+				<NuxtLink
+					to="/manage/user"
+					class="group-data-[collapsible=icon]:justify-center zzz group-data-[collapsible=icon]:my-1"
+				>
 					<div class="flex items-center gap-2">
 						<div
 							class="flex size-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-violet-600 text-white text-sm font-semibold"
@@ -156,7 +163,6 @@
 			icon: "heroicons:code-bracket",
 			disabled: false,
 		},
-		{ label: "יצירת הגשה חדשה", to: null, icon: "heroicons:plus-circle", disabled: true },
 	];
 
 	const isActive = (to: string) =>
@@ -168,3 +174,9 @@
 		navigateTo("/login");
 	}
 </script>
+
+<style scoped lang="css">
+	.zzz {
+		transition: none;
+	}
+</style>

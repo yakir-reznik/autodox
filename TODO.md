@@ -12,14 +12,14 @@
 
 ## Features
 
-- [x] Implement authorization plan... server endpoints are currently not protected
-- [ ] Disable unauthorized actions in management panel UI. for example - user without delete permission on form should not be able to click the delete button... it needs to be disabled.
 - [ ] Allow users to share form folders
 - [ ] Import / export form json is a mess... does not export all props of fields and also does not import all. we need a simpler solution to dump an export with to much fuss and import back.
 - [ ] Add sha 256 checksum hash to locked submission
 - [ ] for submissions that have expired - they are stuck in "In Progress". we need to change their status to "expired"
 - [ ] submissions link expire 14 days after generating (create-submission-link.post.ts) we need to add option to change this in form settings and in submission settings. i want the @server/api/forms/[id]/create-submission-link.post.ts to return the number of days the link is good for and we need to display it on the success message instead of a hardcoded value
 - [ ] Allow saving without submitting. Also allow saving while form is only partially filled. Max 1 save per user per form and it should expire after 30 days. new save overwrites last one. (Plan file ready - save-submission-drafts.md)
+- [x] Implement authorization plan... server endpoints are currently not protected
+- [x] Disable unauthorized actions in management panel UI. for example - user without delete permission on form should not be able to click the delete button... it needs to be disabled.
 - [x] Form share. Users should be able to share forms with other users. If i share my form with a user they can view data related to this form (submission), they can create submissions for it etc but they CAN NOT edit the form itself. We need to make an extensive plan for this and then update the authorization plan before executing.
 - [x] Remove form name from print view (Causes double title)
 - [x] Implement archiving feature in submissions/form/{form_id} - there is also ui in more actions dropdown. we need to show a approve modal and if approved mark as archived. in the filtering section allow showing archived items
