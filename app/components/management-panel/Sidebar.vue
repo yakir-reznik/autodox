@@ -134,7 +134,7 @@
 	const mainNavItems = [
 		{ label: "ניהול טפסים", to: "/manage/", icon: "heroicons:document-text" },
 		{
-			label: "טפסים משותפים (להשלים)",
+			label: "טפסים ששותפו איתי",
 			to: "/manage/forms/shared",
 			icon: "heroicons:users",
 		},

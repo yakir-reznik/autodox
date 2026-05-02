@@ -143,6 +143,7 @@ export interface FormWithElements {
 	updatedAt: string;
 	createdBy: number;
 	updatedBy: number | null;
+	permissions?: FormPermissions;
 	elements: Array<{
 		id: number;
 		type: ElementType;
@@ -196,12 +197,29 @@ export interface HistoryEntry {
 }
 
 // Form sharing types
-export type FormSharePermissions = {
+export type FormPermissionName =
+	| "view"
+	| "view_submissions"
+	| "create_submissions"
+	| "manage_submissions"
+	| "edit_form"
+	| "delete"
+	| "manage_shares";
+
+export type FormPermissions = {
+	canView: boolean;
 	canViewSubmissions: boolean;
 	canCreateSubmissions: boolean;
 	canManageSubmissions: boolean;
 	canEditForm: boolean;
+	canDelete: boolean;
+	canManageShares: boolean;
 };
+
+export type FormSharePermissions = Pick<
+	FormPermissions,
+	"canViewSubmissions" | "canCreateSubmissions" | "canManageSubmissions" | "canEditForm"
+>;
 
 export type FormShare = {
 	id: number;

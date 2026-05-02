@@ -58,37 +58,40 @@
 					</BaseButton>
 				</UiDropdownMenuTrigger>
 				<UiDropdownMenuContent align="end">
-					<UiDropdownMenuItem class="px-4" @select="handleMoveForm(form)">
-						<Icon name="mdi:folder-move" class="h-4 w-4" />
-						העבר לתיקייה
-					</UiDropdownMenuItem class="px-4">
-					<UiDropdownMenuItem class="px-4" @select="emit('duplicateForm', form)">
-						<Icon name="heroicons:document-duplicate" class="h-4 w-4" />
-						שכפול טופס
-					</UiDropdownMenuItem class="px-4">
-					<UiDropdownMenuItem class="px-4" @select="emit('createSubmission', form)">
-						<Icon name="heroicons:document-text" class="h-4 w-4" />
-						יצירת הגשה
-					</UiDropdownMenuItem class="px-4">
-					<UiDropdownMenuItem class="px-4" @select="emit('changeStatus', form)">
-						<Icon name="heroicons:arrow-path" class="h-4 w-4" />
-						שינוי סטטוס
-					</UiDropdownMenuItem class="px-4">
+					<UiDropdownMenuItem
+						v-for="action in primaryMenuActions"
+						:key="action.key"
+						class="px-4"
+						:disabled="isActionDisabled(action)"
+						@select="action.handler"
+					>
+						<Icon :name="action.icon" class="h-4 w-4" />
+						{{ action.label }}
+					</UiDropdownMenuItem>
 					<NuxtLink :to="`/manage/form/${form.id}/submission-data-structure`">
 						<UiDropdownMenuItem class="px-4">
 							<Icon name="heroicons:code-bracket" class="h-4 w-4" />
 							הצג מבנה נתונים
 						</UiDropdownMenuItem>
 					</NuxtLink>
-					<UiDropdownMenuItem class="px-4" @select="emit('openSettings', form)">
-						<Icon name="heroicons:cog-6-tooth" class="h-4 w-4" />
-						הגדרות טופס ושיתוף
+					<UiDropdownMenuItem
+						class="px-4"
+						:disabled="isActionDisabled(settingsAction)"
+						@select="settingsAction.handler"
+					>
+						<Icon :name="settingsAction.icon" class="h-4 w-4" />
+						{{ settingsAction.label }}
 					</UiDropdownMenuItem>
 					<UiDropdownMenuSeparator />
-					<UiDropdownMenuItem class="px-4" variant="destructive" @select="emit('deleteForm', form)">
-						<Icon name="heroicons:trash" class="h-4 w-4" />
-						מחיקה
-					</UiDropdownMenuItem class="px-4">
+					<UiDropdownMenuItem
+						class="px-4"
+						variant="destructive"
+						:disabled="isActionDisabled(deleteAction)"
+						@select="deleteAction.handler"
+					>
+						<Icon :name="deleteAction.icon" class="h-4 w-4" />
+						{{ deleteAction.label }}
+					</UiDropdownMenuItem>
 				</UiDropdownMenuContent>
 			</UiDropdownMenu>
 		</div>
@@ -96,6 +99,7 @@
 </template>
 
 <script setup lang="ts">
+	import type { FormPermissionName } from "~/types/form-builder";
 	import {
 		type FormListItem,
 		getFormStatusLabel,
@@ -115,8 +119,73 @@
 		openSettings: [form: FormListItem];
 	}>();
 
+	type MenuAction = {
+		key: string;
+		label: string;
+		icon: string;
+		handler: () => void;
+		requiredPermissions?: FormPermissionName[];
+		requiredPermissionMode?: "all" | "any";
+	};
+
+	const primaryMenuActions = computed<MenuAction[]>(() => [
+		{
+			key: "move",
+			label: "העבר לתיקייה",
+			icon: "mdi:folder-move",
+			handler: () => handleMoveForm(form),
+		},
+		{
+			key: "duplicate",
+			label: "שכפול טופס",
+			icon: "heroicons:document-duplicate",
+			handler: () => emit("duplicateForm", form),
+		},
+		{
+			key: "create-submission",
+			label: "יצירת הגשה",
+			icon: "heroicons:document-text",
+			handler: () => emit("createSubmission", form),
+			requiredPermissions: ["create_submissions"],
+		},
+		{
+			key: "change-status",
+			label: "שינוי סטטוס",
+			icon: "heroicons:arrow-path",
+			handler: () => emit("changeStatus", form),
+			requiredPermissions: ["edit_form"],
+		},
+	]);
+
+	const settingsAction: MenuAction = {
+		key: "settings",
+		label: "הגדרות טופס ושיתוף",
+		icon: "heroicons:cog-6-tooth",
+		handler: () => emit("openSettings", form),
+		requiredPermissions: ["edit_form", "manage_shares"],
+		requiredPermissionMode: "any",
+	};
+
+	const deleteAction: MenuAction = {
+		key: "delete",
+		label: "מחיקה",
+		icon: "heroicons:trash",
+		handler: () => emit("deleteForm", form),
+		requiredPermissions: ["delete"],
+	};
+
 	function handleMoveForm(form: FormListItem) {
 		emit("moveForm", form);
+	}
+
+	function isActionDisabled(action: MenuAction) {
+		return action.requiredPermissions
+			? !hasRequiredFormPermissions(
+					form.permissions,
+					action.requiredPermissions,
+					action.requiredPermissionMode,
+				)
+			: false;
 	}
 </script>
 

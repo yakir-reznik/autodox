@@ -2,6 +2,10 @@
 
 Autodox is a **Nuxt 4** form builder for creating and filling dynamic forms (Vue 3, TypeScript, Drizzle ORM, MySQL).
 
+## General
+
+- **Be concise with you're answers and descriptions of actions you took**
+
 ## Key Facts
 
 - **Use tabs** use tabs over spaces for indentation when writing code

@@ -6,17 +6,21 @@
 				<p class="text-xs text-gray-500">User ID: {{ userId }}</p>
 			</div>
 			<div class="flex items-center gap-3">
-				<select
-					id="form-filter"
-					v-model="selectedFormId"
-					@change="onFormFilterChange"
-					class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-				>
-					<option :value="null">כל הטפסים</option>
-					<option v-for="form in formsData" :key="form.id" :value="form.id">
-						{{ form.title }}
-					</option>
-				</select>
+				<UiSelect v-model="selectedFormId">
+					<UiSelectTrigger class="w-48 bg-white">
+						<UiSelectValue placeholder="כל הטפסים" />
+					</UiSelectTrigger>
+					<UiSelectContent>
+						<UiSelectItem :value="ALL_FORMS_VALUE">כל הטפסים</UiSelectItem>
+						<UiSelectItem
+							v-for="form in formsData"
+							:key="form.id"
+							:value="String(form.id)"
+						>
+							{{ form.title }}
+						</UiSelectItem>
+					</UiSelectContent>
+				</UiSelect>
 				<UiButton variant="outline" size="sm" @click="refresh" :disabled="pending">
 					<Icon v-if="pending" name="svg-spinners:ring-resize" class="h-4 w-4" />
 					<Icon v-else name="heroicons:arrow-path" class="h-4 w-4" />
@@ -40,6 +44,8 @@
 
 <script setup lang="ts">
 	import type { Submission } from "~/types/Submission";
+
+	const ALL_FORMS_VALUE = "all";
 
 	definePageMeta({
 		layout: "management-panel",
@@ -68,12 +74,17 @@
 	const router = useRouter();
 	const userId = Number(route.params.user_id);
 	const currentPage = ref(Number(route.query.page) || 1);
-	const selectedFormId = ref<number | null>(null);
+	const selectedFormId = ref(ALL_FORMS_VALUE);
 
 	watch(currentPage, (newPage) => {
 		router.replace({
 			query: { ...route.query, page: newPage > 1 ? String(newPage) : undefined },
 		});
+	});
+
+	watch(selectedFormId, () => {
+		currentPage.value = 1;
+		refresh();
 	});
 
 	const { data: formsData } = await useFetch<FormOption[]>("/api/forms");
@@ -85,17 +96,14 @@
 		refresh,
 	} = await useFetch<PaginatedResponse>(() => {
 		let url = `/api/submissions?userId=${userId}&page=${currentPage.value}`;
-		if (selectedFormId.value) url += `&formId=${selectedFormId.value}`;
+		if (selectedFormId.value !== ALL_FORMS_VALUE) {
+			url += `&formId=${Number(selectedFormId.value)}`;
+		}
 		return url;
 	});
 
 	const submissions = computed(() => response.value?.data ?? []);
 	const pagination = computed(() => response.value?.pagination);
-
-	function onFormFilterChange() {
-		currentPage.value = 1;
-		refresh();
-	}
 
 	useHead({ title: "הגשות - Autodox" });
 </script>
