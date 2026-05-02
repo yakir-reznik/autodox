@@ -178,5 +178,6 @@
 <style scoped lang="css">
 	.zzz {
 		transition: none;
+		background: red;
 	}
 </style>
