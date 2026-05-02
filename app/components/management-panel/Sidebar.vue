@@ -1,5 +1,5 @@
 <template>
-	<UiSidebar side="right" collapsible="icon">
+	<UiSidebar side="right" collapsible="icon" id="management-panel-sidebar">
 		<UiSidebarHeader>
 			<div
 				class="flex items-center justify-between gap-2 px-2 py-1 group-data-[collapsible=icon]:hidden"
@@ -19,9 +19,9 @@
 			</div>
 		</UiSidebarHeader>
 
-		<UiSidebarContent class="group-data-[collapsible=icon]:mt-4">
+		<UiSidebarContent class="group-data-[collapsible=icon]:mt-7">
 			<UiSidebarGroup>
-				<UiSidebarGroupLabel>ניווט</UiSidebarGroupLabel>
+				<UiSidebarGroupLabel class="sidebar-group-label">ניווט</UiSidebarGroupLabel>
 				<UiSidebarGroupContent>
 					<UiSidebarMenu>
 						<UiSidebarMenuItem v-for="item in mainNavItems" :key="item.to">
@@ -33,11 +33,11 @@
 							>
 								<NuxtLink
 									:to="item.to"
-									class="group-data-[collapsible=icon]:justify-center zzz group-data-[collapsible=icon]:my-1"
+									:class="sidebarItemClasses"
 									exact-active-class="text-primary! bg-primary/5!"
 								>
 									<Icon :name="item.icon" class="text-lg shrink-0" />
-									<span class="text-base group-data-[collapsible=icon]:hidden">
+									<span class="text-base sidebar-item-label">
 										{{ item.label }}
 									</span>
 								</NuxtLink>
@@ -48,7 +48,7 @@
 			</UiSidebarGroup>
 
 			<UiSidebarGroup>
-				<UiSidebarGroupLabel>פעולות</UiSidebarGroupLabel>
+				<UiSidebarGroupLabel class="sidebar-group-label">פעולות</UiSidebarGroupLabel>
 				<UiSidebarGroupContent>
 					<UiSidebarMenu>
 						<UiSidebarMenuItem v-for="item in actionItems" :key="item.label">
@@ -59,12 +59,9 @@
 								size="lg"
 								:tooltip="item.label"
 							>
-								<NuxtLink
-									:to="item.to!"
-									class="group-data-[collapsible=icon]:justify-center zzz group-data-[collapsible=icon]:my-1"
-								>
+								<NuxtLink :to="item.to!" :class="sidebarItemClasses">
 									<Icon :name="item.icon" class="text-lg shrink-0" />
-									<span class="text-base group-data-[collapsible=icon]:hidden">
+									<span class="text-base sidebar-item-label">
 										{{ item.label }}
 									</span>
 								</NuxtLink>
@@ -74,10 +71,11 @@
 								disabled
 								size="lg"
 								:tooltip="item.label"
-								class="opacity-50 cursor-not-allowed group-data-[collapsible=icon]:justify-center zzz group-data-[collapsible=icon]:my-1"
+								:class="sidebarItemClasses"
+								class="opacity-50 cursor-not-allowed"
 							>
 								<Icon :name="item.icon" class="text-lg shrink-0" />
-								<span class="text-base group-data-[collapsible=icon]:hidden">
+								<span class="text-base sidebar-item-label">
 									{{ item.label }}
 								</span>
 							</UiSidebarMenuButton>
@@ -91,10 +89,7 @@
 			<div
 				class="rounded-lg bg-muted p-3 flex flex-col gap-2 group-data-[collapsible=icon]:hidden"
 			>
-				<NuxtLink
-					to="/manage/user"
-					class="group-data-[collapsible=icon]:justify-center zzz group-data-[collapsible=icon]:my-1"
-				>
+				<NuxtLink to="/manage/user" :class="sidebarItemClasses">
 					<div class="flex items-center gap-2">
 						<div
 							class="flex size-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-violet-600 text-white text-sm font-semibold"
@@ -138,6 +133,9 @@
 	const { user, clear } = useUserSession();
 	const route = useRoute();
 
+	const sidebarItemClasses =
+		"sidebar-item group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:my-1 group-data-[collapsible=icon]:h-12! group-data-[collapsible=icon]:w-10!";
+
 	const mainNavItems = [
 		{ label: "ניהול טפסים", to: "/manage/", icon: "heroicons:document-text" },
 		{
@@ -176,8 +174,24 @@
 </script>
 
 <style scoped lang="css">
-	.zzz {
-		transition: none;
-		background: red;
+	.sidebar-group-label {
+		transition: opacity 200ms linear;
+	}
+
+	.sidebar-item {
+		transition: width 200ms linear;
+	}
+	[data-collapsible="icon"] .sidebar-item .iconify {
+		transform: translateX(-3px);
+	}
+
+	.sidebar-item-label {
+		transition: opacity 200ms linear;
+	}
+
+	[data-collapsible="icon"] .sidebar-item-label {
+		display: flex;
+		opacity: 0;
+		width: 0;
 	}
 </style>
