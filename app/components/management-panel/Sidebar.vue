@@ -173,6 +173,13 @@
 	}
 </script>
 
+<style>
+	/** Sidebar collapsed width */
+	[data-slot="sidebar-wrapper"] {
+		--sidebar-width-icon: 3.5rem !important;
+	}
+</style>
+
 <style scoped lang="css">
 	.sidebar-group-label {
 		transition: opacity 200ms linear;
