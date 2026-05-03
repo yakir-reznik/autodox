@@ -44,8 +44,8 @@ cd "$APP_DIR" || error_exit "Failed to change to app directory"
 log "Creating backup..."
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 if [ -d ".output" ]; then
-    tar -czf "$BACKUP_DIR/app_$TIMESTAMP.tar.gz" .output
-    log "✓ Backup created: app_$TIMESTAMP.tar.gz"
+	tar -czf "$BACKUP_DIR/app_$TIMESTAMP.tar.gz" .output
+	log "✓ Backup created: app_$TIMESTAMP.tar.gz"
 fi
 
 # 2. Fetch latest code from master
@@ -60,9 +60,8 @@ log "Installing dependencies with npm..."
 npm install || error_exit "Failed to install dependencies"
 log "✓ Dependencies installed"
 
-# 4. Run database migrations
-log "Generating and running database migrations..."
-npx drizzle-kit generate || error_exit "Failed to generate migrations"
+# 4. Run committed database migrations
+log "Running committed database migrations..."
 npx drizzle-kit migrate || error_exit "Failed to run migrations"
 log "✓ Migrations completed"
 
