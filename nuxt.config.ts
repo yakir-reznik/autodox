@@ -2,6 +2,22 @@
 export default defineNuxtConfig({
 	compatibilityDate: "2025-07-15",
 	devtools: { enabled: true },
+	vite: {
+		build: {
+			rollupOptions: {
+				onwarn(warning, warn) {
+					if (
+						warning.code === "SOURCEMAP_BROKEN" &&
+						warning.plugin === "@tailwindcss/vite:generate:build"
+					) {
+						return;
+					}
+
+					warn(warning);
+				},
+			},
+		},
+	},
 	modules: [
 		"@nuxt/fonts",
 		"@nuxt/icon",
