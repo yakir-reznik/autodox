@@ -7,7 +7,7 @@ import "dotenv/config";
 import { randomBytes } from "crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
-import * as schema from "../server/db/schema";
+import * as schema from "~~/db/schema";
 import { eq } from "drizzle-orm";
 import { Hash } from "@adonisjs/hash";
 import { Scrypt } from "@adonisjs/hash/drivers/scrypt";

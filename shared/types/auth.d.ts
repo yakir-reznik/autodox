@@ -1,5 +1,5 @@
 // shared/types/auth.d.ts
-import type { UserRole } from "../../server/db/schema"
+import type { UserRole } from "~~/db/schema";
 
 declare module "#auth-utils" {
 	interface User {

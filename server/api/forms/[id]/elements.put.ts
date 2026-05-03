@@ -5,7 +5,7 @@ import { requireFormPermission } from "~~/server/utils/authorization";
 import {
 	findDuplicateNameGroups,
 	type ElementForValidation,
-} from "../../../../shared/utils/fieldNameValidation";
+} from "~~/shared/utils/fieldNameValidation";
 
 export default defineEventHandler(async (event) => {
 	const formId = Number(getRouterParam(event, "id"));
@@ -50,10 +50,7 @@ export default defineEventHandler(async (event) => {
 
 	// Get existing element IDs for this form
 	const existingElements = await db.query.formElementsTable.findMany({
-		where: and(
-			eq(formElementsTable.formId, formId),
-			eq(formElementsTable.isDeleted, false)
-		),
+		where: and(eq(formElementsTable.formId, formId), eq(formElementsTable.isDeleted, false)),
 	});
 	const existingIds = new Set(existingElements.map((el) => el.id));
 
@@ -83,8 +80,8 @@ export default defineEventHandler(async (event) => {
 			.where(
 				and(
 					eq(formElementsTable.formId, formId),
-					inArray(formElementsTable.id, idsToDelete)
-				)
+					inArray(formElementsTable.id, idsToDelete),
+				),
 			);
 	}
 
@@ -150,10 +147,7 @@ export default defineEventHandler(async (event) => {
 
 	// Fetch updated elements
 	const updatedElements = await db.query.formElementsTable.findMany({
-		where: and(
-			eq(formElementsTable.formId, formId),
-			eq(formElementsTable.isDeleted, false)
-		),
+		where: and(eq(formElementsTable.formId, formId), eq(formElementsTable.isDeleted, false)),
 		orderBy: (elements, { asc }) => [asc(elements.position)],
 	});
 

@@ -3,7 +3,7 @@ import {
 	findDuplicateNameGroups,
 	type DuplicateGroup,
 	type ElementForValidation,
-} from "../../shared/utils/fieldNameValidation";
+} from "~~/shared/utils/fieldNameValidation";
 
 export class DuplicateFieldNamesError extends Error {
 	groups: DuplicateGroup[];
@@ -14,9 +14,7 @@ export class DuplicateFieldNamesError extends Error {
 	}
 }
 
-export function useFieldNameValidation(
-	getElements: () => BuilderElement[],
-) {
+export function useFieldNameValidation(getElements: () => BuilderElement[]) {
 	const duplicateGroups = computed<DuplicateGroup[]>(() => {
 		const payload: ElementForValidation[] = getElements().map((el) => ({
 			id: el.clientId,
