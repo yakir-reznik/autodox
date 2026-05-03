@@ -207,8 +207,12 @@
 				:model-value="config.url || ''"
 				placeholder="https://..."
 				@update:model-value="$emit('update:config', { url: $event })"
+				dir="ltr"
 			/>
-			<p class="mt-1 text-xs text-gray-500">Or enter external URL</p>
+
+			<p class="mt-1 text-xs text-gray-500">
+				אפשר להשתמש ב-<code v-pre>{{ fieldName }}</code> בתוך ה-URL
+			</p>
 		</div>
 
 		<!-- Image alt text -->
