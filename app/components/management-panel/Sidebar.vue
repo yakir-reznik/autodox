@@ -143,7 +143,11 @@
 			to: "/manage/forms/shared",
 			icon: "heroicons:users",
 		},
-		{ label: "הגשות", to: "/manage/submissions", icon: "heroicons:inbox-stack" },
+		{
+			label: "הגשות",
+			to: `/manage/submissions/user/${user.value?.id}`,
+			icon: "heroicons:inbox-stack",
+		},
 		{ label: "דוחות", to: "/manage/reports", icon: "heroicons:chart-bar" },
 		{ label: "ניהול משתמש", to: "/manage/user", icon: "heroicons:user-circle" },
 	];

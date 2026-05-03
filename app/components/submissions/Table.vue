@@ -18,10 +18,10 @@
 		v-else-if="!submissions || submissions.length === 0"
 		class="rounded-lg border-2 border-dashed border-gray-300 bg-white p-12 text-center"
 	>
-		<Icon name="heroicons:inbox" class="mx-auto h-12 w-12 text-gray-400" />
-		<h3 class="mt-4 text-lg font-medium text-gray-900">No submissions yet</h3>
+		<Icon name="heroicons:inbox" class="mx-auto text-6xl text-gray-400" />
+		<h3 class="mt-4 text-lg font-medium text-gray-900">אין עדיין הגשות</h3>
 		<p class="mt-2 text-gray-500">
-			<slot name="empty-message">This form hasn't received any submissions.</slot>
+			<slot name="empty-message">עדיין לא התקבלו הגשות להצגה.</slot>
 		</p>
 	</div>
 
@@ -81,7 +81,9 @@
 							{{ submission.id }}
 						</td>
 						<td class="px-6 py-4 text-sm text-gray-900 max-w-32">
-							<span class="block truncate" :title="submission.name ?? '-'">{{ submission.name ?? "-" }}</span>
+							<span class="block truncate" :title="submission.name ?? '-'">{{
+								submission.name ?? "-"
+							}}</span>
 						</td>
 						<td v-if="showFormColumn" class="px-6 py-4 text-sm max-w-32">
 							<NuxtLink
@@ -122,7 +124,10 @@
 						<td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
 							{{ formatDate(submission.createdAt) }}
 						</td>
-						<td v-if="showSubmittedAtColumn" class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
+						<td
+							v-if="showSubmittedAtColumn"
+							class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap"
+						>
 							{{ submission.submittedAt ? formatDate(submission.submittedAt) : "-" }}
 						</td>
 						<td class="px-6 py-4 text-sm whitespace-nowrap">
