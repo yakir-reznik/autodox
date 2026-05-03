@@ -29,19 +29,21 @@ export function expandRoles(role: UserRole): UserRole[] {
 
 export async function requireRoles(event: H3Event, required: UserRole[]) {
 	const session = await requireUserSession(event)
-	const hasRole = required.some((r) => session.user.roles.includes(r))
+	const roles = session.user.roles ?? []
+	const hasRole = required.some((r) => roles.includes(r))
 	if (!hasRole) throw createError({ statusCode: 403, message: "Forbidden" })
 	return session
 }
 
 export async function getUserRole(event: H3Event): Promise<UserRole> {
 	const session = await requireUserSession(event)
-	return session.user.roles.includes("admin") ? "admin" : (session.user.roles[0] as UserRole)
+	const roles = session.user.roles ?? []
+	return roles.includes("admin") ? "admin" : (roles[0] as UserRole)
 }
 
 export async function hasUserRole(event: H3Event, role: UserRole): Promise<boolean> {
 	const session = await getUserSession(event)
-	return session.user?.roles.includes(role) ?? false
+	return session.user?.roles?.includes(role) ?? false
 }
 
 export async function getFormPermissions(
@@ -77,7 +79,7 @@ export async function requireFormPermission(
 	perm: FormPermission,
 ) {
 	const session = await requireUserSession(event)
-	const isAdmin = session.user.roles.includes("admin")
+	const isAdmin = (session.user.roles ?? []).includes("admin")
 
 	const form = await db.query.formsTable.findFirst({ where: eq(formsTable.id, formId) })
 	if (!form) throw createError({ statusCode: 404, message: "Form not found" })
@@ -94,7 +96,7 @@ export async function requireSubmissionPermission(
 	perm: FormPermission,
 ) {
 	const session = await requireUserSession(event)
-	const isAdmin = session.user.roles.includes("admin")
+	const isAdmin = (session.user.roles ?? []).includes("admin")
 
 	const submission = await db.query.submissionsTable.findFirst({
 		where: eq(submissionsTable.token, token),

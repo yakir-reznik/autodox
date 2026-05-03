@@ -7,6 +7,7 @@ function isPuppeteerPageRoute(path: string): boolean {
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
 	const { loggedIn, user } = useUserSession();
+	const roles = user.value?.roles ?? [];
 
 	// Public routes that don't require authentication
 	const publicRoutes = [
@@ -42,7 +43,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 			return;
 		}
 		// Allow logged-in admins (works on both SSR and client)
-		if (loggedIn.value && user.value?.roles.includes("admin")) {
+		if (loggedIn.value && roles.includes("admin")) {
 			return;
 		}
 		// Not authenticated — redirect to login
@@ -71,7 +72,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 		const match = to.path.match(/^\/manage\/submissions\/user\/(\d+)$/);
 		if (match) {
 			const targetUserId = Number(match[1]);
-			if (user.value?.id !== targetUserId && !user.value?.roles.includes("admin")) {
+			if (user.value?.id !== targetUserId && !roles.includes("admin")) {
 				return showError({ statusCode: 401 });
 			}
 		}
@@ -79,7 +80,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 	}
 
 	// Users and admins can access the management panel; viewers are redirected
-	if (!user.value?.roles.includes("user")) {
+	if (!roles.includes("user")) {
 		return navigateTo("/");
 	}
 });
