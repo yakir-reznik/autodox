@@ -36,13 +36,6 @@
 						<div class="flex gap-2 text-sm">
 							<span
 								class="font-semibold text-[rgb(var(--fill-text-secondary))] min-w-30"
-								>URL:</span
-							>
-							<span class="font-mono break-all">{{ event.webhookUrl }}</span>
-						</div>
-						<div class="flex gap-2 text-sm">
-							<span
-								class="font-semibold text-[rgb(var(--fill-text-secondary))] min-w-30"
 								>סטטוס:</span
 							>
 							<span
