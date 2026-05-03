@@ -5,6 +5,7 @@ Autodox is a **Nuxt 4** form builder for creating and filling dynamic forms (Vue
 ## General
 
 - **Be concise with you're answers and descriptions of actions you took**
+- **Talk to the operator in english unless explicitly asked otherwise**
 
 ## Key Facts
 
