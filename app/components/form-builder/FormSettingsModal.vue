@@ -326,12 +326,6 @@
 	const webhookUrl = ref("");
 	const webhookIncludePdf = ref(false);
 
-	const statusOptions: { value: FormStatus; label: string }[] = [
-		{ value: "draft", label: "טיוטה" },
-		{ value: "published", label: "פורסם" },
-		{ value: "archived", label: "בארכיון" },
-	];
-
 	const selectedTheme = computed(() => THEMES.find((t) => t.id === theme.value));
 
 	// Fetch settings when modal opens
