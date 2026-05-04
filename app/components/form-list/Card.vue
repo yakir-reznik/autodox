@@ -119,6 +119,8 @@
 		openSettings: [form: FormListItem];
 	}>();
 
+	const toasts = useToasts();
+
 	type MenuAction = {
 		key: string;
 		label: string;
@@ -130,9 +132,15 @@
 
 	const primaryMenuActions = computed<MenuAction[]>(() => [
 		{
+			key: "copy-form-id",
+			label: `התעקת מזהה טופס (${form.id})`,
+			icon: "heroicons:square-2-stack",
+			handler: () => handlCopyFormId(form),
+		},
+		{
 			key: "move",
 			label: "העבר לתיקייה",
-			icon: "mdi:folder-move",
+			icon: "heroicons:folder-arrow-down",
 			handler: () => handleMoveForm(form),
 		},
 		{
@@ -186,6 +194,20 @@
 					action.requiredPermissionMode,
 				)
 			: false;
+	}
+
+	async function handlCopyFormId(form: FormListItem) {
+		try {
+			await navigator.clipboard.writeText(String(form.id));
+			toasts.add({ title: "מזהה הטופס הועתק", theme: "success", duration: 2000 });
+		} catch (error) {
+			console.error("Failed to copy form id:", error);
+			toasts.add({
+				title: "שגיאה: לא ניתן להעתיק את מזהה הטופס",
+				theme: "error",
+				duration: 3000,
+			});
+		}
 	}
 </script>
 

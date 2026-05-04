@@ -75,6 +75,10 @@
 						</UiButton>
 					</UiDropdownMenuTrigger>
 					<UiDropdownMenuContent align="end">
+						<UiDropdownMenuItem class="px-4" @select="handleCopyFormId">
+							<Icon name="heroicons:clipboard-document" class="h-4 w-4" />
+							העתקת מזהה טופס
+						</UiDropdownMenuItem>
 						<NuxtLink :to="`/manage/submissions/form/${formId}`">
 							<UiDropdownMenuItem class="px-4">
 								<Icon name="heroicons:list-bullet" class="h-4 w-4" />
@@ -135,6 +139,7 @@
 		canRedo: false,
 	});
 	const router = useRouter();
+	const toasts = useToasts();
 
 	// Settings modal state
 	const showSettingsModal = ref(false);
@@ -173,6 +178,21 @@
 
 	function goBack() {
 		router.push("/forms");
+	}
+
+	async function handleCopyFormId() {
+		if (!props.formId) {
+			toasts.add({ title: "שגיאה: לא נמצא מזהה טופס", theme: "error", duration: 3000 });
+			return;
+		}
+
+		try {
+			await navigator.clipboard.writeText(String(props.formId));
+			toasts.add({ title: "מזהה הטופס הועתק", theme: "success", duration: 2000 });
+		} catch (error) {
+			console.error("Failed to copy form id:", error);
+			toasts.add({ title: "שגיאה: לא ניתן להעתיק את מזהה הטופס", theme: "error", duration: 3000 });
+		}
 	}
 
 	function handleSettingsSaved(payload: { status: FormStatus; theme: FormTheme }) {

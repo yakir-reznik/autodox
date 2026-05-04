@@ -223,6 +223,10 @@ Please analyze the attached PDF and generate a JSON structure following this exa
 
 CRITICAL — TEXT FIDELITY: Copy all labels, headings, placeholders, option values, and paragraph text EXACTLY as they appear in the PDF. Do NOT correct spelling, grammar, punctuation, capitalization, or phrasing — even if the text seems wrong. The original wording must be preserved verbatim.
 
+CRITICAL — HEBREW RTL: This form is in Hebrew. Output all visible form text in Hebrew and preserve right-to-left reading order/formatting for every title, label, placeholder, option, and paragraph. Do NOT translate Hebrew text to English or rewrite it in left-to-right format.
+
+CRITICAL — TEXT ALIGNMENT: Heading and paragraph elements support an "alignment" property. For Hebrew text, set "alignment": "right". For English or other left-to-right languages, set "alignment": "left". Preserve the source language and choose alignment accordingly.
+
 {
   "title": "Form title here",
   "description": "Optional form description",
@@ -254,10 +258,10 @@ SPECIAL FIELDS:
 - "repeater" - Repeating group of fields (use "label", "children" array, "minItems", "maxItems", "addButtonText")
 
 LAYOUT ELEMENTS:
-- "heading_h1" - Large heading (use "text" property)
-- "heading_h2" - Medium heading (use "text" property)
-- "heading_h3" - Small heading (use "text" property)
-- "paragraph" - Text paragraph (use "text" property)
+- "heading_h1" - Large heading (use "text" and "alignment" properties)
+- "heading_h2" - Medium heading (use "text" and "alignment" properties)
+- "heading_h3" - Small heading (use "text" and "alignment" properties)
+- "paragraph" - Text paragraph (use "text" and "alignment" properties)
 - "image" - Image display (use "url", "caption")
 - "video" - Video embed (use "url", "caption")
 - "divider" - Horizontal line separator (no properties needed)
@@ -294,12 +298,12 @@ For signature:
 { "type": "signature", "label": "Your Signature", "required": true }
 
 For headings:
-{ "type": "heading_h1", "text": "Form Title" }
-{ "type": "heading_h2", "text": "Section Title" }
-{ "type": "heading_h3", "text": "Subsection Title" }
+{ "type": "heading_h1", "text": "Form Title", "alignment": "left" }
+{ "type": "heading_h2", "text": "Section Title", "alignment": "left" }
+{ "type": "heading_h3", "text": "Subsection Title", "alignment": "left" }
 
 For paragraph:
-{ "type": "paragraph", "text": "Please fill out all required fields below." }
+{ "type": "paragraph", "text": "Please fill out all required fields below.", "alignment": "left" }
 
 For divider:
 { "type": "divider" }
