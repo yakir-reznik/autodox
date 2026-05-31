@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BuilderElement } from "~/types/form-builder";
-import { interpolateRawValues } from "~/utils/interpolate";
+import { hasInterpolationTokens, interpolateRawValues } from "~/utils/interpolate";
 
 interface Props {
 	element: BuilderElement;
@@ -32,6 +32,11 @@ const alignClass = computed(() => {
 const resolvedUrl = computed(() =>
 	interpolateRawValues(config.value.url || "", allElements?.value ?? [], rootFormData, prefillData.value),
 );
+
+const shouldShowEmptyState = computed(() => {
+	const url = config.value.url || "";
+	return !hasInterpolationTokens(url);
+});
 
 const mediaStyle = computed(() => {
 	const style: Record<string, string> = {};
@@ -75,7 +80,7 @@ const isVideo = computed(() => props.element.type === "video");
 	</div>
 
 	<!-- Empty state -->
-	<div v-else class="rounded-lg border-2 border-dashed border-input p-8 text-center text-muted-foreground">
+	<div v-else-if="shouldShowEmptyState" class="rounded-lg border-2 border-dashed border-input p-8 text-center text-muted-foreground">
 		<Icon :name="isVideo ? 'heroicons:video-camera' : 'heroicons:photo'" class="mx-auto h-8 w-8" />
 		<p class="mt-2 text-sm">No {{ isVideo ? 'video' : 'image' }} set</p>
 	</div>
