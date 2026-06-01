@@ -9,8 +9,15 @@
 			<span v-if="isRequired" class="form-fill-required text-destructive ms-0.5">*</span>
 		</label>
 		<div class="relative">
+			<div
+				v-if="readonly && shouldRenderReadonlyTextBlock"
+				class="form-fill-input w-full min-h-[42px] bg-card border border-input rounded-md py-2 px-4 text-base text-foreground whitespace-pre-wrap break-words"
+				:dir="['email', 'phone'].includes(element.type) ? 'ltr' : 'rtl'"
+			>
+				{{ readonlyTextValue }}
+			</div>
 			<span
-				v-if="readonly && ['date', 'datetime', 'time'].includes(element.type)"
+				v-else-if="readonly && ['date', 'datetime', 'time'].includes(element.type)"
 				class="form-fill-input flex items-center justify-between w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground"
 				dir="ltr"
 			>
@@ -67,6 +74,17 @@
 	}>();
 
 	const inputId = useId();
+
+	const shouldRenderReadonlyTextBlock = computed(
+		() => isPrintView.value && ["text", "email", "number", "phone"].includes(props.element.type),
+	);
+
+	const readonlyTextValue = computed(() => {
+		if (props.modelValue === undefined || props.modelValue === null || props.modelValue === "") {
+			return "-";
+		}
+		return String(props.modelValue);
+	});
 
 	const formattedReadonlyValue = computed(() => {
 		const val = props.modelValue;

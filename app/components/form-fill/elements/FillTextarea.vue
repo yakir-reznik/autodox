@@ -6,6 +6,7 @@
 		modelValue?: string;
 		error?: string;
 		conditionRequired?: boolean;
+		readonly?: boolean;
 	}
 
 	const props = defineProps<Props>();
@@ -37,6 +38,13 @@
 			props.conditionRequired,
 	);
 
+	const readonlyTextValue = computed(() => {
+		if (props.modelValue === undefined || props.modelValue === null || props.modelValue === "") {
+			return "-";
+		}
+		return props.modelValue;
+	});
+
 	function handleInput(event: Event) {
 		const target = event.target as HTMLTextAreaElement;
 		emit("update:modelValue", target.value);
@@ -53,7 +61,14 @@
 			{{ config.label }}
 			<span v-if="isRequired" class="form-fill-required text-destructive ms-0.5">*</span>
 		</label>
+		<div
+			v-if="readonly && isPrintView"
+			class="form-fill-textarea w-full min-h-[100px] bg-card border border-input rounded-md py-2 px-4 text-base text-foreground whitespace-pre-wrap break-words"
+		>
+			{{ readonlyTextValue }}
+		</div>
 		<textarea
+			v-else
 			:id="inputId"
 			:value="modelValue"
 			:placeholder="config.placeholder"
