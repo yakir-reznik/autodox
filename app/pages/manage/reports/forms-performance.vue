@@ -1,15 +1,15 @@
 <script setup lang="ts">
-	import type { ExternalIdPerformanceRow, SubmissionStatusSummary, SubmissionsSummaryByExternalIdResponse } from "~/types/reports";
+	import type { FormPerformanceRow, SubmissionStatusSummary } from "~/types/reports";
 
-	useHead({ title: "ביצועים לפי מזהה חיצוני - Autodox" });
+	useHead({ title: "ביצועי טפסים - Autodox" });
 
 	definePageMeta({
 		layout: "management-panel",
-		heading: "ביצועים לפי מזהה חיצוני",
+		heading: "ביצועי טפסים",
 		breadcrumbs: [
 			{ label: "ניהול טפסים", to: "/manage" },
 			{ label: "דוח״ות", to: "/manage/reports" },
-			{ label: "ביצועים לפי מזהה חיצוני" },
+			{ label: "ביצועי טפסים" },
 		],
 	});
 
@@ -41,8 +41,8 @@
 		applyFilters,
 	} = useReportDateRange();
 
-	const { data: report, pending } = await useFetch<SubmissionsSummaryByExternalIdResponse>(
-		"/api/admin/reports/submissions-summary-by-external-id",
+	const { data: rows, pending } = await useFetch<FormPerformanceRow[]>(
+		"/api/admin/reports/forms-performance",
 		{
 			query: computed(() => ({
 				from: appliedFrom.value,
@@ -51,15 +51,15 @@
 		},
 	);
 
-	const rows = computed(() => report.value?.externalIdStatuses ?? []);
-	const { sortedRows, sortBy, sortIcon } = useReportSorting<ExternalIdPerformanceRow>(
-		rows,
+	const reportRows = computed(() => rows.value ?? []);
+	const { sortedRows, sortBy, sortIcon } = useReportSorting<FormPerformanceRow>(
+		reportRows,
 		"total",
 		"desc",
 	);
 
 	const totals = computed(() =>
-		rows.value.reduce(
+		reportRows.value.reduce(
 			(acc, row) => {
 				for (const status of statuses) acc[status] += row[status];
 				acc.total += row.total;
@@ -82,10 +82,6 @@
 	const totalCompletionRate = computed(() =>
 		totals.value.total > 0 ? (totals.value.submittedCount / totals.value.total) * 100 : 0,
 	);
-
-	function externalIdLabel(externalId: string | null) {
-		return externalId || "ללא מזהה חיצוני";
-	}
 
 	function formatPercent(value: number) {
 		return `${value.toFixed(1).replace(".0", "")}%`;
@@ -134,7 +130,7 @@
 		<div v-if="pending" class="flex items-center justify-center py-12">
 			<Icon name="svg-spinners:ring-resize" class="h-8 w-8 text-blue-500" />
 		</div>
-		<div v-else-if="!rows.length" class="bg-white rounded-lg shadow p-12 text-center text-gray-500">
+		<div v-else-if="!reportRows.length" class="bg-white rounded-lg shadow p-12 text-center text-gray-500">
 			<Icon name="heroicons:table-cells" class="mx-auto h-12 w-12 text-gray-300 mb-3" />
 			<p>לא נמצאו תוצאות עבור טווח התאריכים שנבחר</p>
 		</div>
@@ -143,9 +139,15 @@
 				<thead class="bg-gray-50">
 					<tr>
 						<th class="px-4 py-3 text-right font-medium text-gray-500">
-							<button class="inline-flex items-center gap-1" @click="sortBy('externalId')">
-								מזהה חיצוני
-								<Icon :name="sortIcon('externalId')" class="h-4 w-4" />
+							<button class="inline-flex items-center gap-1" @click="sortBy('formName')">
+								שם טופס
+								<Icon :name="sortIcon('formName')" class="h-4 w-4" />
+							</button>
+						</th>
+						<th class="px-4 py-3 text-right font-medium text-gray-500">
+							<button class="inline-flex items-center gap-1" @click="sortBy('formId')">
+								מזהה טופס
+								<Icon :name="sortIcon('formId')" class="h-4 w-4" />
 							</button>
 						</th>
 						<th v-for="status in statuses" :key="status" class="px-4 py-3 text-center">
@@ -157,9 +159,15 @@
 							</button>
 						</th>
 						<th class="px-4 py-3 text-center font-medium text-gray-500">
-							<button class="inline-flex items-center gap-1" @click="sortBy('uniqueFormsCount')">
-								טפסים
-								<Icon :name="sortIcon('uniqueFormsCount')" class="h-4 w-4" />
+							<button class="inline-flex items-center gap-1" @click="sortBy('startedCount')">
+								התחילו
+								<Icon :name="sortIcon('startedCount')" class="h-4 w-4" />
+							</button>
+						</th>
+						<th class="px-4 py-3 text-center font-medium text-gray-500">
+							<button class="inline-flex items-center gap-1" @click="sortBy('submittedCount')">
+								השלימו
+								<Icon :name="sortIcon('submittedCount')" class="h-4 w-4" />
 							</button>
 						</th>
 						<th class="px-4 py-3 text-center font-medium text-gray-500">
@@ -183,13 +191,15 @@
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-100">
-					<tr v-for="row in sortedRows" :key="row.externalId ?? '__empty__'" class="hover:bg-gray-50">
-						<td class="px-4 py-3 font-medium text-gray-900">{{ externalIdLabel(row.externalId) }}</td>
+					<tr v-for="row in sortedRows" :key="row.formId" class="hover:bg-gray-50">
+						<td class="px-4 py-3 font-medium text-gray-900">{{ row.formName }}</td>
+						<td class="px-4 py-3 text-gray-500">{{ row.formId }}</td>
 						<td class="px-4 py-3 text-center text-gray-700">{{ row.pending }}</td>
 						<td class="px-4 py-3 text-center text-gray-700">{{ row.in_progress }}</td>
 						<td class="px-4 py-3 text-center text-gray-700">{{ row.submitted }}</td>
 						<td class="px-4 py-3 text-center text-gray-700">{{ row.locked }}</td>
-						<td class="px-4 py-3 text-center text-gray-700">{{ row.uniqueFormsCount }}</td>
+						<td class="px-4 py-3 text-center text-gray-700">{{ row.startedCount }}</td>
+						<td class="px-4 py-3 text-center text-gray-700">{{ row.submittedCount }}</td>
 						<td class="px-4 py-3 text-center text-gray-700">{{ formatPercent(row.completionRate) }}</td>
 						<td class="px-4 py-3 text-center text-gray-700">{{ formatDuration(row.avgFillTimeSeconds) }}</td>
 						<td class="px-4 py-3 text-center font-semibold text-gray-900">{{ row.total }}</td>
@@ -197,12 +207,13 @@
 				</tbody>
 				<tfoot class="bg-gray-50">
 					<tr class="font-semibold text-gray-900">
-						<td class="px-4 py-3">סה״כ</td>
+						<td class="px-4 py-3" colspan="2">סה״כ</td>
 						<td class="px-4 py-3 text-center">{{ totals.pending }}</td>
 						<td class="px-4 py-3 text-center">{{ totals.in_progress }}</td>
 						<td class="px-4 py-3 text-center">{{ totals.submitted }}</td>
 						<td class="px-4 py-3 text-center">{{ totals.locked }}</td>
-						<td class="px-4 py-3 text-center">-</td>
+						<td class="px-4 py-3 text-center">{{ totals.startedCount }}</td>
+						<td class="px-4 py-3 text-center">{{ totals.submittedCount }}</td>
 						<td class="px-4 py-3 text-center">{{ formatPercent(totalCompletionRate) }}</td>
 						<td class="px-4 py-3 text-center">-</td>
 						<td class="px-4 py-3 text-center">{{ totals.total }}</td>
