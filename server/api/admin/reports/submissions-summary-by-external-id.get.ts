@@ -1,6 +1,6 @@
 import { db } from "~~/server/db";
-import { formsTable, submissionStatusEnum, submissionsTable } from "~~/server/db/schema";
-import { and, count, eq, gte, lte } from "drizzle-orm";
+import { submissionStatusEnum, submissionsTable } from "~~/server/db/schema";
+import { and, count, gte, lte } from "drizzle-orm";
 import { requireRoles } from "~~/server/utils/authorization";
 
 type StatusSummary = {
@@ -11,9 +11,8 @@ type StatusSummary = {
 	total: number;
 };
 
-type FormSummaryRow = {
-	formId: number;
-	formName: string;
+type ExternalIdStatusRow = {
+	externalId: string | null;
 } & StatusSummary;
 
 export default defineEventHandler(async (event) => {
@@ -43,7 +42,7 @@ export default defineEventHandler(async (event) => {
 		lte(submissionsTable.createdAt, toDate),
 	);
 
-	const [externalRows, formStatusRows] = await Promise.all([
+	const [externalRows, externalIdStatusRows] = await Promise.all([
 		db
 			.select({
 				externalId: submissionsTable.externalId,
@@ -54,15 +53,13 @@ export default defineEventHandler(async (event) => {
 			.groupBy(submissionsTable.externalId),
 		db
 			.select({
-				formId: submissionsTable.formId,
-				formName: formsTable.title,
+				externalId: submissionsTable.externalId,
 				status: submissionsTable.status,
 				count: count(),
 			})
 			.from(submissionsTable)
-			.innerJoin(formsTable, eq(formsTable.id, submissionsTable.formId))
 			.where(dateConditions)
-			.groupBy(submissionsTable.formId, formsTable.title, submissionsTable.status),
+			.groupBy(submissionsTable.externalId, submissionsTable.status),
 	]);
 
 	const zeroStatusSummary = () =>
@@ -71,18 +68,18 @@ export default defineEventHandler(async (event) => {
 			total: 0,
 		}) as StatusSummary;
 
-	const forms = new Map<number, FormSummaryRow>();
+	const externalIdStatuses = new Map<string, ExternalIdStatusRow>();
 
-	for (const row of formStatusRows) {
-		if (!forms.has(row.formId)) {
-			forms.set(row.formId, {
-				formId: row.formId,
-				formName: row.formName,
+	for (const row of externalIdStatusRows) {
+		const key = JSON.stringify(row.externalId ?? null);
+		if (!externalIdStatuses.has(key)) {
+			externalIdStatuses.set(key, {
+				externalId: row.externalId ?? null,
 				...zeroStatusSummary(),
 			});
 		}
 
-		const entry = forms.get(row.formId)!;
+		const entry = externalIdStatuses.get(key)!;
 		entry[row.status] = row.count;
 		entry.total += row.count;
 	}
@@ -96,7 +93,9 @@ export default defineEventHandler(async (event) => {
 
 	return {
 		externalIds,
-		forms: [...forms.values()].sort((a, b) => a.formName.localeCompare(b.formName, "he")),
+		externalIdStatuses: [...externalIdStatuses.values()].sort((a, b) =>
+			(a.externalId ?? "").localeCompare(b.externalId ?? "", "he"),
+		),
 		total: externalIds.reduce((sum, row) => sum + row.total, 0),
 	};
 });

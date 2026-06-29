@@ -37,6 +37,8 @@
 		locked: "bg-red-100 text-red-800",
 	};
 
+	const allExternalIdsValue = "__all__";
+
 	function defaultFrom() {
 		const d = new Date();
 		d.setDate(d.getDate() - 30);
@@ -47,10 +49,10 @@
 		return new Date().toISOString().slice(0, 10);
 	}
 
-	const selectedExternalId = ref<string>("");
+	const selectedExternalId = ref<string>(allExternalIdsValue);
 	const fromDate = ref(defaultFrom());
 	const toDate = ref(defaultTo());
-	const appliedExternalId = ref<string>("");
+	const appliedExternalId = ref<string>(allExternalIdsValue);
 	const appliedFrom = ref(defaultFrom());
 	const appliedTo = ref(defaultTo());
 
@@ -92,7 +94,10 @@
 		"/api/admin/reports/submissions-by-external-id",
 		{
 			query: computed(() => ({
-				externalId: appliedExternalId.value || undefined,
+				externalId:
+					appliedExternalId.value === allExternalIdsValue
+						? undefined
+						: appliedExternalId.value,
 				from: appliedFrom.value,
 				to: appliedTo.value,
 			})),
@@ -123,7 +128,7 @@
 							<UiSelectValue placeholder="כל המזהים" />
 						</UiSelectTrigger>
 						<UiSelectContent>
-							<UiSelectItem value="">כל המזהים</UiSelectItem>
+							<UiSelectItem :value="allExternalIdsValue">כל המזהים</UiSelectItem>
 							<UiSelectItem
 								v-for="item in externalIds"
 								:key="item.externalId"

@@ -79,7 +79,7 @@
 	);
 
 	const statusTotals = computed(() =>
-		(report.value?.forms ?? []).reduce(
+		(report.value?.externalIdStatuses ?? []).reduce(
 			(acc, row) => {
 				for (const status of statuses) {
 					acc[status] += row[status];
@@ -192,15 +192,14 @@
 			<section class="bg-white rounded-lg shadow overflow-x-auto max-w-6xl">
 				<div class="border-b border-gray-100 px-4 py-3">
 					<h2 class="text-base font-semibold text-gray-900">
-						הגשות לפי דומיין וסטטוס
+						הגשות לפי מזהה חיצוני וסטטוס
 					</h2>
 				</div>
 				<table class="min-w-full divide-y divide-gray-200 text-sm">
 					<thead class="bg-gray-50">
 						<tr>
-							<th class="px-4 py-3 text-right font-medium text-gray-500">דומיין</th>
 							<th class="px-4 py-3 text-right font-medium text-gray-500">
-								מזהה טופס
+								מזהה חיצוני
 							</th>
 							<th
 								v-for="status in statuses"
@@ -220,9 +219,14 @@
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-gray-100">
-						<tr v-for="row in report.forms" :key="row.formId" class="hover:bg-gray-50">
-							<td class="px-4 py-3 font-medium text-gray-900">{{ row.formName }}</td>
-							<td class="px-4 py-3 text-gray-500">{{ row.formId }}</td>
+						<tr
+							v-for="(row, index) in report.externalIdStatuses"
+							:key="`${row.externalId ?? '__null__'}-${index}`"
+							class="hover:bg-gray-50"
+						>
+							<td class="px-4 py-3 font-medium text-gray-900">
+								{{ externalIdLabel(row.externalId) }}
+							</td>
 							<td class="px-4 py-3 text-center text-gray-700">{{ row.pending }}</td>
 							<td class="px-4 py-3 text-center text-gray-700">{{ row.in_progress }}</td>
 							<td class="px-4 py-3 text-center text-gray-700">{{ row.submitted }}</td>
@@ -234,7 +238,7 @@
 					</tbody>
 					<tfoot class="bg-gray-50">
 						<tr class="font-semibold text-gray-900">
-							<td class="px-4 py-3" colspan="2">סה״כ</td>
+							<td class="px-4 py-3">סה״כ</td>
 							<td
 								v-for="status in statuses"
 								:key="status"

@@ -91,10 +91,9 @@ export type SubmissionsSummaryByExternalIdResponse = {
 		externalId: string | null;
 		total: number;
 	}>;
-	forms: Array<
+	externalIdStatuses: Array<
 		{
-			formId: number;
-			formName: string;
+			externalId: string | null;
 		} & SubmissionStatusSummary
 	>;
 	total: number;
