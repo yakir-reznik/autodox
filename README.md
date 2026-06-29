@@ -53,13 +53,13 @@ After running migrations, create an admin user to login to the system:
 
 ```bash
 # Create admin with default credentials (admin@example.com / admin123)
-npx tsx scripts/create-admin.ts
+pnpm exec tsx scripts/create-admin.ts
 
 # Or create with custom email and password
-npx tsx scripts/create-admin.ts your@email.com YourPassword123
+pnpm exec tsx scripts/create-admin.ts your@email.com YourPassword123
 
 # Or specify all details (email, password, name)
-npx tsx scripts/create-admin.ts your@email.com YourPassword123 "Your Name"
+pnpm exec tsx scripts/create-admin.ts your@email.com YourPassword123 "Your Name"
 ```
 
 **Note:** If a user with the specified email already exists, the script will update their password instead of creating a new user.
