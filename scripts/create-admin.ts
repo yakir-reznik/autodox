@@ -1,29 +1,36 @@
 // Creates or updates an admin user in the database.
-// Usage: npx tsx scripts/create-admin.ts [email] [password] [name]
-// Example: npx tsx scripts/create-admin.ts admin@example.com mypassword "Admin User"
+// Usage: pnpm exec tsx scripts/create-admin.ts [email] [password] [name]
+// Example: pnpm exec tsx scripts/create-admin.ts admin@example.com mypassword "Admin User"
 // Defaults: admin@example.com / admin123 / "Admin User"
 
 import "dotenv/config";
-import { randomBytes } from "crypto";
+
+import process from "node:process";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
-import * as schema from "~~/db/schema";
 import { eq } from "drizzle-orm";
 import { Hash } from "@adonisjs/hash";
 import { Scrypt } from "@adonisjs/hash/drivers/scrypt";
+import * as schema from "../server/db/schema";
+import { generateApiKey } from "../server/utils/apiKey";
 
 async function hashPassword(password: string): Promise<string> {
 	const hash = new Hash(new Scrypt({}));
 	return await hash.make(password);
 }
 
-function randomApiKey(): string {
-	// Generate a random 16 chars API key in hex format - lowercase
-	return randomBytes(16).toString("hex");
+function getDatabaseUrl(): string {
+	const databaseUrl = process.env.DATABASE_URL;
+
+	if (!databaseUrl) {
+		throw new Error("DATABASE_URL is required");
+	}
+
+	return databaseUrl;
 }
 
 async function createAdmin() {
-	const connection = await mysql.createConnection(process.env.DATABASE_URL!);
+	const connection = await mysql.createConnection(getDatabaseUrl());
 	const db = drizzle(connection, { schema, mode: "default" });
 
 	// Get credentials from command line arguments or use defaults
@@ -62,7 +69,7 @@ async function createAdmin() {
 				email: email,
 				password: hashedPassword,
 				role: "admin",
-				apiKey: randomApiKey(),
+				apiKey: generateApiKey(),
 			});
 
 			console.log("Admin user created successfully");

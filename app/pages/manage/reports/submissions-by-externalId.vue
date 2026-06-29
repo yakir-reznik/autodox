@@ -1,11 +1,11 @@
 <script setup lang="ts">
 	import type { SubmissionsByExternalIdRow } from "~/types/form-builder";
 
-	useHead({ title: "הגשות לפי מזהה חיצוני - Autodox" });
+	useHead({ title: "פירוט הגשות לפי מזהה חיצוני - Autodox" });
 
 	definePageMeta({
 		layout: "management-panel",
-		heading: "דו״ח הגשות לפי מזהה חיצוני",
+		heading: "פירוט הגשות לפי מזהה חיצוני",
 		breadcrumbs: [
 			{
 				label: "ניהול טפסים",
@@ -16,10 +16,12 @@
 				to: "/manage/reports",
 			},
 			{
-				label: "הגשות לפי מזהה חיצוני",
+				label: "פירוט הגשות לפי מזהה חיצוני",
 			},
 		],
 	});
+
+	const statuses = ["pending", "in_progress", "submitted", "locked"] as const;
 
 	const statusLabels = {
 		pending: "ממתין",
@@ -62,6 +64,25 @@
 	});
 
 	const canApply = computed(() => !rangeError.value && fromDate.value && toDate.value);
+
+	const totals = computed(() =>
+		(rows.value ?? []).reduce(
+			(acc, row) => {
+				for (const status of statuses) {
+					acc[status] += row[status];
+				}
+				acc.total += row.total;
+				return acc;
+			},
+			{
+				pending: 0,
+				in_progress: 0,
+				submitted: 0,
+				locked: 0,
+				total: 0,
+			},
+		),
+	);
 
 	const { data: externalIds } = await useFetch<{ externalId: string }[]>(
 		"/api/admin/reports/external-ids",
@@ -165,12 +186,7 @@
 						<th class="px-4 py-3 text-right font-medium text-gray-500">מזהה טופס</th>
 						<th class="px-4 py-3 text-right font-medium text-gray-500">מזהה חיצוני</th>
 						<th
-							v-for="status in [
-								'pending',
-								'in_progress',
-								'submitted',
-								'locked',
-							] as const"
+							v-for="status in statuses"
 							:key="status"
 							class="px-4 py-3 text-center"
 						>
@@ -200,6 +216,19 @@
 						</td>
 					</tr>
 				</tbody>
+				<tfoot class="bg-gray-50">
+					<tr class="font-semibold text-gray-900">
+						<td class="px-4 py-3" colspan="3">סה"כ</td>
+						<td
+							v-for="status in statuses"
+							:key="status"
+							class="px-4 py-3 text-center"
+						>
+							{{ totals[status] }}
+						</td>
+						<td class="px-4 py-3 text-center">{{ totals.total }}</td>
+					</tr>
+				</tfoot>
 			</table>
 		</div>
 	</main>

@@ -78,6 +78,28 @@ export type SubmissionsByExternalIdRow = {
 	total: number;
 };
 
+export type SubmissionStatusSummary = {
+	pending: number;
+	in_progress: number;
+	submitted: number;
+	locked: number;
+	total: number;
+};
+
+export type SubmissionsSummaryByExternalIdResponse = {
+	externalIds: Array<{
+		externalId: string | null;
+		total: number;
+	}>;
+	forms: Array<
+		{
+			formId: number;
+			formName: string;
+		} & SubmissionStatusSummary
+	>;
+	total: number;
+};
+
 // Folder types
 export interface Folder {
 	id: number;
