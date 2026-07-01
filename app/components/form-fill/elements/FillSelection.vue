@@ -6,6 +6,7 @@
 		modelValue?: string | string[] | boolean;
 		error?: string;
 		conditionRequired?: boolean;
+		readonly?: boolean;
 	};
 
 	defineProps<Props>();
