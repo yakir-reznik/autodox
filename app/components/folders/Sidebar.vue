@@ -63,41 +63,43 @@
 						@click="emit('select-folder', folder.id)"
 					>
 						<div class="flex items-center gap-2">
-							<Icon name="mdi:folder" class="h-5 w-5" />
+							<Icon name="mdi:folder" class="h-5 w-5 shrink-0" />
 							<span class="flex-1 truncate">{{ folder.name }}</span>
 							<span
-								class="text-xs font-medium text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full"
+								class="flex min-w-10 justify-end transition-opacity"
+								:class="hoveredFolderId === folder.id ? 'opacity-0' : 'opacity-100'"
 							>
-								{{ getFolderFormCount(folder.id) }}
+								<span
+									class="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-500"
+								>
+									{{ getFolderFormCount(folder.id) }}
+								</span>
 							</span>
-
-							<!-- Action Buttons (show on hover) -->
-							<div
-								class="flex items-center gap-1 transition-opacity"
-								:class="hoveredFolderId === folder.id ? 'opacity-100' : 'opacity-0'"
-								@click.stop
-							>
-								<button
-									type="button"
-									class="rounded p-1 hover:bg-gray-200 transition-colors"
-									:tabindex="hoveredFolderId === folder.id ? 0 : -1"
-									@click="handleRenameFolder(folder)"
-									title="שינוי שם"
-								>
-									<Icon name="mdi:pencil" class="h-4 w-4" />
-								</button>
-								<button
-									type="button"
-									class="rounded p-1 hover:bg-red-100 hover:text-red-600 transition-colors"
-									:tabindex="hoveredFolderId === folder.id ? 0 : -1"
-									@click="handleDeleteFolder(folder)"
-									title="מחיקה"
-								>
-									<Icon name="mdi:delete" class="h-4 w-4" />
-								</button>
-							</div>
 						</div>
 					</button>
+					<div
+						class="absolute inset-y-0 left-3 flex items-center gap-1 transition-opacity"
+						:class="hoveredFolderId === folder.id ? 'opacity-100' : 'opacity-0 pointer-events-none'"
+					>
+						<button
+							type="button"
+							class="rounded p-1 transition-colors hover:bg-gray-200"
+							:tabindex="hoveredFolderId === folder.id ? 0 : -1"
+							@click="handleRenameFolder(folder)"
+							title="שינוי שם"
+						>
+							<Icon name="mdi:pencil" class="h-4 w-4" />
+						</button>
+						<button
+							type="button"
+							class="rounded p-1 transition-colors hover:bg-red-100 hover:text-red-600"
+							:tabindex="hoveredFolderId === folder.id ? 0 : -1"
+							@click="handleDeleteFolder(folder)"
+							title="מחיקה"
+						>
+							<Icon name="mdi:delete" class="h-4 w-4" />
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>

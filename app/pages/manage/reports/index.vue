@@ -86,15 +86,16 @@
 			<div class="flex flex-wrap items-end gap-4">
 				<div class="flex flex-col gap-1">
 					<label class="text-sm font-medium text-gray-700">טווח מהיר</label>
-					<select
-						v-model="selectedPreset"
-						class="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-						@change="applyPreset(selectedPreset)"
-					>
-						<option v-for="preset in reportDatePresets" :key="preset.value" :value="preset.value">
-							{{ preset.label }}
-						</option>
-					</select>
+					<UiSelect v-model="selectedPreset" @update:model-value="applyPreset(selectedPreset)">
+						<UiSelectTrigger class="w-48 bg-white">
+							<UiSelectValue placeholder="בחר טווח" />
+						</UiSelectTrigger>
+						<UiSelectContent>
+							<UiSelectItem v-for="preset in reportDatePresets" :key="preset.value" :value="preset.value">
+								{{ preset.label }}
+							</UiSelectItem>
+						</UiSelectContent>
+					</UiSelect>
 				</div>
 				<div class="flex flex-col gap-1">
 					<label class="text-sm font-medium text-gray-700">מתאריך</label>

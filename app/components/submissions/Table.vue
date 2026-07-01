@@ -34,12 +34,13 @@
 						<th
 							class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
 						>
-							מזהה
+							שם הגשה
 						</th>
 						<th
+							v-if="showExternalIdColumn"
 							class="px-6 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap"
 						>
-							שם הגשה
+							מזהה חיצוני
 						</th>
 						<th
 							v-if="showFormColumn"
@@ -77,13 +78,19 @@
 						:key="submission.id"
 						class="hover:bg-gray-50"
 					>
-						<td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-							{{ submission.id }}
-						</td>
 						<td class="px-6 py-4 text-sm text-gray-900 max-w-32">
 							<span class="block truncate" :title="submission.name ?? '-'">{{
 								submission.name ?? "-"
 							}}</span>
+						</td>
+						<td
+							v-if="showExternalIdColumn"
+							class="px-6 py-4 text-left text-sm text-gray-600 max-w-36"
+							dir="ltr"
+						>
+							<span class="block truncate" :title="submission.externalId ?? '-'">
+								{{ submission.externalId ?? "-" }}
+							</span>
 						</td>
 						<td v-if="showFormColumn" class="px-6 py-4 text-sm max-w-32">
 							<NuxtLink
@@ -153,25 +160,6 @@
 									/>
 									הצגת טופס
 								</BaseButton>
-								<BaseButton
-									variant="secondary"
-									size="sm"
-									@click="downloadPDF(submission.token)"
-									:disabled="downloadingPdfs.has(submission.token)"
-									title="הורד PDF"
-								>
-									<Icon
-										:name="
-											downloadingPdfs.has(submission.token)
-												? 'svg-spinners:ring-resize'
-												: 'heroicons:arrow-down-tray'
-										"
-										class="h-4 w-4"
-									/>
-									הורד PDF
-								</BaseButton>
-
-								<!-- פעולות נוספות -->
 								<UiDropdownMenu dir="rtl">
 									<UiDropdownMenuTrigger as-child>
 										<BaseButton variant="secondary" size="sm">
@@ -197,6 +185,27 @@
 												class="h-4 w-4 ml-2"
 											/>
 											העתק טוקן
+										</UiDropdownMenuItem>
+										<UiDropdownMenuItem @click="copySubmissionId(submission.id)">
+											<Icon
+												name="heroicons:hashtag"
+												class="h-4 w-4 ml-2"
+											/>
+											העתק מזהה הגשה ({{ submission.id }})
+										</UiDropdownMenuItem>
+										<UiDropdownMenuItem
+											:disabled="downloadingPdfs.has(submission.token)"
+											@click="downloadPDF(submission.token)"
+										>
+											<Icon
+												:name="
+													downloadingPdfs.has(submission.token)
+														? 'svg-spinners:ring-resize'
+														: 'heroicons:arrow-down-tray'
+												"
+												class="h-4 w-4 ml-2"
+											/>
+											הורד PDF
 										</UiDropdownMenuItem>
 										<UiDropdownMenuItem as-child>
 											<NuxtLink
@@ -246,13 +255,13 @@
 			class="mt-6 flex items-center justify-between"
 		>
 			<div class="text-sm text-gray-600">
-				Showing page
+				עמוד
 				<span class="font-medium">{{ pagination.page }}</span>
-				of
+				מתוך
 				<span class="font-medium">{{ pagination.totalPages }}</span>
-				(Total:
+				(סה״כ:
 				<span class="font-medium">{{ pagination.total }}</span>
-				submissions)
+				הגשות)
 			</div>
 
 			<div class="flex gap-2">
@@ -263,7 +272,7 @@
 					@click="handlePreviousPage"
 				>
 					<Icon name="heroicons:arrow-right" class="h-4 w-4" />
-					Previous
+					הקודם
 				</BaseButton>
 
 				<div class="flex gap-1">
@@ -285,7 +294,7 @@
 					:disabled="!pagination.hasNextPage"
 					@click="handleNextPage"
 				>
-					Next
+					הבא
 					<Icon name="heroicons:arrow-left" class="h-4 w-4" />
 				</BaseButton>
 			</div>
@@ -360,6 +369,7 @@
 		name: string | null;
 		token: string;
 		formId: number;
+		externalId: string | null;
 		prefillData: Record<string, unknown> | null;
 		additionalData: Record<string, unknown> | null;
 		createdByUserId: number | null;
@@ -392,10 +402,12 @@
 			pending: boolean;
 			error: any;
 			showFormColumn?: boolean;
+			showExternalIdColumn?: boolean;
 			showSubmittedAtColumn?: boolean;
 		}>(),
 		{
 			showFormColumn: false,
+			showExternalIdColumn: false,
 			showSubmittedAtColumn: true,
 		},
 	);
@@ -462,6 +474,11 @@
 	async function copyToken(token: string) {
 		await navigator.clipboard.writeText(token);
 		toasts.add({ title: "הטוקן הועתק", theme: "success", duration: 2000 });
+	}
+
+	async function copySubmissionId(id: number) {
+		await navigator.clipboard.writeText(String(id));
+		toasts.add({ title: "מזהה ההגשה הועתק", theme: "success", duration: 2000 });
 	}
 
 	function downloadPDF(token: string) {

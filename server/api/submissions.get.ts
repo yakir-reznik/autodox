@@ -1,7 +1,8 @@
 import { db } from "~~/server/db";
-import { submissionsTable, formsTable, formSharesTable } from "~~/server/db/schema";
-import { eq, desc, count, and, inArray } from "drizzle-orm";
+import { submissionsTable, formsTable, formSharesTable, submissionStatusEnum } from "~~/server/db/schema";
+import { eq, desc, count, and, inArray, gte, lte, like, type SQL } from "drizzle-orm";
 import { requireRoles, requireFormPermission } from "~~/server/utils/authorization";
+import { parseReportDateRange } from "~~/server/utils/adminReports";
 
 const SUBMISSION_FIELDS = {
 	id: submissionsTable.id,
@@ -10,6 +11,7 @@ const SUBMISSION_FIELDS = {
 	prefillData: submissionsTable.prefillData,
 	additionalData: submissionsTable.additionalData,
 	createdByUserId: submissionsTable.createdByUserId,
+	externalId: submissionsTable.externalId,
 	expiresAt: submissionsTable.expiresAt,
 	status: submissionsTable.status,
 	isPublic: submissionsTable.isPublic,
@@ -27,12 +29,46 @@ export default defineEventHandler(async (event) => {
 	const query = getQuery(event);
 	const formId = Number(query.formId) || undefined;
 	const userId = Number(query.userId) || undefined;
+	const all = query.all === "true";
 	const sharedWithMe = query.sharedWithMe === "true";
 	const archived = query.archived === "true";
 
 	const page = Math.max(1, Number(query.page) || 1);
 	const limit = 10;
 	const offset = (page - 1) * limit;
+
+	// --- admin all submissions mode ---
+	if (all) {
+		await requireRoles(event, ["admin"]);
+
+		const range = parseReportDateRange(query);
+		const conditions: SQL[] = [
+			gte(submissionsTable.createdAt, range.fromDate),
+			lte(submissionsTable.createdAt, range.toDate),
+		];
+		const status = typeof query.status === "string" ? query.status : "";
+		const externalId = typeof query.externalId === "string" ? query.externalId.trim() : "";
+
+		if (formId) conditions.push(eq(submissionsTable.formId, formId));
+		if (submissionStatusEnum.includes(status as (typeof submissionStatusEnum)[number])) {
+			conditions.push(eq(submissionsTable.status, status as (typeof submissionStatusEnum)[number]));
+		}
+		if (externalId) conditions.push(like(submissionsTable.externalId, `%${externalId}%`));
+
+		const where = and(...conditions);
+
+		const [totalResult, submissions] = await Promise.all([
+			db.select({ count: count() }).from(submissionsTable)
+				.innerJoin(formsTable, eq(submissionsTable.formId, formsTable.id)).where(where),
+			db.select({ ...SUBMISSION_FIELDS, formTitle: formsTable.title })
+				.from(submissionsTable)
+				.innerJoin(formsTable, eq(submissionsTable.formId, formsTable.id))
+				.where(where)
+				.orderBy(desc(submissionsTable.createdAt)).limit(limit).offset(offset),
+		]);
+
+		return paginated(submissions, totalResult[0]?.count ?? 0, page, limit);
+	}
 
 	// --- formId mode ---
 	if (formId) {
@@ -104,7 +140,7 @@ export default defineEventHandler(async (event) => {
 		return paginated(submissions, totalResult[0]?.count ?? 0, page, limit);
 	}
 
-	throw createError({ statusCode: 400, message: "formId, userId, or sharedWithMe is required" });
+	throw createError({ statusCode: 400, message: "formId, userId, all, or sharedWithMe is required" });
 });
 
 function paginated<T>(data: T[], total: number, page: number, limit: number) {

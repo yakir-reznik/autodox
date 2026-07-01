@@ -132,11 +132,12 @@
 <script setup lang="ts">
 	const { user, clear } = useUserSession();
 	const route = useRoute();
+	const isAdmin = computed(() => user.value?.roles?.includes("admin") ?? false);
 
 	const sidebarItemClasses =
 		"sidebar-item group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:my-1 group-data-[collapsible=icon]:h-12! group-data-[collapsible=icon]:w-10!";
 
-	const mainNavItems = [
+	const mainNavItems = computed(() => [
 		{ label: "ניהול טפסים", to: "/manage/", icon: "heroicons:document-text" },
 		{
 			label: "טפסים ששותפו איתי",
@@ -148,9 +149,18 @@
 			to: `/manage/submissions/user/${user.value?.id}`,
 			icon: "heroicons:inbox-stack",
 		},
+		...(isAdmin.value
+			? [
+					{
+						label: "כל ההגשות",
+						to: "/manage/submissions/all",
+						icon: "heroicons:rectangle-stack",
+					},
+				]
+			: []),
 		{ label: "דוחות", to: "/manage/reports", icon: "heroicons:chart-bar" },
 		{ label: "ניהול משתמש", to: "/manage/user", icon: "heroicons:user-circle" },
-	];
+	]);
 
 	const actionItems = [
 		{

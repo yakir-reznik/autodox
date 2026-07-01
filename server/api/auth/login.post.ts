@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
 	if (!email || !password) {
 		throw createError({
 			statusCode: 400,
-			statusMessage: "Email and password are required",
+			statusMessage: "שם משתמש או סיסמה חסרים",
 		});
 	}
 
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
 	if (!user || !user.password) {
 		throw createError({
 			statusCode: 401,
-			statusMessage: "Invalid email or password",
+			statusMessage: "שם משתמש או סיסמה שגויים",
 		});
 	}
 
@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
 	if (!isValid) {
 		throw createError({
 			statusCode: 401,
-			statusMessage: "Invalid email or password",
+			statusMessage: "שם משתמש או סיסמה שגויים",
 		});
 	}
 

@@ -32,7 +32,7 @@
 
 			if (response.success) {
 				await fetch();
-				await router.push("/forms");
+				await router.push("/manage");
 			}
 		} catch (e: any) {
 			error.value = e.data?.statusMessage || "ההרשמה נכשלה";

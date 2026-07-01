@@ -5,6 +5,7 @@
 
 	const email = ref("");
 	const password = ref("");
+	const showPassword = ref(false);
 	const error = ref("");
 	const loading = ref(false);
 	const { fetch } = useUserSession();
@@ -118,15 +119,30 @@
 						>
 							סיסמה
 						</label>
-						<BaseInput
-							class="ltr"
-							id="password"
-							v-model="password"
-							type="password"
-							placeholder="••••••••"
-							:disabled="loading"
-							required
-						/>
+						<div class="relative">
+							<input
+								id="password"
+								v-model="password"
+								:type="showPassword ? 'text' : 'password'"
+								placeholder="••••••••"
+								:disabled="loading"
+								class="ltr w-full rounded-lg border border-gray-300 px-3 py-2 pr-10 text-sm transition-colors hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
+								required
+							>
+							<button
+								type="button"
+								class="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-gray-400 transition-colors hover:text-gray-600 disabled:cursor-not-allowed disabled:text-gray-300"
+								:aria-label="showPassword ? 'הסתר סיסמה' : 'הצג סיסמה'"
+								:title="showPassword ? 'הסתר סיסמה' : 'הצג סיסמה'"
+								:disabled="loading"
+								@click="showPassword = !showPassword"
+							>
+								<Icon
+									:name="showPassword ? 'heroicons:eye-slash' : 'heroicons:eye'"
+									class="h-5 w-5"
+								/>
+							</button>
+						</div>
 					</div>
 
 					<div
