@@ -1,0 +1,178 @@
+I have a PDF form that I need to convert to JSON format for a form builder system.
+
+Please analyze the attached PDF and generate a JSON structure following this exact schema:
+
+CRITICAL — TEXT FIDELITY: Copy all labels, headings, placeholders, option values, and paragraph text EXACTLY as they appear in the PDF. Do NOT correct spelling, grammar, punctuation, capitalization, or phrasing — even if the text seems wrong. The original wording must be preserved verbatim.
+
+CRITICAL — HEBREW RTL: This form is in Hebrew. Output all visible form text in Hebrew and preserve right-to-left reading order/formatting for every title, label, placeholder, option, and paragraph. Do NOT translate Hebrew text to English or rewrite it in left-to-right format.
+
+CRITICAL — TEXT ALIGNMENT: Heading and paragraph elements support an "alignment" property. For Hebrew text, set "alignment": "right". For English or other left-to-right languages, set "alignment": "left". Preserve the source language and choose alignment accordingly.
+
+{
+  "title": "Form title here",
+  "description": "Optional form description",
+  "elements": [
+    // Each form field/element as an object
+  ]
+}
+
+=== ALL SUPPORTED ELEMENT TYPES ===
+
+INPUT FIELDS (use "label", "placeholder", "helpText", "required", "defaultValue", "autocomplete", "id"):
+- "text" - Single line text input (names, addresses, etc.)
+- "email" - Email address input
+- "number" - Numeric input (age, quantity, etc.) - also supports "step"
+- "phone" - Phone number input
+- "textarea" - Multi-line text input (comments, descriptions) - also supports "rows"
+- "date" - Date picker (YYYY-MM-DD)
+- "time" - Time picker (HH:MM)
+- "datetime" - Date and time combined picker
+
+SELECTION FIELDS (use "label", "options", "required", "defaultValue", "allowOther", "id"):
+- "dropdown" - Dropdown/select list (single choice from list)
+- "radio" - Radio buttons (single choice, all options visible)
+- "checkbox" - Single checkbox (yes/no, agree/disagree)
+- "checkboxes" - Multiple checkboxes (select multiple options)
+
+SPECIAL FIELDS:
+- "signature" - Digital signature pad (use "label", "required")
+- "repeater" - Repeating group of fields (use "label", "children" array, "minItems", "maxItems", "addButtonText")
+
+LAYOUT ELEMENTS:
+- "heading_h1" - Large heading (use "text" and "alignment" properties)
+- "heading_h2" - Medium heading (use "text" and "alignment" properties)
+- "heading_h3" - Small heading (use "text" and "alignment" properties)
+- "paragraph" - Text paragraph (use "text" and "alignment" properties)
+- "image" - Image display (use "url", "caption")
+- "video" - Video embed (use "url", "caption")
+- "divider" - Horizontal line separator (no properties needed)
+- "spacer" - Vertical space (use "height" in pixels, default 24)
+- "section" - Group container (use "label" for title, "children" array for nested elements)
+
+=== ELEMENT PROPERTIES BY TYPE ===
+
+For text, email, date, time, datetime:
+{ "type": "text", "label": "Field Label", "placeholder": "Hint text", "helpText": "Additional info", "required": true, "defaultValue": "Default text", "autocomplete": "name" }
+
+For number:
+{ "type": "number", "label": "Age", "placeholder": "Enter age", "required": true, "step": 1, "defaultValue": 0 }
+
+For phone:
+{ "type": "phone", "label": "Phone Number", "placeholder": "050-0000000", "required": true, "autocomplete": "tel" }
+
+For textarea:
+{ "type": "textarea", "label": "Comments", "placeholder": "Enter details...", "required": false, "rows": 4 }
+
+For dropdown:
+{ "type": "dropdown", "label": "Select Country", "options": ["Israel", "USA", "UK", "Other"], "required": true, "defaultValue": "Israel" }
+
+For radio (add "id" only when other fields reference it via conditions):
+{ "type": "radio", "id": "gender", "label": "Gender", "options": ["Male", "Female", "Other"], "required": true }
+
+For checkbox (single yes/no):
+{ "type": "checkbox", "label": "I agree to the terms and conditions", "required": true }
+
+For checkboxes (multiple selection):
+{ "type": "checkboxes", "label": "Select Services", "options": ["Service A", "Service B", "Service C"], "required": false, "allowOther": true }
+
+For signature:
+{ "type": "signature", "label": "Your Signature", "required": true }
+
+For headings:
+{ "type": "heading_h1", "text": "Form Title", "alignment": "left" }
+{ "type": "heading_h2", "text": "Section Title", "alignment": "left" }
+{ "type": "heading_h3", "text": "Subsection Title", "alignment": "left" }
+
+For paragraph:
+{ "type": "paragraph", "text": "Please fill out all required fields below.", "alignment": "left" }
+
+For divider:
+{ "type": "divider" }
+
+For spacer:
+{ "type": "spacer", "height": 24 }
+
+For section (grouping):
+{ "type": "section", "label": "Personal Information", "children": [
+  { "type": "text", "label": "First Name", "required": true },
+  { "type": "text", "label": "Last Name", "required": true }
+]}
+
+For repeater (repeating group):
+{ "type": "repeater", "label": "Family Members", "minItems": 1, "maxItems": 5, "addButtonText": "Add Member", "children": [
+  { "type": "text", "label": "Name", "required": true },
+  { "type": "number", "label": "Age", "required": true }
+]}
+
+=== CONDITIONAL LOGIC ===
+
+Conditions can control two independent behaviors on any element:
+- "conditions" — controls VISIBILITY. By default shows the element when conditions are met. Add "conditionsAction": "hide" to hide it instead.
+- "requiredConditions" — controls whether the element is REQUIRED (makes it required only when the conditions are met, regardless of whether "required" is set to true statically)
+
+Both accept the same array-of-condition-objects format. Both apply to any element type — including input fields, sections, and repeaters.
+
+Condition structure:
+{ "fieldId": "the_source_field_id", "operator": "==", "value": "expected value" }
+
+Supported operators: "==" (equals), "!=" (not equals), "contains", "not_contains", "is_empty", "is_not_empty"
+Note: "is_empty" and "is_not_empty" do not require a "value" field.
+
+By default, all conditions in the array must be true simultaneously (AND logic).
+To use OR logic (any condition must be true), add "conditionsLogic": "or" or "requiredConditionsLogic": "or" to the element.
+
+To use conditions, the source field must have an "id" property, and the dependent element references it via "fieldId".
+"id" values must be unique, lowercase, use underscores (e.g., "has_insurance", "marital_status").
+
+Example — show a field only when a radio answer is "Yes", and make it required only then:
+{ "type": "radio", "id": "has_children", "label": "Do you have children?", "options": ["Yes", "No"], "required": true }
+{ "type": "number", "label": "Number of Children",
+  "conditions": [{ "fieldId": "has_children", "operator": "==", "value": "Yes" }],
+  "requiredConditions": [{ "fieldId": "has_children", "operator": "==", "value": "Yes" }] }
+
+Example — show an entire section only when a checkbox is checked:
+{ "type": "checkbox", "id": "is_employed", "label": "I am currently employed" }
+{ "type": "section", "label": "Employment Details",
+  "conditions": [{ "fieldId": "is_employed", "operator": "==", "value": "true" }],
+  "children": [
+    { "type": "text", "label": "Employer Name", "required": true },
+    { "type": "text", "label": "Job Title", "required": true }
+  ]}
+
+Example — show a repeater only when a dropdown value is selected:
+{ "type": "dropdown", "id": "has_dependents", "label": "Do you have dependents?", "options": ["Yes", "No"] }
+{ "type": "repeater", "label": "Dependents",
+  "conditions": [{ "fieldId": "has_dependents", "operator": "==", "value": "Yes" }],
+  "minItems": 1, "addButtonText": "Add Dependent", "children": [
+    { "type": "text", "label": "Name", "required": true },
+    { "type": "number", "label": "Age", "required": true }
+  ]}
+
+Example — a field that is always visible but only required under a condition:
+{ "type": "radio", "id": "contact_pref", "label": "Preferred contact method", "options": ["Email", "Phone"] }
+{ "type": "text", "label": "Phone Number",
+  "requiredConditions": [{ "fieldId": "contact_pref", "operator": "==", "value": "Phone" }] }
+
+Rules for conditional logic:
+- Only add "id" to fields that are referenced by other fields' conditions
+- Apply "conditions" when the PDF shows fields/sections that are clearly dependent on a previous answer (e.g., "If yes, please specify...", fields indented or grouped under a checkbox/radio)
+- Apply "requiredConditions" when the PDF implies a field is only mandatory based on a prior answer
+- For checkbox fields, the value when checked is the string "true"
+- sections and repeaters support "conditions" just like regular fields — use them when an entire block of fields only applies in certain cases
+
+=== IMPORTANT RULES ===
+
+1. Output ONLY valid JSON - no explanations, no markdown code blocks
+2. Use EXACT type names as shown above (e.g., "checkboxes" not "checkbox_group")
+3. For dropdown/radio/checkboxes: "options" must be a simple string array
+4. Mark fields as "required": true if they appear mandatory in the PDF (asterisk, "required" text, etc.)
+5. Maintain the exact order of fields as they appear in the PDF
+6. Copy all text from the PDF EXACTLY as written — do NOT fix spelling, grammar, punctuation, or phrasing under any circumstances
+7. Use headings to separate form sections
+8. Use dividers or spacers for visual separation where appropriate
+9. Group related fields in sections when the PDF has clear groupings
+10. Use "defaultValue" when a field has a pre-filled or default value in the PDF
+11. Use "autocomplete" for fields that benefit from browser autofill (e.g., "name", "email", "tel", "address-line1")
+12. Use "allowOther": true on checkboxes/radio/dropdown when the PDF has an "Other" option with a write-in field
+13. Use "repeater" for sections where users can add multiple entries (e.g., list of family members, work history)
+14. Apply "conditions" to fields that are clearly dependent on a previous answer in the PDF (see CONDITIONAL LOGIC section above)

@@ -35,6 +35,20 @@ export const usersTable = mysqlTable("users_table", {
 });
 
 // ============================================
+// APP SETTINGS
+// ============================================
+
+export const appSettingsTable = mysqlTable("app_settings_table", {
+	key: varchar("key", { length: 100 }).primaryKey(),
+	value: text("value").notNull(),
+	updatedBy: int("updated_by").references(() => usersTable.id),
+	updatedAt: timestamp("updated_at")
+		.notNull()
+		.defaultNow()
+		.$onUpdate(() => sql`now()`),
+});
+
+// ============================================
 // FORM BUILDER - TYPES & ENUMS
 // ============================================
 
