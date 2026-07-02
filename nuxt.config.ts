@@ -60,6 +60,7 @@ export default defineNuxtConfig({
 	},
 	runtimeConfig: {
 		databaseUrl: process.env.DATABASE_URL,
+		openrouterApiKey: process.env.OPEN_ROUTER_API_KEY || "",
 		session: {
 			password: process.env.NUXT_SESSION_PASSWORD || "",
 			cookie: {
