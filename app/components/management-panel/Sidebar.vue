@@ -24,7 +24,7 @@
 				<UiSidebarGroupLabel class="sidebar-group-label">ניווט</UiSidebarGroupLabel>
 				<UiSidebarGroupContent>
 					<UiSidebarMenu>
-						<UiSidebarMenuItem v-for="item in mainNavItems" :key="item.to">
+						<UiSidebarMenuItem v-for="item in visibleMainNavItems" :key="item.to">
 							<UiSidebarMenuButton
 								as-child
 								:is-active="isActive(item.to)"
@@ -37,9 +37,14 @@
 									exact-active-class="text-primary! bg-primary/5!"
 								>
 									<Icon :name="item.icon" class="text-lg shrink-0" />
-									<span class="text-base sidebar-item-label">
+									<span class="text-base truncate sidebar-item-label">
 										{{ item.label }}
 									</span>
+									<Icon
+										v-if="item.requiresAdmin"
+										name="heroicons:shield-check"
+										class="size-3.5 shrink-0 text-blue-500 group-data-[collapsible=icon]:hidden"
+									/>
 								</NuxtLink>
 							</UiSidebarMenuButton>
 						</UiSidebarMenuItem>
@@ -51,7 +56,7 @@
 				<UiSidebarGroupLabel class="sidebar-group-label">פעולות</UiSidebarGroupLabel>
 				<UiSidebarGroupContent>
 					<UiSidebarMenu>
-						<UiSidebarMenuItem v-for="item in actionItems" :key="item.label">
+						<UiSidebarMenuItem v-for="item in visibleActionItems" :key="item.label">
 							<UiSidebarMenuButton
 								v-if="!item.disabled"
 								as-child
@@ -61,9 +66,14 @@
 							>
 								<NuxtLink :to="item.to!" :class="sidebarItemClasses">
 									<Icon :name="item.icon" class="text-lg shrink-0" />
-									<span class="text-base sidebar-item-label">
+									<span class="text-base truncate sidebar-item-label">
 										{{ item.label }}
 									</span>
+									<Icon
+										v-if="item.requiresAdmin"
+										name="heroicons:shield-check"
+										class="size-3.5 shrink-0 text-blue-500 group-data-[collapsible=icon]:hidden"
+									/>
 								</NuxtLink>
 							</UiSidebarMenuButton>
 							<UiSidebarMenuButton
@@ -75,9 +85,14 @@
 								class="opacity-50 cursor-not-allowed"
 							>
 								<Icon :name="item.icon" class="text-lg shrink-0" />
-								<span class="text-base sidebar-item-label">
+								<span class="text-base truncate sidebar-item-label">
 									{{ item.label }}
 								</span>
+								<Icon
+									v-if="item.requiresAdmin"
+									name="heroicons:shield-check"
+									class="size-3.5 shrink-0 text-blue-500 group-data-[collapsible=icon]:hidden"
+								/>
 							</UiSidebarMenuButton>
 						</UiSidebarMenuItem>
 					</UiSidebarMenu>
@@ -137,7 +152,19 @@
 	const sidebarItemClasses =
 		"sidebar-item group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:my-1 group-data-[collapsible=icon]:h-12! group-data-[collapsible=icon]:w-10!";
 
-	const mainNavItems = computed(() => [
+	type SidebarItem = {
+		label: string;
+		to: string;
+		icon: string;
+		disabled?: boolean;
+		requiresAdmin?: boolean;
+		show?: boolean;
+	};
+
+	const isVisible = (item: SidebarItem) =>
+		(item.show ?? true) && (!item.requiresAdmin || isAdmin.value);
+
+	const mainNavItems = computed<SidebarItem[]>(() => [
 		{ label: "ניהול טפסים", to: "/manage/", icon: "heroicons:document-text" },
 		{
 			label: "טפסים ששותפו איתי",
@@ -149,20 +176,25 @@
 			to: `/manage/submissions/user/${user.value?.id}`,
 			icon: "heroicons:inbox-stack",
 		},
-		...(isAdmin.value
-			? [
-					{
-						label: "כל ההגשות",
-						to: "/manage/submissions/all",
-						icon: "heroicons:rectangle-stack",
-					},
-				]
-			: []),
+		{
+			label: "כל ההגשות",
+			to: "/manage/submissions/all",
+			icon: "heroicons:rectangle-stack",
+			requiresAdmin: true,
+		},
 		{ label: "דוחות", to: "/manage/reports", icon: "heroicons:chart-bar" },
 		{ label: "ניהול משתמש", to: "/manage/user", icon: "heroicons:user-circle" },
+		{
+			label: "הגדרות מערכת",
+			to: "/manage/settings",
+			icon: "heroicons:cog-6-tooth",
+			requiresAdmin: true,
+		},
 	]);
 
-	const actionItems = [
+	const visibleMainNavItems = computed(() => mainNavItems.value.filter(isVisible));
+
+	const actionItems = computed<SidebarItem[]>(() => [
 		{
 			label: "יצירת טופס חדש",
 			to: "/manage/form/new",
@@ -175,7 +207,16 @@
 			icon: "heroicons:code-bracket",
 			disabled: false,
 		},
-	];
+		{
+			label: "טופס חדש ב-AI",
+			to: "/manage/form/ai",
+			icon: "heroicons:sparkles",
+			disabled: false,
+			requiresAdmin: true,
+		},
+	]);
+
+	const visibleActionItems = computed(() => actionItems.value.filter(isVisible));
 
 	const isActive = (to: string) =>
 		route.path === to || (to !== "/manage" && route.path.startsWith(to));
