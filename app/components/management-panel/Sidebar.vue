@@ -182,7 +182,12 @@
 			icon: "heroicons:rectangle-stack",
 			requiresAdmin: true,
 		},
-		{ label: "דוחות", to: "/manage/reports", icon: "heroicons:chart-bar" },
+		{
+			label: "דוחות",
+			to: "/manage/reports",
+			icon: "heroicons:chart-bar",
+			requiresAdmin: true,
+		},
 		{ label: "ניהול משתמש", to: "/manage/user", icon: "heroicons:user-circle" },
 		{
 			label: "הגדרות מערכת",
