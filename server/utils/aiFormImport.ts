@@ -31,7 +31,12 @@ type OpenRouterResponse = {
 	usage?: unknown;
 	model?: string;
 	error?: {
+		code?: number | string;
 		message?: string;
+		metadata?: {
+			provider_name?: string;
+			raw?: string;
+		};
 	};
 };
 
@@ -194,38 +199,25 @@ class OpenRouterFormImportProvider implements AiFormImportProvider {
 	}
 
 	private async complete(content: unknown, schema: Record<string, unknown>): Promise<AiFormImportResult> {
-		const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-			method: "POST",
-			headers: {
-				Authorization: `Bearer ${this.apiKey}`,
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				model: this.model,
-				messages: [{ role: "user", content }],
-				response_format: {
-					type: "json_schema",
-					json_schema: {
-						name: "autodox_form_upload",
-						strict: true,
-						schema,
-					},
-				},
-				plugins: [{ id: "file-parser", pdf: { engine: "cloudflare-ai" } }],
-				stream: false,
-			}),
-		});
+		let result = await this.requestCompletion(content, schema, true);
 
-		const result = await response.json() as OpenRouterResponse;
+		if (!result.response.ok && shouldRetryWithoutSchema(result.errorMessage)) {
+			result = await this.requestCompletion(content, schema, false);
+		}
 
-		if (!response.ok) {
+		if (!result.response.ok) {
 			throw createError({
-				statusCode: response.status,
-				message: result.error?.message || "AI provider request failed",
+				statusCode: result.response.status,
+				message: result.errorMessage || "AI provider request failed",
+				data: {
+					model: this.model,
+					provider: result.providerName,
+					providerStatus: result.response.status,
+				},
 			});
 		}
 
-		const responseContent = result.choices?.[0]?.message?.content;
+		const responseContent = result.body.choices?.[0]?.message?.content;
 		const text = Array.isArray(responseContent)
 			? responseContent.map((part) => part.text || "").join("")
 			: responseContent;
@@ -239,8 +231,52 @@ class OpenRouterFormImportProvider implements AiFormImportProvider {
 
 		return {
 			json: parseProviderJson(text),
-			usage: result.usage,
-			model: result.model || this.model,
+			usage: result.body.usage,
+			model: result.body.model || this.model,
+		};
+	}
+
+	private async requestCompletion(
+		content: unknown,
+		schema: Record<string, unknown>,
+		useSchema: boolean,
+	) {
+		const body: Record<string, unknown> = {
+			model: this.model,
+			messages: [{ role: "user", content }],
+			plugins: [{ id: "file-parser", pdf: { engine: "cloudflare-ai" } }],
+			stream: false,
+		};
+
+		if (useSchema) {
+			body.response_format = {
+				type: "json_schema",
+				json_schema: {
+					name: "autodox_form_upload",
+					strict: true,
+					schema,
+				},
+			};
+		}
+
+		const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${this.apiKey}`,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(body),
+		});
+
+		return {
+			response,
+			body: await readOpenRouterResponse(response),
+			get errorMessage() {
+				return getOpenRouterErrorMessage(this.body);
+			},
+			get providerName() {
+				return this.body.error?.metadata?.provider_name;
+			},
 		};
 	}
 }
@@ -272,4 +308,48 @@ function parseProviderJson(text: string): UploadFormBody {
 		if (!match) throw createError({ statusCode: 502, message: "AI provider returned invalid JSON" });
 		return JSON.parse(match[0]);
 	}
+}
+
+async function readOpenRouterResponse(response: Response): Promise<OpenRouterResponse> {
+	const text = await response.text();
+	if (!text) return {};
+
+	try {
+		return JSON.parse(text) as OpenRouterResponse;
+	} catch {
+		return {
+			error: {
+				message: text,
+			},
+		};
+	}
+}
+
+function getOpenRouterErrorMessage(result: OpenRouterResponse) {
+	const rawMessage = getRawProviderErrorMessage(result.error?.metadata?.raw);
+	const message = rawMessage || result.error?.message;
+	const code = result.error?.code;
+
+	if (!message && !code) return "";
+	if (!code) return message || "";
+	if (!message) return String(code);
+	return `${message} (${code})`;
+}
+
+function getRawProviderErrorMessage(raw: string | undefined) {
+	if (!raw) return "";
+
+	try {
+		const parsed = JSON.parse(raw);
+		if (typeof parsed?.error?.message === "string") return parsed.error.message;
+		if (typeof parsed?.message === "string") return parsed.message;
+	} catch {
+		return raw;
+	}
+
+	return raw;
+}
+
+function shouldRetryWithoutSchema(message: string) {
+	return /response[_ ]format|json[_ ]schema|structured|schema/i.test(message);
 }

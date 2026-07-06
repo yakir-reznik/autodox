@@ -1,178 +1,281 @@
-I have a PDF form that I need to convert to JSON format for a form builder system.
-
-Please analyze the attached PDF and generate a JSON structure following this exact schema:
-
-CRITICAL — TEXT FIDELITY: Copy all labels, headings, placeholders, option values, and paragraph text EXACTLY as they appear in the PDF. Do NOT correct spelling, grammar, punctuation, capitalization, or phrasing — even if the text seems wrong. The original wording must be preserved verbatim.
-
-CRITICAL — HEBREW RTL: This form is in Hebrew. Output all visible form text in Hebrew and preserve right-to-left reading order/formatting for every title, label, placeholder, option, and paragraph. Do NOT translate Hebrew text to English or rewrite it in left-to-right format.
-
-CRITICAL — TEXT ALIGNMENT: Heading and paragraph elements support an "alignment" property. For Hebrew text, set "alignment": "right". For English or other left-to-right languages, set "alignment": "left". Preserve the source language and choose alignment accordingly.
-
+# PDF → Form JSON Converter
+ 
+You are converting a PDF form into a JSON structure for a drag-and-drop form builder. Your job is to faithfully represent every visible field, label, heading, and paragraph in the PDF as a JSON element — nothing added, nothing skipped, nothing rephrased.
+ 
+These conventions were refined against real Autodox clinic forms (health declarations and aesthetic-treatment consent forms). When a form looks like one of those, lean on the patterns below — they reflect exactly how the form builder expects the data.
+ 
+## Your output
+ 
+Produce a single valid JSON object:
+ 
+```json
 {
-  "title": "Form title here",
-  "description": "Optional form description",
-  "elements": [
-    // Each form field/element as an object
-  ]
+  "title": "Form title",
+  "description": "Disclaimer or description text from the form",
+  "elements": [ ...elements... ]
 }
-
-=== ALL SUPPORTED ELEMENT TYPES ===
-
-INPUT FIELDS (use "label", "placeholder", "helpText", "required", "defaultValue", "autocomplete", "id"):
-- "text" - Single line text input (names, addresses, etc.)
-- "email" - Email address input
-- "number" - Numeric input (age, quantity, etc.) - also supports "step"
-- "phone" - Phone number input
-- "textarea" - Multi-line text input (comments, descriptions) - also supports "rows"
-- "date" - Date picker (YYYY-MM-DD)
-- "time" - Time picker (HH:MM)
-- "datetime" - Date and time combined picker
-
-SELECTION FIELDS (use "label", "options", "required", "defaultValue", "allowOther", "id"):
-- "dropdown" - Dropdown/select list (single choice from list)
-- "radio" - Radio buttons (single choice, all options visible)
-- "checkbox" - Single checkbox (yes/no, agree/disagree)
-- "checkboxes" - Multiple checkboxes (select multiple options)
-
-SPECIAL FIELDS:
-- "signature" - Digital signature pad (use "label", "required")
-- "repeater" - Repeating group of fields (use "label", "children" array, "minItems", "maxItems", "addButtonText")
-
-LAYOUT ELEMENTS:
-- "heading_h1" - Large heading (use "text" and "alignment" properties)
-- "heading_h2" - Medium heading (use "text" and "alignment" properties)
-- "heading_h3" - Small heading (use "text" and "alignment" properties)
-- "paragraph" - Text paragraph (use "text" and "alignment" properties)
-- "image" - Image display (use "url", "caption")
-- "video" - Video embed (use "url", "caption")
-- "divider" - Horizontal line separator (no properties needed)
-- "spacer" - Vertical space (use "height" in pixels, default 24)
-- "section" - Group container (use "label" for title, "children" array for nested elements)
-
-=== ELEMENT PROPERTIES BY TYPE ===
-
-For text, email, date, time, datetime:
-{ "type": "text", "label": "Field Label", "placeholder": "Hint text", "helpText": "Additional info", "required": true, "defaultValue": "Default text", "autocomplete": "name" }
-
-For number:
-{ "type": "number", "label": "Age", "placeholder": "Enter age", "required": true, "step": 1, "defaultValue": 0 }
-
-For phone:
-{ "type": "phone", "label": "Phone Number", "placeholder": "050-0000000", "required": true, "autocomplete": "tel" }
-
-For textarea:
-{ "type": "textarea", "label": "Comments", "placeholder": "Enter details...", "required": false, "rows": 4 }
-
-For dropdown:
-{ "type": "dropdown", "label": "Select Country", "options": ["Israel", "USA", "UK", "Other"], "required": true, "defaultValue": "Israel" }
-
-For radio (add "id" only when other fields reference it via conditions):
-{ "type": "radio", "id": "gender", "label": "Gender", "options": ["Male", "Female", "Other"], "required": true }
-
-For checkbox (single yes/no):
-{ "type": "checkbox", "label": "I agree to the terms and conditions", "required": true }
-
-For checkboxes (multiple selection):
-{ "type": "checkboxes", "label": "Select Services", "options": ["Service A", "Service B", "Service C"], "required": false, "allowOther": true }
-
-For signature:
-{ "type": "signature", "label": "Your Signature", "required": true }
-
-For headings:
-{ "type": "heading_h1", "text": "Form Title", "alignment": "left" }
-{ "type": "heading_h2", "text": "Section Title", "alignment": "left" }
-{ "type": "heading_h3", "text": "Subsection Title", "alignment": "left" }
-
-For paragraph:
-{ "type": "paragraph", "text": "Please fill out all required fields below.", "alignment": "left" }
-
-For divider:
-{ "type": "divider" }
-
-For spacer:
-{ "type": "spacer", "height": 24 }
-
-For section (grouping):
-{ "type": "section", "label": "Personal Information", "children": [
-  { "type": "text", "label": "First Name", "required": true },
-  { "type": "text", "label": "Last Name", "required": true }
-]}
-
-For repeater (repeating group):
-{ "type": "repeater", "label": "Family Members", "minItems": 1, "maxItems": 5, "addButtonText": "Add Member", "children": [
-  { "type": "text", "label": "Name", "required": true },
-  { "type": "number", "label": "Age", "required": true }
-]}
-
-=== CONDITIONAL LOGIC ===
-
-Conditions can control two independent behaviors on any element:
-- "conditions" — controls VISIBILITY. By default shows the element when conditions are met. Add "conditionsAction": "hide" to hide it instead.
-- "requiredConditions" — controls whether the element is REQUIRED (makes it required only when the conditions are met, regardless of whether "required" is set to true statically)
-
-Both accept the same array-of-condition-objects format. Both apply to any element type — including input fields, sections, and repeaters.
-
-Condition structure:
-{ "fieldId": "the_source_field_id", "operator": "==", "value": "expected value" }
-
-Supported operators: "==" (equals), "!=" (not equals), "contains", "not_contains", "is_empty", "is_not_empty"
-Note: "is_empty" and "is_not_empty" do not require a "value" field.
-
-By default, all conditions in the array must be true simultaneously (AND logic).
-To use OR logic (any condition must be true), add "conditionsLogic": "or" or "requiredConditionsLogic": "or" to the element.
-
-To use conditions, the source field must have an "id" property, and the dependent element references it via "fieldId".
-"id" values must be unique, lowercase, use underscores (e.g., "has_insurance", "marital_status").
-
-Example — show a field only when a radio answer is "Yes", and make it required only then:
-{ "type": "radio", "id": "has_children", "label": "Do you have children?", "options": ["Yes", "No"], "required": true }
-{ "type": "number", "label": "Number of Children",
-  "conditions": [{ "fieldId": "has_children", "operator": "==", "value": "Yes" }],
-  "requiredConditions": [{ "fieldId": "has_children", "operator": "==", "value": "Yes" }] }
-
-Example — show an entire section only when a checkbox is checked:
-{ "type": "checkbox", "id": "is_employed", "label": "I am currently employed" }
-{ "type": "section", "label": "Employment Details",
-  "conditions": [{ "fieldId": "is_employed", "operator": "==", "value": "true" }],
-  "children": [
-    { "type": "text", "label": "Employer Name", "required": true },
-    { "type": "text", "label": "Job Title", "required": true }
-  ]}
-
-Example — show a repeater only when a dropdown value is selected:
-{ "type": "dropdown", "id": "has_dependents", "label": "Do you have dependents?", "options": ["Yes", "No"] }
-{ "type": "repeater", "label": "Dependents",
-  "conditions": [{ "fieldId": "has_dependents", "operator": "==", "value": "Yes" }],
-  "minItems": 1, "addButtonText": "Add Dependent", "children": [
-    { "type": "text", "label": "Name", "required": true },
-    { "type": "number", "label": "Age", "required": true }
-  ]}
-
-Example — a field that is always visible but only required under a condition:
-{ "type": "radio", "id": "contact_pref", "label": "Preferred contact method", "options": ["Email", "Phone"] }
-{ "type": "text", "label": "Phone Number",
-  "requiredConditions": [{ "fieldId": "contact_pref", "operator": "==", "value": "Phone" }] }
-
-Rules for conditional logic:
-- Only add "id" to fields that are referenced by other fields' conditions
-- Apply "conditions" when the PDF shows fields/sections that are clearly dependent on a previous answer (e.g., "If yes, please specify...", fields indented or grouped under a checkbox/radio)
-- Apply "requiredConditions" when the PDF implies a field is only mandatory based on a prior answer
-- For checkbox fields, the value when checked is the string "true"
-- sections and repeaters support "conditions" just like regular fields — use them when an entire block of fields only applies in certain cases
-
-=== IMPORTANT RULES ===
-
-1. Output ONLY valid JSON - no explanations, no markdown code blocks
-2. Use EXACT type names as shown above (e.g., "checkboxes" not "checkbox_group")
-3. For dropdown/radio/checkboxes: "options" must be a simple string array
-4. Mark fields as "required": true if they appear mandatory in the PDF (asterisk, "required" text, etc.)
-5. Maintain the exact order of fields as they appear in the PDF
-6. Copy all text from the PDF EXACTLY as written — do NOT fix spelling, grammar, punctuation, or phrasing under any circumstances
-7. Use headings to separate form sections
-8. Use dividers or spacers for visual separation where appropriate
-9. Group related fields in sections when the PDF has clear groupings
-10. Use "defaultValue" when a field has a pre-filled or default value in the PDF
-11. Use "autocomplete" for fields that benefit from browser autofill (e.g., "name", "email", "tel", "address-line1")
-12. Use "allowOther": true on checkboxes/radio/dropdown when the PDF has an "Other" option with a write-in field
-13. Use "repeater" for sections where users can add multiple entries (e.g., list of family members, work history)
-14. Apply "conditions" to fields that are clearly dependent on a previous answer in the PDF (see CONDITIONAL LOGIC section above)
+```
+ 
+- **`title`**: use the source PDF's filename without the `.pdf` extension, but strip any trailing descriptive suffixes beyond the doctor name and form type. Clinic filenames often contain version/variant tags (e.g. `- כללי - מוגד`, `- v2`, `- final`) that should be dropped. **Always place the doctor name first** — the canonical format is `"ד״ר [Name] - [Form Type]"`. If the filename has the form type before the doctor name (common in Autodox clinic files, e.g. `טופס הסכמה מדעת לטיפול בבוטולינום - דר רחלי הולצברג.pdf`), reorder so the doctor comes first: `"title": "ד״ר רחלי הולצברג - טופס הסכמה מדעת לטיפול בבוטולינום"`. When the filename already starts with the doctor name (e.g. `ד״ר שרה סמולנסקי - שאלון רפואי - כללי - מוגד.pdf`), keep that order and just strip the suffix: `"title": "ד״ר שרה סמולנסקי - שאלון רפואי"`. The printed form heading goes in a `heading_h1` element instead.
+- **`description`**: the form's primary disclaimer / closing legal note (e.g. the gendered-language note, the health-declaration accuracy statement). This same text usually ALSO appears inline as `paragraph` element(s) at its natural position in the form — keep it in both places. The description is a summary copy, not a replacement for the inline text.
+- Output **only** the raw JSON — no markdown fences, no explanation, no commentary before or after.
+---
+ 
+## Reading the PDF
+ 
+Scan every page top-to-bottom (right-to-left for Hebrew/RTL layouts). For each visible item, ask yourself:
+ 
+- Is this a **logo or image** → `image` element at the very top. **Always include `{ "type": "image", "url": "{{logo}}" }` as the very first element** in `elements`, even when no logo is visually present in the PDF — the clinic will supply it at render time.
+- Is this the **form's main title** → `heading_h1` (centered)
+- Is this a **section / product-name heading** → `heading_h2` (centered for branded product names)
+- Is this a **sub-heading** within an informational block, or a visible group heading → `heading_h3`
+- Is this **paragraph text** (informational, numbered clause, disclaimer, a fixed name line like the doctor's name) → `paragraph`
+- Is this an **input area** (blank line, box, underline) → input field type
+- Is this a **group of choices** → radio, checkboxes, or dropdown
+- Is this a **signature area** → `signature`
+- Is this a **repeating block** → `repeater`
+- Is this a **visual separator** → `divider`
+- Is this a **logical group of fields** → `section` with children
+**Numbered clauses** (1. 2. 3. …) in consent forms: encode each as a `paragraph` element with the number baked into the text. Do not create list items, checkboxes, or separate elements for the number.
+ 
+**Informational text** (product info, procedure explanation) that appears before the form fields can sit at the top level as plain `paragraph` / `heading_h2` / `heading_h3` elements — it does not need to be wrapped in a section.
+ 
+When in doubt between two types, pick the one that best matches the visual affordance in the PDF.
+ 
+---
+ 
+## TEXT FIDELITY — critical
+ 
+Copy every label, heading, placeholder, option value, and paragraph **exactly** as it appears in the PDF:
+ 
+- Do NOT fix spelling, grammar, punctuation, or capitalization
+- Do NOT translate or rewrite
+- Do NOT paraphrase
+- Preserve every character, including trailing punctuation or colons
+When a blank field is immediately followed by a parenthetical definition on the same line — e.g. `לאזורים: ______ (להלן: "הטיפול")` — fold the definition into the field's label rather than splitting it across a field and a paragraph: `"label": "לאזורים (להלן: \"הטיפול\"):"`. This keeps the one logical input as one element.
+ 
+**Doctor name inline blank** — consent forms often open with a sentence like `הריני מאשר לד"ר ___ (להלן, הרופאה) לבצע את הטיפול…`. Encode this as a `text` field with `id: "doctorName"`, fold the parenthetical into the label, and always add `helpText: "פרט/י את שם הרופא/ה"`:
+```json
+{
+  "type": "text",
+  "id": "doctorName",
+  "label": "הריני מאשר לד\"ר (להלן, הרופאה) לבצע את הטיפול בבוטולינום טוקסין",
+  "helpText": "פרט/י את שם הרופא/ה",
+  "required": true
+}
+```
+Use `id: "doctorName"` regardless of which treatment the form covers. Do **not** assign a generic `text_N` id to this field.
+ 
+> Tip: when extracting Hebrew text from the PDF, prefer a text-layer extraction (e.g. `pdftotext -layout`) and sanity-check the dense legal paragraphs against a rendered page image. RTL reordering can scramble punctuation; verify rather than assume.
+ 
+---
+ 
+## Alignment
+ 
+Use the `"align"` property (not `"alignment"`) on `heading_h1`, `heading_h2`, `heading_h3`, and `paragraph` elements:
+ 
+- `"align": "right"` — Hebrew or RTL text body paragraphs and section headings
+- `"align": "left"` — English or LTR text
+- `"align": "center"` — the main form title `heading_h1`, branded product-name headings, and **closing/footer paragraphs** (thank-you notes and legal disclaimers that appear at the very bottom of the form after the signature block)
+Field labels and option values do not have an `align` property — just copy the text verbatim. The `image` (logo) element does not need an `align`.
+ 
+---
+ 
+## Structure: sections and their headings
+ 
+Group logically related fields into `section` elements (personal details, each medical-history block, the info-verification block, each signature block, the minor/guardian block). Sections keep the form organized and make conditional logic cleaner — an entire section can be shown/hidden with one condition.
+ 
+Two rules about section labels:
+ 
+1. **Always give the section a human-readable `label`.** If the PDF has a visible heading for that group, use it verbatim (e.g. `"נשים בלבד:"`, `"2. אימות מידע"`, `"במקרה של קטין או פסול דין"`). If the group has no visible heading, use a sensible descriptive label anyway (e.g. `"פרטי המטופל/ת"`, `"הצהרת הרופאה"`, `"אישור והסכמה לביצוע הטיפול"`) — a descriptive label is preferred over a generic placeholder.
+2. **Echo a visible heading as a `heading_h3` child.** When the section's label comes from a heading that is actually printed in the PDF, add a `heading_h3` as the first child repeating that text (`align: "right"` for Hebrew). When the label was one you supplied (no printed heading — e.g. the personal-details block), do NOT add a `heading_h3` child. This way the rendered form shows headings exactly where the PDF does.
+---
+ 
+## Element IDs
+ 
+Give **semantic ids** to the standard personal-info fields and to any field referenced by a condition or a `defaultValue` template (see the table below). For every other input/selection/special field, assign a **sequential generic id per type** in document order: `text_1`, `text_2`, …; `textarea_1`, …; `date_1`, …; `time_1`, …; `signature_1`, ….
+ 
+Keep the counter advancing in reading order. If a field that would normally be an input is instead rendered as a `paragraph` (most commonly the doctor's pre-printed name, see below), its slot is still consumed — skip that number rather than reusing it. Likewise the doctor's signature uses the fixed id `doctorSignature`, so the `signature_N` it would have taken is skipped. Exact numbering is cosmetic (nothing breaks), but staying consistent keeps diffs clean.
+ 
+---
+ 
+## Standard personal-info fields
+ 
+Clinic forms open with a patient-details block. Map the common fields like this (include `required: true` because the clinic needs them, and the semantic `id` so consent blocks can auto-fill from them):
+ 
+| PDF label | type | id | properties |
+|-----------|------|----|-----------|
+| שם / שם מלא / שם ומשפחה | `text` | `fullName` | `required: true`, `autocomplete: "name"` |
+| שם פרטי | `text` | `firstName` | `required: true`, `autocomplete: "given-name"` |
+| שם משפחה | `text` | `lastName` | `required: true`, `autocomplete: "family-name"` |
+| ת.ז / ת.ז. | `text` | `tz` | `required: true` |
+| טלפון / טלפון נייד | `phone` | `phone` | `required: true`, `autocomplete: "tel"` |
+| דוא"ל / אימייל | `email` | `email` | `required: true` |
+| גיל | `number` | `age` | `required: true`, `step: 1` |
+| מין | `radio` | `gender` | `required: true`, `options: ["זכר","נקבה"]`, `defaultValue: "female"` |
+| תאריך לידה | `date` | `birthday` | `required: true` |
+| כתובת | `text` | `address` | `required: true` |
+| עיסוק and other free-text | `text` | `text_N` | (no `required`) |
+ 
+When the form has **separate** first-name and last-name fields, use `firstName` and `lastName` as their ids (not generic `text_N`). Use `fullName` only when the PDF has a single combined name field.
+ 
+Note `מין` (gender) is a **radio**, not a free-text field. Other free-text personal fields (occupation, etc.) get a generic `text_N` id and are not required.
+ 
+---
+ 
+## Element types reference
+ 
+### Input fields
+| Type | When to use |
+|------|------------|
+| `text` | Single-line text (name, address, ID number, etc.) |
+| `email` | Email address |
+| `number` | Numeric value (age, amount, quantity) — add `step: 1` for whole numbers like age |
+| `phone` | Phone / mobile number |
+| `textarea` | Multi-line / comments / free text area |
+| `date` | Date field — use this for "when did X happen?" questions too, not just labelled date fields |
+| `time` | Time field |
+| `datetime` | Combined date + time |
+ 
+### Selection fields
+| Type | When to use |
+|------|------------|
+| `dropdown` | Long list of choices (city, country, category) |
+| `radio` | Yes/no questions, gender, or short lists where exactly one answer is chosen |
+| `checkboxes` | Multiple options that can all be selected (e.g. disease list) |
+ 
+> Note: a marketing/SMS-consent line (e.g. "הנני מאשר/ת קבלת הודעות מ-Allure…") reads like a toggle, but in these forms it is treated as a **`paragraph`**, not a `checkbox`. Encode it as a paragraph with `align: "right"`.
+ 
+### Special fields
+| Type | When to use |
+|------|------------|
+| `signature` | Signature box / area |
+| `repeater` | A block of fields that can repeat (e.g., list of children, previous employers) |
+ 
+### Layout elements
+| Type | Properties |
+|------|-----------|
+| `heading_h1` | `text`, `align` |
+| `heading_h2` | `text`, `align` |
+| `heading_h3` | `text`, `align` |
+| `paragraph` | `text`, `align` |
+| `divider` | `style: "solid"` |
+| `spacer` | `height` (px, default 24) |
+| `section` | `label`, `children[]` |
+| `image` | `url` — always use `"url": "{{logo}}"` as the placeholder; the clinic supplies the actual logo at render time |
+ 
+---
+ 
+## Property rules
+ 
+**Always include:**
+- `type` on every element
+- `label` on all input/selection/special fields
+- `text` + `align` on headings and paragraphs
+- `options` and `defaultValue` on every radio (see radio defaults below)
+- `required: true` on the standard personal-info fields, on yes/no medical-history radios, on the info-verification radios, and on the patient-facing consent fields (date, time, name, patient signature). Leave the minor/guardian block optional — it only applies sometimes.
+**Radio defaults — pick by question intent:**
+- **Medical-history / risk questions** ("האם הנך סובל/ת…", "האם את בהריון…") → `defaultValue: "לא"`. Pre-selecting the safe "no" reduces accidental false positives.
+- **Confirmation / consent questions** ("האם קיבלת הסבר מלא…", "אני נותן/ת את הסכמתי…", photo/marketing consent) → `defaultValue: "כן"`. These are affirmations the patient is expected to confirm, so the helpful default is "yes".
+- `gender` → `defaultValue: "female"`.
+**Include when present in the PDF:**
+- `placeholder` — hint text shown inside the input
+- `helpText` — instruction below a field. For a **patient** signature use `"חתוך/י את שמך"`; for the **doctor and guardian** signatures use `"נא לחתום במלבן מטה"`.
+- `rows` — `rows: 2` for short follow-up textareas ("please specify" after yes/no). Omit for non-textarea fields.
+- `allowOther` — for checkboxes/radio when the PDF has an "Other / אחר" write-in option
+- `defaultValue: "today"` — on `date` fields in consent / signature / doctor blocks
+- `defaultValue: "now"` — on `time` fields in consent / signature / doctor blocks
+- `defaultValue: "{{fullName}}"` — on a consent "שם מלא" field that should auto-fill from the patient's name entered earlier. Use the `{{fieldId}}` template syntax (double curly braces), referencing the semantic id.
+- `autocomplete: "name"` — on every name text field; `autocomplete: "tel"` — on phone fields.
+---
+ 
+## Signature blocks (consent / doctor / guardian)
+ 
+Aesthetic-consent forms end with a recurring set of signing blocks. Encode them consistently:
+ 
+**Patient consent block** (`"אישור והסכמה לביצוע הטיפול"` or a `"חתימת המטופל/ת"` block):
+```json
+{ "type": "date", "id": "date_1", "label": "תאריך", "required": true, "defaultValue": "today" }
+{ "type": "time", "id": "time_1", "label": "שעה", "required": true, "defaultValue": "now" }
+{ "type": "text", "id": "fullName", "label": "שם מלא", "required": true, "defaultValue": "{{fullName}}", "autocomplete": "name" }
+{ "type": "signature", "id": "signature_2", "label": "* חתימת המטופל/ת", "helpText": "חתוך/י את שמך", "required": true }
+```
+ 
+**Doctor block** (`"הצהרת הרופאה"`): the doctor's pre-printed name (e.g. `ד״ר עמית ווייס מ.ר. 196791`) is fixed text, so render it as a `paragraph`, NOT a fillable field. The doctor's date and time are required; the doctor's signature uses the fixed id `doctorSignature`:
+```json
+{ "type": "paragraph", "text": "אני מאשר/ת כי הסברתי למטופל…", "align": "right" }
+{ "type": "paragraph", "text": "ד״ר עמית ווייס מ.ר. 196791", "align": "right" }
+{ "type": "date", "id": "date_2", "label": "תאריך", "required": true, "defaultValue": "today" }
+{ "type": "time", "id": "time_2", "label": "שעה", "required": true, "defaultValue": "now" }
+{ "type": "signature", "id": "doctorSignature", "label": "חתימת הרופאה", "helpText": "נא לחתום במלבן מטה", "required": true }
+```
+ 
+**Minor / guardian block** (`"במקרה של קטין או פסול דין"`): this is the one printed heading among the signing blocks, so give it a `heading_h3` child. Its fields are optional (it only applies to minors), date/time still default to today/now, and the guardian signature uses `"נא לחתום במלבן מטה"`:
+```json
+{ "type": "heading_h3", "text": "במקרה של קטין או פסול דין", "align": "right" }
+{ "type": "text", "id": "text_4", "label": "שם האפוטרופוס", "autocomplete": "name" }
+{ "type": "text", "id": "text_5", "label": "ת.ז" }
+{ "type": "text", "id": "text_6", "label": "קרבה" }
+{ "type": "date", "id": "date_3", "label": "תאריך", "defaultValue": "today" }
+{ "type": "time", "id": "time_3", "label": "שעה", "defaultValue": "now" }
+{ "type": "signature", "id": "signature_4", "label": "חתימת האפוטרופוס", "helpText": "נא לחתום במלבן מטה" }
+```
+ 
+Put a `{ "type": "divider", "style": "solid" }` between these blocks.
+ 
+---
+ 
+## Conditional logic
+ 
+Add conditions when the PDF shows fields that only appear based on a prior answer — for example "if yes, please specify…", or fields indented under a checkbox. Use `conditions` to control visibility. (A separate `requiredConditions` is not needed — keep follow-ups optional so an empty conditional field never blocks submission.)
+ 
+**Yes/no follow-up pattern** (most common in medical/intake forms):
+```json
+{ "type": "radio", "id": "had_surgery", "label": "האם עברת ניתוח כלשהו (כולל אסתטי)?",
+  "options": ["כן", "לא"], "required": true, "defaultValue": "לא" }
+{ "type": "textarea", "id": "textarea_1", "label": "במידה וכן, פרט:", "rows": 2,
+  "conditions": [{ "fieldId": "had_surgery", "operator": "==", "value": "כן" }] }
+```
+ 
+**Checkboxes follow-up** — when a detail field should appear if any checkbox was checked:
+```json
+{ "type": "checkboxes", "id": "diseases", "label": "האם את/ה סובל/ת מאחת מהמחלות הבאות?",
+  "options": [...] }
+{ "type": "textarea", "id": "textarea_2", "label": "פרט/י את המחלות ומצבך:", "rows": 2,
+  "conditions": [{ "fieldId": "diseases", "operator": "is_not_empty" }] }
+```
+ 
+**Event date follow-up** — use a `date` field (not text) when asking when something happened:
+```json
+{ "type": "radio", "id": "before_event", "label": "האם את/ה לפני אירוע שמחה?",
+  "options": ["כן", "לא"], "required": true, "defaultValue": "לא" }
+{ "type": "date", "id": "date_4", "label": "אם כן מתי האירוע?",
+  "conditions": [{ "fieldId": "before_event", "operator": "==", "value": "כן" }] }
+```
+ 
+Rules:
+- Add a semantic `"id"` to any field referenced by conditions — keep these lowercase with underscores
+- For a checked single checkbox, the condition value is the string `"true"`
+- `"is_not_empty"` / `"is_empty"` operators do not need a `"value"` field
+- `section` and `repeater` support conditions too
+---
+ 
+## Quality checklist (run through before outputting)
+ 
+1. Every PDF field has a corresponding element — nothing skipped
+2. `title` follows the format `"ד״ר [Name] - [Form Type]"` (doctor name always first); the printed form title is a `heading_h1`
+3. `{ "type": "image", "url": "{{logo}}" }` is always the very first element (even when no logo is visible in the PDF)
+4. All Hebrew text is in Hebrew, not transliterated or translated; text copied verbatim
+5. All headings/paragraphs use `"align"` (not `"alignment"`) with the correct value
+6. Standard personal-info fields use the semantic ids and `required`/`autocomplete` from the table; `מין` is a radio
+7. Generic fields use sequential per-type ids (`text_N`, `textarea_N`, `date_N`, `time_N`, `signature_N`)
+8. Medical-history radios default to `"לא"`; confirmation/consent radios default to `"כן"`; all radios have `options` + `required`
+9. Follow-up fields use `conditions` (no `requiredConditions`); short "please specify" textareas use `rows: 2`
+10. "When did X happen?" fields use `date` type, not `text`
+11. Sections have a descriptive `label`; sections whose label is a printed PDF heading also have a `heading_h3` child echoing it
+12. Consent/doctor blocks: date `today`, time `now`, both required; consent name field `defaultValue: "{{fullName}}"`
+13. Doctor name is a `paragraph` (not a field); doctor signature id is `doctorSignature`; doctor & guardian signatures use `helpText: "נא לחתום במלבן מטה"`, patient signatures use `"חתוך/י את שמך"`
+14. Minor/guardian block is optional (no `required`); marketing-consent line is a `paragraph`, not a checkbox
+15. A blank-field-plus-parenthetical (e.g. `(להלן: "הטיפול")`) is folded into one field label; the opening doctor-name blank uses `id: "doctorName"` + `helpText: "פרט/י את שם הרופא/ה"`
+16. The form's main disclaimer appears in root `description` AND inline as paragraph(s); dividers include `"style": "solid"`
+17. The output is valid JSON (no trailing commas, no comments) — raw JSON only, no markdown fences

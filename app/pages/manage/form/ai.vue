@@ -242,7 +242,7 @@
 			startRedirectCountdown();
 		} catch (e: any) {
 			const data = e.data?.data;
-			aiError.value = e.data?.message || e.message || "יצירת הטופס נכשלה";
+			aiError.value = getAiImportErrorMessage(e);
 			aiValidationErrors.value = data?.errors || [];
 			aiInvalidJson.value = data?.json ? JSON.stringify(data.json, null, 2) : "";
 			aiStatus.value = "failed";
@@ -301,6 +301,29 @@
 		if (!aiRedirectTimer) return;
 		clearInterval(aiRedirectTimer);
 		aiRedirectTimer = null;
+	}
+
+	function getAiImportErrorMessage(e: any) {
+		const message = e.data?.message || e.message || "";
+		const provider = e.data?.data?.provider ? ` (${e.data.data.provider})` : "";
+
+		if (/overloaded|capacity|rate.?limit|too many requests|529|429/i.test(message)) {
+			return `ספק ה-AI עמוס כרגע${provider}. נסו שוב בעוד כמה דקות או בחרו מודל אחר בהגדרות.`;
+		}
+
+		if (/response[_ ]format|json[_ ]schema|structured|schema/i.test(message)) {
+			return `המודל שנבחר לא הצליח להחזיר JSON מובנה${provider}. נסו שוב או בחרו מודל אחר בהגדרות.`;
+		}
+
+		if (/provider returned error|provider request failed/i.test(message)) {
+			return `ספק ה-AI החזיר שגיאה כללית${provider}. נסו שוב או בחרו מודל אחר בהגדרות.`;
+		}
+
+		if (/OPEN_ROUTER_API_KEY/i.test(message)) {
+			return "מפתח OpenRouter לא מוגדר בשרת.";
+		}
+
+		return message || "יצירת הטופס נכשלה";
 	}
 
 	function goToCreatedForm() {
