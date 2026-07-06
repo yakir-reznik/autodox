@@ -126,8 +126,6 @@
 </template>
 
 <script setup lang="ts">
-	import chatgptPrompt from "~~/shared/prompts/ai-form-json-generation-prompt.txt?raw";
-
 	const router = useRouter();
 	const route = useRoute();
 
@@ -148,6 +146,7 @@
 	useHead({ title: "Upload JSON - Autodox" });
 
 	const jsonInput = ref("");
+	const chatgptPrompt = ref("");
 	const error = ref("");
 	const loading = ref(false);
 	const prefilling = ref(false);
@@ -157,6 +156,15 @@
 	});
 
 	const isUpdatingMode = computed(() => formId.value !== null);
+
+	onMounted(async () => {
+		try {
+			const data = await $fetch<{ prompt: string }>("/api/forms/ai-import-prompt");
+			chatgptPrompt.value = data.prompt;
+		} catch {
+			error.value = "Failed to load ChatGPT prompt";
+		}
+	});
 
 	onMounted(async () => {
 		if (!isUpdatingMode.value || !formId.value) return;
