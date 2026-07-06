@@ -40,6 +40,7 @@ export default defineEventHandler(async (event) => {
 		theme: form.theme,
 		webhookUrl: form.webhookUrl,
 		webhookIncludePdf: form.webhookIncludePdf,
+		allowPdfDownload: form.allowPdfDownload,
 		password: form.password,
 		allowPublicSubmissions: form.allowPublicSubmissions,
 		createdBy: form.createdBy,

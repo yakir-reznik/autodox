@@ -1,0 +1,2 @@
+-- No-op migration marker.
+-- The schema change for allow_pdf_download is captured in 0016_add_allow_pdf_download.sql.

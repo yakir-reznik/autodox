@@ -49,12 +49,15 @@
 	const webhookUrlValue = ref("");
 	const overrideWebhookPdf = ref(false);
 	const webhookPdfValue = ref(false);
+	const overridePdfDownload = ref(false);
+	const pdfDownloadValue = ref(true);
 
 	const formDefaults = ref<{
 		password: string | null;
 		webhookUrl: string | null;
 		webhookIncludePdf: boolean;
-	}>({ password: null, webhookUrl: null, webhookIncludePdf: false });
+		allowPdfDownload: boolean;
+	}>({ password: null, webhookUrl: null, webhookIncludePdf: false, allowPdfDownload: true });
 
 	const prefillableTypes: ElementType[] = [
 		"text",
@@ -93,6 +96,8 @@
 		webhookUrlValue.value = "";
 		overrideWebhookPdf.value = false;
 		webhookPdfValue.value = false;
+		overridePdfDownload.value = false;
+		pdfDownloadValue.value = true;
 		createdLink.value = null;
 		error.value = null;
 	}
@@ -108,6 +113,7 @@
 					password: string | null;
 					webhookUrl: string | null;
 					webhookIncludePdf: boolean;
+					allowPdfDownload: boolean;
 				}>(`/api/forms/${props.formId}/settings`),
 			]);
 
@@ -147,6 +153,7 @@
 				password: settingsResponse.password,
 				webhookUrl: settingsResponse.webhookUrl,
 				webhookIncludePdf: settingsResponse.webhookIncludePdf ?? false,
+				allowPdfDownload: settingsResponse.allowPdfDownload ?? true,
 			};
 		} catch (e: any) {
 			error.value = e.data?.message || "שגיאה בטעינת נתוני הטופס";
@@ -174,6 +181,7 @@
 			if (overridePassword.value) body.password = passwordValue.value;
 			if (overrideWebhookUrl.value) body.webhook_url = webhookUrlValue.value;
 			if (overrideWebhookPdf.value) body.webhook_include_pdf = webhookPdfValue.value;
+			if (overridePdfDownload.value) body.allow_pdf_download = pdfDownloadValue.value;
 
 			const filledRows = additionalDataRows.filter((r) => r.key.trim());
 			if (filledRows.length > 0) {
@@ -270,6 +278,8 @@
 					v-model:webhookUrlValue="webhookUrlValue"
 					v-model:overrideWebhookPdf="overrideWebhookPdf"
 					v-model:webhookPdfValue="webhookPdfValue"
+					v-model:overridePdfDownload="overridePdfDownload"
+					v-model:pdfDownloadValue="pdfDownloadValue"
 					:form-defaults="formDefaults"
 				/>
 

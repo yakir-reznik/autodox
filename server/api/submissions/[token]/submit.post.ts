@@ -1,5 +1,5 @@
 import { db } from "~~/server/db";
-import { submissionsTable } from "~~/server/db/schema";
+import { formsTable, submissionsTable } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { deliverWebhook } from "~~/server/utils/webhookDelivery";
 
@@ -84,8 +84,18 @@ export default defineEventHandler(async (event) => {
 			console.error(`[Webhook] Delivery failed for submission ${submission.id}:`, error);
 		});
 
+	const form = await db.query.formsTable.findFirst({
+		where: eq(formsTable.id, submission.formId),
+	});
+
+	const { allowPdfDownload } = form
+		? resolveFormSettings(form, submission)
+		: { allowPdfDownload: false };
+
 	return {
 		success: true,
 		message: "Form submitted successfully",
+		token,
+		allowPdfDownload: !!allowPdfDownload,
 	};
 });

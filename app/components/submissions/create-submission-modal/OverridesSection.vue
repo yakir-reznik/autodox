@@ -4,6 +4,7 @@
 			password: string | null;
 			webhookUrl: string | null;
 			webhookIncludePdf: boolean;
+			allowPdfDownload: boolean;
 		};
 	};
 
@@ -15,6 +16,8 @@
 	const webhookUrlValue = defineModel<string>("webhookUrlValue", { default: "" });
 	const overrideWebhookPdf = defineModel<boolean>("overrideWebhookPdf", { default: false });
 	const webhookPdfValue = defineModel<boolean>("webhookPdfValue", { default: false });
+	const overridePdfDownload = defineModel<boolean>("overridePdfDownload", { default: false });
+	const pdfDownloadValue = defineModel<boolean>("pdfDownloadValue", { default: true });
 
 	const showOverrides = ref(false);
 </script>
@@ -76,6 +79,20 @@
 					<BaseToggle v-model="webhookPdfValue" />
 					<span class="text-xs text-gray-500">
 						(ברירת מחדל: {{ formDefaults.webhookIncludePdf ? "כן" : "לא" }})
+					</span>
+				</div>
+			</div>
+
+			<!-- Filler PDF Download override -->
+			<div class="space-y-2">
+				<label class="flex items-center gap-3 cursor-pointer">
+					<UiCheckbox v-model="overridePdfDownload" class="bg-background" />
+					<span class="text-sm text-gray-700">דרוס הורדת PDF לממלא</span>
+				</label>
+				<div v-if="overridePdfDownload" class="flex items-center gap-2">
+					<BaseToggle v-model="pdfDownloadValue" />
+					<span class="text-xs text-gray-500">
+						(ברירת מחדל: {{ formDefaults.allowPdfDownload ? "כן" : "לא" }})
 					</span>
 				</div>
 			</div>

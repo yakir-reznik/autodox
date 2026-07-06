@@ -169,6 +169,8 @@
 	const isSubmitted = ref(false);
 	const isAlreadyLocked = ref(false);
 	const isArchived = ref(false);
+	const submittedToken = ref<string | null>(null);
+	const canDownloadPdf = ref(false);
 
 	// Convert server elements to client format with hierarchy
 	const allElements = computed((): BuilderElement[] => {
@@ -607,11 +609,17 @@
 			});
 
 			// Use unified endpoint - pass token if available
-			await $fetch(`/api/forms/${props.formId}/submit`, {
+			const response = await $fetch<{
+				success: boolean;
+				token?: string;
+				allowPdfDownload?: boolean;
+			}>(`/api/forms/${props.formId}/submit`, {
 				method: "POST",
 				body: { submissionData, token: props.token },
 			});
 
+			submittedToken.value = response.token ?? props.token ?? null;
+			canDownloadPdf.value = !!response.allowPdfDownload && !!submittedToken.value;
 			isSubmitted.value = true;
 		} catch (error: any) {
 			console.error("Submission error:", error);
@@ -722,7 +730,11 @@
 		</div>
 
 		<!-- Success state -->
-		<FormFillSuccess v-else-if="isSubmitted" />
+		<FormFillSuccess
+			v-else-if="isSubmitted"
+			:token="submittedToken"
+			:can-download-pdf="canDownloadPdf"
+		/>
 
 		<!-- Form -->
 		<form

@@ -44,6 +44,7 @@ export default defineEventHandler(async (event) => {
 		additionalData?: Record<string, unknown>;
 		webhook_url?: string;
 		webhook_include_pdf?: boolean;
+		allow_pdf_download?: boolean;
 		password?: string;
 	}>(event);
 
@@ -71,6 +72,7 @@ export default defineEventHandler(async (event) => {
 		createdAt: new Date(),
 		webhookUrl,
 		webhookIncludePdf: body?.webhook_include_pdf ?? null,
+		allowPdfDownload: body?.allow_pdf_download ?? null,
 		password: body?.password ?? null,
 	});
 

@@ -14,6 +14,7 @@ const ALLOWED_FIELDS = [
 	"allowPublicSubmissions",
 	"webhookUrl",
 	"webhookIncludePdf",
+	"allowPdfDownload",
 ] as const;
 
 export default defineEventHandler(async (event) => {

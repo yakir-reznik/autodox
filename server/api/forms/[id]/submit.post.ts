@@ -77,7 +77,11 @@ export default defineEventHandler(async (event) => {
 			.where(eq(submissionsTable.token, token));
 
 		// Trigger webhook
-		const { webhookUrl: effectiveWebhookUrl, webhookIncludePdf } = resolveFormSettings(form, submission);
+		const {
+			webhookUrl: effectiveWebhookUrl,
+			webhookIncludePdf,
+			allowPdfDownload,
+		} = resolveFormSettings(form, submission);
 		if (effectiveWebhookUrl) {
 			deliverWebhook(submission.id, effectiveWebhookUrl as string, { includePdf: !!webhookIncludePdf })
 				.then((result) => {
@@ -88,7 +92,12 @@ export default defineEventHandler(async (event) => {
 				});
 		}
 
-		return { success: true, message: "Form submitted successfully" };
+		return {
+			success: true,
+			message: "Form submitted successfully",
+			token,
+			allowPdfDownload: !!allowPdfDownload,
+		};
 	}
 
 	// No token - public submission flow
@@ -101,7 +110,7 @@ export default defineEventHandler(async (event) => {
 
 	// Create new public submission
 	const newToken = generateToken();
-	const { webhookUrl, webhookIncludePdf } = resolveFormSettings(form);
+	const { webhookUrl, webhookIncludePdf, allowPdfDownload } = resolveFormSettings(form);
 
 	const [insertResult] = await db.insert(submissionsTable).values({
 		token: newToken,
@@ -115,6 +124,7 @@ export default defineEventHandler(async (event) => {
 		submittedAt: now,
 		lockedAt: now,
 		webhookUrl: webhookUrl as string | null,
+		allowPdfDownload: allowPdfDownload as boolean,
 	});
 
 	const submissionId = insertResult.insertId;
@@ -130,5 +140,10 @@ export default defineEventHandler(async (event) => {
 			});
 	}
 
-	return { success: true, message: "Form submitted successfully" };
+	return {
+		success: true,
+		message: "Form submitted successfully",
+		token: newToken,
+		allowPdfDownload: !!allowPdfDownload,
+	};
 });

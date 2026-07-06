@@ -35,6 +35,7 @@ export default defineEventHandler(async (event) => {
 		theme: sourceForm.theme,
 		webhookUrl: sourceForm.webhookUrl,
 		webhookIncludePdf: sourceForm.webhookIncludePdf,
+		allowPdfDownload: sourceForm.allowPdfDownload,
 		allowPublicSubmissions: sourceForm.allowPublicSubmissions,
 		createdBy: session.user.id,
 	});
