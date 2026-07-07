@@ -98,6 +98,27 @@
 			background: white;
 		}
 
+		.form-fill-elements,
+		.form-fill-elements :deep(.form-fill-section-content) {
+			display: block;
+		}
+
+		.form-fill-elements :deep(.form-fill-field + .form-fill-field) {
+			margin-top: 1.5rem;
+		}
+
+		.form-fill-elements :deep(.form-fill-field[data-field-type="signature"]) {
+			break-inside: avoid;
+			page-break-inside: avoid;
+		}
+
+		.form-fill-elements :deep(.form-fill-signature-readonly),
+		.form-fill-elements :deep(.form-fill-signature-image) {
+			break-inside: avoid;
+			page-break-inside: avoid;
+			display: block;
+		}
+
 		/* Hide scrollbars */
 		::-webkit-scrollbar {
 			display: none;

@@ -153,11 +153,16 @@
 		</label>
 
 		<!-- Readonly mode: display signature as image -->
-		<div v-if="readonly && modelValue" class="form-fill-signature-readonly w-full md:max-w-100">
+		<div
+			v-if="readonly && modelValue"
+			class="form-fill-signature-readonly w-full md:max-w-100"
+		>
 			<img
 				:src="modelValue"
 				:alt="config.label || 'חתימה'"
-				class="form-fill-signature-image block w-full h-auto border border-input rounded-md"
+				:width="canvasWidth"
+				:height="canvasHeight"
+				class="form-fill-signature-image block w-full h-auto aspect-8/5 object-contain border border-input rounded-md"
 			/>
 		</div>
 
