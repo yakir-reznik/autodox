@@ -4,6 +4,7 @@
 			:folders="folders || []"
 			:selected-folder-id="selectedFolderId"
 			:forms="forms || []"
+			:folder-counts="folderCountsById"
 			:user-id="user?.id"
 			@select-all="selectFolder('all')"
 			@select-unfiled="selectFolder('unfiled')"
@@ -36,7 +37,7 @@
 						</button>
 					</div>
 					<div v-if="searchQuery && !pending" class="text-sm text-gray-600">
-						{{ filteredForms.length }} תוצאות
+						{{ pagination?.total ?? 0 }} תוצאות
 					</div>
 				</div>
 
@@ -56,13 +57,13 @@
 				</div>
 
 				<FormListEmptyState
-					v-else-if="!filteredForms || filteredForms.length === 0"
+					v-else-if="forms.length === 0"
 					:shared-with-me-only="props.sharedWithMeOnly"
 				/>
 
 				<div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 					<FormListCard
-						v-for="form in filteredForms"
+						v-for="form in forms"
 						:key="form.id"
 						:form="form"
 						@move-form="handleMoveForm"
@@ -73,6 +74,13 @@
 						@open-settings="handleOpenSettings"
 					/>
 				</div>
+
+				<FormListPagination
+					v-if="!pending && !error"
+					v-model:page="currentPage"
+					:pagination="pagination"
+					entity-label="טפסים"
+				/>
 			</div>
 		</main>
 	</div>
@@ -116,7 +124,7 @@
 
 <script setup lang="ts">
 	import type { Folder } from "~/types/form-builder";
-	import type { FormListItem } from "~/types/FormListItem";
+	import type { FormListItem, PaginatedFormsResponse } from "~/types/FormListItem";
 
 	interface Props {
 		sharedWithMeOnly?: boolean;
@@ -126,8 +134,7 @@
 		sharedWithMeOnly: false,
 	});
 
-	const { user, clear } = useUserSession();
-	const router = useRouter();
+	const { user } = useUserSession();
 
 	const selectedFolderId = ref<number | null | "all" | "unfiled">("all");
 	const showMoveFormModal = ref(false);
@@ -141,44 +148,69 @@
 	const showSettingsModal = ref(false);
 	const settingsForm = ref<FormListItem | null>(null);
 	const searchQuery = ref("");
+	const debouncedSearchQuery = ref("");
+	const currentPage = ref(1);
+	const pageSize = 12;
+	let searchDebounceTimer: ReturnType<typeof setTimeout> | undefined;
 
 	const { data: folders, refresh: refreshFolders } = await useFetch<Folder[]>("/api/folders");
 
-	const { data: forms, pending, error, refresh } = await useFetch<FormListItem[]>("/api/forms", {
-		query: computed(() => (props.sharedWithMeOnly ? { "shared-with-me": "1" } : {})),
-	});
+	const {
+		data: response,
+		pending,
+		error,
+		refresh,
+	} = await useFetch<PaginatedFormsResponse>("/api/forms", {
+		query: computed(() => {
+			const query: Record<string, string | number> = {
+				page: currentPage.value,
+				limit: pageSize,
+			};
 
-	const filteredForms = computed(() => {
-		if (!forms.value) return [];
+			if (props.sharedWithMeOnly) query["shared-with-me"] = "1";
+			if (debouncedSearchQuery.value) query.search = debouncedSearchQuery.value;
 
-		const id = selectedFolderId.value;
-		let list = forms.value;
-		if (id === "unfiled") list = list.filter((f) => f.folderId === null);
-		else if (typeof id === "number") list = list.filter((f) => f.folderId === id);
-
-		if (!searchQuery.value.trim()) return list;
-
-		const query = searchQuery.value.toLowerCase().trim();
-		return list.filter((form) => {
-			const title = form.title.toLowerCase();
-			let titleIndex = 0;
-			for (const char of query) {
-				titleIndex = title.indexOf(char, titleIndex);
-				if (titleIndex === -1) return false;
-				titleIndex++;
+			if (selectedFolderId.value === "unfiled") {
+				query.folderId = "null";
+			} else if (typeof selectedFolderId.value === "number") {
+				query.folderId = selectedFolderId.value;
 			}
-			return true;
-		});
+
+			return query;
+		}),
 	});
 
-	async function handleLogout() {
-		await $fetch("/api/auth/logout", { method: "POST" });
-		await clear();
-		router.push("/login");
-	}
+	const forms = computed(() => response.value?.data ?? []);
+	const pagination = computed(() => response.value?.pagination);
+	const folderCountsById = computed<Record<number, number> | undefined>(() => {
+		if (!response.value) return undefined;
+
+		return Object.fromEntries(
+			(response.value?.folderCounts ?? [])
+				.filter((row) => row.folderId !== null)
+				.map((row) => [row.folderId!, row.count]),
+		) as Record<number, number>;
+	});
+
+	watch(searchQuery, (value) => {
+		currentPage.value = 1;
+		clearTimeout(searchDebounceTimer);
+		searchDebounceTimer = setTimeout(() => {
+			debouncedSearchQuery.value = value.trim();
+		}, 300);
+	});
+
+	watch(pagination, (value) => {
+		if (value && value.totalPages > 0 && currentPage.value > value.totalPages) {
+			currentPage.value = value.totalPages;
+		}
+	});
+
+	onBeforeUnmount(() => clearTimeout(searchDebounceTimer));
 
 	function selectFolder(id: number | "all" | "unfiled") {
 		selectedFolderId.value = id;
+		currentPage.value = 1;
 	}
 
 	async function handleFoldersChanged() {
@@ -235,9 +267,14 @@
 				method: "PATCH",
 				body: { status },
 			});
-			forms.value = forms.value?.map((f) =>
-				f.id === changeStatusForm.value!.id ? { ...f, status } : f,
-			);
+			if (response.value) {
+				response.value = {
+					...response.value,
+					data: response.value.data.map((f) =>
+						f.id === changeStatusForm.value!.id ? { ...f, status } : f,
+					),
+				};
+			}
 		} catch (error) {
 			console.error("Failed to change form status:", error);
 		}

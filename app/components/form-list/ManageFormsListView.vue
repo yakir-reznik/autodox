@@ -3,7 +3,8 @@
 		<FoldersSidebar
 			:folders="folders || []"
 			:selected-folder-id="selectedFolderId"
-			:forms="forms || []"
+			:forms="forms"
+			:folder-counts="folderCountsById"
 			:user-id="user?.id"
 			@select-all="selectFolder('all')"
 			@select-unfiled="selectFolder('unfiled')"
@@ -13,43 +14,43 @@
 
 		<main class="min-w-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 lg:px-8">
 			<div class="w-full">
-				<div
-					class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
-				>
-					<div class="relative w-full max-w-md">
-						<label for="">&nbsp;</label>
-						<Icon
-							name="heroicons:magnifying-glass"
-							class="absolute right-3 bottom-0.5 h-5 w-5 -translate-y-1/2 text-gray-400"
-						/>
-						<UiInput
-							v-model="searchQuery"
-							type="text"
-							placeholder="חיפוש טפסים..."
-							class="w-full rounded-md border border-gray-300 py-2 pl-4 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-						/>
-						<button
-							v-if="searchQuery"
-							type="button"
-							class="absolute left-2.5 bottom-2 flex items-center justify-center rounded p-0.5 text-gray-400 transition-colors hover:text-gray-600"
-							@click="searchQuery = ''"
-						>
-							<Icon name="heroicons:x-mark" class="h-4 w-4" />
-						</button>
-					</div>
+				<div class="mb-6 rounded-lg bg-white p-4 shadow">
+					<div class="flex flex-nowrap items-end gap-4 overflow-x-auto pb-1">
+						<div class="flex min-w-72 flex-col gap-1">
+							<label class="text-sm font-medium text-gray-700">חיפוש</label>
+							<div class="relative">
+								<Icon
+									name="heroicons:magnifying-glass"
+									class="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+								/>
+								<UiInput
+									v-model="searchQuery"
+									type="text"
+									placeholder="חיפוש לפי שם טופס"
+									class="bg-white pr-10 pl-10"
+								/>
+								<button
+									v-if="searchQuery"
+									type="button"
+									class="absolute left-2.5 top-1/2 flex -translate-y-1/2 items-center justify-center rounded p-0.5 text-gray-400 transition-colors hover:text-gray-600"
+									@click="searchQuery = ''"
+								>
+									<Icon name="heroicons:x-mark" class="h-4 w-4" />
+								</button>
+							</div>
+						</div>
 
-					<div class="flex flex-col gap-6 sm:flex-row sm:items-center">
-						<div class="flex flex-col gap-2">
-							<label class="text-xs font-medium text-gray-600">סטטוס טופס</label>
+						<div class="flex min-w-40 flex-col gap-1">
+							<label class="text-sm font-medium text-gray-700">סטטוס טופס</label>
 							<UiSelect v-model="statusFilter" dir="rtl">
-								<UiSelectTrigger class="w-full">
+								<UiSelectTrigger class="bg-white">
 									{{ statusLabels[statusFilter] }}
 								</UiSelectTrigger>
 								<UiSelectContent>
 									<UiSelectItem
-										v-for="[val, label] in Object.entries(statusLabels)"
-										:key="val"
-										:value="val"
+										v-for="[value, label] in Object.entries(statusLabels)"
+										:key="value"
+										:value="value"
 									>
 										{{ label }}
 									</UiSelectItem>
@@ -57,24 +58,16 @@
 							</UiSelect>
 						</div>
 
-						<div class="flex flex-row-reverse gap-2 pt-7">
-							<label
-								v-if="!props.sharedWithMeOnly"
-								class="inline-flex cursor-pointer items-center gap-2 text-sm text-gray-700"
-								for="shared-forms"
-							>
-								הצג רק טפסים ששותפו איתי
-							</label>
-							<UiCheckbox
-								v-model="showSharedWithMeOnly"
-								type="checkbox"
-								class="h-4 w-4 rounded border-gray-300 translate-y-0.5 text-blue-600 focus:ring-blue-500"
-								id="shared-forms"
-							/>
-						</div>
+						<BaseButton
+							variant="secondary"
+							:disabled="!hasActiveFilters"
+							@click="clearFilters"
+						>
+							נקה מסננים
+						</BaseButton>
 
-						<div v-if="!pending" class="text-sm text-gray-600 mr-8 pt-5">
-							{{ filteredForms.length }} טפסים
+						<div v-if="!pending" class="mr-auto whitespace-nowrap text-sm text-gray-600">
+							{{ pagination?.total ?? 0 }} טפסים
 						</div>
 					</div>
 				</div>
@@ -94,69 +87,71 @@
 					</BaseButton>
 				</div>
 
-				<FormListEmptyState
-					v-else-if="!filteredForms.length"
-					:shared-with-me-only="effectiveSharedWithMeOnly"
-				/>
+				<div
+					v-else-if="forms.length === 0"
+					class="rounded-lg border-2 border-dashed border-gray-300 bg-white p-12 text-center"
+				>
+					<Icon name="heroicons:document-magnifying-glass" class="mx-auto h-12 w-12 text-gray-400" />
+					<h3 class="mt-4 text-lg font-medium text-gray-900">
+						{{ hasActiveFilters ? "לא נמצאו טפסים" : "אין טפסים" }}
+					</h3>
+					<p class="mt-2 text-gray-500">
+						{{ hasActiveFilters ? "נסה לשנות את החיפוש או הסינון." : "התחל ליצור את הטופס הראשון שלך." }}
+					</p>
+					<NuxtLink v-if="!hasActiveFilters" to="/manage/form/new" class="mt-6 inline-block">
+						<BaseButton variant="primary">
+							<Icon name="heroicons:plus" class="h-5 w-5" />
+							יצירת טופס
+						</BaseButton>
+					</NuxtLink>
+				</div>
 
 				<div
 					v-else
 					class="overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm"
 				>
 					<div class="overflow-x-auto">
-						<table class="w-full min-w-215">
+						<table class="w-full min-w-175">
 							<thead class="border-b border-gray-200 bg-gray-50">
 								<tr>
-									<th
-										class="px-6 py-3 text-right text-sm font-medium text-gray-700"
-									>
+									<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
 										<button
 											type="button"
 											class="inline-flex items-center gap-2"
 											@click="toggleSort('title')"
 										>
 											<span>שם הטופס</span>
-											<Icon
-												:name="getSortIcon('title')"
-												class="h-4 w-4 text-gray-500"
-											/>
+											<Icon :name="getSortIcon('title')" class="h-4 w-4 text-gray-500" />
 										</button>
 									</th>
-									<th
-										class="px-6 py-3 text-right text-sm font-medium text-gray-700"
-									>
-										תיקייה
-									</th>
-									<th
-										class="px-6 py-3 text-right text-sm font-medium text-gray-700"
-									>
-										סטטוס
-									</th>
-									<!-- <th
-										class="px-6 py-3 text-right text-sm font-medium text-gray-700"
-									>
+									<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
 										<button
 											type="button"
 											class="inline-flex items-center gap-2"
-											@click="toggleSort('createdAt')"
+											@click="toggleSort('status')"
 										>
-											<span>נוצר בתאריך</span>
-											<Icon
-												:name="getSortIcon('createdAt')"
-												class="h-4 w-4 text-gray-500"
-											/>
+											<span>סטטוס</span>
+											<Icon :name="getSortIcon('status')" class="h-4 w-4 text-gray-500" />
 										</button>
-									</th> -->
-									<th
-										class="px-6 py-3 text-right text-sm font-medium text-gray-700"
-									>
+									</th>
+									<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
+										<button
+											type="button"
+											class="inline-flex items-center gap-2"
+											@click="toggleSort('updatedAt')"
+										>
+											<span class="whitespace-nowrap">עודכן לאחרונה</span>
+											<Icon :name="getSortIcon('updatedAt')" class="h-4 w-4 text-gray-500" />
+										</button>
+									</th>
+									<th class="px-6 py-3 text-right text-sm font-medium text-gray-700">
 										פעולות
 									</th>
 								</tr>
 							</thead>
 							<tbody class="divide-y divide-gray-200">
 								<tr
-									v-for="form in filteredForms"
+									v-for="form in forms"
 									:key="form.id"
 									class="hover:bg-gray-50"
 								>
@@ -165,7 +160,7 @@
 											<div class="flex min-w-0 items-center gap-2">
 												<NuxtLink
 													:to="`/manage/form/${form.id}/edit`"
-													class="block max-w-[30ch] truncate text-base font-medium text-blue-600 hover:text-blue-800 hover:underline"
+													class="block max-w-[34ch] truncate text-base font-medium text-blue-600 hover:text-blue-800 hover:underline"
 												>
 													{{ form.title }}
 												</NuxtLink>
@@ -178,15 +173,18 @@
 											</div>
 											<p
 												v-if="form.description"
-												class="max-w-[30ch] truncate text-sm text-gray-500"
+												class="max-w-[34ch] truncate text-sm text-gray-500"
 											>
 												{{ form.description }}
 											</p>
+											<div class="mt-1 flex items-center gap-1 text-xs text-gray-500">
+												<Icon name="heroicons:folder" class="h-3.5 w-3.5 text-gray-400" />
+												<span v-if="form.folderName" class="max-w-[34ch] truncate">
+													{{ form.folderName }}
+												</span>
+												<span v-else class="text-gray-400">ללא תיקייה</span>
+											</div>
 										</div>
-									</td>
-									<td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
-										<span v-if="form.folderName">{{ form.folderName }}</span>
-										<span v-else class="text-gray-400">ללא תיקייה</span>
 									</td>
 									<td class="px-6 py-4 text-sm">
 										<span
@@ -196,17 +194,14 @@
 											{{ getFormStatusLabel(form.status) }}
 										</span>
 									</td>
-									<!-- <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-600">
-										{{ formatDate(form.createdAt) }}
-									</td> -->
+									<td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
+										{{ formatDate(form.updatedAt) }}
+									</td>
 									<td class="px-6 py-4 text-sm">
 										<div class="flex items-center gap-2">
 											<NuxtLink :to="`/manage/form/${form.id}/edit`">
 												<BaseButton size="sm">
-													<Icon
-														name="heroicons:pencil-square"
-														class="h-4 w-4"
-													/>
+													<Icon name="heroicons:pencil-square" class="h-4 w-4" />
 													עריכה
 												</BaseButton>
 											</NuxtLink>
@@ -218,15 +213,8 @@
 											</NuxtLink>
 											<UiDropdownMenu dir="rtl">
 												<UiDropdownMenuTrigger as-child>
-													<BaseButton
-														variant="secondary"
-														size="sm"
-														class="whitespace-nowrap"
-													>
-														<Icon
-															name="heroicons:ellipsis-vertical"
-															class="h-4 w-4"
-														/>
+													<BaseButton variant="secondary" size="sm" class="whitespace-nowrap">
+														<Icon name="heroicons:ellipsis-vertical" class="h-4 w-4" />
 														פעולות נוספות
 													</BaseButton>
 												</UiDropdownMenuTrigger>
@@ -237,10 +225,7 @@
 														:disabled="isActionDisabled(form, action)"
 														@select="action.handler"
 													>
-														<Icon
-															:name="action.icon"
-															class="ml-2 h-4 w-4"
-														/>
+														<Icon :name="action.icon" class="ml-2 h-4 w-4" />
 														{{ action.label }}
 													</UiDropdownMenuItem>
 													<UiDropdownMenuItem as-child>
@@ -248,29 +233,18 @@
 															:to="`/manage/form/${form.id}/submission-data-structure`"
 															class="flex w-full items-center"
 														>
-															<Icon
-																name="heroicons:code-bracket"
-																class="ml-2 h-4 w-4"
-															/>
+															<Icon name="heroicons:code-bracket" class="ml-2 h-4 w-4" />
 															הצג מבנה נתונים
 														</NuxtLink>
 													</UiDropdownMenuItem>
 													<UiDropdownMenuSeparator />
 													<UiDropdownMenuItem
 														variant="destructive"
-														:disabled="
-															!hasRequiredFormPermissions(
-																form.permissions,
-																deleteActionPermissions,
-															)
-														"
+														:disabled="!hasRequiredFormPermissions(form.permissions, deleteActionPermissions)"
 														@select="handleDeleteForm(form)"
 													>
-														<Icon
-															name="heroicons:trash"
-															class="ml-2 h-4 w-4"
-														/>
-														{{ deleteActionLabel }}
+														<Icon name="heroicons:trash" class="ml-2 h-4 w-4" />
+														מחיקה
 													</UiDropdownMenuItem>
 												</UiDropdownMenuContent>
 											</UiDropdownMenu>
@@ -281,6 +255,13 @@
 						</table>
 					</div>
 				</div>
+
+				<FormListPagination
+					v-if="!pending && !error"
+					v-model:page="currentPage"
+					:pagination="pagination"
+					entity-label="טפסים"
+				/>
 			</div>
 		</main>
 	</div>
@@ -327,6 +308,7 @@
 	import {
 		type FormListItem,
 		type FormStatusKey,
+		type PaginatedFormsResponse,
 		getFormStatusLabel,
 		getFormStatusLabelClasses,
 	} from "~/types/FormListItem";
@@ -335,7 +317,7 @@
 		sharedWithMeOnly?: boolean;
 	}
 
-	type SortField = "title" | "createdAt";
+	type SortField = "title" | "status" | "createdAt" | "updatedAt";
 	type SortDirection = "asc" | "desc";
 	type StatusFilter = "all" | FormStatusKey;
 	type RowAction = {
@@ -366,78 +348,104 @@
 	const showSettingsModal = ref(false);
 	const settingsForm = ref<FormListItem | null>(null);
 	const searchQuery = ref("");
-	const showSharedWithMeOnly = ref(props.sharedWithMeOnly);
+	const debouncedSearchQuery = ref("");
 	const statusFilter = ref<StatusFilter>("all");
 	const sortField = ref<SortField>("createdAt");
 	const sortDirection = ref<SortDirection>("desc");
+	const currentPage = ref(1);
+	const pageSize = 10;
+	let searchDebounceTimer: ReturnType<typeof setTimeout> | undefined;
 
 	const { data: folders, refresh: refreshFolders } = await useFetch<Folder[]>("/api/folders");
 
 	const {
-		data: forms,
+		data: response,
 		pending,
 		error,
 		refresh,
-	} = await useFetch<FormListItem[]>("/api/forms", {
-		query: computed(() => (props.sharedWithMeOnly ? { "shared-with-me": "1" } : {})),
-	});
+	} = await useFetch<PaginatedFormsResponse>("/api/forms", {
+		query: computed(() => {
+			const query: Record<string, string | number> = {
+				page: currentPage.value,
+				limit: pageSize,
+				sortBy: sortField.value,
+				sortDir: sortDirection.value,
+			};
 
-	const effectiveSharedWithMeOnly = computed(
-		() => props.sharedWithMeOnly || showSharedWithMeOnly.value,
-	);
+			if (props.sharedWithMeOnly) query["shared-with-me"] = "1";
+			if (debouncedSearchQuery.value) query.search = debouncedSearchQuery.value;
+			if (statusFilter.value !== "all") query.status = statusFilter.value;
 
-	const filteredForms = computed(() => {
-		if (!forms.value) return [];
-
-		let list = [...forms.value];
-		const folderId = selectedFolderId.value;
-
-		if (folderId === "unfiled") {
-			list = list.filter((form) => form.folderId === null);
-		} else if (typeof folderId === "number") {
-			list = list.filter((form) => form.folderId === folderId);
-		}
-
-		if (effectiveSharedWithMeOnly.value) {
-			list = list.filter((form) => !form.isOwner);
-		}
-
-		if (statusFilter.value !== "all") {
-			list = list.filter((form) => form.status === statusFilter.value);
-		}
-
-		const query = searchQuery.value.trim().toLowerCase();
-		if (query) {
-			list = list.filter((form) =>
-				[form.title, form.description, form.folderName, String(form.id)]
-					.filter(Boolean)
-					.some((value) => value!.toLowerCase().includes(query)),
-			);
-		}
-
-		return list.sort((left, right) => {
-			if (sortField.value === "title") {
-				const result = left.title.localeCompare(right.title, "he", { sensitivity: "base" });
-				return sortDirection.value === "asc" ? result : -result;
+			if (selectedFolderId.value === "unfiled") {
+				query.folderId = "null";
+			} else if (typeof selectedFolderId.value === "number") {
+				query.folderId = selectedFolderId.value;
 			}
 
-			const leftTime = new Date(left.createdAt).getTime();
-			const rightTime = new Date(right.createdAt).getTime();
-			return sortDirection.value === "asc" ? leftTime - rightTime : rightTime - leftTime;
-		});
+			return query;
+		}),
 	});
 
-	const deleteActionLabel = "מחיקה";
+	const forms = computed(() => response.value?.data ?? []);
+	const pagination = computed(() => response.value?.pagination);
+	const folderCountsById = computed<Record<number, number> | undefined>(() => {
+		if (!response.value) return undefined;
+
+		return Object.fromEntries(
+			(response.value.folderCounts ?? [])
+				.filter((row) => row.folderId !== null)
+				.map((row) => [row.folderId!, row.count]),
+		) as Record<number, number>;
+	});
+
+	const hasActiveFilters = computed(
+		() => Boolean(searchQuery.value.trim()) || statusFilter.value !== "all",
+	);
+
+	watch(searchQuery, (value) => {
+		currentPage.value = 1;
+		clearTimeout(searchDebounceTimer);
+		searchDebounceTimer = setTimeout(() => {
+			debouncedSearchQuery.value = value.trim();
+		}, 300);
+	});
+
+	watch(statusFilter, () => {
+		currentPage.value = 1;
+	});
+
+	watch(pagination, (value) => {
+		if (value && value.totalPages > 0 && currentPage.value > value.totalPages) {
+			currentPage.value = value.totalPages;
+		}
+	});
+
+	onBeforeUnmount(() => clearTimeout(searchDebounceTimer));
+
 	const deleteActionPermissions: FormPermissionName[] = ["delete"];
+
+	const statusLabels = {
+		all: "כל הסטטוסים",
+		draft: "טיוטה",
+		published: "פורסם",
+		archived: "בארכיון",
+	};
+
+	function selectFolder(id: number | "all" | "unfiled") {
+		selectedFolderId.value = id;
+		currentPage.value = 1;
+	}
 
 	function toggleSort(field: SortField) {
 		if (sortField.value === field) {
 			sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
+			currentPage.value = 1;
 			return;
 		}
 
 		sortField.value = field;
 		sortDirection.value = field === "title" ? "asc" : "desc";
+		currentPage.value = 1;
 	}
 
 	function getSortIcon(field: SortField) {
@@ -445,6 +453,13 @@
 		return sortDirection.value === "asc"
 			? "heroicons:bars-arrow-up"
 			: "heroicons:bars-arrow-down";
+	}
+
+	function clearFilters() {
+		searchQuery.value = "";
+		debouncedSearchQuery.value = "";
+		statusFilter.value = "all";
+		currentPage.value = 1;
 	}
 
 	function getRowActions(form: FormListItem): RowAction[] {
@@ -502,10 +517,6 @@
 			: false;
 	}
 
-	function selectFolder(id: number | "all" | "unfiled") {
-		selectedFolderId.value = id;
-	}
-
 	async function handleFoldersChanged() {
 		await refreshFolders();
 		await refresh();
@@ -560,9 +571,7 @@
 				method: "PATCH",
 				body: { status },
 			});
-			forms.value = forms.value?.map((form) =>
-				form.id === changeStatusForm.value!.id ? { ...form, status } : form,
-			);
+			await refresh();
 		} catch (error) {
 			console.error("Failed to change form status:", error);
 		}
@@ -608,11 +617,4 @@
 			});
 		}
 	}
-
-	const statusLabels = {
-		all: "כל הסטטוסים",
-		draft: "טיוטא",
-		published: "פורסם",
-		archived: "בארכיון",
-	};
 </script>

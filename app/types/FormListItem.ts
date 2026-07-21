@@ -17,6 +17,26 @@ export interface FormListItem {
 	permissions: FormPermissions;
 }
 
+export type FormListPaginationInfo = {
+	page: number;
+	limit: number;
+	total: number;
+	totalPages: number;
+	hasNextPage: boolean;
+	hasPreviousPage: boolean;
+};
+
+export type FormFolderCount = {
+	folderId: number | null;
+	count: number;
+};
+
+export type PaginatedFormsResponse = {
+	data: FormListItem[];
+	pagination: FormListPaginationInfo;
+	folderCounts: FormFolderCount[];
+};
+
 export const formStatusLabels = {
 	draft: {
 		label: "טיוטה",

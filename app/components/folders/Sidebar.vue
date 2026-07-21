@@ -137,6 +137,7 @@
 		folders: Folder[];
 		selectedFolderId: number | null | "all" | "unfiled";
 		forms: FormListItem[];
+		folderCounts?: Record<number, number>;
 		userId: number | undefined;
 	}
 
@@ -316,11 +317,13 @@
 	// Calculate form count for a folder (for delete modal)
 	const deletingFolderFormCount = computed(() => {
 		if (!deletingFolder.value || !props.forms) return 0;
+		if (props.folderCounts) return props.folderCounts[deletingFolder.value.id] ?? 0;
 		return props.forms.filter((f) => f.folderId === deletingFolder.value?.id).length;
 	});
 
 	// Helper to get form count for any folder
 	const getFolderFormCount = (folderId: number) => {
+		if (props.folderCounts) return props.folderCounts[folderId] ?? 0;
 		return props.forms.filter((f) => f.folderId === folderId).length;
 	};
 </script>
