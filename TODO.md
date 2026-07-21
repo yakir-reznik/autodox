@@ -1,6 +1,6 @@
 ## Bugs
 
-- [ ] When sharing a form, user can start typing an email address and it will show a list of users that match the input. This is not good because it can be used to find out if a user exists in the system or not. We need to change this to only show users that are already shared with the form and allow adding new users by typing their email address and clicking "Add" button.
+- [x] When sharing a form, user can start typing an email address and it will show a list of users that match the input. This is not good because it can be used to find out if a user exists in the system or not. We need to change this to only show users that are already shared with the form and allow adding new users by typing their email address and clicking "Add" button.
 - [x] Dragging elements into repeater is kind of hard
 - [x] Signature fields inside repeater don't export in pdf
 - [x] What the hell happens when repeater field is marked is required? - basically nothing - removed this prop from repeater fields
