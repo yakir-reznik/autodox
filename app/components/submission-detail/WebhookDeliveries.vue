@@ -2,7 +2,7 @@
 	<div class="mb-8 rounded-lg bg-white p-6 shadow">
 		<div class="mb-4 flex items-center justify-between">
 			<h2 class="text-lg font-medium text-gray-900">
-				Webhook Deliveries ({{ deliveries.length }})
+				משלוחי Webhook ({{ deliveries.length }})
 			</h2>
 			<BaseButton
 				v-if="!isWebhookDisabled"
@@ -118,7 +118,7 @@
 					<!-- URL -->
 					<div>
 						<p class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
-							URL
+							כתובת URL
 						</p>
 						<code
 							class="block break-all rounded bg-gray-100 px-3 py-2 text-xs text-gray-800"
@@ -145,7 +145,7 @@
 					<div v-if="modalDetail.requestHeaders">
 						<div class="mb-1 flex items-center justify-between">
 							<p class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-								Request Headers
+								כותרות בקשה
 							</p>
 							<BaseCopyButton
 								:text="toJson(modalDetail.requestHeaders)"
@@ -164,7 +164,7 @@
 					<div v-if="modalDetail.requestPayload">
 						<div class="mb-1 flex items-center justify-between">
 							<p class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-								Request Body
+								גוף הבקשה
 							</p>
 							<BaseCopyButton
 								:text="toJson(modalDetail.requestPayload)"
@@ -183,7 +183,7 @@
 					<div v-if="modalDetail.responseHeaders">
 						<div class="mb-1 flex items-center justify-between">
 							<p class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-								Response Headers
+								כותרות תגובה
 							</p>
 							<BaseCopyButton
 								:text="toJson(modalDetail.responseHeaders)"
@@ -202,7 +202,7 @@
 					<div v-if="modalDetail.responseBody">
 						<div class="mb-1 flex items-center justify-between">
 							<p class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-								Response Body
+								גוף התגובה
 							</p>
 							<BaseCopyButton
 								:text="modalDetail.responseBody"
@@ -288,7 +288,7 @@
 			});
 			emit("refresh");
 		} catch (err) {
-			console.error("Failed to resend webhook:", err);
+			console.error("שליחת Webhook מחדש נכשלה:", err);
 		} finally {
 			isResending.value = false;
 		}
@@ -309,7 +309,7 @@
 			);
 			modalDetail.value = res.data;
 		} catch (err) {
-			console.error("Failed to load delivery detail:", err);
+			console.error("טעינת פרטי משלוח Webhook נכשלה:", err);
 		} finally {
 			isLoadingDetail.value = false;
 		}

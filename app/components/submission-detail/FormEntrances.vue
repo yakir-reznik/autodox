@@ -2,7 +2,7 @@
 	<div v-if="entrances.length > 0" class="mb-8 overflow-hidden rounded-lg bg-white shadow">
 		<div class="border-b border-gray-200 bg-gray-50 px-6 py-3">
 			<h2 class="text-lg font-medium text-gray-900">
-				Form Entrances ({{ entrances.length }})
+				כניסות לטופס ({{ entrances.length }})
 			</h2>
 		</div>
 		<div class="relative">
@@ -11,28 +11,28 @@
 					<thead class="border-b border-gray-200 bg-gray-50">
 						<tr>
 							<th class="px-4 py-3 text-right text-sm font-medium text-gray-700">
-								Entrance #
+								מספר כניסה
 							</th>
 							<th class="px-4 py-3 text-right text-sm font-medium text-gray-700">
-								Date & Time
+								תאריך ושעה
 							</th>
 							<th class="px-4 py-3 text-center text-sm font-medium text-gray-700">
-								Device Type
+								סוג מכשיר
 							</th>
 							<th class="px-4 py-3 text-right text-sm font-medium text-gray-700">
-								Browser
+								דפדפן
 							</th>
 							<th class="px-4 py-3 text-right text-sm font-medium text-gray-700">
-								OS
+								מערכת הפעלה
 							</th>
 							<th class="px-4 py-3 text-center text-sm font-medium text-gray-700">
-								IP Address
+								כתובת IP
 							</th>
 							<th class="px-4 py-3 text-center text-sm font-medium text-gray-700">
-								Country
+								מדינה
 							</th>
 							<th class="px-4 py-3 text-center text-sm font-medium text-gray-700">
-								New Session
+								סשן חדש
 							</th>
 						</tr>
 					</thead>
@@ -139,10 +139,10 @@
 	);
 
 	const deviceTypeLabels: Record<DeviceType, string> = {
-		mobile: "Mobile",
-		tablet: "Tablet",
-		desktop: "Desktop",
-		unknown: "Unknown",
+		mobile: "נייד",
+		tablet: "טאבלט",
+		desktop: "מחשב",
+		unknown: "לא ידוע",
 	};
 
 	function formatDate(dateString: string) {

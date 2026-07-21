@@ -21,7 +21,7 @@
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-4">
 			<!-- Status -->
 			<div>
-				<label class="block text-sm font-medium text-gray-700">Status</label>
+				<label class="block text-sm font-medium text-gray-700">סטטוס</label>
 				<div class="mt-2 flex items-center gap-2">
 					<span
 						class="rounded-full px-3 py-1 text-sm font-medium"
@@ -42,28 +42,28 @@
 
 			<!-- Form -->
 			<div>
-				<label class="block text-sm font-medium text-gray-700">Form</label>
+				<label class="block text-sm font-medium text-gray-700">טופס</label>
 				<div class="mt-2">
 					<NuxtLink
 						:to="`/fill/${submission.formId}?token=${submission.token}`"
 						class="text-blue-600 hover:underline"
 					>
-						{{ form?.title || `Form #${submission.formId}` }}
+						{{ form?.title || `טופס #${submission.formId}` }}
 					</NuxtLink>
 				</div>
 			</div>
 
 			<!-- Created By User -->
 			<div>
-				<label class="block text-sm font-medium text-gray-700">Created By User ID</label>
+				<label class="block text-sm font-medium text-gray-700">מזהה משתמש יוצר</label>
 				<div class="mt-2 text-gray-900">
-					{{ submission.createdByUserId ?? "Anonymous" }}
+					{{ submission.createdByUserId ?? "אנונימי" }}
 				</div>
 			</div>
 
 			<!-- Download PDF Button -->
 			<div>
-				<label class="block text-sm font-medium mb-2 text-gray-700">Download PDF</label>
+				<label class="block text-sm font-medium mb-2 text-gray-700">הורדת PDF</label>
 				<BaseButton
 					variant="primary"
 					size="sm"
@@ -76,14 +76,14 @@
 						"
 						class="h-4 w-4"
 					/>
-					{{ isDownloading ? "Downloading..." : "Download PDF" }}
+					{{ isDownloading ? "מוריד..." : "הורד PDF" }}
 				</BaseButton>
 			</div>
 		</div>
 
 		<!-- Timeline -->
 		<div class="mt-6 border-t border-gray-200 pt-6">
-			<h3 class="text-lg font-medium text-gray-900">Timeline</h3>
+			<h3 class="text-lg font-medium text-gray-900">ציר זמן</h3>
 			<div class="mt-4 space-y-4">
 				<div class="flex gap-4">
 					<div class="flex flex-col items-center">
@@ -94,7 +94,7 @@
 						</div>
 					</div>
 					<div class="flex-1">
-						<p class="text-sm font-medium text-gray-900">Link Created</p>
+						<p class="text-sm font-medium text-gray-900">קישור נוצר</p>
 						<p class="text-sm text-gray-600">
 							{{ formatDate(submission.createdAt) }}
 						</p>
@@ -113,7 +113,7 @@
 						</div>
 					</div>
 					<div class="flex-1">
-						<p class="text-sm font-medium text-gray-900">Form Started</p>
+						<p class="text-sm font-medium text-gray-900">מילוי הטופס התחיל</p>
 						<p class="text-sm text-gray-600">
 							{{ formatDate(submission.startedAt) }}
 						</p>
@@ -129,7 +129,7 @@
 						</div>
 					</div>
 					<div class="flex-1">
-						<p class="text-sm font-medium text-gray-900">Form Submitted</p>
+						<p class="text-sm font-medium text-gray-900">הטופס הוגש</p>
 						<p class="text-sm text-gray-600">
 							{{ formatDate(submission.submittedAt) }}
 						</p>
@@ -161,7 +161,7 @@
 						</div>
 					</div>
 					<div class="flex-1">
-						<p class="text-sm font-medium text-gray-900">Form Locked</p>
+						<p class="text-sm font-medium text-gray-900">הטופס ננעל</p>
 						<p class="text-sm text-gray-600">
 							{{ formatDate(submission.lockedAt) }}
 						</p>
@@ -174,7 +174,7 @@
 		<div class="mt-6 border-t border-gray-200 pt-6">
 			<div class="rounded-lg bg-yellow-50 p-4">
 				<p class="text-sm text-yellow-800">
-					<strong>Link expires at:</strong>
+					<strong>הקישור פג בתאריך:</strong>
 					{{ formatDate(submission.expiresAt) }}
 				</p>
 			</div>
@@ -223,8 +223,8 @@
 			link.click();
 			document.body.removeChild(link);
 		} catch (err) {
-			console.error("Failed to download PDF:", err);
-			alert("Failed to download PDF. Please try again.");
+			console.error("הורדת PDF נכשלה:", err);
+			alert("הורדת ה-PDF נכשלה. נסה שוב.");
 		} finally {
 			setTimeout(() => {
 				isDownloading.value = false;

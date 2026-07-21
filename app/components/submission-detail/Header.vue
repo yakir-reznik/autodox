@@ -10,8 +10,8 @@
 						</BaseButton>
 					</NuxtLink>
 					<div>
-						<h1 class="text-2xl font-bold text-gray-900">Submission Details</h1>
-						<p class="text-sm text-gray-600">Token: {{ token }}</p>
+						<h1 class="text-2xl font-bold text-gray-900">פרטי הגשה</h1>
+						<p class="text-sm text-gray-600">אסימון: {{ token }}</p>
 					</div>
 				</div>
 				<div class="flex items-center gap-3">

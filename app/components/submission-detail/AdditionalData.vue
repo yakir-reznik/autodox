@@ -3,7 +3,7 @@
 		<div
 			class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3"
 		>
-			<h2 class="text-lg font-medium text-gray-900">Additional Data</h2>
+			<h2 class="text-lg font-medium text-gray-900">נתונים נוספים</h2>
 			<BaseCopyButton
 				v-if="submission.additionalData"
 				:text="JSON.stringify(submission.additionalData, null, 2)"
@@ -14,7 +14,7 @@
 			<Shiki lang="json" :code="JSON.stringify(submission.additionalData, null, 2)" />
 		</div>
 		<div v-else class="p-4 text-center text-sm text-gray-500">
-			No additional data
+			אין נתונים נוספים
 		</div>
 	</div>
 </template>

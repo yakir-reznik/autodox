@@ -10,9 +10,9 @@
 		<div v-else-if="error" class="rounded-lg bg-red-50 p-6 text-center">
 			<Icon name="heroicons:exclamation-circle" class="mx-auto h-12 w-12 text-red-500" />
 			<p class="mt-2 text-red-700">
-				{{ error.message || "Failed to load submission details" }}
+				{{ error.message || "טעינת פרטי ההגשה נכשלה" }}
 			</p>
-			<BaseButton variant="secondary" class="mt-4" @click="refresh"> Try Again </BaseButton>
+			<BaseButton variant="secondary" class="mt-4" @click="refresh"> נסה שוב </BaseButton>
 		</div>
 
 		<div v-else-if="submission">
@@ -96,7 +96,7 @@
 	const webhookDeliveries = computed(() => response.value?.data?.webhookDeliveries ?? []);
 
 	useHead({
-		title: `Submission Details - Autodox`,
+		title: `פרטי הגשה - Autodox`,
 	});
 
 	// Update breadcrumbs after loading page data
