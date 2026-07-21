@@ -1,4 +1,4 @@
-import type { FormShare, FormSharePermissions, UserSearchResult } from "~~/app/types/form-builder"
+import type { FormShare, FormSharePermissions } from "~~/app/types/form-builder"
 
 export function useFormShares(formId: number) {
 	const shares = ref<FormShare[]>([])
@@ -18,13 +18,26 @@ export function useFormShares(formId: number) {
 		}
 	}
 
-	async function addShare(granteeUserId: number, permissions: FormSharePermissions) {
-		const data = await $fetch<FormShare>(`/api/forms/${formId}/shares`, {
+	async function addShare(granteeEmail: string, permissions: FormSharePermissions) {
+		await $fetch(`/api/forms/${formId}/shares`, {
 			method: "POST",
-			body: { granteeUserId, permissions },
+			body: { granteeEmail, permissions },
 		})
-		shares.value.push(data)
-		return data
+		await fetchShares()
+	}
+
+	async function removeShare(shareId: number) {
+		const idx = shares.value.findIndex((s) => s.id === shareId)
+		if (idx === -1) return
+
+		const removed = shares.value.splice(idx, 1)[0]!
+
+		try {
+			await $fetch(`/api/forms/${formId}/shares/${shareId}`, { method: "DELETE" })
+		} catch (e) {
+			shares.value.splice(idx, 0, removed)
+			throw e
+		}
 	}
 
 	async function updateShare(shareId: number, permissions: FormSharePermissions) {
@@ -45,26 +58,7 @@ export function useFormShares(formId: number) {
 		}
 	}
 
-	async function removeShare(shareId: number) {
-		const idx = shares.value.findIndex((s) => s.id === shareId)
-		if (idx === -1) return
-
-		const removed = shares.value.splice(idx, 1)[0]!
-
-		try {
-			await $fetch(`/api/forms/${formId}/shares/${shareId}`, { method: "DELETE" })
-		} catch (e) {
-			shares.value.splice(idx, 0, removed)
-			throw e
-		}
-	}
-
-	async function searchUsers(q: string): Promise<UserSearchResult[]> {
-		if (!q.trim()) return []
-		return $fetch<UserSearchResult[]>("/api/users/search", { query: { q } })
-	}
-
 	fetchShares()
 
-	return { shares, loading, error, addShare, updateShare, removeShare, searchUsers }
+	return { shares, loading, error, addShare, updateShare, removeShare }
 }

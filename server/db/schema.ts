@@ -500,8 +500,8 @@ export const formSharesTable = mysqlTable(
 			.notNull()
 			.references(() => formsTable.id, { onDelete: "cascade" }),
 		granteeUserId: int("grantee_user_id")
-			.notNull()
 			.references(() => usersTable.id, { onDelete: "cascade" }),
+		granteeEmail: varchar("grantee_email", { length: 255 }).notNull(),
 		grantedBy: int("granted_by")
 			.notNull()
 			.references(() => usersTable.id),
@@ -517,7 +517,7 @@ export const formSharesTable = mysqlTable(
 			.defaultNow()
 			.$onUpdate(() => sql`now()`),
 	},
-	(t) => [uniqueIndex("form_shares_form_grantee_unique").on(t.formId, t.granteeUserId)],
+	(t) => [uniqueIndex("form_shares_form_grantee_email_unique").on(t.formId, t.granteeEmail)],
 );
 
 // ============================================

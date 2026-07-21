@@ -1,6 +1,6 @@
 import { db } from "~~/server/db";
 import { submissionsTable, formsTable, formSharesTable, submissionStatusEnum } from "~~/server/db/schema";
-import { eq, desc, count, and, inArray, gte, lte, like, type SQL } from "drizzle-orm";
+import { eq, desc, count, and, or, inArray, gte, lte, like, type SQL } from "drizzle-orm";
 import { requireRoles, requireFormPermission } from "~~/server/utils/authorization";
 import { parseReportDateRange } from "~~/server/utils/adminReports";
 
@@ -121,7 +121,10 @@ export default defineEventHandler(async (event) => {
 
 		const shares = await db.query.formSharesTable.findMany({
 			where: and(
-				eq(formSharesTable.granteeUserId, session.user.id),
+				or(
+					eq(formSharesTable.granteeUserId, session.user.id),
+					eq(formSharesTable.granteeEmail, session.user.email.toLowerCase()),
+				),
 				eq(formSharesTable.canViewSubmissions, true),
 			),
 		});

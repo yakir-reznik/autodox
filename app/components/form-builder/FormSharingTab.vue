@@ -1,7 +1,9 @@
 <template>
 	<div class="flex flex-col gap-4 min-h-60">
 		<h4 class="text-sm text-foreground -mb-2">מתן גישה למשתמש:</h4>
-		<FormBuilderFormShareUserPicker :exclude-ids="existingUserIds" @select="onUserSelect" />
+		<FormBuilderFormShareUserPicker :loading="addingShare" @add="onEmailAdd" />
+		<p v-if="addMessage" class="text-sm text-green-600">{{ addMessage }}</p>
+		<p v-if="addError" class="text-sm text-red-600">{{ addError }}</p>
 
 		<UiSeparator class="mt-2 mb-1" />
 
@@ -32,20 +34,28 @@
 		FormShare,
 		DraftShare,
 		FormSharePermissions,
-		UserSearchResult,
 	} from "~~/app/types/form-builder";
 
 	const props = defineProps<{ formId: number }>();
 
 	const loading = ref(false);
 	const loadError = ref<string | null>(null);
+	const addMessage = ref<string | null>(null);
+	const addError = ref<string | null>(null);
+	const addingShare = ref(false);
 	const saveError = ref<string | null>(null);
 	const saving = ref(false);
+	let addMessageTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	const originalShares = ref<FormShare[]>([]);
 	const draftShares = ref<DraftShare[]>([]);
 
-	const existingUserIds = computed(() => draftShares.value.map((s) => s.granteeUserId));
+	const defaultPermissions: FormSharePermissions = {
+		canViewSubmissions: true,
+		canCreateSubmissions: false,
+		canManageSubmissions: false,
+		canEditForm: false,
+	};
 
 	async function fetchShares() {
 		loading.value = true;
@@ -56,9 +66,7 @@
 			draftShares.value = data.map((s) => ({
 				draftId: String(s.id),
 				shareId: s.id,
-				granteeUserId: s.granteeUserId,
 				granteeEmail: s.granteeEmail,
-				granteeName: s.granteeName,
 				permissions: { ...s.permissions },
 			}));
 		} catch (e: any) {
@@ -68,20 +76,35 @@
 		}
 	}
 
-	function onUserSelect(user: UserSearchResult) {
-		draftShares.value.push({
-			draftId: `new-${Date.now()}`,
-			shareId: null,
-			granteeUserId: user.id,
-			granteeEmail: user.email,
-			granteeName: user.name,
-			permissions: {
-				canViewSubmissions: true,
-				canCreateSubmissions: false,
-				canManageSubmissions: false,
-				canEditForm: false,
-			},
-		});
+	async function onEmailAdd(email: string) {
+		addMessage.value = null;
+		addError.value = null;
+		saveError.value = null;
+		clearAddMessageTimeout();
+		addingShare.value = true;
+
+		try {
+			await $fetch(`/api/forms/${props.formId}/shares`, {
+				method: "POST",
+				body: { granteeEmail: email, permissions: defaultPermissions },
+			});
+			addMessage.value = `הטופס שותף עם ${email}`;
+			addMessageTimeout = setTimeout(() => {
+				addMessage.value = null;
+				addMessageTimeout = null;
+			}, 6000);
+			await fetchShares();
+		} catch (e: any) {
+			addError.value = e.data?.message ?? "שגיאה בשיתוף הטופס";
+		} finally {
+			addingShare.value = false;
+		}
+	}
+
+	function clearAddMessageTimeout() {
+		if (!addMessageTimeout) return;
+		clearTimeout(addMessageTimeout);
+		addMessageTimeout = null;
 	}
 
 	function onUpdatePermissions(draftId: string, permissions: FormSharePermissions) {
@@ -102,7 +125,6 @@
 			);
 
 			const deletions = originalShares.value.filter((s) => !draftShareIds.has(s.id));
-			const additions = draftShares.value.filter((s) => s.shareId == null);
 			const updates = draftShares.value.filter((s) => {
 				if (s.shareId == null) return false;
 				const orig = originalShares.value.find((o) => o.id === s.shareId);
@@ -112,12 +134,6 @@
 			await Promise.all([
 				...deletions.map((s) =>
 					$fetch(`/api/forms/${props.formId}/shares/${s.id}`, { method: "DELETE" }),
-				),
-				...additions.map((s) =>
-					$fetch(`/api/forms/${props.formId}/shares`, {
-						method: "POST",
-						body: { granteeUserId: s.granteeUserId, permissions: s.permissions },
-					}),
 				),
 				...updates.map((s) =>
 					$fetch(`/api/forms/${props.formId}/shares/${s.shareId}`, {
@@ -138,6 +154,8 @@
 	}
 
 	fetchShares();
+
+	onBeforeUnmount(clearAddMessageTimeout);
 
 	defineExpose({ save, saving });
 </script>

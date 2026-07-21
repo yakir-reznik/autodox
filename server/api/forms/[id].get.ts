@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
 				throw createError({ statusCode: 404, message: "Form not found" });
 			}
 
-			const permissions = await getFormPermissions(user.id, id, isAdmin);
+			const permissions = await getFormPermissions(user.id, user.email, id, isAdmin);
 			if (!permissions.has("view")) {
 				throw createError({ statusCode: 403, message: "Forbidden" });
 			}

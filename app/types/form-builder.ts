@@ -213,26 +213,16 @@ export type FormSharePermissions = Pick<
 export type FormShare = {
 	id: number;
 	formId: number;
-	granteeUserId: number;
 	granteeEmail: string;
-	granteeName: string | null;
 	grantedBy: number;
 	permissions: FormSharePermissions;
 	createdAt: string;
 	updatedAt: string;
 };
 
-export type UserSearchResult = {
-	id: number;
-	email: string;
-	name: string | null;
-};
-
 export type DraftShare = {
 	draftId: string;
 	shareId: number | null;
-	granteeUserId: number;
 	granteeEmail: string;
-	granteeName: string | null;
 	permissions: FormSharePermissions;
 };

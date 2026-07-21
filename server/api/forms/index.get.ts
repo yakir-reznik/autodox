@@ -17,7 +17,12 @@ const ALL_PERMISSIONS: FormPermissions = {
 export default defineEventHandler(async (event) => {
 	const session = await requireRoles(event, ["user"]);
 	const userId = session.user.id;
+	const userEmail = session.user.email.toLowerCase();
 	const isAdmin = session.user.roles.includes("admin");
+	const shareRecipientFilter = or(
+		eq(formSharesTable.granteeUserId, userId),
+		eq(formSharesTable.granteeEmail, userEmail),
+	);
 
 	const query = getQuery(event);
 	const { folderId } = query;
@@ -32,12 +37,8 @@ export default defineEventHandler(async (event) => {
 
 	if (sharedWithMeOnly) {
 		const sharedFilter = folderFilter
-			? and(
-					isNotNull(formSharesTable.granteeUserId),
-					folderFilter,
-					eq(formSharesTable.granteeUserId, userId),
-				)
-			: eq(formSharesTable.granteeUserId, userId);
+			? and(folderFilter, shareRecipientFilter)
+			: shareRecipientFilter;
 
 		const rows = await db
 			.select({
@@ -64,7 +65,7 @@ export default defineEventHandler(async (event) => {
 				formSharesTable,
 				and(
 					eq(formSharesTable.formId, formsTable.id),
-					eq(formSharesTable.granteeUserId, userId),
+					shareRecipientFilter,
 				),
 			)
 			.where(sharedFilter)
@@ -147,7 +148,6 @@ export default defineEventHandler(async (event) => {
 			shareCanCreateSubmissions: formSharesTable.canCreateSubmissions,
 			shareCanManageSubmissions: formSharesTable.canManageSubmissions,
 			shareCanEditForm: formSharesTable.canEditForm,
-			shareGranteeUserId: formSharesTable.granteeUserId,
 		})
 		.from(formsTable)
 		.leftJoin(foldersTable, eq(formsTable.folderId, foldersTable.id))
@@ -155,10 +155,10 @@ export default defineEventHandler(async (event) => {
 			formSharesTable,
 			and(
 				eq(formSharesTable.formId, formsTable.id),
-				eq(formSharesTable.granteeUserId, userId),
+				shareRecipientFilter,
 			),
 		)
-		.where(or(ownedFilter, isNotNull(formSharesTable.granteeUserId)))
+		.where(or(ownedFilter, isNotNull(formSharesTable.id)))
 		.orderBy(desc(formsTable.createdAt));
 
 	return rows.map((row) => {

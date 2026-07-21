@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm"
+import { eq, and, or } from "drizzle-orm"
 import type { H3Event } from "h3"
 import type { UserRole } from "~~/server/db/schema"
 import { formsTable, formSharesTable, submissionsTable, usersTable } from "~~/server/db/schema"
@@ -48,6 +48,7 @@ export async function hasUserRole(event: H3Event, role: UserRole): Promise<boole
 
 export async function getFormPermissions(
 	userId: number,
+	userEmail: string | undefined,
 	formId: number,
 	isAdmin: boolean,
 ): Promise<Set<FormPermission>> {
@@ -56,10 +57,13 @@ export async function getFormPermissions(
 
 	if (isAdmin || form.createdBy === userId) return new Set(ALL_PERMISSIONS)
 
+	const granteeFilters = [eq(formSharesTable.granteeUserId, userId)]
+	if (userEmail) granteeFilters.push(eq(formSharesTable.granteeEmail, userEmail.toLowerCase()))
+
 	const share = await db.query.formSharesTable.findFirst({
 		where: and(
 			eq(formSharesTable.formId, formId),
-			eq(formSharesTable.granteeUserId, userId),
+			or(...granteeFilters),
 		),
 	})
 
@@ -84,7 +88,7 @@ export async function requireFormPermission(
 	const form = await db.query.formsTable.findFirst({ where: eq(formsTable.id, formId) })
 	if (!form) throw createError({ statusCode: 404, message: "Form not found" })
 
-	const permissions = await getFormPermissions(session.user.id, formId, isAdmin)
+	const permissions = await getFormPermissions(session.user.id, session.user.email, formId, isAdmin)
 	if (!permissions.has(perm)) throw createError({ statusCode: 403, message: "Forbidden" })
 
 	return { session, form, permissions }
@@ -108,7 +112,7 @@ export async function requireSubmissionPermission(
 	})
 	if (!form) throw createError({ statusCode: 404, message: "Form not found" })
 
-	const permissions = await getFormPermissions(session.user.id, form.id, isAdmin)
+	const permissions = await getFormPermissions(session.user.id, session.user.email, form.id, isAdmin)
 	if (!permissions.has(perm)) throw createError({ statusCode: 403, message: "Forbidden" })
 
 	return { session, submission, form, permissions }
@@ -132,7 +136,7 @@ export async function requireApiKeyFormPermission(
 	const form = await db.query.formsTable.findFirst({ where: eq(formsTable.id, formId) })
 	if (!form) throw createError({ statusCode: 404, message: "Form not found" })
 
-	const permissions = await getFormPermissions(user.id, formId, isAdmin)
+	const permissions = await getFormPermissions(user.id, user.email, formId, isAdmin)
 	if (!permissions.has(perm)) throw createError({ statusCode: 403, message: "Forbidden" })
 
 	return { user, form, permissions }
