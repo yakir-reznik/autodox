@@ -10,9 +10,9 @@ defineProps<{
 		<div class="mx-auto max-w-7xl px-6 lg:px-8">
 			<div class="reveal mx-auto max-w-2xl text-center">
 				<h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-					פשוט. מהיר. יעיל.
+					מהרעיון להגשה מטופלת
 				</h2>
-				<p class="mt-4 text-lg text-gray-500">שלושה צעדים זה כל מה שצריך</p>
+				<p class="mt-4 text-lg text-gray-500">תהליך אחד שמחבר בנייה, שיתוף ומעקב</p>
 			</div>
 
 			<div class="relative mt-20">
@@ -29,15 +29,15 @@ defineProps<{
 								class="flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/25"
 							>
 								<Icon
-									name="ph:plus-circle-fill"
+									name="heroicons:plus-circle"
 									class="h-9 w-9 text-white"
 								/>
 							</div>
 						</div>
 						<span class="text-5xl font-black text-blue-300">01</span>
-						<h3 class="mt-2 text-xl font-bold text-gray-900">צור טופס</h3>
+						<h3 class="mt-2 text-xl font-bold text-gray-900">בנה או ייבא</h3>
 						<p class="mt-2 text-gray-500">
-							בחר רכיבים, גרור ושחרר, והתאם אישית בקלות
+							התחל מ-AI, JSON או קנבס ריק, ואז סדר רכיבים ופריסות
 						</p>
 					</div>
 
@@ -48,13 +48,13 @@ defineProps<{
 							<div
 								class="flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-violet-500 to-violet-700 shadow-lg shadow-violet-500/25"
 							>
-								<Icon name="ph:share-fill" class="h-9 w-9 text-white" />
+								<Icon name="heroicons:share" class="h-9 w-9 text-white" />
 							</div>
 						</div>
 						<span class="text-5xl font-black text-violet-300">02</span>
-						<h3 class="mt-2 text-xl font-bold text-gray-900">שתף</h3>
+						<h3 class="mt-2 text-xl font-bold text-gray-900">שתף והכן הגשות</h3>
 						<p class="mt-2 text-gray-500">
-							שלח קישור, הטמע באתר, או שתף QR קוד
+							הגדר הרשאות, צור קישורים אישיים ומלא נתונים מראש
 						</p>
 					</div>
 
@@ -66,15 +66,15 @@ defineProps<{
 								class="flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-emerald-500 to-emerald-700 shadow-lg shadow-emerald-500/25"
 							>
 								<Icon
-									name="ph:chart-line-up-fill"
+									name="heroicons:presentation-chart-line"
 									class="h-9 w-9 text-white"
 								/>
 							</div>
 						</div>
 						<span class="text-5xl font-black text-emerald-300">03</span>
-						<h3 class="mt-2 text-xl font-bold text-gray-900">אסוף ונתח</h3>
+						<h3 class="mt-2 text-xl font-bold text-gray-900">עקוב וסגור מעגל</h3>
 						<p class="mt-2 text-gray-500">
-							צפה בתשובות בזמן אמת וייצא דוחות
+							ראה דוחות, PDF, ציר זמן ומשלוחי Webhook במקום אחד
 						</p>
 					</div>
 				</div>

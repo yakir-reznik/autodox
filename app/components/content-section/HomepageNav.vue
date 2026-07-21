@@ -21,7 +21,7 @@
 					<div
 						class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-blue-500 to-blue-700"
 					>
-						<Icon name="ph:stack-fill" class="h-5 w-5 text-white" />
+						<Icon name="heroicons:rectangle-stack" class="h-5 w-5 text-white" />
 					</div>
 					<span class="text-xl font-bold text-white">Autodox</span>
 				</div>
@@ -34,6 +34,18 @@
 						יתרונות
 					</button>
 					<button
+						@click="scrollTo('ai-builder')"
+						class="cursor-pointer text-sm text-white/60 transition-colors hover:text-white"
+					>
+						יצירה עם AI
+					</button>
+					<button
+						@click="scrollTo('operations')"
+						class="cursor-pointer text-sm text-white/60 transition-colors hover:text-white"
+					>
+						יכולות חדשות
+					</button>
+					<button
 						@click="scrollTo('how-it-works')"
 						class="cursor-pointer text-sm text-white/60 transition-colors hover:text-white"
 					>
@@ -43,7 +55,7 @@
 						@click="scrollTo('form-elements')"
 						class="cursor-pointer text-sm text-white/60 transition-colors hover:text-white"
 					>
-						20+ רכיבים לבניית טפסים
+						24 רכיבים
 					</button>
 					<button
 						@click="scrollTo('contact')"

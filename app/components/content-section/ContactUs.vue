@@ -43,7 +43,7 @@
 					</p>
 					<div class="flex items-center gap-3 text-slate-400">
 						<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
-							<Icon name="ph:envelope-fill" class="h-5 w-5 text-blue-500" />
+							<Icon name="heroicons:envelope" class="h-5 w-5 text-blue-500" />
 						</div>
 						<span class="text-sm">contact@autodox.co.il</span>
 					</div>
@@ -88,7 +88,7 @@
 						size="lg"
 						class="w-full rounded-xl!"
 					>
-						<Icon name="ph:paper-plane-tilt-fill" class="h-5 w-5" />
+						<Icon name="heroicons:paper-airplane" class="h-5 w-5" />
 						שלח הודעה
 					</BaseButton>
 				</form>

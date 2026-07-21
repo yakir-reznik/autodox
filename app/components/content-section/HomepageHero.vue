@@ -42,15 +42,15 @@ defineProps<{
 						<span
 							class="bg-linear-to-l from-blue-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent"
 						>
-							תוצאות אמיתיות.
+							תהליכים שלמים.
 						</span>
 					</h1>
 
 					<p
 						class="hero-enter-d2 mx-auto mt-6 max-w-xl text-lg leading-relaxed text-slate-400 sm:text-xl"
 					>
-						צור טפסים דינמיים בדקות עם ממשק גרירה ושחרור. שתף, אסוף ונתח תשובות —
-						הכל במקום אחד.
+						בנה טפסים בגרירה, צור אותם מ-AI או JSON, שתף עם הרשאות, והמשך
+						לנהל הגשות, PDF, דוחות ו-Webhooks ממקום אחד.
 					</p>
 
 					<div
@@ -62,7 +62,7 @@ defineProps<{
 								size="lg"
 								class="!rounded-xl !px-8 !py-3.5 !text-base"
 							>
-								<Icon name="ph:rocket-launch-fill" class="h-5 w-5" />
+								<Icon name="heroicons:rocket-launch" class="h-5 w-5" />
 								התחל בחינם
 							</BaseButton>
 						</NuxtLink>
@@ -71,7 +71,7 @@ defineProps<{
 							class="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 px-8 py-3.5 text-base font-medium text-white/80 transition-all hover:border-white/20 hover:bg-white/5 hover:text-white"
 						>
 							גלה עוד
-							<Icon name="ph:arrow-down" class="h-4 w-4" />
+							<Icon name="heroicons:arrow-down" class="h-4 w-4" />
 						</button>
 					</div>
 				</div>
@@ -101,30 +101,62 @@ defineProps<{
 									dir="ltr"
 									class="flex-1 rounded-md bg-white px-3 py-1 text-center font-mono text-[11px] text-gray-400"
 								>
-									autodox.app/fill/event-2025
+									autodox.app/manage/form/42/edit
 								</div>
 							</div>
 
 							<div dir="rtl" class="space-y-5 p-6 sm:p-8">
 								<div class="mockup-field" style="animation-delay: 1s">
-									<h3 class="text-lg font-bold text-gray-900">
-										טופס הרשמה לכנס 2025
-									</h3>
-									<p class="mt-1 text-sm text-gray-400">
-										מלא את הפרטים שלך להרשמה
-									</p>
+									<div class="flex items-start justify-between gap-4">
+										<div>
+											<h3 class="text-lg font-bold text-gray-900">
+												טופס לקוח חדש
+											</h3>
+											<p class="mt-1 text-sm text-gray-400">
+												נבנה מ-AI, נערך בגרירה ונשמר אוטומטית
+											</p>
+										</div>
+										<span
+											class="rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-600"
+										>
+											נשמר
+										</span>
+									</div>
+								</div>
+
+								<div class="mockup-field" style="animation-delay: 1.1s">
+									<div class="grid grid-cols-3 gap-2">
+										<div
+											class="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-center text-xs font-semibold text-blue-600"
+										>
+											רשת
+										</div>
+										<div
+											class="rounded-lg border border-violet-100 bg-violet-50 px-3 py-2 text-center text-xs font-semibold text-violet-600"
+										>
+											תנאי
+										</div>
+										<div
+											class="rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-center text-xs font-semibold text-amber-600"
+										>
+											חזרה
+										</div>
+									</div>
 								</div>
 
 								<div class="mockup-field" style="animation-delay: 1.2s">
 									<label
 										class="mb-1.5 block w-full text-sm font-medium text-gray-700"
 									>
-										שם מלא
+										שם חברה
 									</label>
+									<p class="mt-1 text-sm text-gray-400">
+										מילוי מוקדם מתוך קישור הגשה אישי
+									</p>
 									<div
 										class="flex h-10 w-full items-center rounded-lg border border-gray-200 bg-gray-50 px-3"
 									>
-										<span class="text-sm text-gray-900">ישראל ישראלי</span>
+										<span class="text-sm text-gray-900">אלפא מערכות בע״מ</span>
 										<span
 											class="typing-cursor mr-0.5 h-4 w-0.5 bg-blue-500"
 										></span>
@@ -135,13 +167,13 @@ defineProps<{
 									<label
 										class="mb-1.5 block w-full text-sm font-medium text-gray-700"
 									>
-										אימייל
+										מזהה חיצוני
 									</label>
 									<div
 										class="flex h-10 w-full items-center rounded-lg border border-gray-200 bg-white px-3"
 									>
-										<span dir="ltr" class="text-sm text-gray-300"
-											>your@email.com</span
+										<span dir="ltr" class="text-sm text-gray-500"
+											>CRM-4832</span
 										>
 									</div>
 								</div>
@@ -179,12 +211,19 @@ defineProps<{
 								</div>
 
 								<div class="mockup-field" style="animation-delay: 1.8s">
-									<div
-										class="flex h-10 w-full items-center justify-center rounded-lg bg-blue-600"
-									>
-										<span class="text-sm font-medium text-white"
-											>שלח טופס</span
-										>
+									<div class="grid gap-2 sm:grid-cols-3">
+										<div class="rounded-lg bg-gray-50 p-3">
+											<p class="text-[11px] text-gray-400">PDF</p>
+											<p class="text-sm font-bold text-gray-800">מוכן להורדה</p>
+										</div>
+										<div class="rounded-lg bg-gray-50 p-3">
+											<p class="text-[11px] text-gray-400">Webhook</p>
+											<p class="text-sm font-bold text-gray-800">200 OK</p>
+										</div>
+										<div class="rounded-lg bg-blue-600 p-3 text-white">
+											<p class="text-[11px] text-blue-100">דוח</p>
+											<p class="text-sm font-bold">78% השלמה</p>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -200,12 +239,12 @@ defineProps<{
 							class="flex h-7 w-7 items-center justify-center rounded-full bg-green-100"
 						>
 							<Icon
-								name="ph:check-circle-fill"
+								name="heroicons:check-circle"
 								class="h-4 w-4 text-green-500"
 							/>
 						</div>
 						<span class="whitespace-nowrap text-xs font-medium text-gray-700"
-							>שמירה אוטומטית</span
+							>הרשאות שיתוף</span
 						>
 					</div>
 
@@ -216,10 +255,10 @@ defineProps<{
 						<div
 							class="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100"
 						>
-							<Icon name="ph:users-fill" class="h-4 w-4 text-blue-500" />
+							<Icon name="heroicons:signal" class="h-4 w-4 text-blue-500" />
 						</div>
 						<span class="whitespace-nowrap text-xs font-medium text-gray-700"
-							>24 תשובות חדשות</span
+							>Webhook נמסר</span
 						>
 					</div>
 				</div>

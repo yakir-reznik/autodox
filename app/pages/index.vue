@@ -21,10 +21,10 @@
 	const statsTriggered = ref(false);
 
 	const counters = reactive({
-		users: 0,
-		forms: 0,
-		submissions: 0,
-		uptime: 0,
+		elements: 0,
+		reports: 0,
+		permissions: 0,
+		themes: 0,
 	});
 
 	function animateCounter(
@@ -46,10 +46,10 @@
 	function triggerCounters() {
 		if (statsTriggered.value) return;
 		statsTriggered.value = true;
-		animateCounter("users", 12500, 2000);
-		animateCounter("forms", 48000, 2500);
-		animateCounter("submissions", 250000, 3000);
-		animateCounter("uptime", 99.9, 1500, 1);
+		animateCounter("elements", 24, 1600);
+		animateCounter("reports", 3, 1400);
+		animateCounter("permissions", 4, 1400);
+		animateCounter("themes", 5, 1400);
 	}
 
 	function scrollTo(id: string) {
@@ -90,88 +90,95 @@
 
 	const features = [
 		{
-			icon: "ph:hand-grabbing-fill",
+			icon: "heroicons:hand-raised",
 			title: "גרור ושחרר",
-			desc: "בנה טפסים בקלות עם ממשק אינטואיטיבי. פשוט גרור רכיבים למקום הרצוי.",
+			desc: "בנה טפסים עם קנבס, סרגל רכיבים ושמירה אוטומטית תוך כדי עבודה.",
 			color: "text-blue-500",
 			bg: "bg-blue-500/10",
 		},
 		{
-			icon: "ph:git-branch-fill",
+			icon: "heroicons:sparkles",
+			title: "יצירה מ-AI ו-JSON",
+			desc: "התחל מטופס שנוצר ב-AI, ייבא JSON קיים או ייצא מבנה לשימוש חוזר.",
+			color: "text-fuchsia-500",
+			bg: "bg-fuchsia-500/10",
+		},
+		{
+			icon: "heroicons:adjustments-horizontal",
 			title: "לוגיקה מותנית",
-			desc: "הצג או הסתר שדות אוטומטית לפי תשובות קודמות. טפסים חכמים באמת.",
+			desc: "הצג, הסתר או הפוך שדות לחובה לפי תשובות קודמות ותנאים ברורים.",
 			color: "text-violet-500",
 			bg: "bg-violet-500/10",
 		},
 		{
-			icon: "ph:palette-fill",
-			title: "ערכות עיצוב",
-			desc: "בחר מתוך ערכות נושא מעוצבות מראש או התאם צבעים וסגנונות.",
-			color: "text-pink-500",
-			bg: "bg-pink-500/10",
+			icon: "heroicons:squares-2x2",
+			title: "פריסות מורכבות",
+			desc: "ארגן שדות במקטעים, רשתות ושדות חזרה שמתאימים גם למסכים קטנים.",
+			color: "text-indigo-500",
+			bg: "bg-indigo-500/10",
 		},
 		{
-			icon: "ph:share-network-fill",
-			title: "שיתוף בקליק",
-			desc: "שתף טפסים בקישור ישיר, QR קוד, או הטמע באתר שלך.",
+			icon: "heroicons:share",
+			title: "שיתוף והרשאות",
+			desc: "שתף טפסים עם משתמשים אחרים וקבע מי יכול לערוך, ליצור או לנהל הגשות.",
 			color: "text-emerald-500",
 			bg: "bg-emerald-500/10",
 		},
 		{
-			icon: "ph:chart-bar-fill",
-			title: "מעקב תשובות",
-			desc: "צפה בתשובות בזמן אמת. סנן, מיין וייצא נתונים בקלות.",
+			icon: "heroicons:folder",
+			title: "תיקיות וחיפוש",
+			desc: "נהל הרבה טפסים עם תיקיות, סינון, חיפוש, שכפול וסטטוסים ברורים.",
+			color: "text-sky-500",
+			bg: "bg-sky-500/10",
+		},
+		{
+			icon: "heroicons:chart-bar",
+			title: "דוחות ביצועים",
+			desc: "עקוב אחרי סטטוסים, זמני מילוי, מזהים חיצוניים וביצועים לפי טופס.",
 			color: "text-amber-500",
 			bg: "bg-amber-500/10",
 		},
 		{
-			icon: "ph:devices-fill",
-			title: "מותאם לכל מסך",
-			desc: "הטפסים שלך נראים מושלם בנייד, טאבלט ומחשב.",
+			icon: "heroicons:link",
+			title: "קישורי הגשה אישיים",
+			desc: "צור קישור ייעודי עם שם פנימי, מזהה חיצוני, נתונים מקדימים ותוקף.",
 			color: "text-cyan-500",
 			bg: "bg-cyan-500/10",
 		},
 		{
-			icon: "ph:shield-check-fill",
-			title: "הגנה בסיסמה",
-			desc: "הגן על הטפסים שלך עם סיסמה או טוקן. שליטה מלאה בגישה.",
+			icon: "heroicons:shield-check",
+			title: "הגנה והגדרות מילוי",
+			desc: "שלוט בגישה ציבורית, בסיסמה, הורדת PDF לממלא והגדרות לפי הגשה.",
 			color: "text-slate-500",
 			bg: "bg-slate-500/10",
 		},
 		{
-			icon: "ph:file-pdf-fill",
-			title: "ייצוא ל-PDF",
-			desc: "ייצא תשובות ל-PDF מקצועי בלחיצת כפתור.",
+			icon: "heroicons:document-arrow-down",
+			title: "PDF וציר זמן",
+			desc: "הורד PDF להגשה, ראה מתי הקישור נוצר, התחיל, הוגש, ננעל או הועבר לארכיון.",
 			color: "text-red-500",
 			bg: "bg-red-500/10",
 		},
 		{
-			icon: "ph:webhooks-logo-fill",
-			title: "Webhooks ואינטגרציות",
-			desc: "חבר את הטפסים שלך לשירותים חיצוניים. שלח נתונים אוטומטית עם ניסיונות חוזרים.",
+			icon: "heroicons:signal",
+			title: "Webhooks עם בקרה",
+			desc: "שלח נתונים לשירותים חיצוניים, צרף PDF, בדוק ניסיונות ושלח מחדש כשצריך.",
 			color: "text-orange-500",
 			bg: "bg-orange-500/10",
 		},
 		{
-			icon: "ph:upload-fill",
+			icon: "heroicons:arrow-up-tray",
 			title: "העלאת קבצים",
 			desc: "אפשר למשתמשים להעלות קבצים, תמונות ומסמכים ישירות דרך הטופס.",
 			color: "text-teal-500",
 			bg: "bg-teal-500/10",
 		},
 		{
-			icon: "ph:floppy-disk-fill",
-			title: "שמירה אוטומטית",
-			desc: "הטפסים נשמרים אוטומטית תוך כדי עריכה. אף שינוי לא הולך לאיבוד.",
+			icon: "heroicons:paint-brush",
+			title: "ערכות נושא ו-RTL",
+			desc: "בחר מראה לטופס, כולל תמיכה מלאה בעברית, RTL והתאמה לנייד.",
 			color: "text-lime-500",
 			bg: "bg-lime-500/10",
-		},
-		{
-			icon: "ph:file-arrow-up-fill",
-			title: "ייבוא וייצוא JSON",
-			desc: "ייבא וייצא טפסים בפורמט JSON. העבר טפסים בין חשבונות בקלות.",
-			color: "text-indigo-500",
-			bg: "bg-indigo-500/10",
 		},
 	];
 </script>
@@ -181,7 +188,9 @@
 		<ContentSectionHomepageNav :scrolled="scrolled" :scroll-to="scrollTo" />
 		<ContentSectionHomepageHero :scroll-to="scrollTo" />
 		<ContentSectionUsageMetrics :counters="counters" />
+		<ContentSectionHomepageAiBuilder :scroll-to="scrollTo" />
 		<ContentSectionHomepageFeatures :features="features" />
+		<ContentSectionHomepageOperations />
 		<ContentSectionHowItWorks :scroll-to="scrollTo" />
 		<ContentSectionHomepageCTA />
 		<ContentSectionFormElements />

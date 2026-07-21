@@ -23,7 +23,7 @@
 								size="lg"
 								class="relative rounded-xl! px-10! py-4! text-lg!"
 							>
-								<Icon name="ph:rocket-launch-fill" class="h-5 w-5" />
+								<Icon name="heroicons:rocket-launch" class="h-5 w-5" />
 								צור חשבון בחינם
 							</BaseButton>
 						</NuxtLink>

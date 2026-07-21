@@ -62,7 +62,7 @@
 		{
 			key: "special",
 			title: "שדות מיוחדים",
-			desc: "רכיבים מתקדמים ליכולות מורחבות",
+			desc: "רכיבים מתקדמים לתהליכים חוזרים וחתימה",
 			color: "amber",
 			elements: [
 				{ icon: "heroicons:pencil-square", label: "חתימה" },
@@ -76,6 +76,7 @@
 			color: "emerald",
 			elements: [
 				{ icon: "heroicons:rectangle-group", label: "מקטע" },
+				{ icon: "heroicons:squares-2x2", label: "רשת" },
 				{ icon: "heroicons:h1", label: "כותרת 1" },
 				{ icon: "heroicons:h2", label: "כותרת 2" },
 				{ icon: "heroicons:h3", label: "כותרת 3" },
@@ -94,7 +95,7 @@
 		<div class="mx-auto max-w-7xl px-6 lg:px-8">
 			<div class="reveal mx-auto max-w-2xl text-center">
 				<h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-					20+ רכיבים לבניית כל טופס
+					24 רכיבים לבניית כל טופס
 				</h2>
 				<p class="mt-4 text-lg leading-relaxed text-gray-500">
 					מגוון רחב של שדות קלט, בחירה, תוכן ועיצוב — הכל מוכן לשימוש

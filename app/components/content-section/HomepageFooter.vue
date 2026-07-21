@@ -7,7 +7,7 @@
 					<div
 						class="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-blue-500 to-blue-700"
 					>
-						<Icon name="ph:stack-fill" class="h-4 w-4 text-white" />
+						<Icon name="heroicons:rectangle-stack" class="h-4 w-4 text-white" />
 					</div>
 					<span class="text-sm font-semibold text-white">Autodox</span>
 				</div>

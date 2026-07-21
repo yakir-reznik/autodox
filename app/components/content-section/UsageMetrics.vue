@@ -1,9 +1,9 @@
 <script setup lang="ts">
 interface Counters {
-	users: number;
-	forms: number;
-	submissions: number;
-	uptime: number;
+	elements: number;
+	reports: number;
+	permissions: number;
+	themes: number;
 }
 
 defineProps<{
@@ -22,27 +22,27 @@ defineProps<{
 			<div class="grid grid-cols-2 gap-8 lg:grid-cols-4">
 				<div class="text-center">
 					<div class="text-3xl font-extrabold text-white sm:text-4xl">
-						{{ counters.users.toLocaleString() }}+
+						{{ counters.elements.toLocaleString() }}
 					</div>
-					<div class="mt-1 text-sm text-blue-200">משתמשים פעילים</div>
+					<div class="mt-1 text-sm text-blue-200">רכיבי טופס</div>
 				</div>
 				<div class="text-center">
 					<div class="text-3xl font-extrabold text-white sm:text-4xl">
-						{{ counters.forms.toLocaleString() }}+
+						{{ counters.reports.toLocaleString() }}
 					</div>
-					<div class="mt-1 text-sm text-blue-200">טפסים נוצרו</div>
+					<div class="mt-1 text-sm text-blue-200">דוחות ניהול</div>
 				</div>
 				<div class="text-center">
 					<div class="text-3xl font-extrabold text-white sm:text-4xl">
-						{{ counters.submissions.toLocaleString() }}+
+						{{ counters.permissions.toLocaleString() }}
 					</div>
-					<div class="mt-1 text-sm text-blue-200">תשובות נאספו</div>
+					<div class="mt-1 text-sm text-blue-200">הרשאות שיתוף</div>
 				</div>
 				<div class="text-center">
 					<div class="text-3xl font-extrabold text-white sm:text-4xl">
-						{{ counters.uptime }}%
+						{{ counters.themes.toLocaleString() }}
 					</div>
-					<div class="mt-1 text-sm text-blue-200">זמינות</div>
+					<div class="mt-1 text-sm text-blue-200">ערכות נושא</div>
 				</div>
 			</div>
 		</div>
