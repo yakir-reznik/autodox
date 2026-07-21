@@ -16,7 +16,7 @@
 - [ ] Allow users to share form folders
 - [ ] Import / export form json is a mess... does not export all props of fields and also does not import all. we need a simpler solution to dump an export with to much fuss and import back.
 - [ ] Add sha 256 checksum hash to locked submission
-- [ ] for submissions that have expired - they are stuck in "In Progress". we need to change their status to "expired"
+- [x] for submissions that have expired - they are stuck in "In Progress". we need to change their status to "expired"
 - [ ] submissions link expire 14 days after generating (create-submission-link.post.ts) we need to add option to change this in form settings and in submission settings. i want the @server/api/forms/[id]/create-submission-link.post.ts to return the number of days the link is good for and we need to display it on the success message instead of a hardcoded value
 - [ ] Allow saving without submitting. Also allow saving while form is only partially filled. Max 1 save per user per form and it should expire after 30 days. new save overwrites last one. (Plan file ready - save-submission-drafts.md)
 - [x] Implement authorization plan... server endpoints are currently not protected
