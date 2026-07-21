@@ -3,6 +3,7 @@ export type SubmissionStatusSummary = {
 	in_progress: number;
 	submitted: number;
 	locked: number;
+	expired: number;
 	total: number;
 	startedCount: number;
 	submittedCount: number;

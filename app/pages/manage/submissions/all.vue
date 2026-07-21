@@ -113,12 +113,13 @@
 
 	const ALL_FORMS_VALUE = "all";
 	const ALL_STATUSES_VALUE = "all";
-	const statuses = ["pending", "in_progress", "submitted", "locked"] as const;
+	const statuses = ["pending", "in_progress", "submitted", "locked", "expired"] as const;
 	const statusLabels = {
 		pending: "ממתין",
 		in_progress: "בתהליך",
 		submitted: "הוגש",
 		locked: "נעול",
+		expired: "פג תוקף",
 	};
 
 	definePageMeta({

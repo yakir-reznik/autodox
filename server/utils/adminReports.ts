@@ -21,6 +21,7 @@ export type ReportStatusSummary = {
 	in_progress: number;
 	submitted: number;
 	locked: number;
+	expired: number;
 	total: number;
 };
 
@@ -226,6 +227,7 @@ function statusMetricSelect() {
 		in_progress: sumWhen(sql`${submissionsTable.status} = 'in_progress'`),
 		submitted: sumWhen(sql`${submissionsTable.status} = 'submitted'`),
 		locked: sumWhen(sql`${submissionsTable.status} = 'locked'`),
+		expired: sumWhen(sql`${submissionsTable.status} = 'expired'`),
 		total: count(),
 		startedCount: sumWhen(sql`${submissionsTable.startedAt} is not null`),
 		submittedCount: sumWhen(sql`${submissionsTable.submittedAt} is not null`),
@@ -242,6 +244,7 @@ function mapMetrics(row: Record<string, unknown> | undefined): MetricBase {
 	const in_progress = toNumber(row?.in_progress);
 	const submitted = toNumber(row?.submitted);
 	const locked = toNumber(row?.locked);
+	const expired = toNumber(row?.expired);
 	const total = toNumber(row?.total);
 	const submittedCount = toNumber(row?.submittedCount);
 
@@ -250,6 +253,7 @@ function mapMetrics(row: Record<string, unknown> | undefined): MetricBase {
 		in_progress,
 		submitted,
 		locked,
+		expired,
 		total,
 		startedCount: toNumber(row?.startedCount),
 		submittedCount,

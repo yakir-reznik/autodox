@@ -13,20 +13,22 @@
 		],
 	});
 
-	type Status = Extract<keyof SubmissionStatusSummary, "pending" | "in_progress" | "submitted" | "locked">;
+	type Status = Extract<keyof SubmissionStatusSummary, "pending" | "in_progress" | "submitted" | "locked" | "expired">;
 
-	const statuses: Status[] = ["pending", "in_progress", "submitted", "locked"];
+	const statuses: Status[] = ["pending", "in_progress", "submitted", "locked", "expired"];
 	const statusLabels = {
 		pending: "ממתין",
 		in_progress: "בתהליך",
 		submitted: "הוגש",
 		locked: "נעול",
+		expired: "פג תוקף",
 	};
 	const statusColors = {
 		pending: "bg-gray-100 text-gray-800",
 		in_progress: "bg-blue-100 text-blue-800",
 		submitted: "bg-green-100 text-green-800",
 		locked: "bg-red-100 text-red-800",
+		expired: "bg-orange-100 text-orange-800",
 	};
 
 	const {
@@ -72,6 +74,7 @@
 				in_progress: 0,
 				submitted: 0,
 				locked: 0,
+				expired: 0,
 				total: 0,
 				startedCount: 0,
 				submittedCount: 0,
@@ -195,10 +198,9 @@
 					<tr v-for="row in sortedRows" :key="row.formId" class="hover:bg-gray-50">
 						<td class="px-4 py-3 font-medium text-gray-900">{{ row.formName }}</td>
 						<td class="px-4 py-3 text-gray-500">{{ row.formId }}</td>
-						<td class="px-4 py-3 text-center text-gray-700">{{ row.pending }}</td>
-						<td class="px-4 py-3 text-center text-gray-700">{{ row.in_progress }}</td>
-						<td class="px-4 py-3 text-center text-gray-700">{{ row.submitted }}</td>
-						<td class="px-4 py-3 text-center text-gray-700">{{ row.locked }}</td>
+						<td v-for="status in statuses" :key="status" class="px-4 py-3 text-center text-gray-700">
+							{{ row[status] }}
+						</td>
 						<td class="px-4 py-3 text-center text-gray-700">{{ row.startedCount }}</td>
 						<td class="px-4 py-3 text-center text-gray-700">{{ row.submittedCount }}</td>
 						<td class="px-4 py-3 text-center text-gray-700">{{ formatPercent(row.completionRate) }}</td>
@@ -209,10 +211,9 @@
 				<tfoot class="bg-gray-50">
 					<tr class="font-semibold text-gray-900">
 						<td class="px-4 py-3" colspan="2">סה״כ</td>
-						<td class="px-4 py-3 text-center">{{ totals.pending }}</td>
-						<td class="px-4 py-3 text-center">{{ totals.in_progress }}</td>
-						<td class="px-4 py-3 text-center">{{ totals.submitted }}</td>
-						<td class="px-4 py-3 text-center">{{ totals.locked }}</td>
+						<td v-for="status in statuses" :key="status" class="px-4 py-3 text-center">
+							{{ totals[status] }}
+						</td>
 						<td class="px-4 py-3 text-center">{{ totals.startedCount }}</td>
 						<td class="px-4 py-3 text-center">{{ totals.submittedCount }}</td>
 						<td class="px-4 py-3 text-center">{{ formatPercent(totalCompletionRate) }}</td>

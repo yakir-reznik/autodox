@@ -1,6 +1,7 @@
 import { db } from "~~/server/db";
 import { submissionsTable } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
+import { isSubmissionExpired } from "~~/server/utils/submissionExpiry";
 
 export default defineEventHandler(async (event) => {
 	const token = getRouterParam(event, "token");
@@ -27,7 +28,7 @@ export default defineEventHandler(async (event) => {
 	}
 
 	// Check if submission has expired
-	if (submission.expiresAt && new Date(submission.expiresAt) < new Date()) {
+	if (isSubmissionExpired(submission)) {
 		throw createError({
 			statusCode: 403,
 			message: "This submission link has expired",

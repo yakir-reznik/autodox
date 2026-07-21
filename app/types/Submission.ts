@@ -8,7 +8,7 @@ export interface Submission {
 	externalId: string | null;
 	createdByUserId: number | null;
 	expiresAt: string;
-	status: "pending" | "in_progress" | "submitted" | "locked";
+	status: "pending" | "in_progress" | "submitted" | "locked" | "expired";
 	submissionData: Record<string, unknown> | null;
 	createdAt: string;
 	startedAt: string | null;
@@ -44,11 +44,13 @@ export const statusColors: Record<string, string> = {
 	in_progress: "bg-blue-100 text-blue-800",
 	submitted: "bg-green-100 text-green-800",
 	locked: "bg-red-100 text-red-800",
+	expired: "bg-orange-100 text-orange-800",
 };
 
 export const statusLabels: Record<string, string> = {
-	pending: "Pending",
-	in_progress: "In Progress",
-	submitted: "Submitted",
-	locked: "Locked",
+	pending: "ממתין",
+	in_progress: "בתהליך",
+	submitted: "הוגש",
+	locked: "נעול",
+	expired: "פג תוקף",
 };

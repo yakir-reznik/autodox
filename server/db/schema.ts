@@ -367,7 +367,7 @@ export const formElementsTable = mysqlTable("form_elements_table", {
 // ============================================
 
 // Submission status enum
-export const submissionStatusEnum = ["pending", "in_progress", "submitted", "locked"] as const;
+export const submissionStatusEnum = ["pending", "in_progress", "submitted", "locked", "expired"] as const;
 export type SubmissionStatus = (typeof submissionStatusEnum)[number];
 
 // Device type enum for tracking

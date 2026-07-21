@@ -147,7 +147,7 @@
 								</NuxtLink>
 								<BaseButton
 									v-if="
-										!['submitted', 'locked'].includes(submission.status) &&
+										!['submitted', 'locked', 'expired'].includes(submission.status) &&
 										!submission.isArchived
 									"
 									variant="secondary"
@@ -374,7 +374,7 @@
 		additionalData: Record<string, unknown> | null;
 		createdByUserId: number | null;
 		expiresAt: string;
-		status: "pending" | "in_progress" | "submitted" | "locked";
+		status: "pending" | "in_progress" | "submitted" | "locked" | "expired";
 		isPublic: boolean;
 		isArchived: boolean;
 		archivedAt: string | null;
@@ -431,13 +431,15 @@
 		in_progress: "bg-blue-100 text-blue-800",
 		submitted: "bg-green-100 text-green-800",
 		locked: "bg-red-100 text-red-800",
+		expired: "bg-orange-100 text-orange-800",
 	};
 
 	const statusLabels = {
-		pending: "Pending",
-		in_progress: "In Progress",
-		submitted: "Submitted",
-		locked: "Locked",
+		pending: "ממתין",
+		in_progress: "בתהליך",
+		submitted: "הוגש",
+		locked: "נעול",
+		expired: "פג תוקף",
 	};
 
 	function formatDate(dateString: string) {

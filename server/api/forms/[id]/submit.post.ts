@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "~~/server/db";
 import { formsTable, submissionsTable } from "~~/server/db/schema";
 import { deliverWebhook } from "~~/server/utils/webhookDelivery";
+import { isSubmissionExpired } from "~~/server/utils/submissionExpiry";
 
 function generateToken(): string {
 	const timestamp = Date.now().toString();
@@ -61,7 +62,7 @@ export default defineEventHandler(async (event) => {
 			throw createError({ statusCode: 403, message: "This submission is locked and cannot be modified" });
 		}
 
-		if (submission.expiresAt && new Date(submission.expiresAt) < now) {
+		if (isSubmissionExpired(submission, now)) {
 			throw createError({ statusCode: 403, message: "This submission link has expired" });
 		}
 

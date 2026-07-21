@@ -60,6 +60,7 @@
 		{ label: "ממתין", value: overview.value?.pending ?? 0 },
 		{ label: "בתהליך", value: overview.value?.in_progress ?? 0 },
 		{ label: "הושלמו", value: overview.value?.submittedCount ?? 0 },
+		{ label: "פג תוקף", value: overview.value?.expired ?? 0 },
 		{ label: "ציבוריות", value: overview.value?.publicCount ?? 0 },
 		{ label: "עם קישור", value: overview.value?.tokenCount ?? 0 },
 		{ label: "בארכיון", value: overview.value?.archivedCount ?? 0 },
