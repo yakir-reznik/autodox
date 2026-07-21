@@ -12,8 +12,7 @@ export default defineEventHandler(async (event) => {
 		db
 			.select({ count: count() })
 			.from(submissionsTable)
-			.innerJoin(formsTable, eq(submissionsTable.formId, formsTable.id))
-			.where(eq(formsTable.createdBy, userId)),
+			.where(eq(submissionsTable.createdByUserId, userId)),
 	]);
 
 	const dbUser = user[0];

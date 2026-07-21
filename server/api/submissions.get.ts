@@ -70,21 +70,6 @@ export default defineEventHandler(async (event) => {
 		return paginated(submissions, totalResult[0]?.count ?? 0, page, limit);
 	}
 
-	// --- formId mode ---
-	if (formId) {
-		await requireFormPermission(event, formId, "view_submissions");
-
-		const where = and(eq(submissionsTable.formId, formId), eq(submissionsTable.isArchived, archived));
-
-		const [totalResult, submissions] = await Promise.all([
-			db.select({ count: count() }).from(submissionsTable).where(where),
-			db.select(SUBMISSION_FIELDS).from(submissionsTable).where(where)
-				.orderBy(desc(submissionsTable.createdAt)).limit(limit).offset(offset),
-		]);
-
-		return paginated(submissions, totalResult[0]?.count ?? 0, page, limit);
-	}
-
 	// --- userId mode ---
 	if (userId) {
 		const session = await requireRoles(event, ["user"]);
@@ -94,7 +79,13 @@ export default defineEventHandler(async (event) => {
 			throw createError({ statusCode: 403, message: "Forbidden" });
 		}
 
-		const where = and(eq(formsTable.createdBy, userId), eq(submissionsTable.isArchived, archived));
+		const conditions: SQL[] = [
+			eq(submissionsTable.createdByUserId, userId),
+			eq(submissionsTable.isArchived, archived),
+		];
+		if (formId) conditions.push(eq(submissionsTable.formId, formId));
+
+		const where = and(...conditions);
 
 		const [totalResult, submissions] = await Promise.all([
 			db.select({ count: count() }).from(submissionsTable)
@@ -103,6 +94,21 @@ export default defineEventHandler(async (event) => {
 				.from(submissionsTable)
 				.innerJoin(formsTable, eq(submissionsTable.formId, formsTable.id))
 				.where(where)
+				.orderBy(desc(submissionsTable.createdAt)).limit(limit).offset(offset),
+		]);
+
+		return paginated(submissions, totalResult[0]?.count ?? 0, page, limit);
+	}
+
+	// --- formId mode ---
+	if (formId) {
+		await requireFormPermission(event, formId, "view_submissions");
+
+		const where = and(eq(submissionsTable.formId, formId), eq(submissionsTable.isArchived, archived));
+
+		const [totalResult, submissions] = await Promise.all([
+			db.select({ count: count() }).from(submissionsTable).where(where),
+			db.select(SUBMISSION_FIELDS).from(submissionsTable).where(where)
 				.orderBy(desc(submissionsTable.createdAt)).limit(limit).offset(offset),
 		]);
 
