@@ -16,7 +16,7 @@
         <Icon name="heroicons:wrench" class="text-base" />
       </button>
       <button
-        v-if="isOwner"
+        v-if="canManageShares"
         type="button"
         class="px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2"
         :class="
@@ -312,12 +312,13 @@
 <script setup lang="ts">
 import { SelectItem, SelectItemText, SelectItemIndicator } from "reka-ui";
 import { Check } from "lucide-vue-next";
-import type { FormStatus, FormTheme } from "~/types/form-builder";
+import type { FormPermissions, FormStatus, FormTheme } from "~/types/form-builder";
 import { THEMES } from "~/composables/useThemes";
 
 interface Props {
   modelValue: boolean;
   formId: number;
+  permissions?: FormPermissions | null;
 }
 
 const props = defineProps<Props>();
@@ -327,10 +328,9 @@ const emit = defineEmits<{
   saved: [payload: { status: FormStatus; theme: FormTheme }];
 }>();
 
-const { user } = useUserSession();
-const formCreatedBy = ref<number | null>(null);
-const isOwner = computed(
-  () => user.value?.id != null && formCreatedBy.value === user.value.id,
+const loadedPermissions = ref<FormPermissions | null>(null);
+const canManageShares = computed(() =>
+  props.permissions?.canManageShares ?? loadedPermissions.value?.canManageShares ?? false,
 );
 
 const activeTab = ref<"settings" | "sharing">("settings");
@@ -399,6 +399,7 @@ async function fetchSettings() {
       webhookIncludePdf: boolean;
       allowPdfDownload: boolean;
       createdBy: number;
+      permissions: FormPermissions;
     }>(`/api/forms/${props.formId}/settings`);
 
     status.value = data.status ?? "draft";
@@ -409,7 +410,7 @@ async function fetchSettings() {
     webhookUrl.value = data.webhookUrl ?? "";
     webhookIncludePdf.value = data.webhookIncludePdf ?? false;
     allowPdfDownload.value = data.allowPdfDownload ?? true;
-    formCreatedBy.value = data.createdBy;
+    loadedPermissions.value = data.permissions;
   } catch (e: any) {
     error.value = e.data?.message || "Failed to load settings";
   } finally {

@@ -1,17 +1,6 @@
-import { db } from "~~/server/db";
-import { formsTable } from "~~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { requireFormPermission } from "~~/server/utils/authorization";
 
 export default defineEventHandler(async (event) => {
-	// Require authentication
-	const session = await getUserSession(event);
-	if (!session.user) {
-		throw createError({
-			statusCode: 401,
-			message: "Authentication required",
-		});
-	}
-
 	const id = Number(getRouterParam(event, "id"));
 	if (isNaN(id)) {
 		throw createError({
@@ -20,16 +9,7 @@ export default defineEventHandler(async (event) => {
 		});
 	}
 
-	const form = await db.query.formsTable.findFirst({
-		where: eq(formsTable.id, id),
-	});
-
-	if (!form) {
-		throw createError({
-			statusCode: 404,
-			message: "Form not found",
-		});
-	}
+	const { form, permissions } = await requireFormPermission(event, id, "edit_form");
 
 	// Return form settings including plain text password
 	return {
@@ -44,5 +24,14 @@ export default defineEventHandler(async (event) => {
 		password: form.password,
 		allowPublicSubmissions: form.allowPublicSubmissions,
 		createdBy: form.createdBy,
+		permissions: {
+			canView: permissions.has("view"),
+			canViewSubmissions: permissions.has("view_submissions"),
+			canCreateSubmissions: permissions.has("create_submissions"),
+			canManageSubmissions: permissions.has("manage_submissions"),
+			canEditForm: permissions.has("edit_form"),
+			canDelete: permissions.has("delete"),
+			canManageShares: permissions.has("manage_shares"),
+		},
 	};
 });

@@ -44,6 +44,7 @@ export interface FormBuilderState {
 	description: string;
 	status: FormStatus;
 	theme: FormTheme;
+	permissions: FormPermissions | null;
 
 	// Elements
 	elements: BuilderElement[];

@@ -55,6 +55,7 @@ export function useFormBuilder() {
 		description: "",
 		status: "draft",
 		theme: "lightning",
+		permissions: null,
 		elements: [],
 		selectedElementId: null,
 		isDirty: false,
@@ -326,6 +327,7 @@ export function useFormBuilder() {
 		state.description = response.description || "";
 		state.status = response.status;
 		state.theme = response.theme;
+		state.permissions = response.permissions ?? null;
 
 		// Convert server elements to builder elements
 		const serverIdToClientId = new Map<number, string>();
@@ -503,6 +505,7 @@ export function useFormBuilder() {
 		state.description = "";
 		state.status = "draft";
 		state.theme = "lightning";
+		state.permissions = null;
 		state.elements = [];
 		state.selectedElementId = null;
 		state.isDirty = false;

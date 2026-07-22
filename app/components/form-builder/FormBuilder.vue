@@ -29,6 +29,7 @@
 			:form-id="state.formId ?? undefined"
 			:can-undo="canUndo"
 			:can-redo="canRedo"
+			:permissions="state.permissions"
 			@save="handleForceSave"
 			@undo="undo"
 			@redo="redo"

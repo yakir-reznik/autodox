@@ -108,6 +108,7 @@
 		v-if="formId"
 		v-model="showSettingsModal"
 		:form-id="formId"
+		:permissions="permissions"
 		@saved="handleSettingsSaved"
 	/>
 
@@ -121,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-	import type { SaveStatus, FormStatus, FormTheme } from "~/types/form-builder";
+	import type { SaveStatus, FormStatus, FormTheme, FormPermissions } from "~/types/form-builder";
 
 	interface Props {
 		title: string;
@@ -132,6 +133,7 @@
 		formId?: number;
 		canUndo?: boolean;
 		canRedo?: boolean;
+		permissions?: FormPermissions | null;
 	}
 
 	const props = withDefaults(defineProps<Props>(), {

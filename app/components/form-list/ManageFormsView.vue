@@ -119,6 +119,7 @@
 		v-if="settingsForm"
 		v-model="showSettingsModal"
 		:form-id="settingsForm.id"
+		:permissions="settingsForm.permissions"
 	/>
 </template>
 
