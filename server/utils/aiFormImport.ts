@@ -16,8 +16,18 @@ export type AiFormImportResult = {
 };
 
 export type AiFormImportProvider = {
-	extractForm(file: AiImportFile, prompt: string, schema: Record<string, unknown>): Promise<AiFormImportResult>;
-	repairFormJson(json: unknown, errors: UploadJsonValidationError[], schema: Record<string, unknown>): Promise<AiFormImportResult>;
+	extractForm(
+		file: AiImportFile,
+		prompt: string,
+		schema: Record<string, unknown>,
+		signal?: AbortSignal,
+	): Promise<AiFormImportResult>;
+	repairFormJson(
+		json: unknown,
+		errors: UploadJsonValidationError[],
+		schema: Record<string, unknown>,
+		signal?: AbortSignal,
+	): Promise<AiFormImportResult>;
 };
 
 type OpenRouterChoice = {
@@ -182,27 +192,43 @@ class OpenRouterFormImportProvider implements AiFormImportProvider {
 		private readonly model: string,
 	) {}
 
-	async extractForm(file: AiImportFile, prompt: string, schema: Record<string, unknown>) {
+	async extractForm(
+		file: AiImportFile,
+		prompt: string,
+		schema: Record<string, unknown>,
+		signal?: AbortSignal,
+	) {
 		const content = [
 			{ type: "text", text: prompt },
 			getFileContentPart(file),
 		];
 
-		return this.complete(content, schema);
+		return this.complete(content, schema, signal);
 	}
 
-	async repairFormJson(json: unknown, errors: UploadJsonValidationError[], schema: Record<string, unknown>) {
+	async repairFormJson(
+		json: unknown,
+		errors: UploadJsonValidationError[],
+		schema: Record<string, unknown>,
+		signal?: AbortSignal,
+	) {
 		return this.complete(
 			`Repair this Autodox form JSON so it passes validation. Return only corrected JSON.\n\nValidation errors:\n${JSON.stringify(errors, null, 2)}\n\nJSON:\n${JSON.stringify(json, null, 2)}`,
 			schema,
+			signal,
 		);
 	}
 
-	private async complete(content: unknown, schema: Record<string, unknown>): Promise<AiFormImportResult> {
-		let result = await this.requestCompletion(content, schema, true);
+	private async complete(
+		content: unknown,
+		schema: Record<string, unknown>,
+		signal?: AbortSignal,
+	): Promise<AiFormImportResult> {
+		let result = await this.requestCompletion(content, schema, true, signal);
 
 		if (!result.response.ok && shouldRetryWithoutSchema(result.errorMessage)) {
-			result = await this.requestCompletion(content, schema, false);
+			signal?.throwIfAborted();
+			result = await this.requestCompletion(content, schema, false, signal);
 		}
 
 		if (!result.response.ok) {
@@ -240,6 +266,7 @@ class OpenRouterFormImportProvider implements AiFormImportProvider {
 		content: unknown,
 		schema: Record<string, unknown>,
 		useSchema: boolean,
+		signal?: AbortSignal,
 	) {
 		const body: Record<string, unknown> = {
 			model: this.model,
@@ -266,6 +293,7 @@ class OpenRouterFormImportProvider implements AiFormImportProvider {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify(body),
+			signal,
 		});
 
 		return {

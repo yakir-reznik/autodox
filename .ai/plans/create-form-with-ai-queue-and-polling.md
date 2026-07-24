@@ -6,13 +6,22 @@
 - Use an in-memory `p-queue` task registry with a 10-minute task timeout, no DB migration.
 - Update the UI from real task statuses, with rotating Hebrew “alive” messages during the AI generation stage every 8 seconds.
 
+## Implementation Progress
+
+- [x] Add shared AI import task response/status types.
+- [x] Add an in-memory AI import queue with 10-minute timeout and retained terminal results.
+- [x] Convert the POST endpoint to enqueue work and add a polling endpoint.
+- [x] Pass abort signals into OpenRouter requests for timed-out tasks.
+- [x] Update the AI create-form page to poll task status and rotate generation messages.
+- [x] Run `pnpm run typecheck`.
+
 ## Key Changes
 
 - Add shared AI import task types, likely in `shared/types/ai-form-import.ts`:
   - Statuses: `queued`, `generating`, `repairing`, `creating`, `success`, `failed`, `expired`.
   - Response shapes for create-task and get-task-status.
 - Add `server/utils/aiFormImportQueue.ts`:
-  - `PQueue` concurrency defaults to `1`, configurable with `AI_FORM_IMPORT_QUEUE_CONCURRENCY`.
+  - `PQueue` concurrency defaults to `1`, configurable with `AI_FORM_IMPORT_QUEUE_CONCURRENCY`. Set to `5` for now to allow some parallelism.
   - Timeout is `10 * 60 * 1000`.
   - Store tasks in memory by random task id, scoped to `userId`.
   - Clean up completed/failed/expired tasks after a short retention window, e.g. 30 minutes.
