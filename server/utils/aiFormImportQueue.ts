@@ -10,15 +10,19 @@ import {
 	aiFormImportJsonSchema,
 	aiFormImportPrompt,
 	getAiFormImportProvider,
-	type AiImportFile,
 } from "~~/server/utils/aiFormImport";
+import {
+	deleteStoredAiImportFile,
+	readStoredAiImportFile,
+	type StoredAiImportFile,
+} from "~~/server/utils/aiFormImportFiles";
 import {
 	createFormFromUploadJson,
 	normalizeAndValidateUploadForm,
 	replaceFormFromUploadJson,
 } from "~~/server/utils/formUploadJson";
 
-const AI_FORM_IMPORT_CONCURRENCY = Number.parseInt(process.env.AI_FORM_IMPORT_QUEUE_CONCURRENCY || "5", 10);
+const AI_FORM_IMPORT_CONCURRENCY = 2;
 const AI_FORM_IMPORT_TASK_TIMEOUT_MS = 10 * 60 * 1000;
 const AI_FORM_IMPORT_QUEUE_TIMEOUT_MS = AI_FORM_IMPORT_TASK_TIMEOUT_MS + 1000;
 const AI_FORM_IMPORT_TASK_RETENTION_MS = 30 * 60 * 1000;
@@ -27,7 +31,7 @@ type AiFormImportTask = {
 	id: string;
 	userId: number;
 	formId: number | null;
-	file: AiImportFile | null;
+	file: StoredAiImportFile | null;
 	status: AiFormImportTaskStatus;
 	createdAt: Date;
 	updatedAt: Date;
@@ -55,7 +59,7 @@ const tasks = new Map<string, AiFormImportTask>();
 export function queueAiFormImportTask(payload: {
 	userId: number;
 	formId: number | null;
-	file: AiImportFile;
+	file: StoredAiImportFile;
 }): AiFormImportTaskCreateResponse {
 	const task: AiFormImportTask = {
 		id: randomUUID(),
@@ -96,10 +100,10 @@ export function getAiFormImportTask(
 }
 
 async function runAiFormImportTask(task: AiFormImportTask) {
-	const file = task.file;
+	const storedFile = task.file;
 	task.file = null;
 
-	if (!file) {
+	if (!storedFile) {
 		markTaskFailed(task, new Error("AI import file is missing"));
 		return;
 	}
@@ -113,6 +117,7 @@ async function runAiFormImportTask(task: AiFormImportTask) {
 
 	try {
 		updateTaskStatus(task, "generating");
+		const file = await readStoredAiImportFile(storedFile);
 		const provider = await getAiFormImportProvider();
 		throwIfTaskTimedOut(task);
 		const initial = await provider.extractForm(file, aiFormImportPrompt, aiFormImportJsonSchema, controller.signal);
@@ -170,6 +175,7 @@ async function runAiFormImportTask(task: AiFormImportTask) {
 		markTaskFailed(task, error);
 	} finally {
 		clearTimeout(timeout);
+		await deleteStoredAiImportFile(storedFile);
 		scheduleTaskCleanup(task);
 	}
 }

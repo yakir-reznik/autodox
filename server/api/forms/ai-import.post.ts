@@ -1,6 +1,7 @@
 import { readMultipartFormData } from "h3";
 import { requireFormPermission, requireRoles } from "~~/server/utils/authorization";
 import { getAiFormImportSettings, type AiImportFile } from "~~/server/utils/aiFormImport";
+import { deleteStoredAiImportFile, storeAiImportFile } from "~~/server/utils/aiFormImportFiles";
 import { queueAiFormImportTask } from "~~/server/utils/aiFormImportQueue";
 
 const allowedMimeTypes = new Set([
@@ -50,10 +51,16 @@ export default defineEventHandler(async (event) => {
 		mimeType,
 		data: filePart.data,
 	};
+	const storedFile = await storeAiImportFile(file);
 
-	return queueAiFormImportTask({
-		userId: session.user.id,
-		formId,
-		file,
-	});
+	try {
+		return queueAiFormImportTask({
+			userId: session.user.id,
+			formId,
+			file: storedFile,
+		});
+	} catch (error) {
+		await deleteStoredAiImportFile(storedFile);
+		throw error;
+	}
 });

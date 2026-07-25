@@ -14,6 +14,7 @@
 - [x] Pass abort signals into OpenRouter requests for timed-out tasks.
 - [x] Update the AI create-form page to poll task status and rotate generation messages.
 - [x] Run `pnpm run typecheck`.
+- [x] Move queued task file payloads from memory to private temp files on disk.
 
 ## Key Changes
 
