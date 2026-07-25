@@ -26,3 +26,7 @@ logs
 # User uploads — stored outside public/ so they survive deploys and are served by Nginx in prod
 storage/uploads/*
 !storage/uploads/.gitkeep
+
+# Temporary AI import files — private queue inputs, deleted after processing
+storage/ai-imports/*
+!storage/ai-imports/.gitkeep

@@ -1,17 +1,8 @@
 import { readMultipartFormData } from "h3";
 import { requireFormPermission, requireRoles } from "~~/server/utils/authorization";
-import {
-	aiFormImportJsonSchema,
-	aiFormImportPrompt,
-	getAiFormImportSettings,
-	getAiFormImportProvider,
-	type AiImportFile,
-} from "~~/server/utils/aiFormImport";
-import {
-	createFormFromUploadJson,
-	normalizeAndValidateUploadForm,
-	replaceFormFromUploadJson,
-} from "~~/server/utils/formUploadJson";
+import { getAiFormImportSettings, type AiImportFile } from "~~/server/utils/aiFormImport";
+import { deleteStoredAiImportFile, storeAiImportFile } from "~~/server/utils/aiFormImportFiles";
+import { queueAiFormImportTask } from "~~/server/utils/aiFormImportQueue";
 
 const allowedMimeTypes = new Set([
 	"application/pdf",
@@ -60,47 +51,16 @@ export default defineEventHandler(async (event) => {
 		mimeType,
 		data: filePart.data,
 	};
-	const provider = await getAiFormImportProvider();
-	const initial = await provider.extractForm(file, aiFormImportPrompt, aiFormImportJsonSchema);
-	const initialValidation = normalizeAndValidateUploadForm(initial.json, { requireTitle: formId === null });
+	const storedFile = await storeAiImportFile(file);
 
-	let validBody = initialValidation.body;
-	let usage = initial.usage;
-	let model = initial.model;
-	let invalidJson = initial.json;
-	let validationErrors = initialValidation.errors;
-
-	if (!validBody) {
-		const repaired = await provider.repairFormJson(initial.json, initialValidation.errors, aiFormImportJsonSchema);
-		const repairedValidation = normalizeAndValidateUploadForm(repaired.json, { requireTitle: formId === null });
-		validBody = repairedValidation.body;
-		usage = repaired.usage ?? usage;
-		model = repaired.model ?? model;
-		invalidJson = repaired.json;
-		validationErrors = repairedValidation.errors;
-	}
-
-	if (!validBody) {
-		throw createError({
-			statusCode: 422,
-			message: "AI output is invalid",
-			data: {
-				success: false,
-				json: invalidJson,
-				errors: validationErrors,
-			},
+	try {
+		return queueAiFormImportTask({
+			userId: session.user.id,
+			formId,
+			file: storedFile,
 		});
+	} catch (error) {
+		await deleteStoredAiImportFile(storedFile);
+		throw error;
 	}
-
-	const resultFormId = formId ?? await createFormFromUploadJson(validBody, session.user.id);
-	if (formId !== null) {
-		await replaceFormFromUploadJson(formId, validBody);
-	}
-
-	return {
-		success: true,
-		formId: resultFormId,
-		...(usage ? { usage } : {}),
-		...(model ? { model } : {}),
-	};
 });

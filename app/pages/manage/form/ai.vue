@@ -50,12 +50,14 @@
 						</div>
 
 						<div
-							v-else-if="aiStatus === 'failed'"
+							v-else-if="aiStatus === 'failed' || aiStatus === 'expired'"
 							class="flex items-start gap-3 rounded-lg bg-red-50 p-4 text-red-800"
 						>
 							<Icon name="heroicons:x-circle" class="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
 							<div class="min-w-0 flex-1">
-								<p class="font-medium">יצירת הטופס נכשלה</p>
+								<p class="font-medium">
+									{{ aiStatus === "expired" ? "יצירת הטופס הופסקה" : "יצירת הטופס נכשלה" }}
+								</p>
 								<p class="mt-1 text-sm text-red-700">{{ aiError }}</p>
 								<ul v-if="aiValidationErrors.length" class="mt-3 list-inside list-disc text-sm text-red-700">
 									<li v-for="item in aiValidationErrors" :key="`${item.path}-${item.message}`">
@@ -67,7 +69,7 @@
 
 						<div v-else>
 							<p class="text-sm font-medium text-gray-900">{{ currentAiStep?.title }}</p>
-							<p class="mt-1 text-sm text-gray-600">{{ currentAiStep?.description }}</p>
+							<p class="mt-1 text-sm text-gray-600">{{ currentAiStepDescription }}</p>
 						</div>
 
 						<ol class="space-y-3">
@@ -141,7 +143,7 @@
 					@click="handleAiImport"
 				>
 					<Icon name="heroicons:sparkles" class="h-5 w-5" />
-					{{ aiLoading ? currentAiStep?.buttonLabel : "צור טופס עם AI" }}
+					{{ aiLoading ? currentAiStep?.buttonLabel || "מעבד..." : "צור טופס עם AI" }}
 				</BaseButton>
 			</div>
 		</main>
@@ -149,9 +151,17 @@
 </template>
 
 <script setup lang="ts">
+	import type {
+		AiFormImportTaskCreateResponse,
+		AiFormImportTaskStatus,
+		AiFormImportTaskStatusResponse,
+		AiFormImportValidationError,
+	} from "~~/shared/types/ai-form-import";
+
 	const router = useRouter();
 
-	type AiImportStatus = "idle" | "uploading" | "extracting" | "creating" | "success" | "failed";
+	type AiImportStatus = "idle" | "uploading" | AiFormImportTaskStatus;
+	type AiStepStatus = "uploading" | AiFormImportTaskStatus;
 	type AiStepState = "done" | "active" | "failed" | "idle";
 
 	definePageMeta({
@@ -178,16 +188,21 @@
 	const aiLoading = ref(false);
 	const aiError = ref("");
 	const aiInvalidJson = ref("");
-	const aiValidationErrors = ref<Array<{ path: string; message: string }>>([]);
+	const aiValidationErrors = ref<AiFormImportValidationError[]>([]);
 	const aiStatus = ref<AiImportStatus>("idle");
 	const activeAiStepIndex = ref(0);
+	const aiTaskId = ref("");
 	const aiCreatedFormId = ref<number | null>(null);
 	const redirectSeconds = ref(5);
-	const aiStageTimers: ReturnType<typeof setTimeout>[] = [];
+	const aiGeneratingMessageIndex = ref(0);
+	const aiPollIntervalMs = 2000;
+	const aiGeneratingMessageIntervalMs = 8000;
+	let aiPollTimer: ReturnType<typeof setTimeout> | null = null;
 	let aiRedirectTimer: ReturnType<typeof setInterval> | null = null;
+	let aiGeneratingMessageTimer: ReturnType<typeof setInterval> | null = null;
 
 	const aiSteps: Array<{
-		status: AiImportStatus;
+		status: AiStepStatus;
 		title: string;
 		description: string;
 		buttonLabel: string;
@@ -199,10 +214,22 @@
 			buttonLabel: "מעלה קובץ...",
 		},
 		{
-			status: "extracting",
+			status: "queued",
+			title: "ממתינים לתור",
+			description: "המשימה נכנסה לתור ותתחיל ברגע שיש מקום פנוי לעיבוד.",
+			buttonLabel: "ממתין לתור...",
+		},
+		{
+			status: "generating",
 			title: "מחלצים את מבנה הטופס",
 			description: "ה-AI מזהה שדות, כותרות, אפשרויות וחוקי מילוי מתוך הקובץ.",
 			buttonLabel: "מחלץ מבנה...",
+		},
+		{
+			status: "repairing",
+			title: "מתקנים את מבנה הטופס",
+			description: "בודקים את הפלט ומבקשים מה-AI לתקן אותו אם צריך.",
+			buttonLabel: "מתקן מבנה...",
 		},
 		{
 			status: "creating",
@@ -212,7 +239,22 @@
 		},
 	];
 
+	const aiGeneratingMessages = [
+		"ממתינים שה-AI יסיים לבנות את הטופס.",
+		"המודל עדיין עובד על זה.",
+		"עוד רגע זה מוכן...",
+		"ה-AI קורא את המסמך לעומק.",
+		"מסדרים שדות, כותרות ואפשרויות.",
+	];
+
 	const currentAiStep = computed(() => aiSteps.find((step) => step.status === aiStatus.value));
+	const currentAiStepDescription = computed(() => {
+		if (aiStatus.value === "generating") {
+			return aiGeneratingMessages[aiGeneratingMessageIndex.value];
+		}
+
+		return currentAiStep.value?.description || "";
+	});
 
 	function handleAiFileChange(event: Event) {
 		const input = event.target as HTMLInputElement;
@@ -227,63 +269,130 @@
 		aiLoading.value = true;
 		aiStatus.value = "uploading";
 		activeAiStepIndex.value = 0;
-		startAiStageTimers();
 
 		try {
 			const body = new FormData();
 			body.append("file", aiFile.value);
 
-			const response = await $fetch<{ formId: number; success: boolean }>("/api/forms/ai-import", {
+			const response = await $fetch<AiFormImportTaskCreateResponse>("/api/forms/ai-import", {
 				method: "POST",
 				body,
 			});
-			aiCreatedFormId.value = response.formId;
-			aiStatus.value = "success";
-			startRedirectCountdown();
+			aiTaskId.value = response.taskId;
+			applyAiTaskStatus({
+				taskId: response.taskId,
+				status: response.status,
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
+			});
+			startAiTaskPolling(response.taskId);
 		} catch (e: any) {
 			const data = e.data?.data;
 			aiError.value = getAiImportErrorMessage(e);
 			aiValidationErrors.value = data?.errors || [];
 			aiInvalidJson.value = data?.json ? JSON.stringify(data.json, null, 2) : "";
 			aiStatus.value = "failed";
-		} finally {
-			clearAiStageTimers();
 			aiLoading.value = false;
 		}
 	}
 
 	function resetAiFeedback() {
-		clearAiStageTimers();
+		clearAiPollTimer();
 		clearRedirectTimer();
+		clearGeneratingMessageTimer();
 		aiError.value = "";
 		aiInvalidJson.value = "";
 		aiValidationErrors.value = [];
 		aiStatus.value = "idle";
+		aiTaskId.value = "";
 		aiCreatedFormId.value = null;
 		redirectSeconds.value = 5;
+		aiGeneratingMessageIndex.value = 0;
 	}
 
-	function startAiStageTimers() {
-		clearAiStageTimers();
-		aiStageTimers.push(
-			setTimeout(() => {
-				if (!aiLoading.value) return;
-				aiStatus.value = "extracting";
-				activeAiStepIndex.value = 1;
-			}, 1000),
-			setTimeout(() => {
-				if (!aiLoading.value) return;
-				aiStatus.value = "creating";
-				activeAiStepIndex.value = 2;
-			}, 4500),
-		);
+	function startAiTaskPolling(taskId: string) {
+		clearAiPollTimer();
+		void pollAiTask(taskId);
 	}
 
-	function clearAiStageTimers() {
-		while (aiStageTimers.length) {
-			const timer = aiStageTimers.pop();
-			if (timer) clearTimeout(timer);
+	async function pollAiTask(taskId: string) {
+		if (taskId !== aiTaskId.value) return;
+
+		try {
+			const task = await $fetch<AiFormImportTaskStatusResponse>(`/api/forms/ai-import/${taskId}`);
+			applyAiTaskStatus(task);
+
+			if (isTerminalAiStatus(task.status)) return;
+
+			aiPollTimer = setTimeout(() => {
+				void pollAiTask(taskId);
+			}, aiPollIntervalMs);
+		} catch (e: any) {
+			aiError.value = getAiImportErrorMessage(e);
+			aiStatus.value = "failed";
+			aiLoading.value = false;
+			clearAiPollTimer();
+			clearGeneratingMessageTimer();
 		}
+	}
+
+	function applyAiTaskStatus(task: AiFormImportTaskStatusResponse) {
+		if (task.taskId !== aiTaskId.value) return;
+
+		aiStatus.value = task.status;
+		const stepIndex = aiSteps.findIndex((step) => step.status === task.status);
+		if (stepIndex !== -1) activeAiStepIndex.value = stepIndex;
+
+		if (task.status === "generating") {
+			startGeneratingMessageTimer();
+		} else {
+			clearGeneratingMessageTimer();
+		}
+
+		if (task.status === "success") {
+			if (!task.formId) {
+				aiStatus.value = "failed";
+				aiError.value = "הטופס נוצר אבל מזהה הטופס לא התקבל מהשרת.";
+				aiLoading.value = false;
+				clearAiPollTimer();
+				return;
+			}
+
+			aiCreatedFormId.value = task.formId;
+			aiLoading.value = false;
+			clearAiPollTimer();
+			startRedirectCountdown();
+			return;
+		}
+
+		if (task.status === "failed" || task.status === "expired") {
+			aiError.value = getAiTaskErrorMessage(task);
+			aiValidationErrors.value = task.validationErrors || [];
+			aiInvalidJson.value = stringifyInvalidJson(task.invalidJson);
+			aiLoading.value = false;
+			clearAiPollTimer();
+		}
+	}
+
+	function clearAiPollTimer() {
+		if (!aiPollTimer) return;
+		clearTimeout(aiPollTimer);
+		aiPollTimer = null;
+	}
+
+	function startGeneratingMessageTimer() {
+		if (aiGeneratingMessageTimer) return;
+		aiGeneratingMessageIndex.value = 0;
+		aiGeneratingMessageTimer = setInterval(() => {
+			aiGeneratingMessageIndex.value = (aiGeneratingMessageIndex.value + 1) % aiGeneratingMessages.length;
+		}, aiGeneratingMessageIntervalMs);
+	}
+
+	function clearGeneratingMessageTimer() {
+		if (!aiGeneratingMessageTimer) return;
+		clearInterval(aiGeneratingMessageTimer);
+		aiGeneratingMessageTimer = null;
+		aiGeneratingMessageIndex.value = 0;
 	}
 
 	function startRedirectCountdown() {
@@ -304,8 +413,19 @@
 	}
 
 	function getAiImportErrorMessage(e: any) {
-		const message = e.data?.message || e.message || "";
-		const provider = e.data?.data?.provider ? ` (${e.data.data.provider})` : "";
+		return formatAiImportErrorMessage(e.data?.message || e.message || "", e.data?.data);
+	}
+
+	function getAiTaskErrorMessage(task: AiFormImportTaskStatusResponse) {
+		return formatAiImportErrorMessage(task.error || "", task);
+	}
+
+	function formatAiImportErrorMessage(message: string, data?: { provider?: string }) {
+		const provider = data?.provider ? ` (${data.provider})` : "";
+
+		if (/timed out|timeout/i.test(message)) {
+			return "יצירת הטופס ארכה יותר מ-10 דקות ולכן הופסקה. נסו שוב עם קובץ קצר יותר או מודל אחר.";
+		}
 
 		if (/overloaded|capacity|rate.?limit|too many requests|529|429/i.test(message)) {
 			return `ספק ה-AI עמוס כרגע${provider}. נסו שוב בעוד כמה דקות או בחרו מודל אחר בהגדרות.`;
@@ -326,6 +446,12 @@
 		return message || "יצירת הטופס נכשלה";
 	}
 
+	function stringifyInvalidJson(value: unknown) {
+		if (!value) return "";
+		if (typeof value === "string") return value;
+		return JSON.stringify(value, null, 2);
+	}
+
 	function goToCreatedForm() {
 		if (!aiCreatedFormId.value) return;
 		clearRedirectTimer();
@@ -334,7 +460,7 @@
 
 	function getAiStepState(index: number): AiStepState {
 		if (aiStatus.value === "success") return "done";
-		if (aiStatus.value === "failed") {
+		if (aiStatus.value === "failed" || aiStatus.value === "expired") {
 			if (index < activeAiStepIndex.value) return "done";
 			if (index === activeAiStepIndex.value) return "failed";
 			return "idle";
@@ -366,8 +492,13 @@
 		return index === -1 ? aiSteps.length : index;
 	}
 
+	function isTerminalAiStatus(status: AiFormImportTaskStatus) {
+		return status === "success" || status === "failed" || status === "expired";
+	}
+
 	onBeforeUnmount(() => {
-		clearAiStageTimers();
+		clearAiPollTimer();
 		clearRedirectTimer();
+		clearGeneratingMessageTimer();
 	});
 </script>
