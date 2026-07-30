@@ -48,6 +48,14 @@ function generateUniqueName(
 	return `${baseName}${maxNumber + 1}`;
 }
 
+function logDuplicateFieldNames(groups: DuplicateFieldNamesError["groups"]) {
+	const fieldNames = [...new Set(groups.map((group) => group.name))];
+	console.warn("Save blocked: duplicate field names", {
+		fieldNames,
+		groups,
+	});
+}
+
 export function useFormBuilder() {
 	const state = reactive<FormBuilderState>({
 		formId: null,
@@ -163,9 +171,13 @@ export function useFormBuilder() {
 			recordHistory();
 		}
 
-		// Also remove children if it's a container (section/grid)
+		// Also remove children if it's a container
 		const element = state.elements.find((el) => el.clientId === clientId);
-		if (element?.type === "section" || element?.type === "grid") {
+		if (
+			element?.type === "section" ||
+			element?.type === "repeater" ||
+			element?.type === "grid"
+		) {
 			const children = getChildElements(clientId);
 			for (const child of children) {
 				removeElement(child.clientId, true);
@@ -386,6 +398,7 @@ export function useFormBuilder() {
 		// Block save when same-scope field names collide — would silently corrupt submission data.
 		if (hasDuplicates.value) {
 			state.saveError = "Duplicate field names";
+			logDuplicateFieldNames(duplicateGroups.value);
 			throw new DuplicateFieldNamesError(duplicateGroups.value);
 		}
 

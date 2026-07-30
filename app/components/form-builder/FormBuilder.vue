@@ -150,7 +150,6 @@
 			if (error.name === "DuplicateFieldNamesError") {
 				// Auto-save attempts stay silent — the inline error and canvas badge are the
 				// in-context signals. Manual save toasts via `handleForceSave` below.
-				console.warn("Save blocked: duplicate field names");
 				return;
 			}
 			console.error("Auto-save failed:", error);
