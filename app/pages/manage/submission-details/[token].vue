@@ -16,7 +16,7 @@
 		</div>
 
 		<div v-else-if="submission">
-			<SubmissionDetailOverview :submission :form />
+			<SubmissionDetailOverview :submission :form @refresh="refresh" />
 
 			<SubmissionDetailSubmittedData :submission />
 

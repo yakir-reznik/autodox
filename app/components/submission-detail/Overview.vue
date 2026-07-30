@@ -61,23 +61,68 @@
 				</div>
 			</div>
 
-			<!-- Download PDF Button -->
+			<!-- Actions -->
 			<div>
-				<label class="block text-sm font-medium mb-2 text-gray-700">הורדת PDF</label>
-				<BaseButton
-					variant="primary"
-					size="sm"
-					@click="downloadPDF"
-					:disabled="isDownloading"
-				>
-					<Icon
-						:name="
-							isDownloading ? 'svg-spinners:ring-resize' : 'heroicons:arrow-down-tray'
-						"
-						class="h-4 w-4"
-					/>
-					{{ isDownloading ? "מוריד..." : "הורד PDF" }}
-				</BaseButton>
+				<label class="block text-sm font-medium mb-2 text-gray-700">פעולות</label>
+				<UiDropdownMenu dir="rtl">
+					<UiDropdownMenuTrigger as-child>
+						<BaseButton variant="secondary" size="sm">
+							<Icon name="heroicons:ellipsis-vertical" class="h-4 w-4" />
+							פעולות נוספות
+						</BaseButton>
+					</UiDropdownMenuTrigger>
+					<UiDropdownMenuContent align="end" class="w-52">
+						<UiDropdownMenuItem @click="copyFormLink">
+							<Icon name="heroicons:link" class="h-4 w-4 ml-2" />
+							העתק קישור לטופס
+						</UiDropdownMenuItem>
+						<UiDropdownMenuItem @click="copyToken">
+							<Icon name="heroicons:clipboard-document" class="h-4 w-4 ml-2" />
+							העתק טוקן
+						</UiDropdownMenuItem>
+						<UiDropdownMenuItem @click="copySubmissionId">
+							<Icon name="heroicons:hashtag" class="h-4 w-4 ml-2" />
+							העתק מזהה הגשה ({{ submission.id }})
+						</UiDropdownMenuItem>
+						<UiDropdownMenuItem :disabled="isDownloading" @click="downloadPDF">
+							<Icon
+								:name="
+									isDownloading
+										? 'svg-spinners:ring-resize'
+										: 'heroicons:arrow-down-tray'
+								"
+								class="h-4 w-4 ml-2"
+							/>
+							הורד PDF
+						</UiDropdownMenuItem>
+						<UiDropdownMenuItem as-child>
+							<NuxtLink
+								:to="`/print/${submission.token}`"
+								target="_blank"
+								class="flex items-center w-full"
+							>
+								<Icon name="heroicons:printer" class="h-4 w-4 ml-2" />
+								תצוגת הדפסה
+							</NuxtLink>
+						</UiDropdownMenuItem>
+						<UiDropdownMenuSeparator />
+						<UiDropdownMenuItem @click="toggleArchive">
+							<Icon
+								:name="
+									submission.isArchived
+										? 'heroicons:archive-box-x-mark'
+										: 'heroicons:archive-box-arrow-down'
+								"
+								class="h-4 w-4 ml-2"
+							/>
+							{{ submission.isArchived ? "שחזור מארכיון" : "העברה לארכיון" }}
+						</UiDropdownMenuItem>
+						<UiDropdownMenuItem @click="openRenameModal">
+							<Icon name="heroicons:pencil" class="h-4 w-4 ml-2" />
+							שינוי שם הגשה
+						</UiDropdownMenuItem>
+					</UiDropdownMenuContent>
+				</UiDropdownMenu>
 			</div>
 		</div>
 
@@ -180,6 +225,30 @@
 			</div>
 		</div>
 	</div>
+
+	<UiDialog v-model:open="showRenameModal">
+		<UiDialogContent class="sm:max-w-md" dir="rtl">
+			<UiDialogHeader>
+				<UiDialogTitle>שינוי שם הגשה</UiDialogTitle>
+				<UiDialogDescription>הזן שם חדש להגשה</UiDialogDescription>
+			</UiDialogHeader>
+			<div class="py-2">
+				<UiInput
+					v-model="renameName"
+					placeholder="שם ההגשה"
+					class="w-full"
+					@keydown.enter="submitRename"
+				/>
+			</div>
+			<UiDialogFooter class="flex gap-2 justify-start flex-row-reverse">
+				<UiButton :disabled="renaming" @click="submitRename">
+					<Icon v-if="renaming" name="svg-spinners:ring-resize" class="h-4 w-4" />
+					שמור
+				</UiButton>
+				<UiButton variant="outline" @click="showRenameModal = false">ביטול</UiButton>
+			</UiDialogFooter>
+		</UiDialogContent>
+	</UiDialog>
 </template>
 
 <script setup lang="ts">
@@ -196,7 +265,13 @@
 		form: Form | null | undefined;
 	}>();
 
+	const emit = defineEmits<{ refresh: [] }>();
+	const toasts = useToasts();
+
 	const isDownloading = ref(false);
+	const showRenameModal = ref(false);
+	const renameName = ref("");
+	const renaming = ref(false);
 
 	function formatDate(dateString: string) {
 		return new Date(dateString).toLocaleDateString("he-IL", {
@@ -222,13 +297,73 @@
 			document.body.appendChild(link);
 			link.click();
 			document.body.removeChild(link);
+			toasts.add({
+				title: "מוריד PDF...",
+				theme: "success",
+				duration: 2000,
+			});
 		} catch (err) {
 			console.error("הורדת PDF נכשלה:", err);
-			alert("הורדת ה-PDF נכשלה. נסה שוב.");
+			toasts.add({
+				title: "שגיאה: לא ניתן להוריד PDF",
+				theme: "error",
+				duration: 3000,
+			});
 		} finally {
 			setTimeout(() => {
 				isDownloading.value = false;
 			}, 1000);
+		}
+	}
+
+	async function copyFormLink() {
+		const url = `${window.location.origin}/fill/${props.submission.formId}?token=${props.submission.token}`;
+		await navigator.clipboard.writeText(url);
+		toasts.add({ title: "הקישור הועתק", theme: "success", duration: 2000 });
+	}
+
+	async function copyToken() {
+		await navigator.clipboard.writeText(props.submission.token);
+		toasts.add({ title: "הטוקן הועתק", theme: "success", duration: 2000 });
+	}
+
+	async function copySubmissionId() {
+		await navigator.clipboard.writeText(String(props.submission.id));
+		toasts.add({ title: "מזהה ההגשה הועתק", theme: "success", duration: 2000 });
+	}
+
+	function openRenameModal() {
+		renameName.value = props.submission.name ?? "";
+		showRenameModal.value = true;
+	}
+
+	async function submitRename() {
+		if (!renameName.value.trim()) return;
+		renaming.value = true;
+
+		try {
+			await $fetch(`/api/submissions/${props.submission.token}/rename`, {
+				method: "PATCH",
+				body: { name: renameName.value.trim() },
+			});
+			toasts.add({ title: "שם ההגשה עודכן", theme: "success", duration: 2000 });
+			showRenameModal.value = false;
+			emit("refresh");
+		} catch {
+			toasts.add({ title: "שגיאה: לא ניתן לשנות שם", theme: "error", duration: 3000 });
+		} finally {
+			renaming.value = false;
+		}
+	}
+
+	async function toggleArchive() {
+		try {
+			await $fetch(`/api/submissions/${props.submission.token}/archive`, {
+				method: "PATCH",
+			});
+			emit("refresh");
+		} catch {
+			toasts.add({ title: "שגיאה: לא ניתן לעדכן ארכיון", theme: "error", duration: 3000 });
 		}
 	}
 </script>
