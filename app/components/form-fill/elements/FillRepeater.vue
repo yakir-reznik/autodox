@@ -21,6 +21,7 @@
 		errors: Record<string, string>;
 		readonly?: boolean;
 		getConditionRequired?: (clientId: string) => boolean;
+		errorKeyPrefix?: string;
 	}
 
 	const props = defineProps<Props>();
@@ -100,12 +101,16 @@
 		}
 		newItems[itemIndex] = { ...newItems[itemIndex], [fieldClientId]: value };
 		items.value = newItems;
+		delete props.errors[`${getItemErrorPrefix(itemIndex)}${fieldClientId}`];
+	}
+
+	function getItemErrorPrefix(itemIndex: number): string {
+		return `${props.errorKeyPrefix ?? ""}${props.element.clientId}[${itemIndex}].`;
 	}
 
 	// Get error for a specific field in a specific item
 	function getFieldError(itemIndex: number, fieldClientId: string): string | undefined {
-		const errorKey = `${props.element.clientId}[${itemIndex}].${fieldClientId}`;
-		return props.errors[errorKey];
+		return props.errors[`${getItemErrorPrefix(itemIndex)}${fieldClientId}`];
 	}
 
 	const containerClass = computed(() => {
@@ -176,6 +181,7 @@
 							:readonly="readonly"
 							:condition-required="getConditionRequired?.(child.clientId)"
 							:get-condition-required="getConditionRequired"
+							:error-key-prefix="getItemErrorPrefix(itemIndex)"
 							@update:model-value="updateItemField(itemIndex, child.clientId, $event)"
 						/>
 					</div>

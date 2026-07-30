@@ -124,7 +124,7 @@
 				if (element) {
 					// For repeaters, transform nested data from field names to clientIds
 					if (element.type === "repeater" && Array.isArray(value)) {
-						const children = getChildElements(element.clientId);
+						const children = getDescendantElements(element.clientId);
 						const transformedItems = value.map((item: Record<string, any>) => {
 							const transformedItem: Record<string, any> = {};
 							Object.entries(item).forEach(([childFieldName, childValue]) => {
@@ -289,6 +289,18 @@
 			.sort((a, b) => a.position - b.position);
 	}
 
+	function getDescendantElements(parentClientId: string): BuilderElement[] {
+		const descendants: BuilderElement[] = [];
+		const children = getChildElements(parentClientId);
+
+		for (const child of children) {
+			descendants.push(child);
+			descendants.push(...getDescendantElements(child.clientId));
+		}
+
+		return descendants;
+	}
+
 	// Get visible children of a parent element
 	function getVisibleChildElements(parentClientId: string): BuilderElement[] {
 		return allElements.value
@@ -411,31 +423,42 @@
 		);
 	}
 
-	// Validate repeater children
-	function validateRepeater(repeaterClientId: string): boolean {
-		const repeaterItems = formData[repeaterClientId] as Record<string, any>[] | undefined;
-		if (!repeaterItems || repeaterItems.length === 0) return true;
-
-		const children = getChildElements(repeaterClientId);
+	function validateChildElements(
+		parentClientId: string,
+		data: Record<string, any>,
+		errorKeyPrefix = "",
+	): boolean {
+		const children = getChildElements(parentClientId);
 		let isValid = true;
 
-		for (let itemIndex = 0; itemIndex < repeaterItems.length; itemIndex++) {
-			const item = repeaterItems[itemIndex]!;
-			for (const child of children) {
-				if (!isVisible(child.clientId)) continue;
-				if (isFieldElement(child.type)) {
-					const value = item[child.clientId];
-					const errorKey = `${repeaterClientId}[${itemIndex}].${child.clientId}`;
-					if (
-						!validateFieldValue(
-							child,
-							value,
-							errorKey,
-							isRequiredByCondition(child.clientId),
-						)
-					) {
-						isValid = false;
-					}
+		for (const child of children) {
+			if (!isVisible(child.clientId)) continue;
+
+			if (child.type === "repeater") {
+				if (
+					!validateRepeaterItems(
+						child.clientId,
+						data[child.clientId],
+						`${errorKeyPrefix}${child.clientId}`,
+					)
+				) {
+					isValid = false;
+				}
+			} else if (isFieldElement(child.type)) {
+				const errorKey = `${errorKeyPrefix}${child.clientId}`;
+				if (
+					!validateFieldValue(
+						child,
+						data[child.clientId],
+						errorKey,
+						isRequiredByCondition(child.clientId),
+					)
+				) {
+					isValid = false;
+				}
+			} else if (child.type === "section" || child.type === "grid") {
+				if (!validateChildElements(child.clientId, data, errorKeyPrefix)) {
+					isValid = false;
 				}
 			}
 		}
@@ -443,25 +466,41 @@
 		return isValid;
 	}
 
-	function validateSection(sectionClientId: string): boolean {
-		const children = getChildElements(sectionClientId);
+	function validateRepeaterItems(
+		repeaterClientId: string,
+		repeaterItems: unknown,
+		errorKeyBase = repeaterClientId,
+	): boolean {
+		if (!Array.isArray(repeaterItems) || repeaterItems.length === 0) return true;
+
 		let isValid = true;
 
-		for (const child of children) {
-			if (!isVisible(child.clientId)) continue;
-
-			if (isFieldElement(child.type)) {
-				if (!validateField(child.clientId)) {
-					isValid = false;
-				}
-			} else if (child.type === "repeater") {
-				if (!validateRepeater(child.clientId)) {
-					isValid = false;
-				}
+		for (let itemIndex = 0; itemIndex < repeaterItems.length; itemIndex++) {
+			const item = repeaterItems[itemIndex] as Record<string, any>;
+			if (
+				!validateChildElements(
+					repeaterClientId,
+					item,
+					`${errorKeyBase}[${itemIndex}].`,
+				)
+			) {
+				isValid = false;
 			}
 		}
 
 		return isValid;
+	}
+
+	// Validate repeater children
+	function validateRepeater(repeaterClientId: string): boolean {
+		const repeaterItems = formData[repeaterClientId];
+		if (!repeaterItems || repeaterItems.length === 0) return true;
+
+		return validateRepeaterItems(repeaterClientId, repeaterItems);
+	}
+
+	function validateSection(sectionClientId: string): boolean {
+		return validateChildElements(sectionClientId, formData);
 	}
 
 	// Validate all fields
@@ -478,12 +517,12 @@
 				continue;
 			}
 
-			if (isFieldElement(element.type)) {
-				if (!validateField(element.clientId)) {
+			if (element.type === "repeater") {
+				if (!validateRepeater(element.clientId)) {
 					isValid = false;
 				}
-			} else if (element.type === "repeater") {
-				if (!validateRepeater(element.clientId)) {
+			} else if (isFieldElement(element.type)) {
+				if (!validateField(element.clientId)) {
 					isValid = false;
 				}
 			} else if (element.type === "section" || element.type === "grid") {
@@ -589,7 +628,7 @@
 
 					// For repeaters, transform nested data to use field names
 					if (element.type === "repeater" && Array.isArray(value)) {
-						const children = getChildElements(clientId);
+						const children = getDescendantElements(clientId);
 						const transformedItems = value.map((item: Record<string, any>) => {
 							const transformedItem: Record<string, any> = {};
 							Object.entries(item).forEach(([childClientId, childValue]) => {

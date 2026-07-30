@@ -8,6 +8,7 @@
 		errors: Record<string, string>;
 		readonly?: boolean;
 		getConditionRequired?: (clientId: string) => boolean;
+		errorKeyPrefix?: string;
 	}
 
 	const props = defineProps<Props>();
@@ -56,6 +57,11 @@
 		// The parent FormFill handles the formData directly
 		// We need to emit the update for the child
 		props.formData[clientId] = value;
+		delete props.errors[`${props.errorKeyPrefix ?? ""}${clientId}`];
+	}
+
+	function getChildError(clientId: string): string | undefined {
+		return props.errors[`${props.errorKeyPrefix ?? ""}${clientId}`];
 	}
 </script>
 
@@ -83,12 +89,13 @@
 				:element="child"
 				:get-children="getChildren"
 				:model-value="formData[child.clientId]"
-				:error="errors[child.clientId]"
+				:error="getChildError(child.clientId)"
 				:form-data="formData"
 				:errors="errors"
 				:readonly="readonly"
 				:condition-required="getConditionRequired?.(child.clientId)"
 				:get-condition-required="getConditionRequired"
+				:error-key-prefix="errorKeyPrefix"
 				@update:model-value="updateChildData(child.clientId, $event)"
 			/>
 		</div>

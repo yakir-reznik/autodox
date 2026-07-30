@@ -24,6 +24,7 @@
 		readonly?: boolean;
 		conditionRequired?: boolean;
 		getConditionRequired?: (clientId: string) => boolean;
+		errorKeyPrefix?: string;
 	}
 
 	const props = defineProps<Props>();
@@ -102,6 +103,7 @@
 			:readonly="readonly"
 			:condition-required="conditionRequired"
 			:get-condition-required="getConditionRequired"
+			:error-key-prefix="errorKeyPrefix"
 			@update:model-value="emit('update:modelValue', $event)"
 			@blur="emit('blur')"
 		/>
