@@ -116,7 +116,10 @@
 					:checked="config.defaultValue === true"
 					class="h-4 w-4 rounded border-gray-300 text-blue-600"
 				/>
-				<span class="text-sm text-gray-600">{{ config.label }}</span>
+				<span class="text-sm text-gray-600">
+					{{ config.label }}
+					<span v-if="config.validation?.required" class="text-red-500">*</span>
+				</span>
 			</label>
 		</template>
 
