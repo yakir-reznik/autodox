@@ -36,7 +36,7 @@
 				:placeholder="config.placeholder"
 				:step="config.step"
 				:autocomplete="config.autocomplete || 'off'"
-				:dir="['email', 'phone', 'date', 'time'].includes(element.type) ? 'ltr' : 'rtl'"
+				:dir="inputDir"
 				class="form-fill-input w-full bg-card border border-input rounded-md py-2 px-4 text-base text-foreground transition-colors focus:outline-none focus:border-ring focus:ring-3 focus:ring-ring/10 placeholder:text-muted-foreground/50"
 				:class="[
 					{
@@ -135,6 +135,12 @@
 				return "text";
 		}
 	});
+
+	const inputDir = computed(() =>
+		["email", "phone", "date", "time", "datetime"].includes(props.element.type)
+			? "ltr"
+			: "rtl",
+	);
 
 	const isRequired = computed(
 		() =>

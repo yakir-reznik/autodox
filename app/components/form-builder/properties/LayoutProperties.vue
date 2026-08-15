@@ -19,10 +19,14 @@
 		["heading_h1", "heading_h2", "heading_h3", "paragraph"].includes(props.element.type),
 	);
 
+	const isRichTextElement = computed(() => props.element.type === "rich_text");
+
 	// Interpolation field picker
 	const showFieldPicker = ref(false);
 	const textareaRef = ref<InstanceType<typeof BaseTextarea> | null>(null);
+	const richTextEditorRef = ref<HTMLElement | null>(null);
 	const lastCursorPosition = ref<number | null>(null);
+	const savedRichTextRange = ref<Range | null>(null);
 
 	function saveCursorPosition() {
 		const textarea = textareaRef.value?.$el?.querySelector(
@@ -35,6 +39,11 @@
 
 	function insertField(fieldName: string) {
 		const token = `{{${fieldName}}}`;
+		if (isRichTextElement.value) {
+			insertRichTextToken(token);
+			return;
+		}
+
 		const currentText = config.value.text || "";
 		const pos = lastCursorPosition.value ?? currentText.length;
 
@@ -42,6 +51,82 @@
 		emit("update:config", { text: newText });
 		showFieldPicker.value = false;
 	}
+
+	function syncRichTextEditor() {
+		if (!richTextEditorRef.value) return;
+
+		const html = sanitizeRichTextHtml(config.value.html || "");
+		if (richTextEditorRef.value.innerHTML !== html) {
+			richTextEditorRef.value.innerHTML = html;
+		}
+	}
+
+	function emitRichTextHtml() {
+		if (!richTextEditorRef.value) return;
+
+		const html = sanitizeRichTextHtml(richTextEditorRef.value.innerHTML);
+		if (richTextEditorRef.value.innerHTML !== html) {
+			richTextEditorRef.value.innerHTML = html;
+		}
+		emit("update:config", { html });
+		saveRichTextSelection();
+	}
+
+	function saveRichTextSelection() {
+		if (!richTextEditorRef.value || typeof window === "undefined") return;
+
+		const selection = window.getSelection();
+		if (!selection || selection.rangeCount === 0) return;
+
+		const range = selection.getRangeAt(0);
+		if (richTextEditorRef.value.contains(range.commonAncestorContainer)) {
+			savedRichTextRange.value = range.cloneRange();
+		}
+	}
+
+	function restoreRichTextSelection() {
+		if (!savedRichTextRange.value || typeof window === "undefined") return;
+
+		const selection = window.getSelection();
+		if (!selection) return;
+
+		selection.removeAllRanges();
+		selection.addRange(savedRichTextRange.value);
+	}
+
+	function runRichTextCommand(command: string) {
+		richTextEditorRef.value?.focus();
+		restoreRichTextSelection();
+		document.execCommand(command, false);
+		emitRichTextHtml();
+	}
+
+	function insertRichTextToken(token: string) {
+		richTextEditorRef.value?.focus();
+		restoreRichTextSelection();
+		document.execCommand("insertText", false, token);
+		emitRichTextHtml();
+		showFieldPicker.value = false;
+	}
+
+	function handleRichTextPaste(event: ClipboardEvent) {
+		event.preventDefault();
+		const text = event.clipboardData?.getData("text/plain") || "";
+		document.execCommand("insertText", false, text);
+		emitRichTextHtml();
+	}
+
+	const richTextCommands = [
+		{ command: "bold", icon: "mdi:format-bold", label: "מודגש" },
+		{ command: "italic", icon: "mdi:format-italic", label: "נטוי" },
+		{ command: "underline", icon: "mdi:format-underline", label: "קו תחתון" },
+		{ command: "insertUnorderedList", icon: "mdi:format-list-bulleted", label: "רשימה" },
+		{ command: "insertOrderedList", icon: "mdi:format-list-numbered", label: "רשימה ממוספרת" },
+		{ command: "removeFormat", icon: "mdi:format-clear", label: "נקה עיצוב" },
+	];
+
+	watch(() => config.value.html, () => nextTick(syncRichTextEditor), { immediate: true });
+	onMounted(syncRichTextEditor);
 
 	const alignOptions = [
 		{ label: "שמאל", value: "left" },
@@ -150,8 +235,63 @@
 			/>
 		</div>
 
+		<!-- Rich text editor -->
+		<div v-if="isRichTextElement" class="relative space-y-2">
+			<div class="flex items-center justify-between">
+				<label class="text-sm text-gray-600">תוכן</label>
+				<button
+					type="button"
+					class="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700"
+					@click="showFieldPicker = !showFieldPicker"
+				>
+					<Icon name="heroicons:code-bracket" class="h-3.5 w-3.5" />
+					הוסף שדה
+				</button>
+			</div>
+
+			<div class="flex flex-wrap gap-1 rounded-lg border border-gray-200 bg-gray-50 p-1">
+				<button
+					v-for="item in richTextCommands"
+					:key="item.command"
+					type="button"
+					class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-600 hover:bg-white hover:text-gray-900"
+					:title="item.label"
+					@click="runRichTextCommand(item.command)"
+				>
+					<Icon :name="item.icon" class="h-4 w-4" />
+					<span class="sr-only">{{ item.label }}</span>
+				</button>
+			</div>
+
+			<div
+				ref="richTextEditorRef"
+				contenteditable="true"
+				dir="rtl"
+				class="min-h-36 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm leading-relaxed text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 [&_a]:text-primary [&_a]:underline [&_div]:mb-2 [&_div:last-child]:mb-0 [&_li]:mb-1 [&_ol]:list-decimal [&_ol]:pe-0 [&_ol]:ps-4 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pe-0 [&_ul]:ps-4"
+				:style="{ textAlign: config.align || 'right' }"
+				@blur="emitRichTextHtml"
+				@input="emitRichTextHtml"
+				@keyup="saveRichTextSelection"
+				@mouseup="saveRichTextSelection"
+				@paste="handleRichTextPaste"
+			/>
+
+			<FormBuilderPropertiesInterpolationFieldPicker
+				v-if="showFieldPicker"
+				:elements="allElements"
+				@select="insertField"
+				@close="showFieldPicker = false"
+			/>
+		</div>
+
 		<!-- Text alignment -->
-		<div v-if="['heading_h1', 'heading_h2', 'heading_h3', 'paragraph'].includes(element.type)">
+		<div
+			v-if="
+				['heading_h1', 'heading_h2', 'heading_h3', 'paragraph', 'rich_text'].includes(
+					element.type,
+				)
+			"
+		>
 			<label class="mb-1 block text-sm text-gray-600">Alignment</label>
 			<BaseSelect
 				:model-value="config.align || 'right'"

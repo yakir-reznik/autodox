@@ -159,6 +159,7 @@
 			heading_h2: "Heading 2",
 			heading_h3: "Heading 3",
 			paragraph: "Paragraph",
+			rich_text: "Rich Text",
 			image: "Image",
 			video: "Video",
 			divider: "Divider",

@@ -1,5 +1,6 @@
 import { db } from "~~/server/db";
 import { eq } from "drizzle-orm";
+import { sanitizeRichTextHtml } from "~~/app/utils/richText";
 import {
 	formsTable,
 	formElementsTable,
@@ -31,6 +32,7 @@ export type UploadElement = {
 	options?: string[];
 	allowOther?: boolean;
 	text?: string;
+	html?: string;
 	align?: UploadAlign;
 	url?: string;
 	caption?: string;
@@ -207,6 +209,7 @@ function normalizeElement(
 	assignString(input, element, "placeholder");
 	assignString(input, element, "helpText");
 	assignString(input, element, "text");
+	assignString(input, element, "html");
 	assignString(input, element, "url");
 	assignString(input, element, "caption");
 	assignString(input, element, "autocomplete");
@@ -535,6 +538,13 @@ function buildConfig(element: UploadElement): ElementConfig {
 	if (type === "paragraph") {
 		return {
 			text: element.text || "Enter text here...",
+			align: element.align || "right",
+		};
+	}
+
+	if (type === "rich_text") {
+		return {
+			html: sanitizeRichTextHtml(element.html || element.text || "<p>הזן את הטקסט שלך כאן...</p>"),
 			align: element.align || "right",
 		};
 	}

@@ -85,6 +85,7 @@ export const elementTypeEnum = [
 	"heading_h2",
 	"heading_h3",
 	"paragraph",
+	"rich_text",
 	"image",
 	"video",
 	"divider",
@@ -188,6 +189,11 @@ type ParagraphConfig = {
 	align?: "left" | "center" | "right";
 };
 
+type RichTextConfig = {
+	html: string;
+	align?: "left" | "center" | "right";
+};
+
 type MediaConfig = {
 	url: string;
 	alt?: string; // for images
@@ -247,6 +253,7 @@ export type ElementConfig =
 	| SignatureFieldConfig
 	| HeadingConfig
 	| ParagraphConfig
+	| RichTextConfig
 	| MediaConfig
 	| DividerConfig
 	| SpacerConfig

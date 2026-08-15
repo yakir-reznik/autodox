@@ -7,6 +7,7 @@
 	import FillSignature from "./elements/FillSignature.vue";
 	import FillHeading from "./elements/FillHeading.vue";
 	import FillParagraph from "./elements/FillParagraph.vue";
+	import FillRichText from "./elements/FillRichText.vue";
 	import FillMedia from "./elements/FillMedia.vue";
 	import FillDivider from "./elements/FillDivider.vue";
 	import FillSpacer from "./elements/FillSpacer.vue";
@@ -63,6 +64,8 @@
 				return FillHeading;
 			case "paragraph":
 				return FillParagraph;
+			case "rich_text":
+				return FillRichText;
 			case "image":
 			case "video":
 				return FillMedia;

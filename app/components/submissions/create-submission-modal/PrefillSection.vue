@@ -34,6 +34,10 @@
 		return "text";
 	}
 
+	function getInputDir(type: ElementType): "ltr" | "rtl" {
+		return ["email", "phone", "date", "time", "datetime"].includes(type) ? "ltr" : "rtl";
+	}
+
 	function toggleCheckboxValue(
 		prefillData: Record<string, any>,
 		fieldName: string,
@@ -89,6 +93,7 @@
 					"
 					v-model="prefillData[field.name!]"
 					:type="getInputType(field.type)"
+					:dir="getInputDir(field.type)"
 					:placeholder="(field.config as any).placeholder || ''"
 					class="bg-background"
 				/>

@@ -138,6 +138,7 @@
 		"heading_h2",
 		"heading_h3",
 		"paragraph",
+		"rich_text",
 		"image",
 		"video",
 		"divider",

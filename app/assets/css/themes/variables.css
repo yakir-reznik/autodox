@@ -72,6 +72,7 @@
   --fill-font-size-xl: 1.25rem;
   --fill-font-size-2xl: 1.5rem;
   --fill-font-size-3xl: 1.875rem;
+  --fill-rich-text-list-indent: 1rem;
 
   /* === Border Radius === */
   --fill-radius-sm: 0.25rem;

@@ -46,6 +46,7 @@ export default defineEventHandler(async (event) => {
 		if (config.allowOther) out.allowOther = config.allowOther;
 
 		if (config.text) out.text = config.text;
+		if (config.html) out.html = config.html;
 		if (config.align) out.align = config.align;
 
 		if (config.url !== undefined) out.url = config.url;

@@ -8,6 +8,7 @@
 	import SignatureElement from "./SignatureElement.vue";
 	import HeadingElement from "./HeadingElement.vue";
 	import ParagraphElement from "./ParagraphElement.vue";
+	import RichTextElement from "./RichTextElement.vue";
 	import MediaElement from "./MediaElement.vue";
 	import DividerElement from "./DividerElement.vue";
 	import SpacerElement from "./SpacerElement.vue";
@@ -137,6 +138,7 @@
 		SignatureElement,
 		HeadingElement,
 		ParagraphElement,
+		RichTextElement,
 		MediaElement,
 		DividerElement,
 		SpacerElement,

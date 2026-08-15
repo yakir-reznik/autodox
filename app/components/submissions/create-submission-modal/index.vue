@@ -74,6 +74,24 @@
 		"checkboxes",
 	];
 
+	function hasRelativeDateTimeDefault(defaultValue: string, fieldType: ElementType): boolean {
+		if (fieldType === "date") return isRelativeDateKey(defaultValue);
+		if (fieldType === "time") return isRelativeTimeKey(defaultValue);
+		if (fieldType !== "datetime") return false;
+
+		try {
+			const parsed = JSON.parse(defaultValue) as { date?: unknown; time?: unknown };
+			if (parsed && typeof parsed === "object") {
+				return (
+					(typeof parsed.date === "string" && isRelativeDateKey(parsed.date)) ||
+					(typeof parsed.time === "string" && isRelativeTimeKey(parsed.time))
+				);
+			}
+		} catch {}
+
+		return isRelativeDateKey(defaultValue) || isRelativeTimeKey(defaultValue);
+	}
+
 	watch(
 		() => props.modelValue,
 		async (open) => {
@@ -137,6 +155,13 @@
 				} else if (field.type === "checkbox") {
 					if (dv === true) prefillData[field.name!] = true;
 				} else if (["date", "datetime", "time"].includes(field.type) && dv) {
+					if (
+						typeof dv === "string" &&
+						hasRelativeDateTimeDefault(dv, field.type)
+					) {
+						continue;
+					}
+
 					const resolved = resolveDateTimeDefault(
 						dv,
 						field.type as "date" | "datetime" | "time",

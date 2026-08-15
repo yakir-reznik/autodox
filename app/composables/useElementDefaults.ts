@@ -137,6 +137,11 @@ export function getDefaultConfig(type: ElementType): ElementConfig {
 				text: "הזן את הטקסט שלך כאן...",
 				align: "right",
 			};
+		case "rich_text":
+			return {
+				html: "<p>הזן את הטקסט שלך כאן...</p>",
+				align: "right",
+			};
 		case "image":
 			return {
 				url: "",
@@ -305,6 +310,12 @@ export function usePaletteElements(): PaletteElement[] {
 			category: "layout",
 		},
 		{
+			type: "rich_text",
+			label: "טקסט עשיר",
+			icon: "mdi:format-text",
+			category: "layout",
+		},
+		{
 			type: "image",
 			label: "תמונה",
 			icon: "heroicons:photo",
@@ -376,6 +387,7 @@ export function getElementComponent(type: ElementType): string | undefined {
 		heading_h2: "HeadingElement",
 		heading_h3: "HeadingElement",
 		paragraph: "ParagraphElement",
+		rich_text: "RichTextElement",
 		image: "MediaElement",
 		video: "MediaElement",
 		divider: "DividerElement",
