@@ -29,7 +29,7 @@ Scan every page top-to-bottom (right-to-left for Hebrew/RTL layouts). For each v
 - Is this the **form's main title** → `heading_h1` (centered)
 - Is this a **section / product-name heading** → `heading_h2` (centered for branded product names)
 - Is this a **sub-heading** within an informational block, or a visible group heading → `heading_h3`
-- Is this **paragraph text** (informational, numbered clause, disclaimer, a fixed name line like the doctor's name) → `paragraph`
+- Is this **paragraph text** (informational, numbered clause, disclaimer, a fixed name line like the doctor's name) → `paragraph`, or `rich_text` only when inline formatting or a list is needed to represent the source
 - Is this an **input area** (blank line, box, underline) → input field type
 - Is this a **group of choices** → radio, checkboxes, or dropdown
 - Is this a **signature area** → `signature`
@@ -72,7 +72,7 @@ Use `id: "doctorName"` regardless of which treatment the form covers. Do **not**
  
 ## Alignment
  
-Use the `"align"` property (not `"alignment"`) on `heading_h1`, `heading_h2`, `heading_h3`, and `paragraph` elements:
+Use the `"align"` property (not `"alignment"`) on `heading_h1`, `heading_h2`, `heading_h3`, `paragraph`, and `rich_text` elements:
  
 - `"align": "right"` — Hebrew or RTL text body paragraphs and section headings
 - `"align": "left"` — English or LTR text
@@ -159,6 +159,7 @@ Note `מין` (gender) is a **radio**, not a free-text field. Other free-text pe
 | `heading_h2` | `text`, `align` |
 | `heading_h3` | `text`, `align` |
 | `paragraph` | `text`, `align` |
+| `rich_text` | `html`, `align` — use only when inline formatting or a list is needed |
 | `divider` | `style: "solid"` |
 | `spacer` | `height` (px, default 24) |
 | `section` | `label`, `children[]` |
@@ -166,12 +167,28 @@ Note `מין` (gender) is a **radio**, not a free-text field. Other free-text pe
  
 ---
  
+## Rich text and value interpolation
+
+Use `paragraph` for ordinary text and the existing heading types for headings. Use `rich_text` only when it meaningfully preserves formatting in the source, such as bold, italic, underline, links, or a list within a text block. Do not use it merely for alignment or to combine unrelated elements. Keep numbered consent clauses as separate `paragraph` elements as instructed above. Rich text is displayed content, not an input field.
+
+Put its content in `html`, preserving the source wording. Supported tags are `p`, `div`, `br`, `strong`, `b`, `em`, `i`, `u`, `ul`, `ol`, `li`, and `a`. Links need an `href` using `https:`, `http:`, `mailto:`, or `tel:`. Other tags and formatting attributes are removed, so do not rely on styles, colors, font sizes, or unsupported HTML.
+
+Headings, paragraphs, and rich text can display a form field's current value using `{{fieldId}}` in `text` or `html`. Use the exact `id` of an existing non-repeater field, containing only letters, digits, or underscores, for example:
+
+```json
+{ "type": "rich_text", "html": "<p>אני, <strong>{{fullName}}</strong>, מאשר/ת את האמור לעיל.</p>", "align": "right" }
+```
+
+Use interpolation only when the source clearly calls for a previously entered value to appear again in displayed text; do not invent references or replace a distinct input with a token. Do not reference fields inside repeaters. An empty field displays `_____`; an unresolved token remains visible. The `defaultValue` template on an input is a separate use of the same token syntax.
+
+---
+
 ## Property rules
  
 **Always include:**
 - `type` on every element
 - `label` on all input/selection/special fields
-- `text` + `align` on headings and paragraphs
+- `text` + `align` on headings and paragraphs; `html` + `align` on rich text
 - `options` and `defaultValue` on every radio (see radio defaults below)
 - `required: true` on the standard personal-info fields, on yes/no medical-history radios, on the info-verification radios, and on the patient-facing consent fields (date, time, name, patient signature). Leave the minor/guardian block optional — it only applies sometimes.
 **Radio defaults — pick by question intent:**
@@ -278,4 +295,5 @@ Rules:
 14. Minor/guardian block is optional (no `required`); marketing-consent line is a `paragraph`, not a checkbox
 15. A blank-field-plus-parenthetical (e.g. `(להלן: "הטיפול")`) is folded into one field label; the opening doctor-name blank uses `id: "doctorName"` + `helpText: "פרט/י את שם הרופא/ה"`
 16. The form's main disclaimer appears in root `description` AND inline as paragraph(s); dividers include `"style": "solid"`
-17. The output is valid JSON (no trailing commas, no comments) — raw JSON only, no markdown fences
+17. Rich text is used only when needed; interpolation references existing suitable field ids
+18. The output is valid JSON (no trailing commas, no comments) — raw JSON only, no markdown fences
