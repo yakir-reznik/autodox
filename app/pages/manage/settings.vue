@@ -1,5 +1,5 @@
 <template>
-	<div class="max-w-2xl">
+	<div class="max-w-2xl space-y-6">
 		<UiCard class="bg-white border-gray-300">
 			<UiCardHeader>
 				<UiCardTitle>הגדרות יצירת טפסים ב-AI</UiCardTitle>
@@ -67,6 +67,10 @@
 				</form>
 			</UiCardContent>
 		</UiCard>
+		<p class="text-sm text-muted-foreground">
+			תאריך ושעת בניית האפליקציה:
+			<time :datetime="buildDate" dir="ltr" class="inline-block">{{ formattedBuildDate }}</time>
+		</p>
 	</div>
 </template>
 
@@ -91,6 +95,20 @@
 	});
 
 	useHead({ title: "הגדרות מערכת - Autodox" });
+
+	const buildDate = useRuntimeConfig().public.buildDate;
+	const buildDateParts = new Intl.DateTimeFormat("en-GB", {
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+		hour: "2-digit",
+		minute: "2-digit",
+		second: "2-digit",
+		hourCycle: "h23",
+		timeZone: "Asia/Jerusalem",
+	}).formatToParts(new Date(buildDate));
+	const datePart = (type: Intl.DateTimeFormatPartTypes) => buildDateParts.find((part) => part.type === type)?.value;
+	const formattedBuildDate = `${datePart("day")}/${datePart("month")}/${datePart("year")} ${datePart("hour")}:${datePart("minute")}:${datePart("second")}`;
 
 	const toasts = useToasts();
 	const saving = ref(false);

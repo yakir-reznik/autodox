@@ -59,6 +59,9 @@ export default defineNuxtConfig({
 		componentDir: "@/components/ui",
 	},
 	runtimeConfig: {
+		public: {
+			buildDate: new Date().toISOString(),
+		},
 		databaseUrl: process.env.DATABASE_URL,
 		openrouterApiKey: process.env.OPEN_ROUTER_API_KEY || "",
 		session: {
