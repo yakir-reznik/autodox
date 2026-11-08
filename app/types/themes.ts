@@ -1,5 +1,12 @@
 export const THEMES = [
 	{
+		id: "cream-gold",
+		title: "שמנת וזהב",
+		description: "גווני שמנת וזהב עם הדגשות אדומות",
+		cssFile: "/assets/css/themes/cream-gold.css",
+		colors: ["#FFFFFF", "#FBF8F3", "#A8875A", "#D9CFC0", "#B4503C"],
+	},
+	{
 		id: "dark",
 		title: "כהה",
 		description: "עיצוב כהה לנוחות העיניים",
@@ -51,4 +58,4 @@ export const THEMES = [
 ] as const;
 
 export type Theme = (typeof THEMES)[number];
-export type FormTheme = Theme["id"];
+export type FormTheme = string;

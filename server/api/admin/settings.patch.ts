@@ -24,6 +24,7 @@ export default defineEventHandler(async (event) => {
 
 function parseSettings(body: AppSettingsBody, currentSettings: AppSettings): AppSettings {
 	const aiFormImportModel = body.aiFormImportModel?.trim() || currentSettings.aiFormImportModel;
+	const aiThemeColorModel = body.aiThemeColorModel?.trim() || currentSettings.aiThemeColorModel;
 	const aiFormImportMaxFileSizeMb = Number(
 		body.aiFormImportMaxFileSizeMb ?? currentSettings.aiFormImportMaxFileSizeMb,
 	);
@@ -34,6 +35,10 @@ function parseSettings(body: AppSettingsBody, currentSettings: AppSettings): App
 
 	if (!aiFormImportModelValues.includes(aiFormImportModel as any)) {
 		throw createError({ statusCode: 400, message: "AI model is not supported" });
+	}
+
+	if (!aiFormImportModelValues.includes(aiThemeColorModel as any)) {
+		throw createError({ statusCode: 400, message: "Theme color AI model is not supported" });
 	}
 
 	if (
@@ -49,6 +54,7 @@ function parseSettings(body: AppSettingsBody, currentSettings: AppSettings): App
 
 	return {
 		aiFormImportModel,
+		aiThemeColorModel,
 		aiFormImportMaxFileSizeMb,
 	};
 }

@@ -26,13 +26,13 @@ Produce a single valid JSON object:
 Scan every page top-to-bottom (right-to-left for Hebrew/RTL layouts). For each visible item, ask yourself:
  
 - Is this a **logo or image** → `image` element at the very top. **Always include `{ "type": "image", "url": "{{logo}}" }` as the very first element** in `elements`, even when no logo is visually present in the PDF — the clinic will supply it at render time.
-- Is this the **form's main title** → `heading_h1` (centered)
-- Is this a **section / product-name heading** → `heading_h2` (centered for branded product names)
+- Is this the **form's main title** → `heading_h1`, aligned as in the source
+- Is this a **section / product-name heading** → `heading_h2`, aligned as in the source
 - Is this a **sub-heading** within an informational block, or a visible group heading → `heading_h3`
 - Is this **paragraph text** (informational, numbered clause, disclaimer, a fixed name line like the doctor's name) → `paragraph`, or `rich_text` only when inline formatting or a list is needed to represent the source
 - Is this an **input area** (blank line, box, underline) → input field type
 - Is this a **group of choices** → radio, checkboxes, or dropdown
-- Is this a **signature area** → `signature`
+- Is this a **signature area** → `signature` for a patient or guardian; for a doctor use `{ "type": "image", "url": "{{doctorSignature}}" }` instead
 - Is this a **repeating block** → `repeater`
 - Is this a **visual separator** → `divider`
 - Is this a **logical group of fields** → `section` with children
@@ -72,30 +72,27 @@ Use `id: "doctorName"` regardless of which treatment the form covers. Do **not**
  
 ## Alignment
  
-Use the `"align"` property (not `"alignment"`) on `heading_h1`, `heading_h2`, `heading_h3`, `paragraph`, and `rich_text` elements:
- 
-- `"align": "right"` — Hebrew or RTL text body paragraphs and section headings
-- `"align": "left"` — English or LTR text
-- `"align": "center"` — the main form title `heading_h1`, branded product-name headings, and **closing/footer paragraphs** (thank-you notes and legal disclaimers that appear at the very bottom of the form after the signature block)
-Field labels and option values do not have an `align` property — just copy the text verbatim. The `image` (logo) element does not need an `align`.
- 
+Use the `"align"` property (not `"alignment"`) on every `heading_h1`, `heading_h2`, `heading_h3`, `paragraph`, and `rich_text`. Inspect the visual placement of each block in the source and choose `"right"`, `"center"`, or `"left"` to match it. Do not infer alignment solely from language, element type, or location: Hebrew text can be centered or left-aligned, and titles and footers are not always centered. If alignment is genuinely unclear, default to right for Hebrew/RTL and left for English/LTR. Field labels and option values do not have an `align` property; images do not need one.
+
 ---
  
 ## Structure: sections and their headings
  
-Group logically related fields into `section` elements (personal details, each medical-history block, the info-verification block, each signature block, the minor/guardian block). Sections keep the form organized and make conditional logic cleaner — an entire section can be shown/hidden with one condition.
+Group logically related content and fields into `section` elements (personal details, each medical-history block, the info-verification block, each signature block, the minor/guardian block). Sections keep the form organized and make conditional logic cleaner — an entire section can be shown/hidden with one condition.
  
+Inspect the page visually for distinct blocks separated by horizontal rules, borders, shaded areas, conspicuous whitespace, or separate headings. Put each clearly separated block in its own `section`, including text-only blocks; preserve their order. A divider may represent a visible line, but it does not replace separate sections. Do not split a continuous block merely because it spans pages.
+
 Two rules about section labels:
  
 1. **Always give the section a human-readable `label`.** If the PDF has a visible heading for that group, use it verbatim (e.g. `"נשים בלבד:"`, `"2. אימות מידע"`, `"במקרה של קטין או פסול דין"`). If the group has no visible heading, use a sensible descriptive label anyway (e.g. `"פרטי המטופל/ת"`, `"הצהרת הרופאה"`, `"אישור והסכמה לביצוע הטיפול"`) — a descriptive label is preferred over a generic placeholder.
-2. **Echo a visible heading as a `heading_h3` child.** When the section's label comes from a heading that is actually printed in the PDF, add a `heading_h3` as the first child repeating that text (`align: "right"` for Hebrew). When the label was one you supplied (no printed heading — e.g. the personal-details block), do NOT add a `heading_h3` child. This way the rendered form shows headings exactly where the PDF does.
+2. **Echo a visible heading as a `heading_h3` child.** When the section's label comes from a heading that is actually printed in the PDF, add a `heading_h3` as the first child repeating that text (with alignment matching the source). When the label was one you supplied (no printed heading — e.g. the personal-details block), do NOT add a `heading_h3` child. This way the rendered form shows headings exactly where the PDF does.
 ---
  
 ## Element IDs
  
 Give **semantic ids** to the standard personal-info fields and to any field referenced by a condition or a `defaultValue` template (see the table below). For every other input/selection/special field, assign a **sequential generic id per type** in document order: `text_1`, `text_2`, …; `textarea_1`, …; `date_1`, …; `time_1`, …; `signature_1`, ….
  
-Keep the counter advancing in reading order. If a field that would normally be an input is instead rendered as a `paragraph` (most commonly the doctor's pre-printed name, see below), its slot is still consumed — skip that number rather than reusing it. Likewise the doctor's signature uses the fixed id `doctorSignature`, so the `signature_N` it would have taken is skipped. Exact numbering is cosmetic (nothing breaks), but staying consistent keeps diffs clean.
+Keep the counter advancing in reading order. If a field that would normally be an input is instead rendered as a `paragraph` (most commonly the doctor's pre-printed name, see below), its slot is still consumed — skip that number rather than reusing it. The doctor's signature is an image rather than a signature input and does not consume a `signature_N` id. Exact numbering is cosmetic (nothing breaks), but staying consistent keeps diffs clean.
  
 ---
  
@@ -163,13 +160,13 @@ Note `מין` (gender) is a **radio**, not a free-text field. Other free-text pe
 | `divider` | `style: "solid"` |
 | `spacer` | `height` (px, default 24) |
 | `section` | `label`, `children[]` |
-| `image` | `url` — always use `"url": "{{logo}}"` as the placeholder; the clinic supplies the actual logo at render time |
+| `image` | `url` — use `"{{logo}}"` for the initial logo and `"{{doctorSignature}}"` for a doctor signature |
  
 ---
  
 ## Rich text and value interpolation
 
-Use `paragraph` for ordinary text and the existing heading types for headings. Use `rich_text` only when it meaningfully preserves formatting in the source, such as bold, italic, underline, links, or a list within a text block. Do not use it merely for alignment or to combine unrelated elements. Keep numbered consent clauses as separate `paragraph` elements as instructed above. Rich text is displayed content, not an input field.
+Use `paragraph` for ordinary text and the existing heading types for headings. When the source contains a bulleted or numbered list within an informational text block, use `rich_text` with `<ul><li>...</li></ul>` or `<ol><li>...</li></ol>` and preserve every item and its wording. Do not flatten bullets into plain paragraphs or omit list markers. Inspect the rendered page, not just extracted text, to identify bullets and indentation. Use `rich_text` only when it meaningfully preserves formatting in the source, such as bold, italic, underline, links, or a list within a text block. Do not use it merely for alignment or to combine unrelated elements. Keep numbered consent clauses as separate `paragraph` elements as instructed above. Rich text is displayed content, not an input field.
 
 Put its content in `html`, preserving the source wording. Supported tags are `p`, `div`, `br`, `strong`, `b`, `em`, `i`, `u`, `ul`, `ol`, `li`, and `a`. Links need an `href` using `https:`, `http:`, `mailto:`, or `tel:`. Other tags and formatting attributes are removed, so do not rely on styles, colors, font sizes, or unsupported HTML.
 
@@ -197,9 +194,9 @@ Use interpolation only when the source clearly calls for a previously entered va
 - `gender` → `defaultValue: "female"`.
 **Include when present in the PDF:**
 - `placeholder` — hint text shown inside the input
-- `helpText` — instruction below a field. For a **patient** signature use `"חתוך/י את שמך"`; for the **doctor and guardian** signatures use `"נא לחתום במלבן מטה"`.
+- `helpText` — instruction below a field. For a **patient** signature use `"חתוך/י את שמך"`; for the **guardian** signature use `"נא לחתום במלבן מטה"`.
 - `rows` — `rows: 2` for short follow-up textareas ("please specify" after yes/no). Omit for non-textarea fields.
-- `allowOther` — for checkboxes/radio when the PDF has an "Other / אחר" write-in option
+- `allowOther: true` — for checkboxes or radio whenever the source includes an "Other / אחר" write-in choice (including אחרת or אחר/י). Omit that choice from `options`, since the dedicated control supplies it; retain all other choices. Do not create a separate text field for it. For example: `{ "type": "checkboxes", "id": "checkboxes_1", "label": "אפשרויות", "options": ["אחת", "שתיים"], "allowOther": true }`.
 - `defaultValue: "today"` — on `date` fields in consent / signature / doctor blocks
 - `defaultValue: "now"` — on `time` fields in consent / signature / doctor blocks
 - `defaultValue: "{{fullName}}"` — on a consent "שם מלא" field that should auto-fill from the patient's name entered earlier. Use the `{{fieldId}}` template syntax (double curly braces), referencing the semantic id.
@@ -218,13 +215,13 @@ Aesthetic-consent forms end with a recurring set of signing blocks. Encode them 
 { "type": "signature", "id": "signature_2", "label": "* חתימת המטופל/ת", "helpText": "חתוך/י את שמך", "required": true }
 ```
  
-**Doctor block** (`"הצהרת הרופאה"`): the doctor's pre-printed name (e.g. `ד״ר עמית ווייס מ.ר. 196791`) is fixed text, so render it as a `paragraph`, NOT a fillable field. The doctor's date and time are required; the doctor's signature uses the fixed id `doctorSignature`:
+**Doctor block** (`"הצהרת הרופאה"`): the doctor's pre-printed name (e.g. `ד״ר עמית ווייס מ.ר. 196791`) is fixed text, so render it as a `paragraph`, NOT a fillable field. The doctor's date and time are required; represent the doctor's signature area with an image placeholder, not an input:
 ```json
 { "type": "paragraph", "text": "אני מאשר/ת כי הסברתי למטופל…", "align": "right" }
 { "type": "paragraph", "text": "ד״ר עמית ווייס מ.ר. 196791", "align": "right" }
 { "type": "date", "id": "date_2", "label": "תאריך", "required": true, "defaultValue": "today" }
 { "type": "time", "id": "time_2", "label": "שעה", "required": true, "defaultValue": "now" }
-{ "type": "signature", "id": "doctorSignature", "label": "חתימת הרופאה", "helpText": "נא לחתום במלבן מטה", "required": true }
+{ "type": "image", "url": "{{doctorSignature}}" }
 ```
  
 **Minor / guardian block** (`"במקרה של קטין או פסול דין"`): this is the one printed heading among the signing blocks, so give it a `heading_h3` child. Its fields are optional (it only applies to minors), date/time still default to today/now, and the guardian signature uses `"נא לחתום במלבן מטה"`:
@@ -283,17 +280,18 @@ Rules:
 2. `title` follows the format `"ד״ר [Name] - [Form Type]"` (doctor name always first); the printed form title is a `heading_h1`
 3. `{ "type": "image", "url": "{{logo}}" }` is always the very first element (even when no logo is visible in the PDF)
 4. All Hebrew text is in Hebrew, not transliterated or translated; text copied verbatim
-5. All headings/paragraphs use `"align"` (not `"alignment"`) with the correct value
+5. All headings, paragraphs, and rich text use `"align"` matching each source block, including centered or left-aligned Hebrew
 6. Standard personal-info fields use the semantic ids and `required`/`autocomplete` from the table; `מין` is a radio
 7. Generic fields use sequential per-type ids (`text_N`, `textarea_N`, `date_N`, `time_N`, `signature_N`)
 8. Medical-history radios default to `"לא"`; confirmation/consent radios default to `"כן"`; all radios have `options` + `required`
 9. Follow-up fields use `conditions` (no `requiredConditions`); short "please specify" textareas use `rows: 2`
 10. "When did X happen?" fields use `date` type, not `text`
-11. Sections have a descriptive `label`; sections whose label is a printed PDF heading also have a `heading_h3` child echoing it
+11. Visually separated blocks, including text-only blocks, have separate sections; sections have a descriptive `label` and printed headings are echoed as a `heading_h3` child
 12. Consent/doctor blocks: date `today`, time `now`, both required; consent name field `defaultValue: "{{fullName}}"`
-13. Doctor name is a `paragraph` (not a field); doctor signature id is `doctorSignature`; doctor & guardian signatures use `helpText: "נא לחתום במלבן מטה"`, patient signatures use `"חתוך/י את שמך"`
+13. Doctor name is a `paragraph`; each doctor signature area is an image with `url: "{{doctorSignature}}"`; guardian and patient signatures remain signature fields
 14. Minor/guardian block is optional (no `required`); marketing-consent line is a `paragraph`, not a checkbox
 15. A blank-field-plus-parenthetical (e.g. `(להלן: "הטיפול")`) is folded into one field label; the opening doctor-name blank uses `id: "doctorName"` + `helpText: "פרט/י את שם הרופא/ה"`
 16. The form's main disclaimer appears in root `description` AND inline as paragraph(s); dividers include `"style": "solid"`
-17. Rich text is used only when needed; interpolation references existing suitable field ids
-18. The output is valid JSON (no trailing commas, no comments) — raw JSON only, no markdown fences
+17. Source bullets and lists are preserved as `rich_text` HTML lists; other rich formatting is preserved; interpolation references existing suitable field ids
+18. Every checkbox/radio write-in "אחר" has `allowOther: true` and is not duplicated in `options`
+19. The output is valid JSON (no trailing commas, no comments) — raw JSON only, no markdown fences

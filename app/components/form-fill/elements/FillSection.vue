@@ -33,6 +33,12 @@
 
 	const sectionClass = computed(() => {
 		const classes = ["form-fill-section"];
+		if (children.value.some((child) =>
+			["heading_h1", "heading_h2", "heading_h3"].includes(child.type)
+			&& (child.config as { text?: string }).text?.trim() === "סימני אזהרה",
+		)) {
+			classes.push("form-fill-warning-section");
+		}
 		if (config.value.bordered) {
 			classes.push("bordered");
 		}

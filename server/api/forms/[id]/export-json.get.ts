@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
 		if (el.isRequired) out.required = true;
 
 		if (config.options) out.options = config.options.map((o: any) => o.label);
-		if (config.allowOther) out.allowOther = config.allowOther;
+		if (config.allowUserOption || config.allowOther) out.allowOther = true;
 
 		if (config.text) out.text = config.text;
 		if (config.html) out.html = config.html;

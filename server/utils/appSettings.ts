@@ -5,6 +5,7 @@ import type { AppSettings } from "~~/shared/types/app-settings";
 
 export const appSettingDefaults = {
 	aiFormImportModel: "google/gemini-2.5-flash-lite",
+	aiThemeColorModel: "google/gemini-2.5-flash-lite",
 	aiFormImportMaxFileSizeMb: 10,
 } satisfies AppSettings;
 
@@ -23,6 +24,10 @@ export async function getAppSettings(): Promise<AppSettings> {
 		aiFormImportModel: parseStringSetting(
 			values.aiFormImportModel,
 			appSettingDefaults.aiFormImportModel,
+		),
+		aiThemeColorModel: parseStringSetting(
+			values.aiThemeColorModel,
+			appSettingDefaults.aiThemeColorModel,
 		),
 		aiFormImportMaxFileSizeMb: parseNumberSetting(
 			values.aiFormImportMaxFileSizeMb,

@@ -504,7 +504,7 @@ function buildConfig(element: UploadElement): ElementConfig {
 			placeholder: type === "dropdown" ? "Select an option" : undefined,
 			helpText: element.helpText || "",
 			options,
-			...(element.allowOther ? { allowOther: true } : {}),
+			...(element.allowOther ? { allowUserOption: true } : {}),
 			...(element.defaultValue !== undefined ? { defaultValue: element.defaultValue } : {}),
 			validation: { required: element.required ?? false },
 		};
