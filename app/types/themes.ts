@@ -48,6 +48,13 @@ export const THEMES = [
 		cssFile: "/assets/css/themes/botulina-pink.css",
 		colors: ["#fdf2f8", "#fce7f3", "#f472b6", "#F1117F", "#be185d"],
 	},
+	{
+		id: "cream-gold",
+		title: "שמנת וזהב",
+		description: "גווני שמנת וזהב עם נגיעות אדומות",
+		cssFile: "/assets/css/themes/cream-gold.css",
+		colors: ["#FBF8F3", "#A8875A", "#1F1D1A", "#D9CFC0", "#B4503C"],
+	},
 ] as const;
 
 export type Theme = (typeof THEMES)[number];

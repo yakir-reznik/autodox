@@ -1,0 +1,96 @@
+@import url("https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap");
+
+:root {
+	--background: #ffffff;
+	--foreground: #1F1D1A;
+	--card: #ffffff;
+	--card-foreground: #1F1D1A;
+	--popover: #ffffff;
+	--popover-foreground: #1F1D1A;
+	--primary: #765a36;
+	--primary-foreground: #ffffff;
+	--secondary: #FBF8F3;
+	--secondary-foreground: #1F1D1A;
+	--muted: #FBF8F3;
+	--muted-foreground: #1F1D1A;
+	--accent: #FBF8F3;
+	--accent-foreground: #1F1D1A;
+	--destructive: #B4503C;
+	--destructive-foreground: #ffffff;
+	--border: #D9CFC0;
+	--input: #D9CFC0;
+	--ring: #765a36;
+	--chart-1: #765a36;
+	--chart-2: #A8875A;
+	--chart-3: #D9CFC0;
+	--chart-4: #B4503C;
+	--chart-5: #FCF5F2;
+	--sidebar: #FBF8F3;
+	--sidebar-foreground: #1F1D1A;
+	--sidebar-primary: #765a36;
+	--sidebar-primary-foreground: #ffffff;
+	--sidebar-accent: #FBF8F3;
+	--sidebar-accent-foreground: #1F1D1A;
+	--sidebar-border: #D9CFC0;
+	--sidebar-ring: #765a36;
+	--font-sans: "Rubik", ui-sans-serif, system-ui, sans-serif;
+	--font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+	--font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	--radius: 0.625rem;
+	--shadow-color: #765a36;
+	--shadow-2xs: 0 1px 3px 0 rgb(118 90 54 / 0.06);
+	--shadow-xs: 0 1px 3px 0 rgb(118 90 54 / 0.06);
+	--shadow-sm: 0 1px 3px 0 rgb(118 90 54 / 0.12);
+	--shadow: 0 1px 3px 0 rgb(118 90 54 / 0.12);
+	--shadow-md: 0 4px 12px -2px rgb(118 90 54 / 0.2);
+	--shadow-lg: 0 8px 20px -4px rgb(118 90 54 / 0.22);
+	--shadow-xl: 0 12px 28px -6px rgb(118 90 54 / 0.24);
+	--shadow-2xl: 0 1px 3px 0 rgb(118 90 54 / 0.3);
+	--tracking-normal: 0em;
+	--spacing: 0.25rem;
+}
+
+/*  Theme specific overrides */
+.form-fill-card {
+	background-color: inherit;
+	box-shadow: none;
+}
+
+.form-fill-fieldset-input,
+.form-fill-fieldset-dropdown,
+.form-fill-fieldset-checkbox,
+.form-fill-fieldset-checkboxes,
+.form-fill-fieldset-radio {
+	padding: 1rem;
+	border-radius: 0.5rem;
+	background-color: var(--secondary);
+}
+
+/* Disable padding for fields inside section / repeater */
+.form-fill-repeater-item,
+.form-fill-section {
+	.form-fill-fieldset-input,
+	.form-fill-fieldset-dropdown,
+	.form-fill-fieldset-checkbox,
+	.form-fill-fieldset-checkboxes,
+	.form-fill-fieldset-radio {
+		padding: 0;
+	}
+}
+
+.form-fill-checkbox-option,
+.form-fill-radio-option {
+	padding: 0.5rem;
+	border-radius: 0.5rem;
+	background-color: var(--background);
+}
+
+.form-fill-title,
+.form-fill-elements > .form-fill-field > .form-fill-heading.h1 {
+	color: #A8875A;
+}
+
+.form-fill-section .form-fill-heading {
+	color: #1F1D1A;
+	font-weight: 700;
+}
