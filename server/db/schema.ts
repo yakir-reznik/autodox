@@ -48,16 +48,6 @@ export const appSettingsTable = mysqlTable("app_settings_table", {
 		.$onUpdate(() => sql`now()`),
 });
 
-export const themesTable = mysqlTable("themes_table", {
-	id: varchar("id", { length: 50 }).primaryKey(),
-	title: varchar("title", { length: 255 }).notNull(),
-	description: text("description").notNull(),
-	colors: json("colors").$type<import("~~/shared/types/themes").ThemeColors>().notNull(),
-	darkColors: json("dark_colors").$type<import("~~/shared/types/themes").ThemeColors>(),
-	baseCss: varchar("base_css", { length: 255 }).notNull(),
-	isDeleted: boolean("is_deleted").notNull().default(false),
-});
-
 // ============================================
 // FORM BUILDER - TYPES & ENUMS
 // ============================================

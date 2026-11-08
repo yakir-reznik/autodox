@@ -95,7 +95,6 @@
 			margin: 0;
 			padding: 1rem;
 			box-shadow: none;
-			background: white;
 		}
 
 		.form-fill-elements,

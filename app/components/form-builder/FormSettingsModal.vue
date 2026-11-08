@@ -90,7 +90,55 @@
               <label class="text-xs font-medium text-gray-600">
                 ערכת נושא
               </label>
-              <ThemesPicker v-model="theme" :themes="themes" />
+              <UiSelect v-model="theme" dir="rtl">
+                <UiSelectTrigger class="w-full">
+                  <div class="flex items-center gap-2">
+                    <span>{{ selectedTheme?.title }}</span>
+                    <div class="flex gap-0.5">
+                      <div
+                        v-for="color in selectedTheme?.colors"
+                        :key="color"
+                        :style="{ background: color }"
+                        class="h-3.5 w-3.5 rounded-sm border border-black/10"
+                      />
+                    </div>
+                  </div>
+                </UiSelectTrigger>
+                <UiSelectContent>
+                  <SelectItem
+                    v-for="t in THEMES"
+                    :key="t.id"
+                    :value="t.id"
+                    class="focus:bg-accent focus:text-accent-foreground relative flex w-full cursor-default select-none items-start rounded-sm py-2 pr-8 pl-2 outline-none data-disabled:pointer-events-none data-disabled:opacity-50"
+                  >
+                    <span
+                      class="absolute right-2 mt-0.5 flex size-3.5 items-center justify-center"
+                    >
+                      <SelectItemIndicator>
+                        <Check class="size-4" />
+                      </SelectItemIndicator>
+                    </span>
+                    <div class="flex flex-col gap-1">
+                      <div class="flex items-center gap-2">
+                        <SelectItemText class="text-sm font-medium">{{
+                          t.title
+                        }}</SelectItemText>
+                        <div class="flex gap-0.5">
+                          <div
+                            v-for="color in t.colors"
+                            :key="color"
+                            :style="{ background: color }"
+                            class="h-3.5 w-3.5 rounded-sm border border-black/10"
+                          />
+                        </div>
+                      </div>
+                      <p class="text-muted-foreground line-clamp-2 text-xs">
+                        {{ t.description }}
+                      </p>
+                    </div>
+                  </SelectItem>
+                </UiSelectContent>
+              </UiSelect>
             </div>
           </div>
         </div>
@@ -262,6 +310,8 @@
 </template>
 
 <script setup lang="ts">
+import { SelectItem, SelectItemText, SelectItemIndicator } from "reka-ui";
+import { Check } from "lucide-vue-next";
 import type { FormPermissions, FormStatus, FormTheme } from "~/types/form-builder";
 import { THEMES } from "~/composables/useThemes";
 
@@ -319,8 +369,7 @@ const webhookUrl = ref("");
 const webhookIncludePdf = ref(false);
 const allowPdfDownload = ref(true);
 
-const { data: availableThemes } = await useFetch<Array<{ id: string; title: string; description: string; colors: string[] }>>("/api/themes");
-const themes = computed(() => availableThemes.value ?? THEMES);
+const selectedTheme = computed(() => THEMES.find((t) => t.id === theme.value));
 
 // Fetch settings when modal opens
 watch(

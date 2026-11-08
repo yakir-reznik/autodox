@@ -184,7 +184,7 @@
 
 /*  Theme specific overrides */
 .form-fill-card {
-	background-color: var(--card);
+	background-color: inherit;
 	box-shadow: none;
 }
 

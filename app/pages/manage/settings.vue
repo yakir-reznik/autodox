@@ -2,15 +2,15 @@
 	<div class="max-w-2xl space-y-6">
 		<UiCard class="bg-white border-gray-300">
 			<UiCardHeader>
-				<UiCardTitle>הגדרות AI</UiCardTitle>
+				<UiCardTitle>הגדרות יצירת טפסים ב-AI</UiCardTitle>
 				<UiCardDescription>
-					בחירת מודלים ליצירת טפסים וערכות עיצוב בעזרת AI.
+					הגדרות כלליות שמשפיעות על יצירת טפסים מקבצים בעזרת AI.
 				</UiCardDescription>
 			</UiCardHeader>
 			<UiCardContent>
 				<form class="space-y-6" @submit.prevent="saveSettings">
 					<div class="space-y-2">
-						<UiLabel for="ai-model">מודל ליצירת טפסים</UiLabel>
+						<UiLabel for="ai-model">מודל AI</UiLabel>
 						<UiSelect
 							v-model="form.aiFormImportModel"
 							:disabled="pending || saving"
@@ -24,20 +24,6 @@
 									:key="model.value"
 									:value="model.value"
 								>
-									<span dir="ltr">{{ model.label }}</span>
-								</UiSelectItem>
-							</UiSelectContent>
-						</UiSelect>
-					</div>
-
-					<div class="space-y-2">
-						<UiLabel for="ai-theme-model">מודל ליצירת צבעי ערכות עיצוב</UiLabel>
-						<UiSelect v-model="form.aiThemeColorModel" :disabled="pending || saving">
-							<UiSelectTrigger id="ai-theme-model" class="w-full bg-white">
-								<UiSelectValue placeholder="בחרו מודל" />
-							</UiSelectTrigger>
-							<UiSelectContent>
-								<UiSelectItem v-for="model in aiFormImportModelOptions" :key="model.value" :value="model.value">
 									<span dir="ltr">{{ model.label }}</span>
 								</UiSelectItem>
 							</UiSelectContent>
@@ -79,15 +65,6 @@
 						</UiButton>
 					</div>
 				</form>
-			</UiCardContent>
-		</UiCard>
-		<UiCard class="border-gray-300 bg-white">
-			<UiCardHeader>
-				<UiCardTitle>ערכות עיצוב לטפסים</UiCardTitle>
-				<UiCardDescription>יצירה ועריכה של ערכות העיצוב הזמינות בטפסים.</UiCardDescription>
-			</UiCardHeader>
-			<UiCardContent>
-				<UiButton as-child variant="outline"><NuxtLink to="/manage/themes">ניהול ערכות עיצוב</NuxtLink></UiButton>
 			</UiCardContent>
 		</UiCard>
 		<p class="text-sm text-muted-foreground">
@@ -138,7 +115,6 @@
 	const errorMessage = ref("");
 	const form = reactive<AppSettings>({
 		aiFormImportModel: "",
-		aiThemeColorModel: "",
 		aiFormImportMaxFileSizeMb: 10,
 	});
 
@@ -149,7 +125,6 @@
 		(value) => {
 			if (!value) return;
 			form.aiFormImportModel = value.aiFormImportModel;
-			form.aiThemeColorModel = value.aiThemeColorModel;
 			form.aiFormImportMaxFileSizeMb = value.aiFormImportMaxFileSizeMb;
 		},
 		{ immediate: true },
@@ -158,7 +133,6 @@
 	function resetForm() {
 		if (!settings.value) return;
 		form.aiFormImportModel = settings.value.aiFormImportModel;
-		form.aiThemeColorModel = settings.value.aiThemeColorModel;
 		form.aiFormImportMaxFileSizeMb = settings.value.aiFormImportMaxFileSizeMb;
 		errorMessage.value = "";
 	}
@@ -172,7 +146,6 @@
 				method: "PATCH",
 				body: {
 					aiFormImportModel: form.aiFormImportModel,
-					aiThemeColorModel: form.aiThemeColorModel,
 					aiFormImportMaxFileSizeMb: Number(form.aiFormImportMaxFileSizeMb),
 				},
 			});

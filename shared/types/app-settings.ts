@@ -1,6 +1,5 @@
 export type AppSettings = {
 	aiFormImportModel: string;
-	aiThemeColorModel: string;
 	aiFormImportMaxFileSizeMb: number;
 };
 
