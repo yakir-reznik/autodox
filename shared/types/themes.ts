@@ -29,6 +29,10 @@ export const themeColorLabels: Record<(typeof themeColorKeys)[number], string> =
 export type ThemeColors = Record<(typeof themeColorKeys)[number], string>;
 export type EditableTheme = { id: string; title: string; description: string; colors: ThemeColors; baseCss: string; darkColors?: ThemeColors };
 
+export function isHexColor(value: string) {
+	return /^#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/i.test(value);
+}
+
 export function validateTheme(value: unknown): value is EditableTheme {
 	if (!value || typeof value !== "object") return false;
 	const theme = value as EditableTheme;
@@ -42,5 +46,5 @@ export function validateTheme(value: unknown): value is EditableTheme {
 
 function validColors(colors: ThemeColors) {
 	return !!colors && themeColorKeys.every((key) => typeof colors[key] === "string"
-		&& /^(#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})|oklch\([\d.\s%/+-]+\))$/i.test(colors[key]));
+		&& isHexColor(colors[key]));
 }

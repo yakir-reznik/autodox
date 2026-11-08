@@ -80,8 +80,10 @@ const errors = reactive<Record<string, string>>({});
 	<Teleport v-if="frameBody" :to="frameBody">
 	<div class="form-fill-container bg-background font-sans p-4 text-foreground lg:p-6 pb-20" dir="rtl">
 		<div class="mx-auto max-w-xl space-y-6">
+			<FormFillFormField v-for="element in rootElements.slice(0, 4)" :key="element.clientId"
+				v-model="data[element.clientId]" :element="element" :get-children="children" :form-data="data" :errors="errors" />
 			<div class="form-fill-card space-y-6 rounded-lg bg-card p-4 shadow-md lg:p-8">
-				<FormFillFormField v-for="element in rootElements" :key="element.clientId"
+				<FormFillFormField v-for="element in rootElements.slice(4)" :key="element.clientId"
 					v-model="data[element.clientId]" :element="element" :get-children="children" :form-data="data" :errors="errors" />
 				<button type="button" class="rounded-md bg-primary px-5 py-2 text-primary-foreground">שליחה</button>
 			</div>

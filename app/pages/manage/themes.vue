@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { themeColorKeys, themeColorLabels as labels, type EditableTheme } from "~~/shared/types/themes";
+import { isHexColor, themeColorKeys, themeColorLabels as labels, type EditableTheme, type ThemeColors } from "~~/shared/types/themes";
 
 definePageMeta({
   layout: "management-panel",
@@ -51,13 +51,30 @@ const deleting = ref(false);
 const confirmDelete = ref(false);
 const deleteError = ref("");
 const busy = computed(() => generating.value || saving.value || deleting.value);
+const validColors = computed(() => !!editor.value && [editor.value.colors, editor.value.darkColors ?? editor.value.colors]
+	.every((colors) => themeColorKeys.every((key) => isHexColor(colors[key]))));
 const error = ref("");
 const message = ref("");
+
+function colorsToHex(colors: ThemeColors): ThemeColors {
+	const context = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;
+	return Object.fromEntries(Object.entries(colors).map(([key, value]) => {
+		if (isHexColor(value)) return [key, value];
+		context.clearRect(0, 0, 1, 1);
+		context.fillStyle = value;
+		context.fillRect(0, 0, 1, 1);
+		const channels = [...context.getImageData(0, 0, 1, 1).data];
+		if (channels[3] === 255) channels.pop();
+		return [key, `#${channels.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`];
+	})) as ThemeColors;
+}
 
 function edit(theme: EditableTheme, create = false) {
   editor.value = structuredClone(toRaw(theme));
   isNew.value = create;
-  editor.value.darkColors ??= { ...editor.value.colors };
+	const darkColors = editor.value.darkColors ?? editor.value.colors;
+	editor.value.colors = colorsToHex(editor.value.colors);
+	editor.value.darkColors = colorsToHex(darkColors);
   if (create) {
     editor.value.id = "";
     editor.value.title = "";
@@ -190,7 +207,7 @@ async function save() {
             {{ message }}
           </p>
         </div>
-        <UiButton size="lg" :disabled="busy" @click="save"
+        <UiButton size="lg" :disabled="busy || !validColors" @click="save"
           ><Icon
             v-if="saving"
             name="svg-spinners:ring-resize"
@@ -242,7 +259,7 @@ async function save() {
               <UiButton
                 type="button"
                 variant="outline"
-                :disabled="busy || !prompt.trim()"
+                :disabled="busy || !validColors || !prompt.trim()"
                 @click="generate"
                 ><Icon
                   v-if="generating"
@@ -264,7 +281,7 @@ async function save() {
             <div>
               <h2 class="font-semibold">צבעי הערכה</h2>
               <p class="mt-1 text-xs text-gray-500">
-                ערכו צבעים לשני המצבים. ניתן להזין hex או oklch.
+                ערכו צבעים לשני המצבים. יש להזין צבעים בפורמט hex.
               </p>
             </div>
             <div
