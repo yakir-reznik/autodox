@@ -296,6 +296,7 @@ async function save() {
             v-model:mode="previewMode"
             :colors="editor.colors"
             :dark-colors="editor.darkColors"
+            :base-css="editor.baseCss"
           />
         </div>
       </div>

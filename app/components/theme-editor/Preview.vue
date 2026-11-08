@@ -3,12 +3,46 @@ import type { BuilderElement, ElementType } from "~/types/form-builder";
 import { getDefaultConfig } from "~/composables/useElementDefaults";
 import type { ThemeColors } from "~~/shared/types/themes";
 
-const props = defineProps<{ colors: ThemeColors; darkColors?: ThemeColors; mode: "light" | "dark" }>();
+const props = defineProps<{ colors: ThemeColors; darkColors?: ThemeColors; mode: "light" | "dark"; baseCss: string }>();
 const emit = defineEmits<{ "update:mode": [value: "light" | "dark"] }>();
-const styles = computed(() => Object.fromEntries(Object.entries({
-	...props.colors,
-	...(props.mode === "dark" ? props.darkColors : {}),
-}).map(([key, value]) => [`--${key}`, value])));
+const frame = ref<HTMLIFrameElement | null>(null);
+const frameBody = shallowRef<HTMLElement | null>(null);
+const frameHeight = ref(300);
+let resizeObserver: ResizeObserver | undefined;
+
+function updateFrameTheme() {
+	const doc = frame.value?.contentDocument;
+	if (!doc || !frameBody.value) return;
+	doc.documentElement.classList.toggle("dark", props.mode === "dark");
+	const colors = props.mode === "dark" ? (props.darkColors ?? props.colors) : props.colors;
+	for (const [key, value] of Object.entries(colors)) doc.documentElement.style.setProperty(`--${key}`, value);
+	const theme = doc.getElementById("preview-theme") as HTMLLinkElement | null;
+	if (theme) theme.href = props.baseCss;
+}
+
+function initFrame() {
+	const doc = frame.value?.contentDocument;
+	if (!doc) return;
+	for (const node of document.head.querySelectorAll('style, link[rel="stylesheet"]')) {
+		doc.head.appendChild(node.cloneNode(true));
+	}
+	const theme = doc.createElement("link");
+	theme.id = "preview-theme";
+	theme.rel = "stylesheet";
+	doc.head.appendChild(theme);
+	doc.documentElement.lang = "he";
+	doc.documentElement.dir = "rtl";
+	frameBody.value = doc.body;
+	updateFrameTheme();
+	resizeObserver?.disconnect();
+	resizeObserver = new ResizeObserver(() => {
+		frameHeight.value = Math.max(300, Math.ceil(doc.body.getBoundingClientRect().height));
+	});
+	resizeObserver.observe(doc.body);
+}
+
+watch(() => [props.colors, props.darkColors, props.mode, props.baseCss], updateFrameTheme, { deep: true });
+onBeforeUnmount(() => resizeObserver?.disconnect());
 const types: Array<{ type: ElementType; parent?: string }> = [
 	{ type: "heading_h1" }, { type: "paragraph" }, { type: "text" }, { type: "email" },
 	{ type: "number" }, { type: "phone" }, { type: "textarea" }, { type: "date" }, { type: "time" },
@@ -42,15 +76,16 @@ const errors = reactive<Record<string, string>>({});
 		<button type="button" class="rounded-md border px-3 py-1 text-sm" :class="mode === 'light' ? 'border-blue-600 bg-blue-50 text-blue-800' : 'border-gray-300 bg-white'" :aria-pressed="mode === 'light'" @click="emit('update:mode', 'light')">בהיר</button>
 		<button type="button" class="rounded-md border px-3 py-1 text-sm" :class="mode === 'dark' ? 'border-blue-600 bg-blue-50 text-blue-800' : 'border-gray-300 bg-white'" :aria-pressed="mode === 'dark'" @click="emit('update:mode', 'dark')">כהה</button>
 	</div>
-	<div :style="styles" :class="{ dark: mode === 'dark' }" class="form-fill-container rounded-xl border border-border bg-background p-5 text-foreground sm:p-8" dir="rtl">
+	<iframe ref="frame" srcdoc="<!DOCTYPE html><html><head></head><body></body></html>" title="תצוגה מקדימה של טופס" class="w-full rounded-xl border border-border" :style="{ height: `${frameHeight}px` }" @load="initFrame" />
+	<Teleport v-if="frameBody" :to="frameBody">
+	<div class="form-fill-container bg-background font-sans p-4 text-foreground lg:p-6 pb-20" dir="rtl">
 		<div class="mx-auto max-w-xl space-y-6">
-			<FormFillFormField v-for="element in rootElements.slice(0, 4)" :key="element.clientId"
-				v-model="data[element.clientId]" :element="element" :get-children="children" :form-data="data" :errors="errors" />
-			<div class="form-fill-card space-y-6 rounded-lg bg-card p-5 text-card-foreground shadow-sm">
-				<FormFillFormField v-for="element in rootElements.slice(4)" :key="element.clientId"
+			<div class="form-fill-card space-y-6 rounded-lg bg-card p-4 shadow-md lg:p-8">
+				<FormFillFormField v-for="element in rootElements" :key="element.clientId"
 					v-model="data[element.clientId]" :element="element" :get-children="children" :form-data="data" :errors="errors" />
 				<button type="button" class="rounded-md bg-primary px-5 py-2 text-primary-foreground">שליחה</button>
 			</div>
 		</div>
 	</div>
+	</Teleport>
 </template>

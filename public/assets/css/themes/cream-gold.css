@@ -24,7 +24,7 @@
 
 .form-fill-card.form-fill-card,
 .form-print-container.form-print-container {
-	background-color: #FFFFFF;
+	background-color: var(--card);
 }
 
 .form-fill-title,
